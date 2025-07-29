@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Seamos Genios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/usuarios.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" id="backBtn">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
+            <h1>Gestión de Usuarios</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <span class="user-name" id="adminName">ADMIN</span>
+                <div class="user-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar usuarios...">
+                </div>
+            </div>
+            
+            <div class="filter-container">
+                <select id="userTypeFilter" class="filter-select">
+                    <option value="">Todos los usuarios</option>
+                    <option value="admin">Administradores</option>
+                    <option value="estudiante">Estudiantes</option>
+                </select>
+                
+                <select id="statusFilter" class="filter-select">
+                    <option value="">Todos los estados</option>
+                    <option value="true">Activos</option>
+                    <option value="false">Inactivos</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalUsers">0</h3>
+                    <p>Total Usuarios</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalAdmins">0</h3>
+                    <p>Administradores</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalStudents">0</h3>
+                    <p>Estudiantes</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="activeUsers">0</h3>
+                    <p>Usuarios Activos</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2>Lista de Usuarios</h2>
+                <div class="table-actions">
+                    <button class="refresh-btn" id="refreshBtn">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Actualizar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-wrapper">
+                <table class="users-table" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Teléfono</th>
+                            <th>Documento</th>
+                            <th>Institución</th>
+                            <th>Grado</th>
+                            <th>Departamento</th>
+                            <th>Email Recuperación</th>
+                            <th>Cód. Recup.</th>
+                            <th>Fecha Registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="loading-spinner" id="loadingSpinner">
+                <i class="bi bi-arrow-clockwise spin"></i>
+                <p>Cargando usuarios...</p>
+            </div>
+            
+            <div class="no-results" id="noResults" style="display: none;">
+                <i class="bi bi-person-x"></i>
+                <p>No se encontraron usuarios</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Reset Password Modal -->
+    <div class="modal" id="resetPasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Restablecer Contraseña</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="user-info-modal">
+                    <div class="user-avatar-modal">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div class="user-details-modal">
+                        <h4 id="modalUserName">Nombre del Usuario</h4>
+                        <p id="modalUserEmail">email@seamosgenios.com</p>
+                        <span class="user-type-badge" id="modalUserType">Estudiante</span>
+                    </div>
+                </div>
+                
+                <form id="resetPasswordForm" class="reset-form">
+                    <div class="input-group">
+                        <label for="newPassword">Nueva Contraseña</label>
+                        <div class="password-input">
+                            <input type="password" id="newPassword" required>
+                            <button type="button" class="password-toggle" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirmPassword">Confirmar Contraseña</label>
+                        <div class="password-input">
+                            <input type="password" id="confirmPassword" required>
+                            <button type="button" class="password-toggle" id="toggleConfirmPassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="recovery-code-info">
+                        <i class="bi bi-info-circle"></i>
+                        <p>Se generará un nuevo código de recuperación automáticamente</p>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="cancelReset">Cancelar</button>
+                        <button type="submit" class="reset-btn">
+                            <i class="bi bi-key"></i>
+                            Restablecer Contraseña
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Container -->
+    <div class="message-container" id="messageContainer"></div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/usuarios.js"></script>
+</body>
+
+</html>

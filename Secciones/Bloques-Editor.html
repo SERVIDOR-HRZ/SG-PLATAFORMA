@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Bloques - Seamos Genios</title>
+
+    <!-- Security headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/panel.css">
+    <link rel="stylesheet" href="../Elementos/css/bloques-editor.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" id="backBtn">
+                <i class="bi bi-arrow-left"></i>
+                Volver a Pruebas
+            </button>
+            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
+            <h1 id="pageTitle">Editor de Bloques</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <span class="user-name" id="userName">USUARIO</span>
+                <div class="user-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Test Info -->
+        <div class="test-info-card">
+            <h2 id="testName">Cargando...</h2>
+            <p id="testDate">Fecha: Cargando...</p>
+        </div>
+
+        <!-- Blocks Container -->
+        <div class="blocks-container">
+            <!-- Bloque 1 -->
+            <div class="block-card" data-block="1">
+                <div class="block-header">
+                    <h3>
+                        <i class="bi bi-1-circle-fill"></i>
+                        Bloque 1
+                    </h3>
+                    <div class="block-time" id="block1Time">
+                        Cargando horario...
+                    </div>
+                </div>
+                <div class="subjects-grid" id="block1Subjects">
+                    <div class="subject-card matematicas" data-subject="matematicas">
+                        <div class="subject-icon">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <h4>Matemáticas</h4>
+                        <div class="questions-count" id="matematicas-block1-count">0 preguntas</div>
+                        <button class="btn btn-primary btn-sm" onclick="editSubject('matematicas', 1)">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </button>
+                    </div>
+                    <div class="subject-card lectura" data-subject="lectura">
+                        <div class="subject-icon">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <h4>Lectura</h4>
+                        <div class="questions-count" id="lectura-block1-count">0 preguntas</div>
+                        <button class="btn btn-primary btn-sm" onclick="editSubject('lectura', 1)">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </button>
+                    </div>
+                    <div class="subject-card sociales" data-subject="sociales">
+                        <div class="subject-icon">
+                            <i class="bi bi-globe"></i>
+                        </div>
+                        <h4>Sociales</h4>
+                        <div class="questions-count" id="sociales-block1-count">0 preguntas</div>
+                        <button class="btn btn-primary btn-sm" onclick="editSubject('sociales', 1)">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </button>
+                    </div>
+                    <div class="subject-card ciencias" data-subject="ciencias">
+                        <div class="subject-icon">
+                            <i class="bi bi-gear-fill"></i>
+                        </div>
+                        <h4>Ciencias</h4>
+                        <div class="questions-count" id="ciencias-block1-count">0 preguntas</div>
+                        <button class="btn btn-primary btn-sm" onclick="editSubject('ciencias', 1)">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloque 2 -->
+            <div class="block-card" data-block="2">
+                <div class="block-header">
+                    <h3>
+                        <i class="bi bi-2-circle-fill"></i>
+                        Bloque 2
+                    </h3>
+                    <div class="block-time" id="block2Time">
+                        Cargando horario...
+                    </div>
+                </div>
+                <div class="subjects-grid" id="block2Subjects">
+                    <div class="subject-card matematicas" data-subject="matematicas">
+                        <div class="subject-icon">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <h4>Matemáticas</h4>
+                        <div class="questions-count" id="matematicas-block2-count">0 preguntas</div>
+                        <button class="btn btn-primary btn-sm" onclick="editSubject('matematicas', 2)">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </button>
+                    </div>
+                    <div class="subject-card sociales" data-subject="sociales">
+                        <div class="subject-icon">
+                            <i class="bi bi-globe"></i>
+                        </div>
+                        <h4>Sociales</h4>
+                        <div class="questions-count" id="sociales-block2-count">0 preguntas</div>
+                        <button class="btn btn-primary btn-sm" onclick="editSubject('sociales', 2)">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </button>
+                    </div>
+                    <div class="subject-card ciencias" data-subject="ciencias">
+                        <div class="subject-icon">
+                            <i class="bi bi-gear-fill"></i>
+                        </div>
+                        <h4>Ciencias</h4>
+                        <div class="questions-count" id="ciencias-block2-count">0 preguntas</div>
+                        <button class="btn btn-primary btn-sm" onclick="editSubject('ciencias', 2)">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </button>
+                    </div>
+                    <div class="subject-card ingles" data-subject="ingles">
+                        <div class="subject-icon">
+                            <i class="bi bi-translate"></i>
+                        </div>
+                        <h4>Inglés</h4>
+                        <div class="questions-count" id="ingles-block2-count">0 preguntas</div>
+                        <button class="btn btn-primary btn-sm" onclick="editSubject('ingles', 2)">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="save-container">
+            <button class="btn btn-success btn-lg" id="saveBlocksBtn">
+                <i class="bi bi-check-circle"></i>
+                Guardar Cambios
+            </button>
+        </div>
+    </main>
+
+    <!-- Subject Editor Modal -->
+    <div class="modal-overlay" id="subjectModal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 id="modalTitle">Editar Materia</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="subject-editor">
+                    <div class="editor-header">
+                        <div class="subject-info">
+                            <div class="subject-icon-large" id="modalSubjectIcon">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <div>
+                                <h4 id="modalSubjectName">Materia</h4>
+                                <p id="modalBlockInfo">Bloque 1</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="addQuestionBtn">
+                            <i class="bi bi-plus-circle"></i>
+                            Agregar Pregunta
+                        </button>
+                    </div>
+
+                    <div class="questions-container" id="questionsContainer">
+                        <!-- Questions will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelEdit">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveSubject">Guardar Materia</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/bloques-editor.js"></script>
+</body>
+
+</html>

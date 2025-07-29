@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Reportes - Seamos Genios</title>
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="../Elementos/css/panel.css">
+    <link rel="stylesheet" href="../Elementos/css/reportes.css">
+
+    <!-- Security headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="logout-btn" onclick="window.location.href='Panel_Estudiantes.html'">
+                <i class="bi bi-arrow-left"></i>
+                Volver al Panel
+            </button>
+            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
+            <h1>Mis Reportes</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <span class="user-name" id="studentName">ESTUDIANTE</span>
+                <div class="user-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Panel de Reportes Disponibles -->
+        <aside class="control-panel">
+            <div class="panel-header">
+                <h2><i class="bi bi-file-earmark-pdf"></i> Mis Reportes</h2>
+            </div>
+
+            <div class="reportes-lista" id="reportesLista">
+                <div class="loading-message">
+                    <i class="bi bi-hourglass-split"></i>
+                    <p>Cargando reportes...</p>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3><i class="bi bi-info-circle"></i> Información</h3>
+                <div id="infoReporte" class="info-content">
+                    <p>Seleccione un reporte para visualizarlo y descargarlo.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Contenedor Principal del Reporte -->
+        <div class="contenedor-principal">
+            <div class="documento" id="documento">
+                <!-- Contenedor de marca de agua -->
+                <div class="marca-agua-container">
+                    <img src="../Elementos/img/MarcaAgua.png" alt="Marca de agua" class="marca-agua-imagen">
+                </div>
+                <header class="encabezado">
+                    <div class="header-content">
+                        <div class="titulo-descripcion">
+                            <h1>INFORME INDIVIDUAL DE RESULTADOS</h1>
+                            <p class="descripcion">Este informe presenta los resultados obtenidos por el estudiante en
+                                la prueba diagnóstica basada en los estándares del ICFES. El objetivo de este
+                                diagnóstico es identificar fortalezas y aspectos por mejorar en las diferentes áreas
+                                evaluadas.</p>
+                        </div>
+                        <div class="logo-container">
+                            <img src="../Elementos/img/logo1.png" alt="Logo SeamosGenios" class="logo">
+                        </div>
+                    </div>
+                </header>
+
+                <section class="datos-estudiante">
+                    <div class="info-container">
+                        <h2>DATOS DEL ESTUDIANTE</h2>
+                        <div class="campos-container">
+                            <div class="campo">
+                                <label>NOMBRE DE PILA:</label>
+                                <input type="text" id="nombreEstudiante" value="USUARIO" readonly>
+                            </div>
+                            <div class="campo">
+                                <label>TIPO DE PRUEBA:</label>
+                                <input type="text" id="calEstudiante" value="ESTUDIANTE" readonly>
+                            </div>
+                            <div class="campo">
+                                <label>TELÉFONO:</label>
+                                <input type="tel" id="telefonoEstudiante" readonly>
+                            </div>
+                            <div class="campo">
+                                <label>DEPARTAMENTO:</label>
+                                <input type="text" id="municipioEstudiante" readonly>
+                            </div>
+                            <div class="campo">
+                                <label>IDENTIFICACIÓN:</label>
+                                <div class="documento-container">
+                                    <input type="text" id="tipoDocumento" value="CC" readonly style="width: 50px;">
+                                    <input type="number" id="identificacionEstudiante" readonly>
+                                </div>
+                            </div>
+                            <div class="campo">
+                                <label>FECHA:</label>
+                                <input type="date" id="fechaAplicacion" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="puntaje-global">
+                            <h3>PUNTAJE GLOBAL</h3>
+                            <div class="puntaje" id="puntajeGlobal">500</div>
+                            <div class="sg11-container">
+                                <span class="sg11-prefix">SG11-</span>
+                                <input type="text" class="sg11-input" id="sg11Numero" maxlength="4" placeholder="####"
+                                    readonly>
+                            </div>
+                        </div>
+                        <div class="redes-container">
+                            <h3>@seamosgenios</h3>
+                            <div class="qr-codes">
+                                <div class="qr-code-item">
+                                    <img src="../Elementos/img/qr1.png" alt="Código QR 1">
+                                </div>
+                                <div class="qr-code-item">
+                                    <img src="../Elementos/img/qr2.jpeg" alt="Código QR 2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="asignaturas">
+                    <h2>ASIGNATURAS EVALUADAS Y PUNTAJES ALCANZADOS</h2>
+                    <div class="grafico">
+                        <canvas id="graficoBarras"></canvas>
+                    </div>
+                    <table class="tabla-resultados">
+                        <thead>
+                            <tr>
+                                <th class="header-nivel"></th>
+                                <th class="header-materia">Lectura Crítica</th>
+                                <th class="header-materia">Matemáticas</th>
+                                <th class="header-materia">Ciencias Sociales</th>
+                                <th class="header-materia">Ciencias Naturales</th>
+                                <th class="header-materia">Inglés</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="fila-puntaje">
+                                <td class="celda-nivel">Puntaje</td>
+                                <td><input type="number" class="puntaje-input" data-materia="LC" value="0" readonly>
+                                </td>
+                                <td><input type="number" class="puntaje-input" data-materia="MT" value="0" readonly>
+                                </td>
+                                <td><input type="number" class="puntaje-input" data-materia="SC" value="0" readonly>
+                                </td>
+                                <td><input type="number" class="puntaje-input" data-materia="CN" value="0" readonly>
+                                </td>
+                                <td><input type="number" class="puntaje-input" data-materia="IN" value="0" readonly>
+                                </td>
+                            </tr>
+                            <tr class="fila-nivel">
+                                <td class="celda-nivel">BAJO</td>
+                                <td><span class="rango">0 - 39</span></td>
+                                <td><span class="rango">0 - 39</span></td>
+                                <td><span class="rango">0 - 39</span></td>
+                                <td><span class="rango">0 - 39</span></td>
+                                <td><span class="rango">A- / A1</span></td>
+                            </tr>
+                            <tr class="fila-nivel">
+                                <td class="celda-nivel">MEDIO</td>
+                                <td><span class="rango">40 - 59</span></td>
+                                <td><span class="rango">40 - 59</span></td>
+                                <td><span class="rango">40 - 59</span></td>
+                                <td><span class="rango">40 - 59</span></td>
+                                <td><span class="rango">A2</span></td>
+                            </tr>
+                            <tr class="fila-nivel">
+                                <td class="celda-nivel">ALTO</td>
+                                <td><span class="rango">60 - 79</span></td>
+                                <td><span class="rango">60 - 79</span></td>
+                                <td><span class="rango">60 - 79</span></td>
+                                <td><span class="rango">60 - 79</span></td>
+                                <td><span class="rango">B1</span></td>
+                            </tr>
+                            <tr class="fila-nivel">
+                                <td class="celda-nivel">SUPERIOR</td>
+                                <td><span class="rango">80 - 100</span></td>
+                                <td><span class="rango">80 - 100</span></td>
+                                <td><span class="rango">80 - 100</span></td>
+                                <td><span class="rango">80 - 100</span></td>
+                                <td><span class="rango">B+</span></td>
+                            </tr>
+                            <tr class="fila-percentil">
+                                <td class="celda-nivel">Percentil General</td>
+                                <td colspan="5" class="percentil" style="text-align: center; font-size: 1.2rem;">Su
+                                    puntaje superó al <span id="percentilGeneral">0</span>% de estudiantes </td>
+                            </tr>
+                            <tr class="fila-desempeno">
+                                <td class="celda-nivel">Nivel Desempeño</td>
+                                <td class="nivel">-</td>
+                                <td class="nivel">-</td>
+                                <td class="nivel">-</td>
+                                <td class="nivel">-</td>
+                                <td class="nivel">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- Botón de descarga -->
+            <div class="download-section" style="text-align: center; margin: 20px 0;">
+                <button id="btnDescargarPDF" class="btn-primary" disabled>
+                    <i class="bi bi-download"></i>
+                    Descargar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Cargando datos...</p>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/reportes-estudiante.js"></script>
+</body>
+
+</html>

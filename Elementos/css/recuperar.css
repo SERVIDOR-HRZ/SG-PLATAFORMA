@@ -1,0 +1,158 @@
+/* Estilos específicos para recuperación de contraseña */
+.recuperar-page .recuperar-container {
+    max-width: 450px;
+}
+
+.recuperar-form .logo-container p {
+    color: #ff0000;
+    font-weight: 600;
+}
+
+/* Pasos de recuperación */
+.recovery-step {
+    display: none;
+}
+
+.recovery-step.active {
+    display: block;
+}
+
+/* Estilos para el código de recuperación */
+#recoveryCode {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Botón de recuperación */
+.recovery-btn {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    margin-bottom: 25px;
+}
+
+.recovery-btn:hover {
+    background: linear-gradient(135deg, #cc0000, #990000);
+}
+
+/* Mensaje de ayuda */
+.help-text {
+    font-size: 12px;
+    color: #666666;
+    margin-top: 5px;
+    text-align: center;
+}
+
+/* Estilos para el botón de mostrar/ocultar contraseña */
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: calc(50% + 11px); /* Ajuste para centrar en el input considerando el label */
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666666;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    z-index: 10;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle:hover {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff0000;
+}
+
+.password-toggle:focus {
+    outline: 2px solid rgba(255, 0, 0, 0.3);
+    outline-offset: 2px;
+}
+
+/* Ajustar padding del input cuando hay botón toggle */
+.input-group:has(.password-toggle) input {
+    padding-right: 45px;
+}
+
+/* Validación de campos */
+.input-group input.invalid {
+    border-color: #ff0000 !important;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1) !important;
+}
+
+.input-group input.valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1) !important;
+}
+
+.input-group .validation-message {
+    font-size: 12px;
+    margin-top: 5px;
+    color: #ff0000;
+    display: none;
+}
+
+.input-group .validation-message.show {
+    display: block;
+}
+
+/* Mensaje de estado */
+.message {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    display: none;
+}
+
+.message.success {
+    background: rgba(0, 128, 0, 0.1);
+    color: #008000;
+    border: 1px solid rgba(0, 128, 0, 0.3);
+    display: block;
+}
+
+.message.error {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff0000;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    display: block;
+}
+
+.message.info {
+    background: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+    border: 1px solid rgba(0, 123, 255, 0.3);
+    display: block;
+}
+
+/* Centrar enlaces */
+.form-links {
+    text-align: center;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .recuperar-form {
+        padding: 30px 20px;
+    }
+    
+    .password-toggle {
+        font-size: 14px;
+        right: 10px;
+    }
+    
+    .form-links {
+        text-align: center;
+    }
+}
