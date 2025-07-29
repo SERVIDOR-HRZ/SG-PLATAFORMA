@@ -273,6 +273,30 @@ body {
     transform: translateY(-2px);
 }
 
+.table-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.create-admin-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.create-admin-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
 .table-wrapper {
     overflow-x: visible;
 }
@@ -813,6 +837,197 @@ body {
 .reset-btn:hover {
     background: #cc0000;
     transform: translateY(-2px);
+}
+
+/* Create Admin Modal Styles */
+.create-admin-form .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.create-admin-form .input-group {
+    margin-bottom: 0;
+}
+
+.create-admin-form .input-group label {
+    display: block;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.create-admin-form .input-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.create-admin-form .input-group input:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.admin-info {
+    background: rgba(40, 167, 69, 0.1);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-item i {
+    color: #28a745;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.info-item span {
+    color: #155724;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.create-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.create-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+/* Confirmation Modal Styles */
+.confirmation-modal {
+    max-width: 450px;
+}
+
+.confirmation-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.confirmation-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+    border: 2px solid rgba(255, 193, 7, 0.3);
+}
+
+.confirmation-icon.activate {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border-color: rgba(40, 167, 69, 0.3);
+}
+
+.confirmation-icon.deactivate {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border-color: rgba(220, 53, 69, 0.3);
+}
+
+.confirmation-text {
+    flex: 1;
+}
+
+.confirmation-text p {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.user-info-confirmation {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.user-info-confirmation strong {
+    display: block;
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.user-info-confirmation span {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.confirm-btn {
+    background: #ffc107;
+    color: #212529;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.confirm-btn:hover {
+    background: #e0a800;
+    transform: translateY(-2px);
+}
+
+.confirm-btn.activate {
+    background: #28a745;
+    color: white;
+}
+
+.confirm-btn.activate:hover {
+    background: #218838;
+}
+
+.confirm-btn.deactivate {
+    background: #dc3545;
+    color: white;
+}
+
+.confirm-btn.deactivate:hover {
+    background: #c82333;
 }
 
 /* Message Container */

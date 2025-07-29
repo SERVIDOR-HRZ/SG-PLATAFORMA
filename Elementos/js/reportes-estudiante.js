@@ -11,7 +11,6 @@ const coloresMateria = {
     'IN': '#B366FF'
 };
 
-// Mapeo de materias - Actualizado para coincidir con los datos de Firebase
 const mapeoMaterias = {
     'lectura crítica': 'LC',
     'lectura_critica': 'LC',
@@ -30,7 +29,6 @@ const mapeoMaterias = {
     'english': 'IN'
 };
 
-// Orden de las materias para el gráfico
 const ordenMaterias = ['LC', 'MT', 'SC', 'CN', 'IN'];
 
 document.addEventListener('DOMContentLoaded', function() {

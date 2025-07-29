@@ -945,7 +945,7 @@ async function editTest(testId) {
 
 // Delete test function
 async function deleteTest(testId) {
-    const confirmed = confirm('¿Estás seguro de que deseas eliminar esta prueba?');
+    const confirmed = await showDeleteTestModal();
 
     if (confirmed) {
         try {
@@ -958,6 +958,73 @@ async function deleteTest(testId) {
             showNotification('Error al eliminar la prueba', 'error');
         }
     }
+}
+
+// Show delete test confirmation modal
+function showDeleteTestModal() {
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="panel-modal-overlay" id="deleteTestModalOverlay">
+                <div class="panel-modal">
+                    <div class="panel-modal-body">
+                        <i class="bi bi-exclamation-triangle panel-modal-icon"></i>
+                        <p class="panel-modal-message">¿Estás seguro de que deseas eliminar esta prueba?</p>
+                        <div class="panel-modal-footer">
+                            <button class="panel-modal-btn panel-btn-cancel" id="deleteTestModalCancel">
+                                <i class="bi bi-x-lg"></i>
+                                Cancelar
+                            </button>
+                            <button class="panel-modal-btn panel-btn-confirm" id="deleteTestModalConfirm">
+                                <i class="bi bi-check-lg"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const overlay = document.getElementById('deleteTestModalOverlay');
+        const confirmBtn = document.getElementById('deleteTestModalConfirm');
+        const cancelBtn = document.getElementById('deleteTestModalCancel');
+        
+        // Show modal with animation
+        setTimeout(() => {
+            overlay.classList.add('active');
+        }, 10);
+
+        // Handle confirm
+        confirmBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(true);
+        });
+
+        // Handle cancel
+        cancelBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(false);
+        });
+
+        // Handle overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal(overlay);
+                resolve(false);
+            }
+        });
+
+        // Handle ESC key
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(overlay);
+                resolve(false);
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+    });
 }
 
 // Populate students selector for edit

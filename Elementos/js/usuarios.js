@@ -26,6 +26,7 @@ const elements = {
     loadingSpinner: document.getElementById('loadingSpinner'),
     noResults: document.getElementById('noResults'),
     refreshBtn: document.getElementById('refreshBtn'),
+    createAdminBtn: document.getElementById('createAdminBtn'),
     backBtn: document.getElementById('backBtn'),
     logoutBtn: document.getElementById('logoutBtn'),
     
@@ -47,6 +48,28 @@ const elements = {
     confirmPassword: document.getElementById('confirmPassword'),
     togglePassword: document.getElementById('togglePassword'),
     toggleConfirmPassword: document.getElementById('toggleConfirmPassword'),
+    
+    // Create Admin Modal
+    createAdminModal: document.getElementById('createAdminModal'),
+    closeCreateAdminModal: document.getElementById('closeCreateAdminModal'),
+    cancelCreateAdmin: document.getElementById('cancelCreateAdmin'),
+    createAdminForm: document.getElementById('createAdminForm'),
+    adminNombre: document.getElementById('adminNombre'),
+    adminUsuario: document.getElementById('adminUsuario'),
+    adminPassword: document.getElementById('adminPassword'),
+    toggleAdminPassword: document.getElementById('toggleAdminPassword'),
+    
+    // Confirmation Modal
+    confirmationModal: document.getElementById('confirmationModal'),
+    closeConfirmationModal: document.getElementById('closeConfirmationModal'),
+    cancelConfirmation: document.getElementById('cancelConfirmation'),
+    confirmAction: document.getElementById('confirmAction'),
+    confirmationTitle: document.getElementById('confirmationTitle'),
+    confirmationMessage: document.getElementById('confirmationMessage'),
+    confirmationIcon: document.getElementById('confirmationIcon'),
+    confirmationUserName: document.getElementById('confirmationUserName'),
+    confirmationUserEmail: document.getElementById('confirmationUserEmail'),
+    confirmButtonText: document.getElementById('confirmButtonText'),
     
     messageContainer: document.getElementById('messageContainer')
 };
@@ -77,6 +100,7 @@ function initializePage() {
     elements.userTypeFilter.addEventListener('change', handleFilter);
     elements.statusFilter.addEventListener('change', handleFilter);
     elements.refreshBtn.addEventListener('click', loadUsers);
+    elements.createAdminBtn.addEventListener('click', openCreateAdminModal);
     elements.backBtn.addEventListener('click', () => window.location.href = 'Panel_Admin.html');
     elements.logoutBtn.addEventListener('click', handleLogout);
     
@@ -89,10 +113,32 @@ function initializePage() {
     elements.togglePassword.addEventListener('click', () => togglePasswordVisibility('newPassword', 'togglePassword'));
     elements.toggleConfirmPassword.addEventListener('click', () => togglePasswordVisibility('confirmPassword', 'toggleConfirmPassword'));
     
-    // Close modal on outside click
+    // Create Admin Modal events
+    elements.closeCreateAdminModal.addEventListener('click', closeCreateAdminModal);
+    elements.cancelCreateAdmin.addEventListener('click', closeCreateAdminModal);
+    elements.createAdminForm.addEventListener('submit', handleCreateAdmin);
+    elements.toggleAdminPassword.addEventListener('click', () => togglePasswordVisibility('adminPassword', 'toggleAdminPassword'));
+    
+    // Confirmation Modal events
+    elements.closeConfirmationModal.addEventListener('click', closeConfirmationModal);
+    elements.cancelConfirmation.addEventListener('click', closeConfirmationModal);
+    
+    // Close modals on outside click
     elements.resetPasswordModal.addEventListener('click', function(e) {
         if (e.target === this) {
             closeModal();
+        }
+    });
+    
+    elements.createAdminModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCreateAdminModal();
+        }
+    });
+    
+    elements.confirmationModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeConfirmationModal();
         }
     });
 }
@@ -322,6 +368,136 @@ function closeModal() {
     currentUserForReset = null;
 }
 
+// Open create admin modal
+function openCreateAdminModal() {
+    // Clear form
+    elements.adminNombre.value = '';
+    elements.adminUsuario.value = '';
+    elements.adminPassword.value = '';
+    
+    elements.createAdminModal.classList.add('show');
+}
+
+// Close create admin modal
+function closeCreateAdminModal() {
+    elements.createAdminModal.classList.remove('show');
+}
+
+// Close confirmation modal
+function closeConfirmationModal() {
+    elements.confirmationModal.classList.remove('show');
+    // Remove any pending action
+    elements.confirmAction.onclick = null;
+}
+
+// Show confirmation modal
+function showConfirmationModal(title, message, user, action, onConfirm) {
+    elements.confirmationTitle.textContent = title;
+    elements.confirmationMessage.textContent = message;
+    elements.confirmationUserName.textContent = user.nombre || 'Usuario';
+    elements.confirmationUserEmail.textContent = user.usuario || user.email;
+    
+    // Update icon and button based on action
+    const icon = elements.confirmationIcon.querySelector('i');
+    const confirmBtn = elements.confirmAction;
+    const buttonText = elements.confirmButtonText;
+    
+    if (action === 'activate') {
+        elements.confirmationIcon.className = 'confirmation-icon activate';
+        icon.className = 'bi bi-person-check';
+        confirmBtn.className = 'confirm-btn activate';
+        buttonText.textContent = 'Activar Usuario';
+    } else if (action === 'deactivate') {
+        elements.confirmationIcon.className = 'confirmation-icon deactivate';
+        icon.className = 'bi bi-person-x';
+        confirmBtn.className = 'confirm-btn deactivate';
+        buttonText.textContent = 'Desactivar Usuario';
+    }
+    
+    // Set the confirm action
+    elements.confirmAction.onclick = () => {
+        closeConfirmationModal();
+        onConfirm();
+    };
+    
+    elements.confirmationModal.classList.add('show');
+}
+
+// Handle create admin
+async function handleCreateAdmin(e) {
+    e.preventDefault();
+    
+    const nombre = elements.adminNombre.value.trim();
+    const usuario = elements.adminUsuario.value.trim();
+    const password = elements.adminPassword.value;
+    
+    // Validation
+    if (!nombre || !usuario || !password) {
+        showMessage('Todos los campos son obligatorios', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(usuario)) {
+        showMessage('Por favor ingresa un email válido', 'error');
+        return;
+    }
+    
+    try {
+        const submitBtn = elements.createAdminForm.querySelector('.create-btn');
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        
+        await waitForFirebase();
+        
+        // Check if user already exists
+        const existingUserQuery = await window.firebaseDB.collection('usuarios')
+            .where('usuario', '==', usuario)
+            .get();
+        
+        if (!existingUserQuery.empty) {
+            showMessage('Ya existe un usuario con este email', 'error');
+            return;
+        }
+        
+        // Generate recovery code
+        const recoveryCode = generateRecoveryCode();
+        
+        // Create admin user object
+        const adminData = {
+            nombre: nombre,
+            usuario: usuario,
+            password: password,
+            tipoUsuario: 'admin',
+            activo: true,
+            codigoRecuperacion: recoveryCode,
+            fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
+            fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // Add to Firestore
+        await window.firebaseDB.collection('usuarios').add(adminData);
+        
+        showMessage(`Administrador creado exitosamente. Código de recuperación: ${recoveryCode}`, 'success');
+        closeCreateAdminModal();
+        loadUsers(); // Refresh the list
+        
+    } catch (error) {
+        console.error('Error creating admin:', error);
+        showMessage('Error al crear el administrador', 'error');
+    } finally {
+        const submitBtn = elements.createAdminForm.querySelector('.create-btn');
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+    }
+}
+
 // Toggle password visibility
 function togglePasswordVisibility(inputId, toggleId) {
     const input = document.getElementById(inputId);
@@ -394,25 +570,28 @@ async function toggleUserStatus(userId, currentStatus) {
     if (!user) return;
     
     const action = currentStatus ? 'desactivar' : 'activar';
-    const confirmMessage = `¿Estás seguro de que deseas ${action} a ${user.nombre || user.usuario}?`;
+    const actionType = currentStatus ? 'deactivate' : 'activate';
+    const title = currentStatus ? 'Desactivar Usuario' : 'Activar Usuario';
+    const message = `¿Estás seguro de que deseas ${action} este usuario?`;
     
-    if (!confirm(confirmMessage)) return;
-    
-    try {
-        await waitForFirebase();
-        
-        await window.firebaseDB.collection('usuarios').doc(userId).update({
-            activo: !currentStatus,
-            fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        showMessage(`Usuario ${action}do exitosamente`, 'success');
-        loadUsers(); // Refresh the list
-        
-    } catch (error) {
-        console.error('Error toggling user status:', error);
-        showMessage(`Error al ${action} usuario`, 'error');
-    }
+    // Show custom confirmation modal
+    showConfirmationModal(title, message, user, actionType, async () => {
+        try {
+            await waitForFirebase();
+            
+            await window.firebaseDB.collection('usuarios').doc(userId).update({
+                activo: !currentStatus,
+                fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            showMessage(`Usuario ${action}do exitosamente`, 'success');
+            loadUsers(); // Refresh the list
+            
+        } catch (error) {
+            console.error('Error toggling user status:', error);
+            showMessage(`Error al ${action} usuario`, 'error');
+        }
+    });
 }
 
 // Generate recovery code

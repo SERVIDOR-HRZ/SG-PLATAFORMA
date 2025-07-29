@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showMessage(`¡Contraseña cambiada exitosamente! Tu nuevo código de recuperación es: ${newRecoveryCode}. Redirigiendo al login...`, 'success');
             
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             }, 5000);
             
         } catch (error) {

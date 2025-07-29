@@ -107,6 +107,10 @@
             <div class="table-header">
                 <h2>Lista de Usuarios</h2>
                 <div class="table-actions">
+                    <button class="create-admin-btn" id="createAdminBtn">
+                        <i class="bi bi-person-plus-fill"></i>
+                        Crear Administrador
+                    </button>
                     <button class="refresh-btn" id="refreshBtn">
                         <i class="bi bi-arrow-clockwise"></i>
                         Actualizar
@@ -206,6 +210,100 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Admin Modal -->
+    <div class="modal" id="createAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Nuevo Administrador</h3>
+                <button class="close-btn" id="closeCreateAdminModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createAdminForm" class="create-admin-form">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="adminNombre">Nombre Completo *</label>
+                            <input type="text" id="adminNombre" required placeholder="Ej: Andrés Hincapie">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="adminUsuario">Usuario (Email) *</label>
+                            <input type="email" id="adminUsuario" required placeholder="admin@seamosgenios.com">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="adminPassword">Contraseña *</label>
+                            <div class="password-input">
+                                <input type="password" id="adminPassword" required placeholder="Contraseña segura">
+                                <button type="button" class="password-toggle" id="toggleAdminPassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-info">
+                        <div class="info-item">
+                            <i class="bi bi-info-circle"></i>
+                            <span>El código de recuperación se generará automáticamente</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="bi bi-shield-check"></i>
+                            <span>El usuario será creado como administrador activo</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="bi bi-calendar"></i>
+                            <span>La fecha de creación se establecerá automáticamente</span>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="cancelCreateAdmin">Cancelar</button>
+                        <button type="submit" class="create-btn">
+                            <i class="bi bi-person-plus-fill"></i>
+                            Crear Administrador
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <h3 id="confirmationTitle">Confirmar Acción</h3>
+                <button class="close-btn" id="closeConfirmationModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon" id="confirmationIcon">
+                        <i class="bi bi-question-circle"></i>
+                    </div>
+                    <div class="confirmation-text">
+                        <p id="confirmationMessage">¿Estás seguro de realizar esta acción?</p>
+                        <div class="user-info-confirmation" id="userInfoConfirmation">
+                            <strong id="confirmationUserName">Usuario</strong>
+                            <span id="confirmationUserEmail">email@example.com</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancelConfirmation">Cancelar</button>
+                    <button type="button" class="confirm-btn" id="confirmAction">
+                        <i class="bi bi-check-circle"></i>
+                        <span id="confirmButtonText">Confirmar</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
