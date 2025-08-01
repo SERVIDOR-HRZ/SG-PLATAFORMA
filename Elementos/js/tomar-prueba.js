@@ -631,6 +631,9 @@ function initializeTest() {
     // Load questions for current block
     loadBlockQuestions();
 
+    // Initialize auto-save system BEFORE showing questions
+    initializeAutoSave();
+
     // Start timer
     startTimer();
 
@@ -776,8 +779,10 @@ function showCurrentQuestion() {
     // Update progress
     updateProgress();
 
-    // Load saved answer
-    loadSavedAnswer();
+    // Load saved answer AFTER the question is rendered
+    setTimeout(() => {
+        loadSavedAnswer();
+    }, 100);
 }
 
 // Create multiple choice HTML
@@ -844,7 +849,10 @@ function createQuestionVideosHTML(videos) {
 function createQuestionsSelector(totalQuestions) {
     let html = '';
     for (let i = 0; i < totalQuestions; i++) {
-        const isAnswered = userAnswers[currentSubject] && userAnswers[currentSubject][i] !== null && userAnswers[currentSubject][i] !== undefined && userAnswers[currentSubject][i] !== '';
+        const isAnswered = userAnswers[currentSubject] && 
+                          userAnswers[currentSubject][i] !== null && 
+                          userAnswers[currentSubject][i] !== undefined && 
+                          userAnswers[currentSubject][i] !== '';
         const isActive = i === currentQuestionIndex;
 
         html += `
@@ -963,7 +971,7 @@ function saveOpenAnswer(answer) {
 function loadSavedAnswer() {
     const savedAnswer = userAnswers[currentSubject][currentQuestionIndex];
 
-    if (savedAnswer !== null && savedAnswer !== undefined) {
+    if (savedAnswer !== null && savedAnswer !== undefined && savedAnswer !== '') {
         const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
         const question = subjectQuestions[currentQuestionIndex];
 
@@ -972,7 +980,14 @@ function loadSavedAnswer() {
             const optionElement = document.getElementById(`option_${savedAnswer}`);
             if (optionElement) {
                 optionElement.checked = true;
-                document.querySelectorAll('.option-item')[savedAnswer].classList.add('selected');
+                // Update visual selection
+                document.querySelectorAll('.option-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                const selectedItem = document.querySelectorAll('.option-item')[savedAnswer];
+                if (selectedItem) {
+                    selectedItem.classList.add('selected');
+                }
             }
         } else {
             // Load open answer
@@ -1658,10 +1673,10 @@ function loadSavedAnswersFromStorage() {
             const parsedData = JSON.parse(savedData);
 
             // Verify the data is for the current test and block
-            if (parsedData.testId === testId && parsedData.block === currentBlock) {
+            if (parsedData.testId === testId && parsedData.block === currentBlock && parsedData.answers) {
                 // Merge saved answers with current userAnswers
                 Object.keys(parsedData.answers).forEach(subject => {
-                    if (userAnswers[subject]) {
+                    if (parsedData.answers[subject] && userAnswers[subject]) {
                         Object.keys(parsedData.answers[subject]).forEach(questionIndex => {
                             const savedAnswer = parsedData.answers[subject][questionIndex];
                             if (savedAnswer !== null && savedAnswer !== undefined && savedAnswer !== '') {
@@ -1670,6 +1685,12 @@ function loadSavedAnswersFromStorage() {
                         });
                     }
                 });
+
+                // Update UI if we have a current subject
+                if (currentSubject) {
+                    updateProgress();
+                    updateSubjectCompletion();
+                }
 
                 showNotification('💾 Respuestas anteriores restauradas automáticamente', 'success');
                 console.log('Answers loaded from localStorage:', parsedData);
@@ -1863,3 +1884,35 @@ function recoverAnswersFromStorage() {
 
 // Make recovery function globally accessible
 window.recoverAnswers = recoverAnswersFromStorage;
+
+// Debug function to check auto-save status
+function debugAutoSave() {
+    try {
+        const testId = sessionStorage.getItem('takingTestId');
+        const studentId = currentUser.numeroDocumento || currentUser.numeroIdentidad || currentUser.id;
+        const storageKey = `test_answers_${testId}_${studentId}_block${currentBlock}`;
+
+        const savedData = localStorage.getItem(storageKey);
+        console.log('🔍 DEBUG AUTO-SAVE:');
+        console.log('- Test ID:', testId);
+        console.log('- Student ID:', studentId);
+        console.log('- Block:', currentBlock);
+        console.log('- Storage Key:', storageKey);
+        console.log('- Saved Data:', savedData ? JSON.parse(savedData) : 'No data');
+        console.log('- Current userAnswers:', userAnswers);
+        console.log('- Current Subject:', currentSubject);
+        console.log('- Current Question Index:', currentQuestionIndex);
+
+        if (savedData) {
+            showNotification('🔍 Datos de auto-guardado verificados en consola', 'info');
+        } else {
+            showNotification('⚠️ No se encontraron datos guardados', 'warning');
+        }
+    } catch (error) {
+        console.error('Error in debug function:', error);
+        showNotification('❌ Error al verificar auto-guardado', 'error');
+    }
+}
+
+// Make debug function globally accessible
+window.debugAutoSave = debugAutoSave;

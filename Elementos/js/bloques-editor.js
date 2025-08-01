@@ -520,11 +520,20 @@ function createOptionsHTML(options, questionIndex) {
                         ${createOptionImagesHTML(option.images || [], questionIndex, optionIndex)}
                     </div>
                     <div class="option-buttons">
-                        ${(option.images && option.images.length > 0) ? '' : `
+                        ${(option.images && option.images.length > 0) ? `
+                            <button class="btn btn-sm btn-danger" onclick="removeImageFromOption(${questionIndex}, ${optionIndex}, 0)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        ` : `
                             <button class="btn btn-sm btn-info" onclick="addImageToOption(${questionIndex}, ${optionIndex})">
                                 <i class="bi bi-image"></i>
                             </button>
                         `}
+                        ${options.length > 2 ? `
+                            <button class="btn btn-sm btn-danger" onclick="deleteOption(${questionIndex}, ${optionIndex})">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -663,12 +672,8 @@ function addOption(questionIndex) {
     const blockKey = `bloque${currentEditingBlock}`;
     const options = testBlocks[blockKey][currentEditingSubject].questions[questionIndex].options;
     
-    if (options.length < 6) {
-        options.push({ text: '', isCorrect: false });
-        loadQuestionsInModal();
-    } else {
-        showNotification('Máximo 6 opciones por pregunta', 'warning');
-    }
+    options.push({ text: '', isCorrect: false, images: [] });
+    loadQuestionsInModal();
 }
 
 // Delete option
