@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Redirect after successful registration
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             }, 3000);
             
         } catch (error) {
