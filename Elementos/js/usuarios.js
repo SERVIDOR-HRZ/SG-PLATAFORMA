@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let allUsers = [];
 let filteredUsers = [];
 let currentUserForReset = null;
+let currentUserForEdit = null;
 
 // DOM Elements
 const elements = {
@@ -26,9 +27,14 @@ const elements = {
     loadingSpinner: document.getElementById('loadingSpinner'),
     noResults: document.getElementById('noResults'),
     refreshBtn: document.getElementById('refreshBtn'),
-    createAdminBtn: document.getElementById('createAdminBtn'),
+    createUserBtn: document.getElementById('createUserBtn'),
     backBtn: document.getElementById('backBtn'),
     logoutBtn: document.getElementById('logoutBtn'),
+    
+    // Export elements
+    exportBtn: document.getElementById('exportBtn'),
+    exportMenu: document.getElementById('exportMenu'),
+    exportDropdown: document.querySelector('.export-dropdown'),
     
     // Stats
     totalUsers: document.getElementById('totalUsers'),
@@ -36,7 +42,7 @@ const elements = {
     totalStudents: document.getElementById('totalStudents'),
     activeUsers: document.getElementById('activeUsers'),
     
-    // Modal
+    // Reset Password Modal
     resetPasswordModal: document.getElementById('resetPasswordModal'),
     closeModal: document.getElementById('closeModal'),
     cancelReset: document.getElementById('cancelReset'),
@@ -49,15 +55,40 @@ const elements = {
     togglePassword: document.getElementById('togglePassword'),
     toggleConfirmPassword: document.getElementById('toggleConfirmPassword'),
     
-    // Create Admin Modal
-    createAdminModal: document.getElementById('createAdminModal'),
-    closeCreateAdminModal: document.getElementById('closeCreateAdminModal'),
-    cancelCreateAdmin: document.getElementById('cancelCreateAdmin'),
-    createAdminForm: document.getElementById('createAdminForm'),
-    adminNombre: document.getElementById('adminNombre'),
-    adminUsuario: document.getElementById('adminUsuario'),
-    adminPassword: document.getElementById('adminPassword'),
-    toggleAdminPassword: document.getElementById('toggleAdminPassword'),
+    // Create User Modal
+    createUserModal: document.getElementById('createUserModal'),
+    closeCreateUserModal: document.getElementById('closeCreateUserModal'),
+    cancelCreateUser: document.getElementById('cancelCreateUser'),
+    createUserForm: document.getElementById('createUserForm'),
+    createNombre: document.getElementById('createNombre'),
+    createUsuario: document.getElementById('createUsuario'),
+    createPassword: document.getElementById('createPassword'),
+    createTelefono: document.getElementById('createTelefono'),
+    createEmailRecuperacion: document.getElementById('createEmailRecuperacion'),
+    createInstitucion: document.getElementById('createInstitucion'),
+    createGrado: document.getElementById('createGrado'),
+    createTipoDocumento: document.getElementById('createTipoDocumento'),
+    createNumeroDocumento: document.getElementById('createNumeroDocumento'),
+    createDepartamento: document.getElementById('createDepartamento'),
+    toggleCreatePassword: document.getElementById('toggleCreatePassword'),
+    createButtonText: document.getElementById('createButtonText'),
+    
+    // Edit User Modal
+    editUserModal: document.getElementById('editUserModal'),
+    closeEditUserModal: document.getElementById('closeEditUserModal'),
+    cancelEditUser: document.getElementById('cancelEditUser'),
+    editUserForm: document.getElementById('editUserForm'),
+    editUserTypeBadge: document.getElementById('editUserTypeBadge'),
+    editUserTypeText: document.getElementById('editUserTypeText'),
+    editNombre: document.getElementById('editNombre'),
+    editUsuario: document.getElementById('editUsuario'),
+    editTelefono: document.getElementById('editTelefono'),
+    editEmailRecuperacion: document.getElementById('editEmailRecuperacion'),
+    editInstitucion: document.getElementById('editInstitucion'),
+    editGrado: document.getElementById('editGrado'),
+    editTipoDocumento: document.getElementById('editTipoDocumento'),
+    editNumeroDocumento: document.getElementById('editNumeroDocumento'),
+    editDepartamento: document.getElementById('editDepartamento'),
     
     // Confirmation Modal
     confirmationModal: document.getElementById('confirmationModal'),
@@ -100,28 +131,51 @@ function initializePage() {
     elements.userTypeFilter.addEventListener('change', handleFilter);
     elements.statusFilter.addEventListener('change', handleFilter);
     elements.refreshBtn.addEventListener('click', loadUsers);
-    elements.createAdminBtn.addEventListener('click', openCreateAdminModal);
+    elements.createUserBtn.addEventListener('click', openCreateUserModal);
     elements.backBtn.addEventListener('click', () => window.location.href = 'Panel_Admin.html');
     elements.logoutBtn.addEventListener('click', handleLogout);
     
-    // Modal events
+    // Export dropdown events
+    elements.exportBtn.addEventListener('click', toggleExportMenu);
+    document.addEventListener('click', closeExportMenuOutside);
+    
+    // Export option events
+    const exportOptions = document.querySelectorAll('.export-option');
+    exportOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            const type = e.currentTarget.getAttribute('data-type');
+            handleExport(type);
+            closeExportMenu();
+        });
+    });
+    
+    // Reset Password Modal events
     elements.closeModal.addEventListener('click', closeModal);
     elements.cancelReset.addEventListener('click', closeModal);
     elements.resetPasswordForm.addEventListener('submit', handlePasswordReset);
-    
-    // Password toggles
     elements.togglePassword.addEventListener('click', () => togglePasswordVisibility('newPassword', 'togglePassword'));
     elements.toggleConfirmPassword.addEventListener('click', () => togglePasswordVisibility('confirmPassword', 'toggleConfirmPassword'));
     
-    // Create Admin Modal events
-    elements.closeCreateAdminModal.addEventListener('click', closeCreateAdminModal);
-    elements.cancelCreateAdmin.addEventListener('click', closeCreateAdminModal);
-    elements.createAdminForm.addEventListener('submit', handleCreateAdmin);
-    elements.toggleAdminPassword.addEventListener('click', () => togglePasswordVisibility('adminPassword', 'toggleAdminPassword'));
+    // Create User Modal events
+    elements.closeCreateUserModal.addEventListener('click', closeCreateUserModal);
+    elements.cancelCreateUser.addEventListener('click', closeCreateUserModal);
+    elements.createUserForm.addEventListener('submit', handleCreateUser);
+    elements.toggleCreatePassword.addEventListener('click', () => togglePasswordVisibility('createPassword', 'toggleCreatePassword'));
+    
+    // Edit User Modal events
+    elements.closeEditUserModal.addEventListener('click', closeEditUserModal);
+    elements.cancelEditUser.addEventListener('click', closeEditUserModal);
+    elements.editUserForm.addEventListener('submit', handleEditUser);
     
     // Confirmation Modal events
     elements.closeConfirmationModal.addEventListener('click', closeConfirmationModal);
     elements.cancelConfirmation.addEventListener('click', closeConfirmationModal);
+    
+    // User type radio buttons change event
+    const userTypeRadios = document.querySelectorAll('input[name="tipoUsuario"]');
+    userTypeRadios.forEach(radio => {
+        radio.addEventListener('change', handleUserTypeChange);
+    });
     
     // Close modals on outside click
     elements.resetPasswordModal.addEventListener('click', function(e) {
@@ -130,9 +184,15 @@ function initializePage() {
         }
     });
     
-    elements.createAdminModal.addEventListener('click', function(e) {
+    elements.createUserModal.addEventListener('click', function(e) {
         if (e.target === this) {
-            closeCreateAdminModal();
+            closeCreateUserModal();
+        }
+    });
+    
+    elements.editUserModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEditUserModal();
         }
     });
     
@@ -141,6 +201,21 @@ function initializePage() {
             closeConfirmationModal();
         }
     });
+}
+
+// Handle user type change in create modal
+function handleUserTypeChange() {
+    const selectedType = document.querySelector('input[name="tipoUsuario"]:checked').value;
+    const studentFields = document.querySelector('.student-fields');
+    const createButton = elements.createButtonText;
+    
+    if (selectedType === 'estudiante') {
+        studentFields.style.display = 'block';
+        createButton.textContent = 'Crear Estudiante';
+    } else {
+        studentFields.style.display = 'none';
+        createButton.textContent = 'Crear Administrador';
+    }
 }
 
 // Wait for Firebase
@@ -221,6 +296,11 @@ function renderUsers() {
     filteredUsers.forEach(user => {
         const row = document.createElement('tr');
         
+        // Add inactive class if user is not active
+        if (!user.activo) {
+            row.classList.add('inactive');
+        }
+        
         // Format date
         const creationDate = user.fechaCreacion ? 
             user.fechaCreacion.toDate().toLocaleDateString('es-ES') : 
@@ -248,13 +328,12 @@ function renderUsers() {
                 </span>
             </td>
             <td>
-                ${user.tipoUsuario === 'estudiante' ? (user.telefono || 'No especificado') : 'N/A'}
+                ${user.telefono || 'No especificado'}
             </td>
             <td>
                 ${user.tipoUsuario === 'estudiante' ? 
-                    `<div class="document-info">
-                        <span class="doc-type">${user.tipoDocumento || 'N/A'}</span>
-                        <span class="doc-number">${user.numeroDocumento || 'N/A'}</span>
+                    `<div class="document-inline">
+                        ${user.tipoDocumento || 'N/A'} ${user.numeroDocumento || 'N/A'}
                     </div>` : 'N/A'}
             </td>
             <td>
@@ -267,10 +346,9 @@ function renderUsers() {
                 ${user.tipoUsuario === 'estudiante' ? (user.departamento || 'No especificado') : 'N/A'}
             </td>
             <td>
-                ${user.tipoUsuario === 'estudiante' ? 
-                    `<div class="recovery-email">
-                        ${user.emailRecuperacion || 'No especificado'}
-                    </div>` : 'N/A'}
+                <div class="recovery-email">
+                    ${user.emailRecuperacion || 'No especificado'}
+                </div>
             </td>
             <td>
                 <div class="recovery-code">
@@ -282,6 +360,11 @@ function renderUsers() {
             </td>
             <td>
                 <div class="action-buttons">
+                    <button class="action-btn edit-user-btn" 
+                            onclick="openEditUserModal('${user.id}')"
+                            title="Editar usuario">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
                     <button class="action-btn reset-password-btn" 
                             onclick="openResetPasswordModal('${user.id}')"
                             title="Restablecer contraseña">
@@ -343,6 +426,64 @@ function applyFilters(searchTerm = '') {
     renderUsers();
 }
 
+// Open create user modal
+function openCreateUserModal() {
+    // Clear form
+    elements.createUserForm.reset();
+    
+    // Set default user type to student
+    document.querySelector('input[name="tipoUsuario"][value="estudiante"]').checked = true;
+    handleUserTypeChange();
+    
+    elements.createUserModal.classList.add('show');
+}
+
+// Close create user modal
+function closeCreateUserModal() {
+    elements.createUserModal.classList.remove('show');
+}
+
+// Open edit user modal
+function openEditUserModal(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    
+    currentUserForEdit = user;
+    
+    // Fill form with user data
+    elements.editNombre.value = user.nombre || '';
+    elements.editUsuario.value = user.usuario || user.email || '';
+    elements.editTelefono.value = user.telefono || '';
+    elements.editEmailRecuperacion.value = user.emailRecuperacion || '';
+    
+    // Set user type badge
+    const isAdmin = user.tipoUsuario === 'admin';
+    elements.editUserTypeBadge.className = `user-type-badge-display ${user.tipoUsuario}`;
+    elements.editUserTypeBadge.querySelector('i').className = isAdmin ? 'bi bi-person-badge-fill' : 'bi bi-person-fill';
+    elements.editUserTypeText.textContent = isAdmin ? 'Administrador' : 'Estudiante';
+    
+    // Show/hide student fields
+    const studentFields = document.querySelector('.student-edit-fields');
+    if (user.tipoUsuario === 'estudiante') {
+        studentFields.style.display = 'block';
+        elements.editInstitucion.value = user.institucion || '';
+        elements.editGrado.value = user.grado || '';
+        elements.editTipoDocumento.value = user.tipoDocumento || '';
+        elements.editNumeroDocumento.value = user.numeroDocumento || '';
+        elements.editDepartamento.value = user.departamento || '';
+    } else {
+        studentFields.style.display = 'none';
+    }
+    
+    elements.editUserModal.classList.add('show');
+}
+
+// Close edit user modal
+function closeEditUserModal() {
+    elements.editUserModal.classList.remove('show');
+    currentUserForEdit = null;
+}
+
 // Open reset password modal
 function openResetPasswordModal(userId) {
     const user = allUsers.find(u => u.id === userId);
@@ -366,21 +507,6 @@ function openResetPasswordModal(userId) {
 function closeModal() {
     elements.resetPasswordModal.classList.remove('show');
     currentUserForReset = null;
-}
-
-// Open create admin modal
-function openCreateAdminModal() {
-    // Clear form
-    elements.adminNombre.value = '';
-    elements.adminUsuario.value = '';
-    elements.adminPassword.value = '';
-    
-    elements.createAdminModal.classList.add('show');
-}
-
-// Close create admin modal
-function closeCreateAdminModal() {
-    elements.createAdminModal.classList.remove('show');
 }
 
 // Close confirmation modal
@@ -423,17 +549,20 @@ function showConfirmationModal(title, message, user, action, onConfirm) {
     elements.confirmationModal.classList.add('show');
 }
 
-// Handle create admin
-async function handleCreateAdmin(e) {
+// Handle create user
+async function handleCreateUser(e) {
     e.preventDefault();
     
-    const nombre = elements.adminNombre.value.trim();
-    const usuario = elements.adminUsuario.value.trim();
-    const password = elements.adminPassword.value;
+    const tipoUsuario = document.querySelector('input[name="tipoUsuario"]:checked').value;
+    const nombre = elements.createNombre.value.trim();
+    const usuario = elements.createUsuario.value.trim();
+    const password = elements.createPassword.value;
+    const telefono = elements.createTelefono.value.trim();
+    const emailRecuperacion = elements.createEmailRecuperacion.value.trim();
     
-    // Validation
-    if (!nombre || !usuario || !password) {
-        showMessage('Todos los campos son obligatorios', 'error');
+    // Basic validation
+    if (!nombre || !usuario || !password || !telefono || !emailRecuperacion) {
+        showMessage('Todos los campos básicos son obligatorios', 'error');
         return;
     }
     
@@ -444,13 +573,27 @@ async function handleCreateAdmin(e) {
     
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(usuario)) {
-        showMessage('Por favor ingresa un email válido', 'error');
+    if (!emailRegex.test(usuario) || !emailRegex.test(emailRecuperacion)) {
+        showMessage('Por favor ingresa emails válidos', 'error');
         return;
     }
     
+    // Student-specific validation
+    if (tipoUsuario === 'estudiante') {
+        const institucion = elements.createInstitucion.value.trim();
+        const grado = elements.createGrado.value;
+        const tipoDocumento = elements.createTipoDocumento.value;
+        const numeroDocumento = elements.createNumeroDocumento.value.trim();
+        const departamento = elements.createDepartamento.value;
+        
+        if (!institucion || !grado || !tipoDocumento || !numeroDocumento || !departamento) {
+            showMessage('Todos los campos del estudiante son obligatorios', 'error');
+            return;
+        }
+    }
+    
     try {
-        const submitBtn = elements.createAdminForm.querySelector('.create-btn');
+        const submitBtn = elements.createUserForm.querySelector('.create-btn');
         submitBtn.classList.add('loading');
         submitBtn.disabled = true;
         
@@ -469,30 +612,130 @@ async function handleCreateAdmin(e) {
         // Generate recovery code
         const recoveryCode = generateRecoveryCode();
         
-        // Create admin user object
-        const adminData = {
+        // Create user data object
+        const userData = {
             nombre: nombre,
             usuario: usuario,
             password: password,
-            tipoUsuario: 'admin',
+            telefono: telefono,
+            emailRecuperacion: emailRecuperacion,
+            tipoUsuario: tipoUsuario,
             activo: true,
             codigoRecuperacion: recoveryCode,
             fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
             fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
         };
         
-        // Add to Firestore
-        await window.firebaseDB.collection('usuarios').add(adminData);
+        // Add student-specific fields
+        if (tipoUsuario === 'estudiante') {
+            userData.institucion = elements.createInstitucion.value.trim();
+            userData.grado = elements.createGrado.value;
+            userData.tipoDocumento = elements.createTipoDocumento.value;
+            userData.numeroDocumento = elements.createNumeroDocumento.value.trim();
+            userData.departamento = elements.createDepartamento.value;
+        }
         
-        showMessage(`Administrador creado exitosamente. Código de recuperación: ${recoveryCode}`, 'success');
-        closeCreateAdminModal();
+        // Add to Firestore
+        await window.firebaseDB.collection('usuarios').add(userData);
+        
+        showMessage(`${tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante'} creado exitosamente. Código de recuperación: ${recoveryCode}`, 'success');
+        closeCreateUserModal();
         loadUsers(); // Refresh the list
         
     } catch (error) {
-        console.error('Error creating admin:', error);
-        showMessage('Error al crear el administrador', 'error');
+        console.error('Error creating user:', error);
+        showMessage('Error al crear el usuario', 'error');
     } finally {
-        const submitBtn = elements.createAdminForm.querySelector('.create-btn');
+        const submitBtn = elements.createUserForm.querySelector('.create-btn');
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+    }
+}
+
+// Handle edit user
+async function handleEditUser(e) {
+    e.preventDefault();
+    
+    if (!currentUserForEdit) return;
+    
+    const nombre = elements.editNombre.value.trim();
+    const usuario = elements.editUsuario.value.trim();
+    const telefono = elements.editTelefono.value.trim();
+    const emailRecuperacion = elements.editEmailRecuperacion.value.trim();
+    
+    // Basic validation
+    if (!nombre || !usuario || !telefono || !emailRecuperacion) {
+        showMessage('Todos los campos básicos son obligatorios', 'error');
+        return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(usuario) || !emailRegex.test(emailRecuperacion)) {
+        showMessage('Por favor ingresa emails válidos', 'error');
+        return;
+    }
+    
+    try {
+        const submitBtn = elements.editUserForm.querySelector('.save-btn');
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        
+        await waitForFirebase();
+        
+        // Check if email is being changed and if it already exists
+        if (usuario !== currentUserForEdit.usuario) {
+            const existingUserQuery = await window.firebaseDB.collection('usuarios')
+                .where('usuario', '==', usuario)
+                .get();
+            
+            if (!existingUserQuery.empty) {
+                showMessage('Ya existe un usuario con este email', 'error');
+                return;
+            }
+        }
+        
+        // Create update data object
+        const updateData = {
+            nombre: nombre,
+            usuario: usuario,
+            telefono: telefono,
+            emailRecuperacion: emailRecuperacion,
+            fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // Add student-specific fields if user is a student
+        if (currentUserForEdit.tipoUsuario === 'estudiante') {
+            const institucion = elements.editInstitucion.value.trim();
+            const grado = elements.editGrado.value;
+            const tipoDocumento = elements.editTipoDocumento.value;
+            const numeroDocumento = elements.editNumeroDocumento.value.trim();
+            const departamento = elements.editDepartamento.value;
+            
+            if (!institucion || !grado || !tipoDocumento || !numeroDocumento || !departamento) {
+                showMessage('Todos los campos del estudiante son obligatorios', 'error');
+                return;
+            }
+            
+            updateData.institucion = institucion;
+            updateData.grado = grado;
+            updateData.tipoDocumento = tipoDocumento;
+            updateData.numeroDocumento = numeroDocumento;
+            updateData.departamento = departamento;
+        }
+        
+        // Update in Firestore
+        await window.firebaseDB.collection('usuarios').doc(currentUserForEdit.id).update(updateData);
+        
+        showMessage('Usuario actualizado exitosamente', 'success');
+        closeEditUserModal();
+        loadUsers(); // Refresh the list
+        
+    } catch (error) {
+        console.error('Error updating user:', error);
+        showMessage('Error al actualizar el usuario', 'error');
+    } finally {
+        const submitBtn = elements.editUserForm.querySelector('.save-btn');
         submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
     }
@@ -634,6 +877,110 @@ function handleLogout() {
     }
 }
 
+// Export dropdown functions
+function toggleExportMenu(e) {
+    e.stopPropagation();
+    elements.exportDropdown.classList.toggle('active');
+}
+
+function closeExportMenu() {
+    elements.exportDropdown.classList.remove('active');
+}
+
+function closeExportMenuOutside(e) {
+    if (!elements.exportDropdown.contains(e.target)) {
+        closeExportMenu();
+    }
+}
+
+// Export to Excel function
+function handleExport(type) {
+    let dataToExport = [];
+    let filename = '';
+    
+    // Filter data based on type
+    switch(type) {
+        case 'all':
+            dataToExport = allUsers;
+            filename = 'todos_los_usuarios';
+            break;
+        case 'estudiante':
+            dataToExport = allUsers.filter(user => user.tipoUsuario === 'estudiante');
+            filename = 'estudiantes';
+            break;
+        case 'admin':
+            dataToExport = allUsers.filter(user => user.tipoUsuario === 'admin');
+            filename = 'administradores';
+            break;
+        default:
+            dataToExport = allUsers;
+            filename = 'usuarios';
+    }
+    
+    if (dataToExport.length === 0) {
+        showMessage(`No hay ${type === 'all' ? 'usuarios' : type === 'admin' ? 'administradores' : 'estudiantes'} para exportar`, 'error');
+        return;
+    }
+    
+    // Prepare data for Excel
+    const excelData = dataToExport.map(user => {
+        const baseData = {
+            'Usuario': user.usuario || user.email || '',
+            'Nombre': user.nombre || '',
+            'Tipo': user.tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante',
+            'Estado': user.activo ? 'Activo' : 'Inactivo',
+            'Teléfono': user.telefono || '',
+            'Email Recuperación': user.emailRecuperacion || '',
+            'Código Recuperación': user.codigoRecuperacion || '',
+            'Fecha Registro': user.fechaCreacion ? user.fechaCreacion.toDate().toLocaleDateString('es-ES') : ''
+        };
+        
+        // Add student-specific fields if user is a student
+        if (user.tipoUsuario === 'estudiante') {
+            baseData['Institución'] = user.institucion || '';
+            baseData['Grado'] = user.grado || '';
+            baseData['Tipo Documento'] = user.tipoDocumento || '';
+            baseData['Número Documento'] = user.numeroDocumento || '';
+            baseData['Departamento'] = user.departamento || '';
+        }
+        
+        return baseData;
+    });
+    
+    // Create workbook and worksheet
+    const ws = XLSX.utils.json_to_sheet(excelData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Usuarios');
+    
+    // Set column widths
+    const colWidths = [
+        {wch: 25}, // Usuario
+        {wch: 20}, // Nombre
+        {wch: 15}, // Tipo
+        {wch: 10}, // Estado
+        {wch: 15}, // Teléfono
+        {wch: 25}, // Email Recuperación
+        {wch: 20}, // Código Recuperación
+        {wch: 15}, // Fecha Registro
+        {wch: 25}, // Institución
+        {wch: 12}, // Grado
+        {wch: 15}, // Tipo Documento
+        {wch: 18}, // Número Documento
+        {wch: 20}  // Departamento
+    ];
+    ws['!cols'] = colWidths;
+    
+    // Generate filename with current date
+    const currentDate = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
+    const finalFilename = `${filename}_${currentDate}.xlsx`;
+    
+    // Save file
+    XLSX.writeFile(wb, finalFilename);
+    
+    showMessage(`Exportación completada: ${dataToExport.length} registros exportados`, 'success');
+}
+
 // Global functions for onclick handlers
 window.openResetPasswordModal = openResetPasswordModal;
 window.toggleUserStatus = toggleUserStatus;
+window.openEditUserModal = openEditUserModal;

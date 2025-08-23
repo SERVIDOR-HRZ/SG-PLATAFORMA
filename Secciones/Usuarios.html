@@ -109,9 +109,30 @@
             <div class="table-header">
                 <h2>Lista de Usuarios</h2>
                 <div class="table-actions">
-                    <button class="create-admin-btn" id="createAdminBtn">
+                    <div class="export-dropdown">
+                        <button class="export-btn" id="exportBtn">
+                            <i class="bi bi-file-earmark-excel"></i>
+                            Exportar Excel
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="export-menu" id="exportMenu">
+                            <button class="export-option" data-type="all">
+                                <i class="bi bi-people-fill"></i>
+                                Todos los Usuarios
+                            </button>
+                            <button class="export-option" data-type="estudiante">
+                                <i class="bi bi-person-fill"></i>
+                                Solo Estudiantes
+                            </button>
+                            <button class="export-option" data-type="admin">
+                                <i class="bi bi-person-badge-fill"></i>
+                                Solo Administradores
+                            </button>
+                        </div>
+                    </div>
+                    <button class="create-user-btn" id="createUserBtn">
                         <i class="bi bi-person-plus-fill"></i>
-                        Crear Administrador
+                        Crear Usuario
                     </button>
                     <button class="refresh-btn" id="refreshBtn">
                         <i class="bi bi-arrow-clockwise"></i>
@@ -216,47 +237,160 @@
         </div>
     </div>
 
-    <!-- Create Admin Modal -->
-    <div class="modal" id="createAdminModal">
-        <div class="modal-content">
+    <!-- Create User Modal -->
+    <div class="modal" id="createUserModal">
+        <div class="modal-content create-user-modal">
             <div class="modal-header">
-                <h3>Crear Nuevo Administrador</h3>
-                <button class="close-btn" id="closeCreateAdminModal">
+                <h3>Crear Nuevo Usuario</h3>
+                <button class="close-btn" id="closeCreateUserModal">
                     <i class="bi bi-x"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="createAdminForm" class="create-admin-form">
+                <form id="createUserForm" class="create-user-form">
+                    <!-- User Type Selection -->
+                    <div class="user-type-selection">
+                        <label>Tipo de Usuario *</label>
+                        <div class="user-type-options">
+                            <label class="radio-option">
+                                <input type="radio" name="tipoUsuario" value="estudiante" checked>
+                                <div class="option-content">
+                                    <i class="bi bi-person-fill"></i>
+                                    <span>Estudiante</span>
+                                </div>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="tipoUsuario" value="admin">
+                                <div class="option-content">
+                                    <i class="bi bi-person-badge-fill"></i>
+                                    <span>Administrador</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h4>Información Básica</h4>
                     <div class="form-grid">
                         <div class="input-group">
-                            <label for="adminNombre">Nombre Completo *</label>
-                            <input type="text" id="adminNombre" required placeholder="Ej: Andrés Hincapie">
+                                <label for="createNombre">Nombre Completo *</label>
+                                <input type="text" id="createNombre" required placeholder="Nombre completo">
                         </div>
                         
                         <div class="input-group">
-                            <label for="adminUsuario">Usuario (Email) *</label>
-                            <input type="email" id="adminUsuario" required placeholder="admin@seamosgenios.com">
+                                <label for="createUsuario">Usuario (Email) *</label>
+                                <input type="email" id="createUsuario" required placeholder="usuario@seamosgenios.com">
                         </div>
                         
                         <div class="input-group">
-                            <label for="adminPassword">Contraseña *</label>
+                                <label for="createPassword">Contraseña *</label>
                             <div class="password-input">
-                                <input type="password" id="adminPassword" required placeholder="Contraseña segura">
-                                <button type="button" class="password-toggle" id="toggleAdminPassword">
+                                    <input type="password" id="createPassword" required placeholder="Contraseña segura" minlength="6">
+                                    <button type="button" class="password-toggle" id="toggleCreatePassword">
                                     <i class="bi bi-eye"></i>
                                 </button>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="createTelefono">Teléfono *</label>
+                                <input type="tel" id="createTelefono" required placeholder="Número de teléfono">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="createEmailRecuperacion">Correo de Recuperación *</label>
+                                <input type="email" id="createEmailRecuperacion" required placeholder="correo@ejemplo.com">
                             </div>
                         </div>
                     </div>
                     
-                    <div class="admin-info">
+                    <!-- Student-specific fields -->
+                    <div class="form-section student-fields">
+                        <h4>Información del Estudiante</h4>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="createInstitucion">Institución *</label>
+                                <input type="text" id="createInstitucion" placeholder="Nombre de la institución">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="createGrado">Grado *</label>
+                                <select id="createGrado">
+                                    <option value="">Seleccione Grado</option>
+                                    <option value="PRESABER">PRESABER</option>
+                                    <option value="REPITENTE">REPITENTE</option>
+                                    <option value="VALIDANTE">VALIDANTE</option>
+                                    <option value="SABER11">SABER11</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="createTipoDocumento">Tipo de Documento *</label>
+                                <select id="createTipoDocumento">
+                                    <option value="">Tipo de Documento</option>
+                                    <option value="CC">CC</option>
+                                    <option value="TI">TI</option>
+                                    <option value="CE">CE</option>
+                                    <option value="PA">PA</option>
+                                    <option value="NIT">NIT</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="createNumeroDocumento">Número de Documento *</label>
+                                <input type="text" id="createNumeroDocumento" placeholder="Número de documento">
+                            </div>
+                            
+                            <div class="input-group full-width">
+                                <label for="createDepartamento">Departamento *</label>
+                                <select id="createDepartamento">
+                                    <option value="">Seleccione Departamento</option>
+                                    <option value="Amazonas">Amazonas</option>
+                                    <option value="Antioquia">Antioquia</option>
+                                    <option value="Arauca">Arauca</option>
+                                    <option value="Atlántico">Atlántico</option>
+                                    <option value="Bolívar">Bolívar</option>
+                                    <option value="Boyacá">Boyacá</option>
+                                    <option value="Caldas">Caldas</option>
+                                    <option value="Caquetá">Caquetá</option>
+                                    <option value="Casanare">Casanare</option>
+                                    <option value="Cauca">Cauca</option>
+                                    <option value="Cesar">Cesar</option>
+                                    <option value="Chocó">Chocó</option>
+                                    <option value="Córdoba">Córdoba</option>
+                                    <option value="Cundinamarca">Cundinamarca</option>
+                                    <option value="Guainía">Guainía</option>
+                                    <option value="Guaviare">Guaviare</option>
+                                    <option value="Huila">Huila</option>
+                                    <option value="La Guajira">La Guajira</option>
+                                    <option value="Magdalena">Magdalena</option>
+                                    <option value="Meta">Meta</option>
+                                    <option value="Nariño">Nariño</option>
+                                    <option value="Norte de Santander">Norte de Santander</option>
+                                    <option value="Putumayo">Putumayo</option>
+                                    <option value="Quindío">Quindío</option>
+                                    <option value="Risaralda">Risaralda</option>
+                                    <option value="San Andrés y Providencia">San Andrés y Providencia</option>
+                                    <option value="Santander">Santander</option>
+                                    <option value="Sucre">Sucre</option>
+                                    <option value="Tolima">Tolima</option>
+                                    <option value="Valle del Cauca">Valle del Cauca</option>
+                                    <option value="Vaupés">Vaupés</option>
+                                    <option value="Vichada">Vichada</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="user-info">
                         <div class="info-item">
                             <i class="bi bi-info-circle"></i>
                             <span>El código de recuperación se generará automáticamente</span>
                         </div>
                         <div class="info-item">
                             <i class="bi bi-shield-check"></i>
-                            <span>El usuario será creado como administrador activo</span>
+                            <span>El usuario será creado como activo</span>
                         </div>
                         <div class="info-item">
                             <i class="bi bi-calendar"></i>
@@ -265,10 +399,146 @@
                     </div>
                     
                     <div class="modal-actions">
-                        <button type="button" class="cancel-btn" id="cancelCreateAdmin">Cancelar</button>
+                        <button type="button" class="cancel-btn" id="cancelCreateUser">Cancelar</button>
                         <button type="submit" class="create-btn">
                             <i class="bi bi-person-plus-fill"></i>
-                            Crear Administrador
+                            <span id="createButtonText">Crear Usuario</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="editUserModal">
+        <div class="modal-content edit-user-modal">
+            <div class="modal-header">
+                <h3>Editar Usuario</h3>
+                <button class="close-btn" id="closeEditUserModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm" class="edit-user-form">
+                    <!-- User Type Display -->
+                    <div class="user-type-display">
+                        <label>Tipo de Usuario</label>
+                        <div class="user-type-badge-display" id="editUserTypeBadge">
+                            <i class="bi bi-person-fill"></i>
+                            <span id="editUserTypeText">Estudiante</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h4>Información Básica</h4>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="editNombre">Nombre Completo *</label>
+                                <input type="text" id="editNombre" required placeholder="Nombre completo">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="editUsuario">Usuario (Email) *</label>
+                                <input type="email" id="editUsuario" required placeholder="usuario@seamosgenios.com">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="editTelefono">Teléfono *</label>
+                                <input type="tel" id="editTelefono" required placeholder="Número de teléfono">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="editEmailRecuperacion">Correo de Recuperación *</label>
+                                <input type="email" id="editEmailRecuperacion" required placeholder="correo@ejemplo.com">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Student-specific fields -->
+                    <div class="form-section student-edit-fields">
+                        <h4>Información del Estudiante</h4>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="editInstitucion">Institución *</label>
+                                <input type="text" id="editInstitucion" placeholder="Nombre de la institución">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="editGrado">Grado *</label>
+                                <select id="editGrado">
+                                    <option value="">Seleccione Grado</option>
+                                    <option value="PRESABER">PRESABER</option>
+                                    <option value="REPITENTE">REPITENTE</option>
+                                    <option value="VALIDANTE">VALIDANTE</option>
+                                    <option value="SABER11">SABER11</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="editTipoDocumento">Tipo de Documento *</label>
+                                <select id="editTipoDocumento">
+                                    <option value="">Tipo de Documento</option>
+                                    <option value="CC">CC</option>
+                                    <option value="TI">TI</option>
+                                    <option value="CE">CE</option>
+                                    <option value="PA">PA</option>
+                                    <option value="NIT">NIT</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="editNumeroDocumento">Número de Documento *</label>
+                                <input type="text" id="editNumeroDocumento" placeholder="Número de documento">
+                            </div>
+                            
+                            <div class="input-group full-width">
+                                <label for="editDepartamento">Departamento *</label>
+                                <select id="editDepartamento">
+                                    <option value="">Seleccione Departamento</option>
+                                    <option value="Amazonas">Amazonas</option>
+                                    <option value="Antioquia">Antioquia</option>
+                                    <option value="Arauca">Arauca</option>
+                                    <option value="Atlántico">Atlántico</option>
+                                    <option value="Bolívar">Bolívar</option>
+                                    <option value="Boyacá">Boyacá</option>
+                                    <option value="Caldas">Caldas</option>
+                                    <option value="Caquetá">Caquetá</option>
+                                    <option value="Casanare">Casanare</option>
+                                    <option value="Cauca">Cauca</option>
+                                    <option value="Cesar">Cesar</option>
+                                    <option value="Chocó">Chocó</option>
+                                    <option value="Córdoba">Córdoba</option>
+                                    <option value="Cundinamarca">Cundinamarca</option>
+                                    <option value="Guainía">Guainía</option>
+                                    <option value="Guaviare">Guaviare</option>
+                                    <option value="Huila">Huila</option>
+                                    <option value="La Guajira">La Guajira</option>
+                                    <option value="Magdalena">Magdalena</option>
+                                    <option value="Meta">Meta</option>
+                                    <option value="Nariño">Nariño</option>
+                                    <option value="Norte de Santander">Norte de Santander</option>
+                                    <option value="Putumayo">Putumayo</option>
+                                    <option value="Quindío">Quindío</option>
+                                    <option value="Risaralda">Risaralda</option>
+                                    <option value="San Andrés y Providencia">San Andrés y Providencia</option>
+                                    <option value="Santander">Santander</option>
+                                    <option value="Sucre">Sucre</option>
+                                    <option value="Tolima">Tolima</option>
+                                    <option value="Valle del Cauca">Valle del Cauca</option>
+                                    <option value="Vaupés">Vaupés</option>
+                                    <option value="Vichada">Vichada</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="cancelEditUser">Cancelar</button>
+                        <button type="submit" class="save-btn">
+                            <i class="bi bi-save"></i>
+                            Guardar Cambios
                         </button>
                     </div>
                 </form>
@@ -316,6 +586,9 @@
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/usuarios.js"></script>
