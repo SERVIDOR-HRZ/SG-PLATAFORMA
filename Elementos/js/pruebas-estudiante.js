@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', function () {
     initializePanelModal();
     setupEventListeners();
     loadStudentTests();
+    
+    // Inicializar foto de perfil
+    if (typeof inicializarPerfilCompartido === 'function') {
+        inicializarPerfilCompartido();
+    }
 });
 
 let currentUser = null;

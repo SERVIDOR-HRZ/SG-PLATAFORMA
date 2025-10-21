@@ -16,13 +16,12 @@ document.addEventListener('DOMContentLoaded', function() {
         grado: document.getElementById('grado'),
         tipoDocumento: document.getElementById('tipoDocumento'),
         numeroDocumento: document.getElementById('numeroDocumento'),
-        departamento: document.getElementById('departamento'),
-        terms: document.getElementById('terms')
+        departamento: document.getElementById('departamento')
     };
 
-    // Add validation messages to all inputs except terms and selects
+    // Add validation messages to all inputs except selects
     Object.keys(inputs).forEach(key => {
-        if (key !== 'terms' && inputs[key].tagName !== 'SELECT') {
+        if (inputs[key].tagName !== 'SELECT') {
             const validationMsg = document.createElement('div');
             validationMsg.className = 'validation-message';
             inputs[key].parentNode.appendChild(validationMsg);
@@ -38,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const toggleBtn = document.createElement('button');
         toggleBtn.type = 'button';
         toggleBtn.className = 'password-toggle';
-        toggleBtn.innerHTML = '👁️';
+        toggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
         toggleBtn.setAttribute('aria-label', 'Mostrar contraseña');
         
         // Style the input group as relative
@@ -48,11 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleBtn.addEventListener('click', function() {
             if (input.type === 'password') {
                 input.type = 'text';
-                toggleBtn.innerHTML = '🙈';
+                toggleBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
                 toggleBtn.setAttribute('aria-label', 'Ocultar contraseña');
             } else {
                 input.type = 'password';
-                toggleBtn.innerHTML = '👁️';
+                toggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
                 toggleBtn.setAttribute('aria-label', 'Mostrar contraseña');
             }
         });
@@ -333,13 +332,6 @@ document.addEventListener('DOMContentLoaded', function() {
             validateSelect('tipoDocumento'),
             validateSelect('departamento')
         ];
-        
-        const isTermsAccepted = inputs.terms.checked;
-        
-        if (!isTermsAccepted) {
-            showMessage('Debes aceptar los términos y condiciones', 'error');
-            return;
-        }
         
         if (validations.includes(false)) {
             showMessage('Por favor corrige los errores en el formulario', 'error');

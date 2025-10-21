@@ -21,6 +21,12 @@ body {
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
 }
 
 .header-left {
@@ -67,6 +73,105 @@ body {
     justify-content: center;
     color: white;
     font-size: 1.2rem;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+.user-avatar-default {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff0000;
+}
+
+.user-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* User Dropdown */
+.user-dropdown {
+    position: relative;
+}
+
+.user-menu-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.user-menu-btn:hover {
+    color: #ff0000;
+    transform: scale(1.2);
+}
+
+.user-dropdown-menu {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+.user-dropdown-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.dropdown-item:hover {
+    background: #f5f5f5;
+    color: #ff0000;
+}
+
+.dropdown-item i {
+    font-size: 1.1rem;
+}
+
+.dropdown-divider {
+    margin: 5px 0;
+    border: none;
+    border-top: 1px solid #e0e0e0;
 }
 
 .logout-btn {
@@ -93,6 +198,7 @@ body {
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    margin-top: 80px; /* Espacio para el header fijo */
 }
 
 /* Welcome Section */

@@ -46,6 +46,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Configurar botón de descarga
     document.getElementById('btnDescargarPDF').addEventListener('click', descargarPDF);
+    
+    // Inicializar foto de perfil
+    if (typeof inicializarPerfilCompartido === 'function') {
+        inicializarPerfilCompartido();
+    }
 });
 
 // Verificar autenticación del estudiante

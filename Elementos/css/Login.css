@@ -245,14 +245,14 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     color: #666666;
     padding: 4px;
     border-radius: 4px;
     transition: all 0.3s ease;
     z-index: 10;
-    height: 24px;
-    width: 24px;
+    height: 28px;
+    width: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -266,6 +266,10 @@ body {
 .password-toggle:focus {
     outline: 2px solid rgba(255, 0, 0, 0.3);
     outline-offset: 2px;
+}
+
+.password-toggle i {
+    font-size: 18px;
 }
 
 /* Ajustar padding del input cuando hay botón toggle */

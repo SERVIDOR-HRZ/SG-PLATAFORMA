@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Prevent navigation away from test
     preventNavigation();
+    
+    // Inicializar foto de perfil
+    if (typeof inicializarPerfilCompartido === 'function') {
+        inicializarPerfilCompartido();
+    }
 });
 
 let currentUser = null;

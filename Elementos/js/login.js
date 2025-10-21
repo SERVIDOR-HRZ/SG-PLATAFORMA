@@ -124,17 +124,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Handle register link
-    registerLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'Secciones/registro.html';
-    });
+    // Handle register link (solo si existe)
+    if (registerLink) {
+        registerLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'Secciones/registro.html';
+        });
+    }
 
     // Handle forgot password link
-    forgotPasswordLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'Secciones/recuperar-password.html';
-    });
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'Secciones/recuperar-password.html';
+        });
+    }
 
     // Add password toggle functionality
     function addPasswordToggle(inputId) {
@@ -154,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const toggleBtn = document.createElement('button');
         toggleBtn.type = 'button';
         toggleBtn.className = 'password-toggle';
-        toggleBtn.innerHTML = '👁️';
+        toggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
         toggleBtn.setAttribute('aria-label', 'Mostrar contraseña');
         
         // Style the input group as relative
@@ -164,11 +168,11 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleBtn.addEventListener('click', function() {
             if (input.type === 'password') {
                 input.type = 'text';
-                toggleBtn.innerHTML = '🙈';
+                toggleBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
                 toggleBtn.setAttribute('aria-label', 'Ocultar contraseña');
             } else {
                 input.type = 'password';
-                toggleBtn.innerHTML = '👁️';
+                toggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
                 toggleBtn.setAttribute('aria-label', 'Mostrar contraseña');
             }
         });

@@ -879,4 +879,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Inicializar percentil general
     actualizarPercentilGeneral();
+
+    // Inicializar foto de perfil
+    if (typeof inicializarPerfilCompartido === 'function') {
+        inicializarPerfilCompartido();
+    }
 });

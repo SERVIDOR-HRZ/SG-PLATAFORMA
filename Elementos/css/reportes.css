@@ -92,6 +92,7 @@ body {
 .main-container {
     display: flex;
     min-height: calc(100vh - 80px);
+    margin-top: 80px; /* Espacio para el header fijo */
 }
 
 /* Panel de Control Lateral */

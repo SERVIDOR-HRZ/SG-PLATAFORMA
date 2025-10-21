@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load users
     loadUsers();
+    
+    // Inicializar foto de perfil
+    if (typeof inicializarPerfilCompartido === 'function') {
+        inicializarPerfilCompartido();
+    }
+    
+    // Initialize profile modal
+    initializeProfileModal();
 });
 
 let allUsers = [];
@@ -313,8 +321,16 @@ function renderUsers() {
                 </div>
             </td>
             <td>
-                <div class="user-name">
-                    ${user.nombre || 'No especificado'}
+                <div class="user-name-with-photo">
+                    <div class="table-user-avatar" onclick="openUserProfileModal('${user.id}')" title="Ver perfil completo">
+                        ${user.fotoPerfil ? 
+                            `<img src="${user.fotoPerfil}" alt="${user.nombre}" class="table-avatar-image">` : 
+                            `<div class="table-avatar-default">
+                                <i class="bi bi-person-fill"></i>
+                            </div>`
+                        }
+                    </div>
+                    <span class="user-name-text">${user.nombre || 'No especificado'}</span>
                 </div>
             </td>
             <td>
@@ -980,7 +996,233 @@ function handleExport(type) {
     showMessage(`Exportación completada: ${dataToExport.length} registros exportados`, 'success');
 }
 
+// Handle logout - Modal de confirmación
+async function handleLogout() {
+    // Usar la función compartida si existe, si no usar confirm nativo
+    if (typeof showLogoutModal === 'function') {
+        const confirmed = await showLogoutModal();
+        if (confirmed) {
+            sessionStorage.removeItem('currentUser');
+            window.location.href = '../index.html';
+        }
+    } else {
+        const confirmed = confirm('¿Estás seguro de que deseas cerrar sesión?');
+        if (confirmed) {
+            sessionStorage.removeItem('currentUser');
+            window.location.href = '../index.html';
+        }
+    }
+}
+
+// Open User Profile Modal
+async function openUserProfileModal(userId) {
+    try {
+        // Get user data from Firebase
+        const db = window.firebaseDB;
+        const userDoc = await db.collection('usuarios').doc(userId).get();
+        
+        if (!userDoc.exists) {
+            showMessage('Usuario no encontrado', 'error');
+            return;
+        }
+        
+        const userData = userDoc.data();
+        const profileModal = document.getElementById('userProfileModal');
+        
+        // Set user avatar
+        const avatarLarge = document.getElementById('profileAvatarLarge');
+        if (userData.fotoPerfil) {
+            avatarLarge.innerHTML = `<img src="${userData.fotoPerfil}" alt="${userData.nombre}">`;
+        } else {
+            avatarLarge.innerHTML = `<div class="avatar-default"><i class="bi bi-person-fill"></i></div>`;
+        }
+        
+        // Set user name and type
+        document.getElementById('profileUserName').textContent = userData.nombre || 'Usuario';
+        document.getElementById('profileUserType').textContent = userData.tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante';
+        
+        // Personal Information
+        const personalInfo = document.getElementById('profilePersonalInfo');
+        personalInfo.innerHTML = `
+            <div class="profile-info-item">
+                <div class="profile-info-label"><i class="bi bi-envelope"></i> Email</div>
+                <div class="profile-info-value">${userData.usuario || userData.email || 'No especificado'}</div>
+            </div>
+            <div class="profile-info-item">
+                <div class="profile-info-label"><i class="bi bi-telephone"></i> Teléfono</div>
+                <div class="profile-info-value">${userData.telefono || 'No especificado'}</div>
+            </div>
+            ${userData.fechaNacimiento ? `
+                <div class="profile-info-item">
+                    <div class="profile-info-label"><i class="bi bi-calendar-heart"></i> Fecha de Nacimiento</div>
+                    <div class="profile-info-value">${new Date(userData.fechaNacimiento).toLocaleDateString('es-ES')}</div>
+                </div>
+            ` : ''}
+            ${userData.tipoDocumento && userData.numeroDocumento ? `
+                <div class="profile-info-item">
+                    <div class="profile-info-label"><i class="bi bi-card-text"></i> Documento</div>
+                    <div class="profile-info-value">${userData.tipoDocumento} ${userData.numeroDocumento}</div>
+                </div>
+            ` : ''}
+            ${userData.institucion ? `
+                <div class="profile-info-item">
+                    <div class="profile-info-label"><i class="bi bi-building"></i> Institución</div>
+                    <div class="profile-info-value">${userData.institucion}</div>
+                </div>
+            ` : ''}
+            ${userData.grado ? `
+                <div class="profile-info-item">
+                    <div class="profile-info-label"><i class="bi bi-mortarboard"></i> Grado</div>
+                    <div class="profile-info-value">${userData.grado}</div>
+                </div>
+            ` : ''}
+            ${userData.departamento ? `
+                <div class="profile-info-item">
+                    <div class="profile-info-label"><i class="bi bi-geo-alt"></i> Departamento</div>
+                    <div class="profile-info-value">${userData.departamento}</div>
+                </div>
+            ` : ''}
+        `;
+        
+        // Public profile information
+        const perfilPublico = userData.perfilPublico || {};
+        
+        // Biography
+        const biographySection = document.getElementById('profileBiographySection');
+        const biographyDiv = document.getElementById('profileBiography');
+        if (perfilPublico.biografia && perfilPublico.biografia.trim()) {
+            biographySection.style.display = 'block';
+            biographyDiv.className = 'profile-biography';
+            biographyDiv.innerHTML = `<p>${perfilPublico.biografia}</p>`;
+        } else {
+            biographySection.style.display = 'none';
+        }
+        
+        // Professional Information
+        const professionalSection = document.getElementById('profileProfessionalSection');
+        const professionalInfo = document.getElementById('profileProfessionalInfo');
+        const hasProfessionalInfo = perfilPublico.profesion || perfilPublico.especialidad || 
+                                     perfilPublico.ciudad || perfilPublico.institucion;
+        
+        if (hasProfessionalInfo) {
+            professionalSection.style.display = 'block';
+            professionalInfo.innerHTML = `
+                ${perfilPublico.profesion ? `
+                    <div class="profile-info-item">
+                        <div class="profile-info-label"><i class="bi bi-briefcase"></i> Profesión</div>
+                        <div class="profile-info-value">${perfilPublico.profesion}</div>
+                    </div>
+                ` : ''}
+                ${perfilPublico.especialidad ? `
+                    <div class="profile-info-item">
+                        <div class="profile-info-label"><i class="bi bi-star"></i> Especialidad</div>
+                        <div class="profile-info-value">${perfilPublico.especialidad}</div>
+                    </div>
+                ` : ''}
+                ${perfilPublico.ciudad ? `
+                    <div class="profile-info-item">
+                        <div class="profile-info-label"><i class="bi bi-geo-alt"></i> Ciudad</div>
+                        <div class="profile-info-value">${perfilPublico.ciudad}</div>
+                    </div>
+                ` : ''}
+                ${perfilPublico.institucion ? `
+                    <div class="profile-info-item">
+                        <div class="profile-info-label"><i class="bi bi-building"></i> Institución</div>
+                        <div class="profile-info-value">${perfilPublico.institucion}</div>
+                    </div>
+                ` : ''}
+            `;
+        } else {
+            professionalSection.style.display = 'none';
+        }
+        
+        // Social Links
+        const socialSection = document.getElementById('profileSocialSection');
+        const socialLinks = document.getElementById('profileSocialLinks');
+        const redesSociales = perfilPublico.redesSociales || {};
+        const hasSocialLinks = redesSociales.linkedin || redesSociales.twitter || 
+                               redesSociales.instagram || redesSociales.facebook;
+        
+        if (hasSocialLinks) {
+            socialSection.style.display = 'block';
+            let socialHTML = '';
+            
+            if (redesSociales.linkedin) {
+                socialHTML += `
+                    <a href="${redesSociales.linkedin}" target="_blank" class="social-link linkedin">
+                        <i class="bi bi-linkedin"></i> LinkedIn
+                    </a>
+                `;
+            }
+            if (redesSociales.twitter) {
+                const twitterUrl = redesSociales.twitter.startsWith('@') 
+                    ? `https://twitter.com/${redesSociales.twitter.substring(1)}`
+                    : redesSociales.twitter;
+                socialHTML += `
+                    <a href="${twitterUrl}" target="_blank" class="social-link twitter">
+                        <i class="bi bi-twitter"></i> Twitter
+                    </a>
+                `;
+            }
+            if (redesSociales.instagram) {
+                const instagramUrl = redesSociales.instagram.startsWith('@')
+                    ? `https://instagram.com/${redesSociales.instagram.substring(1)}`
+                    : redesSociales.instagram;
+                socialHTML += `
+                    <a href="${instagramUrl}" target="_blank" class="social-link instagram">
+                        <i class="bi bi-instagram"></i> Instagram
+                    </a>
+                `;
+            }
+            if (redesSociales.facebook) {
+                socialHTML += `
+                    <a href="${redesSociales.facebook}" target="_blank" class="social-link facebook">
+                        <i class="bi bi-facebook"></i> Facebook
+                    </a>
+                `;
+            }
+            
+            socialLinks.innerHTML = socialHTML;
+        } else {
+            socialSection.style.display = 'none';
+        }
+        
+        // Show modal
+        profileModal.classList.add('show');
+        
+    } catch (error) {
+        console.error('Error loading user profile:', error);
+        showMessage('Error al cargar el perfil del usuario', 'error');
+    }
+}
+
+// Close User Profile Modal
+function closeUserProfileModal() {
+    const profileModal = document.getElementById('userProfileModal');
+    profileModal.classList.remove('show');
+}
+
+// Initialize Profile Modal Events
+function initializeProfileModal() {
+    const closeProfileBtn = document.getElementById('closeProfileModal');
+    const profileModal = document.getElementById('userProfileModal');
+    
+    if (closeProfileBtn) {
+        closeProfileBtn.addEventListener('click', closeUserProfileModal);
+    }
+    
+    // Close modal when clicking outside
+    if (profileModal) {
+        profileModal.addEventListener('click', function(e) {
+            if (e.target === profileModal) {
+                closeUserProfileModal();
+            }
+        });
+    }
+}
+
 // Global functions for onclick handlers
 window.openResetPasswordModal = openResetPasswordModal;
 window.toggleUserStatus = toggleUserStatus;
 window.openEditUserModal = openEditUserModal;
+window.openUserProfileModal = openUserProfileModal;

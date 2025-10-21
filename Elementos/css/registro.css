@@ -97,8 +97,7 @@
         grid-column: 2;
     }
     
-    /* Términos y botones ocupan toda la fila */
-    .terms-container,
+    /* Botones ocupan toda la fila */
     .register-btn,
     .form-links {
         grid-column: 1 / -1;
@@ -198,54 +197,6 @@
     box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1) !important;
 }
 
-.terms-container {
-    margin: 20px 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: flex-start;
-    cursor: pointer;
-    font-size: 14px;
-    color: #333333;
-    line-height: 1.4;
-}
-
-.checkbox-label input[type="checkbox"] {
-    display: none;
-}
-
-.checkbox-custom {
-    width: 18px;
-    height: 18px;
-    border: 2px solid #e0e0e0;
-    border-radius: 4px;
-    margin-right: 10px;
-    position: relative;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
-    border-color: #ff0000;
-    background: #ff0000;
-}
-
-.checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: bold;
-}
-
 .register-btn {
     background: linear-gradient(135deg, #ff0000, #cc0000);
     margin-bottom: 25px;
@@ -331,12 +282,6 @@
         font-size: 18px;
     }
     
-    /* Términos centrados */
-    .terms-container {
-        margin: 30px 0 20px 0;
-        justify-content: center;
-    }
-    
     /* Centrar enlaces en PC */
     .form-links {
         text-align: center;
@@ -373,14 +318,14 @@
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     color: #666666;
     padding: 4px;
     border-radius: 4px;
     transition: all 0.3s ease;
     z-index: 10;
-    height: 24px;
-    width: 24px;
+    height: 28px;
+    width: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -394,6 +339,10 @@
 .password-toggle:focus {
     outline: 2px solid rgba(255, 0, 0, 0.3);
     outline-offset: 2px;
+}
+
+.password-toggle i {
+    font-size: 18px;
 }
 
 /* Ajustar padding del input cuando hay botón toggle */
@@ -416,15 +365,6 @@
         margin-bottom: 20px; /* Restaurar margin en móvil */
     }
     
-    .terms-container {
-        margin: 15px 0;
-        justify-content: flex-start;
-    }
-    
-    .checkbox-label {
-        font-size: 13px;
-    }
-    
     .register-btn {
         margin-top: 10px;
         padding: 14px;
@@ -432,7 +372,7 @@
     }
     
     .password-toggle {
-        font-size: 14px;
+        font-size: 18px;
         right: 10px;
     }
 }

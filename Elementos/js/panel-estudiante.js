@@ -29,12 +29,64 @@ function checkAuthentication() {
 }
 
 // Load user information
-function loadUserInfo() {
+async function loadUserInfo() {
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
     
     if (currentUser.nombre) {
         document.getElementById('studentName').textContent = currentUser.nombre.toUpperCase();
     }
+
+    // Cargar foto de perfil desde Firebase
+    await cargarFotoPerfil(currentUser.id);
+}
+
+// Cargar foto de perfil del usuario
+async function cargarFotoPerfil(usuarioId) {
+    try {
+        // Esperar a que Firebase esté listo
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+
+        const db = window.firebaseDB;
+        const usuarioDoc = await db.collection('usuarios').doc(usuarioId).get();
+
+        if (usuarioDoc.exists) {
+            const datosUsuario = usuarioDoc.data();
+            
+            if (datosUsuario.fotoPerfil) {
+                mostrarFotoPerfil(datosUsuario.fotoPerfil);
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar foto de perfil:', error);
+    }
+}
+
+// Mostrar foto de perfil
+function mostrarFotoPerfil(urlFoto) {
+    const avatarDefault = document.getElementById('userAvatarDefault');
+    const avatarImage = document.getElementById('userAvatarImage');
+
+    if (avatarDefault && avatarImage) {
+        avatarDefault.style.display = 'none';
+        avatarImage.src = urlFoto;
+        avatarImage.style.display = 'block';
+    }
+}
+
+// Esperar a que Firebase esté listo
+function esperarFirebase() {
+    return new Promise(resolve => {
+        const verificar = () => {
+            if (window.firebaseDB) {
+                resolve();
+            } else {
+                setTimeout(verificar, 100);
+            }
+        };
+        verificar();
+    });
 }
 
 // Update time display
@@ -75,11 +127,44 @@ function setupEventListeners() {
         logoutBtn.addEventListener('click', handleLogout);
     }
     
+    // Logout button en dropdown
+    const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
+    if (logoutBtnDropdown) {
+        logoutBtnDropdown.addEventListener('click', handleLogout);
+    }
+    
     // Dashboard cards
     const dashboardCards = document.querySelectorAll('.dashboard-card');
     dashboardCards.forEach(card => {
         card.addEventListener('click', handleCardClick);
     });
+
+    // User menu dropdown
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdownMenu = document.getElementById('userDropdownMenu');
+    
+    if (userMenuBtn && userDropdownMenu) {
+        userMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('active');
+        });
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!userMenuBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                userDropdownMenu.classList.remove('active');
+            }
+        });
+    }
+
+    // Click en avatar para ir a configuración
+    const userAvatar = document.getElementById('userAvatarContainer');
+    if (userAvatar) {
+        userAvatar.addEventListener('click', function(e) {
+            e.stopPropagation();
+            window.location.href = 'panelUsuario.html';
+        });
+    }
 }
 
 // Initialize panel modal styles and functionality
