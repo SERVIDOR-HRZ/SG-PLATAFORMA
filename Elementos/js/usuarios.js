@@ -175,6 +175,33 @@ function initializePage() {
     elements.cancelEditUser.addEventListener('click', closeEditUserModal);
     elements.editUserForm.addEventListener('submit', handleEditUser);
     
+    // Delete User Modal events
+    const deleteUserBtn = document.getElementById('deleteUserBtn');
+    const deleteUserModal = document.getElementById('deleteUserModal');
+    const closeDeleteModal = document.getElementById('closeDeleteModal');
+    const cancelDeleteUser = document.getElementById('cancelDeleteUser');
+    const confirmDeleteUser = document.getElementById('confirmDeleteUser');
+    
+    if (deleteUserBtn) {
+        deleteUserBtn.addEventListener('click', openDeleteUserModal);
+    }
+    if (closeDeleteModal) {
+        closeDeleteModal.addEventListener('click', closeDeleteUserModal);
+    }
+    if (cancelDeleteUser) {
+        cancelDeleteUser.addEventListener('click', closeDeleteUserModal);
+    }
+    if (confirmDeleteUser) {
+        confirmDeleteUser.addEventListener('click', handleDeleteUser);
+    }
+    if (deleteUserModal) {
+        deleteUserModal.addEventListener('click', function(e) {
+            if (e.target === deleteUserModal) {
+                closeDeleteUserModal();
+            }
+        });
+    }
+    
     // Confirmation Modal events
     elements.closeConfirmationModal.addEventListener('click', closeConfirmationModal);
     elements.cancelConfirmation.addEventListener('click', closeConfirmationModal);
@@ -316,11 +343,6 @@ function renderUsers() {
         
         row.innerHTML = `
             <td>
-                <div class="user-email">
-                    <strong>${user.usuario || user.email}</strong>
-                </div>
-            </td>
-            <td>
                 <div class="user-name-with-photo">
                     <div class="table-user-avatar" onclick="openUserProfileModal('${user.id}')" title="Ver perfil completo">
                         ${user.fotoPerfil ? 
@@ -331,6 +353,11 @@ function renderUsers() {
                         }
                     </div>
                     <span class="user-name-text">${user.nombre || 'No especificado'}</span>
+                </div>
+            </td>
+            <td>
+                <div class="user-email">
+                    <strong>${user.usuario || user.email}</strong>
                 </div>
             </td>
             <td>
@@ -1218,6 +1245,72 @@ function initializeProfileModal() {
                 closeUserProfileModal();
             }
         });
+    }
+}
+
+// Open Delete User Modal
+function openDeleteUserModal() {
+    if (!currentUserForEdit) return;
+    
+    // Set user info
+    document.getElementById('deleteUserName').textContent = currentUserForEdit.nombre || 'Usuario';
+    document.getElementById('deleteUserEmail').textContent = currentUserForEdit.usuario || currentUserForEdit.email;
+    
+    // Clear security code input
+    document.getElementById('securityCodeInput').value = '';
+    
+    // Show delete modal
+    document.getElementById('deleteUserModal').classList.add('show');
+}
+
+// Close Delete User Modal
+function closeDeleteUserModal() {
+    document.getElementById('deleteUserModal').classList.remove('show');
+    document.getElementById('securityCodeInput').value = '';
+}
+
+// Handle Delete User
+async function handleDeleteUser() {
+    if (!currentUserForEdit) return;
+    
+    const securityCode = document.getElementById('securityCodeInput').value.trim();
+    const SECURITY_CODE = 'SG-PG-2025-OWH346OU6634OSDFS4YE431FSD325';
+    
+    // Validate security code
+    if (!securityCode) {
+        showMessage('Debes ingresar el código de seguridad', 'error');
+        return;
+    }
+    
+    if (securityCode !== SECURITY_CODE) {
+        showMessage('Código de seguridad incorrecto', 'error');
+        document.getElementById('securityCodeInput').value = '';
+        document.getElementById('securityCodeInput').focus();
+        return;
+    }
+    
+    try {
+        const confirmBtn = document.getElementById('confirmDeleteUser');
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Eliminando...';
+        
+        await waitForFirebase();
+        
+        // Delete user from Firestore
+        await window.firebaseDB.collection('usuarios').doc(currentUserForEdit.id).delete();
+        
+        showMessage('Usuario eliminado exitosamente', 'success');
+        closeDeleteUserModal();
+        closeEditUserModal();
+        loadUsers(); // Refresh the list
+        
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        showMessage('Error al eliminar el usuario', 'error');
+    } finally {
+        const confirmBtn = document.getElementById('confirmDeleteUser');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="bi bi-trash"></i><span>Eliminar Definitivamente</span>';
     }
 }
 

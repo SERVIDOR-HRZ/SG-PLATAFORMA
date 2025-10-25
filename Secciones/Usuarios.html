@@ -163,8 +163,8 @@
                 <table class="users-table" id="usersTable">
                     <thead>
                         <tr>
-                            <th>Usuario</th>
                             <th>Nombre</th>
+                            <th>Usuario</th>
                             <th>Rol</th>
                             <th>Estado</th>
                             <th>Teléfono</th>
@@ -553,11 +553,17 @@
                     </div>
                     
                     <div class="modal-actions">
-                        <button type="button" class="cancel-btn" id="cancelEditUser">Cancelar</button>
-                        <button type="submit" class="save-btn">
-                            <i class="bi bi-save"></i>
-                            Guardar Cambios
+                        <button type="button" class="delete-user-btn" id="deleteUserBtn">
+                            <i class="bi bi-trash"></i>
+                            Eliminar Usuario
                         </button>
+                        <div class="right-actions">
+                            <button type="button" class="cancel-btn" id="cancelEditUser">Cancelar</button>
+                            <button type="submit" class="save-btn">
+                                <i class="bi bi-save"></i>
+                                Guardar Cambios
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -592,6 +598,55 @@
                     <button type="button" class="confirm-btn" id="confirmAction">
                         <i class="bi bi-check-circle"></i>
                         <span id="confirmButtonText">Confirmar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete User Confirmation Modal -->
+    <div class="modal" id="deleteUserModal">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <h3>Eliminar Usuario</h3>
+                <button class="close-btn" id="closeDeleteModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon delete">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="confirmation-text">
+                        <p><strong>¡ADVERTENCIA!</strong></p>
+                        <p>Estás a punto de eliminar permanentemente este usuario.</p>
+                        <div class="user-info-confirmation" id="deleteUserInfoConfirmation">
+                            <strong id="deleteUserName">Usuario</strong>
+                            <span id="deleteUserEmail">email@example.com</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="security-code-section">
+                    <label for="securityCodeInput">
+                        <i class="bi bi-shield-lock"></i>
+                        Código de Seguridad
+                    </label>
+                    <input 
+                        type="text" 
+                        id="securityCodeInput" 
+                        placeholder="Ingresa el código de seguridad"
+                        autocomplete="off"
+                    >
+                    <p class="security-hint">Este código es necesario para confirmar la eliminación definitiva</p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancelDeleteUser">Cancelar</button>
+                    <button type="button" class="confirm-delete-btn" id="confirmDeleteUser">
+                        <i class="bi bi-trash"></i>
+                        <span>Eliminar Definitivamente</span>
                     </button>
                 </div>
             </div>
