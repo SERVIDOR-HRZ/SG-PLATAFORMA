@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add event listeners
     setupEventListeners();
+    
+    // Check for unread messages
+    checkUnreadMessages();
 });
 
 // Check if user is authenticated and is admin
@@ -403,6 +406,9 @@ function handleCardClick(event) {
             case 'reportes':
                 window.location.href = 'reporte.html';
                 break;
+            case 'chat':
+                window.location.href = 'Chat.html';
+                break;
             default:
                 console.log('Sección no encontrada:', section);
         }
@@ -449,3 +455,41 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+// Check unread messages
+async function checkUnreadMessages() {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        
+        if (!currentUser.id) return;
+        
+        // Listen for changes in conversations
+        db.collection('conversaciones')
+            .where('participantes', 'array-contains', currentUser.id)
+            .onSnapshot((snapshot) => {
+                let totalUnread = 0;
+                
+                snapshot.forEach((doc) => {
+                    const conversation = doc.data();
+                    const unreadCount = conversation.noLeidos?.[currentUser.id] || 0;
+                    totalUnread += unreadCount;
+                });
+                
+                // Update badge
+                const badge = document.getElementById('chatNotificationBadge');
+                if (badge) {
+                    if (totalUnread > 0) {
+                        badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            });
+        
+    } catch (error) {
+        console.error('Error checking unread messages:', error);
+    }
+}
