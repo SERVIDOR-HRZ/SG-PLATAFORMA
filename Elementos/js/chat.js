@@ -55,6 +55,8 @@ const elements = {
     imagePreviewContainer: document.getElementById('imagePreviewContainer'),
     previewImage: document.getElementById('previewImage'),
     removeImageBtn: document.getElementById('removeImageBtn'),
+    mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+    sidebarOverlay: document.getElementById('sidebarOverlay'),
     
     messageContainer: document.getElementById('messageContainer')
 };
@@ -81,7 +83,7 @@ function loadUserInfo() {
 
 // Initialize page
 function initializePage() {
-    // Back button
+    // Back button - Siempre vuelve al panel
     elements.backBtn.addEventListener('click', () => {
         const userType = currentUser.tipoUsuario;
         if (userType === 'admin') {
@@ -143,6 +145,12 @@ function initializePage() {
     
     // Paste image functionality
     elements.messageInput.addEventListener('paste', handlePasteImage);
+    
+    // Mobile menu button
+    elements.mobileMenuBtn.addEventListener('click', toggleSidebarMobile);
+    
+    // Sidebar overlay (cerrar al hacer clic fuera)
+    elements.sidebarOverlay.addEventListener('click', closeSidebarMobile);
 }
 
 // Wait for Firebase
@@ -343,9 +351,70 @@ async function openChat(contact) {
         // Update contacts list
         renderContacts();
         
+        // Ocultar sidebar en móviles
+        hideSidebarOnMobile();
+        
     } catch (error) {
         console.error('Error opening chat:', error);
         showMessage('Error al abrir el chat', 'error');
+    }
+}
+
+// Hide sidebar on mobile devices
+function hideSidebarOnMobile() {
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('contactsSidebar');
+        const overlay = elements.sidebarOverlay;
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// Show sidebar on mobile devices
+function showSidebarOnMobile() {
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('contactsSidebar');
+        const overlay = elements.sidebarOverlay;
+        const btnIcon = elements.mobileMenuBtn.querySelector('i');
+        
+        sidebar.classList.add('mobile-open');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Rotar flecha hacia la izquierda
+        if (btnIcon) {
+            btnIcon.style.transform = 'rotate(180deg)';
+        }
+    }
+}
+
+// Toggle sidebar visibility
+function toggleSidebarMobile() {
+    const sidebar = document.getElementById('contactsSidebar');
+    const overlay = elements.sidebarOverlay;
+    const btn = elements.mobileMenuBtn;
+    
+    if (sidebar.classList.contains('mobile-open')) {
+        closeSidebarMobile();
+    } else {
+        showSidebarOnMobile();
+    }
+}
+
+// Close sidebar mobile
+function closeSidebarMobile() {
+    const sidebar = document.getElementById('contactsSidebar');
+    const overlay = elements.sidebarOverlay;
+    const btnIcon = elements.mobileMenuBtn.querySelector('i');
+    
+    sidebar.classList.remove('mobile-open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    
+    // Rotar flecha hacia la derecha
+    if (btnIcon) {
+        btnIcon.style.transform = 'rotate(0deg)';
     }
 }
 
@@ -536,6 +605,9 @@ async function startChatWithUser(contact) {
         
         // Abrir el chat
         await openChat(contact);
+        
+        // Ocultar sidebar en móviles
+        hideSidebarOnMobile();
         
     } catch (error) {
         console.error('Error starting chat:', error);
