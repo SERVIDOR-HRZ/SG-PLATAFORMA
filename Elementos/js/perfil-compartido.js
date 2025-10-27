@@ -54,10 +54,12 @@ function esperarFirebaseCompartido() {
 function configurarMenuUsuarioCompartido() {
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdownMenu = document.getElementById('userDropdownMenu');
+    const userAvatar = document.getElementById('userAvatarContainer');
     
     if (userMenuBtn && userDropdownMenu) {
         userMenuBtn.addEventListener('click', function(e) {
             e.stopPropagation();
+            e.preventDefault();
             userDropdownMenu.classList.toggle('active');
         });
 
@@ -69,11 +71,16 @@ function configurarMenuUsuarioCompartido() {
         });
     }
 
-    // Click en avatar para ir a configuración
-    const userAvatar = document.getElementById('userAvatarContainer');
+    // Click en avatar para ir a configuración (pero no si se hace clic en el botón del menú)
     if (userAvatar) {
         userAvatar.addEventListener('click', function(e) {
-            e.stopPropagation();
+            // No redirigir si se hace clic en el botón del menú o en el dropdown
+            if (userMenuBtn && (e.target === userMenuBtn || userMenuBtn.contains(e.target))) {
+                return;
+            }
+            if (userDropdownMenu && userDropdownMenu.contains(e.target)) {
+                return;
+            }
             window.location.href = 'panelUsuario.html';
         });
     }

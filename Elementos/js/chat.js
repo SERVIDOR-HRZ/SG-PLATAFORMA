@@ -35,9 +35,6 @@ const elements = {
     searchContactsInput: document.getElementById('searchContactsInput'),
     backBtn: document.getElementById('backBtn'),
     logoutBtn: document.getElementById('logoutBtn'),
-    logoutBtnDropdown: document.getElementById('logoutBtnDropdown'),
-    userMenuBtn: document.getElementById('userMenuBtn'),
-    userDropdownMenu: document.getElementById('userDropdownMenu'),
     
     // Chat Area
     chatArea: document.getElementById('chatArea'),
@@ -95,19 +92,7 @@ function initializePage() {
     
     // Logout buttons
     elements.logoutBtn.addEventListener('click', handleLogout);
-    elements.logoutBtnDropdown.addEventListener('click', handleLogout);
-    
-    // User menu dropdown
-    elements.userMenuBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        elements.userDropdownMenu.classList.toggle('active');
-    });
-    
-    document.addEventListener('click', function(e) {
-        if (!elements.userMenuBtn.contains(e.target) && !elements.userDropdownMenu.contains(e.target)) {
-            elements.userDropdownMenu.classList.remove('active');
-        }
-    });
+    // El logout del dropdown se maneja en perfil-compartido.js
     
     // Search contacts
     elements.searchContactsInput.addEventListener('input', handleSearchContacts);

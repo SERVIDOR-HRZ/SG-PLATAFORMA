@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     inicializarPanelModal();
     verificarAutenticacion();
     configurarEventos();
+    configurarEventosPestanas();
+    configurarEventosPlaylists();
     cargarInformacionUsuario();
 });
 
@@ -11,6 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
 let usuarioActual = null;
 const IMGBB_API_KEY = '0d447185d3dc7cba69ee1c6df144f146';
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
+let playlistActual = null;
+let cancionesTemporales = [];
+let modoEdicion = false;
 
 // Verificar autenticación
 function verificarAutenticacion() {
@@ -800,6 +805,461 @@ function cerrarModal(overlay) {
     }, 300);
 }
 
-// Hacer función global
+// ========================================
+// GESTIÓN DE PESTAÑAS
+// ========================================
+
+function configurarEventosPestanas() {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.getAttribute('data-tab');
+            cambiarPestana(tabName);
+        });
+    });
+}
+
+function cambiarPestana(tabName) {
+    // Actualizar botones
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    
+    // Actualizar contenido
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.querySelector(`[data-content="${tabName}"]`).classList.add('active');
+    
+    // Cargar datos según la pestaña
+    if (tabName === 'playlists') {
+        cargarPlaylists();
+    }
+}
+
+// ========================================
+// GESTIÓN DE PLAYLISTS
+// ========================================
+
+function configurarEventosPlaylists() {
+    // Botón crear playlist
+    document.getElementById('crearPlaylistBtn').addEventListener('click', abrirModalNuevaPlaylist);
+    
+    // Modal de playlist
+    document.getElementById('closePlaylistModal').addEventListener('click', cerrarModalPlaylist);
+    document.getElementById('cancelarPlaylistBtn').addEventListener('click', cerrarModalPlaylist);
+    document.getElementById('guardarPlaylistBtn').addEventListener('click', guardarPlaylist);
+    
+    // Agregar canción
+    document.getElementById('agregarCancionBtn').addEventListener('click', mostrarFormularioCancion);
+    document.getElementById('confirmarAgregarCancion').addEventListener('click', agregarCancion);
+    document.getElementById('cancelarAgregarCancion').addEventListener('click', ocultarFormularioCancion);
+    
+    // Modal de confirmación
+    document.getElementById('cancelarEliminarBtn').addEventListener('click', cerrarModalConfirmar);
+}
+
+async function cargarPlaylists() {
+    const container = document.getElementById('playlistsLista');
+    
+    try {
+        const db = window.firebaseDB;
+        // Consulta sin orderBy para evitar necesidad de índice compuesto
+        const playlistsSnapshot = await db.collection('playlists')
+            .where('usuarioId', '==', usuarioActual.id)
+            .get();
+        
+        if (playlistsSnapshot.empty) {
+            container.innerHTML = `
+                <div class="playlists-vacio">
+                    <i class="bi bi-music-note-list"></i>
+                    <h3>No tienes playlists creadas</h3>
+                    <p>Crea tu primera playlist personalizada de YouTube para escuchar mientras estudias</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Ordenar las playlists en el cliente por fecha de creación (más reciente primero)
+        const playlists = [];
+        playlistsSnapshot.forEach(doc => {
+            playlists.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+        
+        // Ordenar por fecha de creación descendente
+        playlists.sort((a, b) => {
+            const fechaA = a.fechaCreacion ? a.fechaCreacion.toMillis() : 0;
+            const fechaB = b.fechaCreacion ? b.fechaCreacion.toMillis() : 0;
+            return fechaB - fechaA;
+        });
+        
+        container.innerHTML = '';
+        
+        playlists.forEach(playlist => {
+            const playlistCard = crearTarjetaPlaylist(playlist.id, playlist);
+            container.appendChild(playlistCard);
+        });
+        
+    } catch (error) {
+        console.error('Error al cargar playlists:', error);
+        container.innerHTML = `
+            <div class="playlists-vacio">
+                <i class="bi bi-exclamation-triangle"></i>
+                <h3>Error al cargar playlists</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+function crearTarjetaPlaylist(id, playlist) {
+    const div = document.createElement('div');
+    div.className = 'playlist-card';
+    div.innerHTML = `
+        <div class="playlist-header">
+            <div class="playlist-icon">
+                <i class="bi bi-music-note-beamed"></i>
+            </div>
+            <div class="playlist-info">
+                <h3 class="playlist-nombre">${playlist.nombre}</h3>
+                <p class="playlist-descripcion">${playlist.descripcion || 'Sin descripción'}</p>
+            </div>
+        </div>
+        <div class="playlist-meta">
+            <div class="playlist-stats">
+                <div class="playlist-stat">
+                    <i class="bi bi-list-music"></i>
+                    <span>${playlist.canciones ? playlist.canciones.length : 0} canciones</span>
+                </div>
+            </div>
+            <div class="playlist-acciones">
+                <button class="btn-icon btn-play" title="Reproducir" data-id="${id}">
+                    <i class="bi bi-play-fill"></i>
+                </button>
+                <button class="btn-icon btn-edit" title="Editar" data-id="${id}">
+                    <i class="bi bi-pencil-fill"></i>
+                </button>
+                <button class="btn-icon btn-delete" title="Eliminar" data-id="${id}">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Event listeners
+    div.querySelector('.btn-play').addEventListener('click', (e) => {
+        e.stopPropagation();
+        reproducirPlaylist(id, playlist);
+    });
+    
+    div.querySelector('.btn-edit').addEventListener('click', (e) => {
+        e.stopPropagation();
+        editarPlaylist(id, playlist);
+    });
+    
+    div.querySelector('.btn-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        confirmarEliminarPlaylist(id, playlist.nombre);
+    });
+    
+    return div;
+}
+
+function abrirModalNuevaPlaylist() {
+    modoEdicion = false;
+    playlistActual = null;
+    cancionesTemporales = [];
+    
+    document.getElementById('playlistModalTitulo').textContent = 'Crear Nueva Playlist';
+    document.getElementById('playlistNombre').value = '';
+    document.getElementById('playlistDescripcion').value = '';
+    
+    actualizarListaCanciones();
+    ocultarFormularioCancion();
+    
+    document.getElementById('playlistModal').classList.add('active');
+}
+
+async function editarPlaylist(id, playlist) {
+    modoEdicion = true;
+    playlistActual = { id, ...playlist };
+    cancionesTemporales = [...(playlist.canciones || [])];
+    
+    document.getElementById('playlistModalTitulo').textContent = 'Editar Playlist';
+    document.getElementById('playlistNombre').value = playlist.nombre;
+    document.getElementById('playlistDescripcion').value = playlist.descripcion || '';
+    
+    actualizarListaCanciones();
+    ocultarFormularioCancion();
+    
+    document.getElementById('playlistModal').classList.add('active');
+}
+
+function cerrarModalPlaylist() {
+    document.getElementById('playlistModal').classList.remove('active');
+    playlistActual = null;
+    cancionesTemporales = [];
+    modoEdicion = false;
+}
+
+function mostrarFormularioCancion() {
+    document.getElementById('agregarCancionForm').style.display = 'block';
+    document.getElementById('videoUrl').value = '';
+    document.getElementById('videoUrl').focus();
+}
+
+function ocultarFormularioCancion() {
+    document.getElementById('agregarCancionForm').style.display = 'none';
+    document.getElementById('videoUrl').value = '';
+}
+
+function agregarCancion() {
+    const urlInput = document.getElementById('videoUrl');
+    const url = urlInput.value.trim();
+    
+    if (!url) {
+        mostrarNotificacion('Por favor ingresa una URL de YouTube', 'advertencia');
+        return;
+    }
+    
+    // Extraer ID del video
+    const videoId = extraerVideoId(url);
+    
+    if (!videoId) {
+        mostrarNotificacion('URL de YouTube inválida', 'error');
+        return;
+    }
+    
+    // Verificar si ya existe
+    if (cancionesTemporales.some(c => c.id === videoId)) {
+        mostrarNotificacion('Esta canción ya está en la playlist', 'advertencia');
+        return;
+    }
+    
+    // Agregar canción
+    cancionesTemporales.push({
+        id: videoId,
+        title: `Video de YouTube ${videoId}`,
+        url: `https://www.youtube.com/watch?v=${videoId}`
+    });
+    
+    actualizarListaCanciones();
+    ocultarFormularioCancion();
+    mostrarNotificacion('Canción agregada correctamente', 'exito');
+}
+
+function extraerVideoId(url) {
+    // Patrones comunes de URLs de YouTube
+    const patterns = [
+        // https://www.youtube.com/watch?v=VIDEO_ID
+        /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+        // https://youtu.be/VIDEO_ID
+        /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+        // https://www.youtube.com/embed/VIDEO_ID
+        /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+        // https://www.youtube.com/v/VIDEO_ID
+        /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+        // Solo el ID de 11 caracteres
+        /^([a-zA-Z0-9_-]{11})$/
+    ];
+    
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) {
+            return match[1];
+        }
+    }
+    
+    return null;
+}
+
+function actualizarListaCanciones() {
+    const container = document.getElementById('cancionesLista');
+    
+    if (cancionesTemporales.length === 0) {
+        container.innerHTML = `
+            <div class="lista-vacia">
+                <i class="bi bi-music-note"></i>
+                <p>No hay canciones en esta playlist</p>
+                <small>Agrega canciones usando el botón de arriba</small>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    cancionesTemporales.forEach((cancion, index) => {
+        const item = crearItemCancion(cancion, index);
+        container.appendChild(item);
+    });
+}
+
+function crearItemCancion(cancion, index) {
+    const div = document.createElement('div');
+    div.className = 'cancion-item';
+    div.innerHTML = `
+        <i class="bi bi-grip-vertical cancion-handle"></i>
+        <div class="cancion-thumbnail">
+            <i class="bi bi-youtube"></i>
+        </div>
+        <div class="cancion-info">
+            <div class="cancion-titulo">${cancion.title}</div>
+            <div class="cancion-id">ID: ${cancion.id}</div>
+        </div>
+        <div class="cancion-acciones">
+            <button class="btn-icon btn-delete" title="Eliminar">
+                <i class="bi bi-trash-fill"></i>
+            </button>
+        </div>
+    `;
+    
+    div.querySelector('.btn-delete').addEventListener('click', () => {
+        eliminarCancion(index);
+    });
+    
+    return div;
+}
+
+function eliminarCancion(index) {
+    cancionesTemporales.splice(index, 1);
+    actualizarListaCanciones();
+    mostrarNotificacion('Canción eliminada', 'exito');
+}
+
+async function guardarPlaylist() {
+    const nombre = document.getElementById('playlistNombre').value.trim();
+    const descripcion = document.getElementById('playlistDescripcion').value.trim();
+    
+    if (!nombre) {
+        mostrarNotificacion('El nombre de la playlist es requerido', 'advertencia');
+        return;
+    }
+    
+    if (cancionesTemporales.length === 0) {
+        mostrarNotificacion('Debes agregar al menos una canción', 'advertencia');
+        return;
+    }
+    
+    try {
+        mostrarCargando('Guardando playlist...');
+        
+        const db = window.firebaseDB;
+        const playlistData = {
+            nombre: nombre,
+            descripcion: descripcion,
+            canciones: cancionesTemporales,
+            usuarioId: usuarioActual.id,
+            fechaActualizacion: firebase.firestore.Timestamp.now()
+        };
+        
+        if (modoEdicion && playlistActual) {
+            // Actualizar playlist existente
+            await db.collection('playlists').doc(playlistActual.id).update(playlistData);
+            mostrarNotificacion('Playlist actualizada correctamente', 'exito');
+        } else {
+            // Crear nueva playlist
+            playlistData.fechaCreacion = firebase.firestore.Timestamp.now();
+            await db.collection('playlists').add(playlistData);
+            mostrarNotificacion('Playlist creada correctamente', 'exito');
+        }
+        
+        cerrarModalPlaylist();
+        cargarPlaylists();
+        ocultarCargando();
+        
+    } catch (error) {
+        console.error('Error al guardar playlist:', error);
+        mostrarNotificacion('Error al guardar la playlist', 'error');
+        ocultarCargando();
+    }
+}
+
+function confirmarEliminarPlaylist(id, nombre) {
+    document.getElementById('confirmarEliminarMensaje').textContent = 
+        `¿Estás seguro de eliminar la playlist "${nombre}"?`;
+    
+    document.getElementById('confirmarEliminarModal').classList.add('active');
+    
+    document.getElementById('confirmarEliminarBtn').onclick = () => {
+        eliminarPlaylist(id);
+        cerrarModalConfirmar();
+    };
+}
+
+async function eliminarPlaylist(id) {
+    try {
+        mostrarCargando('Eliminando playlist...');
+        
+        const db = window.firebaseDB;
+        await db.collection('playlists').doc(id).delete();
+        
+        mostrarNotificacion('Playlist eliminada correctamente', 'exito');
+        cargarPlaylists();
+        ocultarCargando();
+        
+    } catch (error) {
+        console.error('Error al eliminar playlist:', error);
+        mostrarNotificacion('Error al eliminar la playlist', 'error');
+        ocultarCargando();
+    }
+}
+
+function cerrarModalConfirmar() {
+    document.getElementById('confirmarEliminarModal').classList.remove('active');
+}
+
+function reproducirPlaylist(id, playlist) {
+    if (!playlist.canciones || playlist.canciones.length === 0) {
+        mostrarNotificacion('Esta playlist no tiene canciones', 'advertencia');
+        return;
+    }
+    
+    // Guardar la playlist en sessionStorage para que el reproductor pueda acceder
+    sessionStorage.setItem('playlistActiva', JSON.stringify({
+        id: id,
+        nombre: playlist.nombre,
+        canciones: playlist.canciones
+    }));
+    
+    // Mostrar el mini reproductor
+    if (window.mostrarReproductor) {
+        window.mostrarReproductor();
+    }
+    
+    // Esperar a que el reproductor esté listo
+    const esperarReproductor = setInterval(() => {
+        if (window.musicPlayer) {
+            clearInterval(esperarReproductor);
+            
+            // Cambiar a la playlist seleccionada
+            window.musicPlayer.cambiarPlaylist(playlist.canciones);
+            
+            // Auto-reproducir después de un momento
+            setTimeout(() => {
+                if (window.musicPlayer.isPlayerReady && !window.musicPlayer.isPlaying) {
+                    window.musicPlayer.togglePlayPause();
+                }
+            }, 1500);
+            
+            mostrarNotificacion(`Reproduciendo: ${playlist.nombre}`, 'exito');
+        }
+    }, 100);
+    
+    // Timeout de seguridad
+    setTimeout(() => {
+        clearInterval(esperarReproductor);
+        if (!window.musicPlayer) {
+            mostrarNotificacion('Error al cargar el reproductor de música', 'error');
+        }
+    }, 5000);
+}
+
+// Hacer funciones globales
 window.cerrarNotificacion = cerrarNotificacion;
 

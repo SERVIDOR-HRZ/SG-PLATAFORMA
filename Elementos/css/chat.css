@@ -154,7 +154,7 @@ body {
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s ease;
-    z-index: 9999;
+    z-index: 10001;
 }
 
 .user-dropdown-menu.active {

@@ -42,9 +42,27 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="configuracion-container">
-            <!-- Sección de Foto de Perfil -->
-            <div class="perfil-seccion">
-                <h2>Foto de Perfil</h2>
+            <!-- Navegación por pestañas -->
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="perfil">
+                    <i class="bi bi-person-circle"></i>
+                    Perfil
+                </button>
+                <button class="tab-btn" data-tab="informacion">
+                    <i class="bi bi-file-person"></i>
+                    Información
+                </button>
+                <button class="tab-btn" data-tab="seguridad">
+                    <i class="bi bi-shield-lock"></i>
+                    Seguridad
+                </button>
+            </div>
+
+            <!-- Tab Content: Perfil -->
+            <div class="tab-content active" data-content="perfil">
+                <!-- Sección de Foto de Perfil -->
+                <div class="perfil-seccion">
+                    <h2>Foto de Perfil</h2>
                 <div class="foto-perfil-container">
                     <div class="foto-perfil-preview" id="fotoPerfilPreview">
                         <div class="foto-avatar" id="fotoAvatar">
@@ -68,9 +86,12 @@
                     </div>
                 </div>
             </div>
+            </div>
 
-            <!-- Sección de Información Personal -->
-            <div class="informacion-seccion">
+            <!-- Tab Content: Información -->
+            <div class="tab-content" data-content="informacion">
+                <!-- Sección de Información Personal -->
+                <div class="informacion-seccion">
                 <h2>Información Personal</h2>
                 <form class="formulario-usuario" id="formularioUsuario">
                     <div class="form-grupo">
@@ -250,8 +271,13 @@
                     </div>
                 </form>
             </div>
+            </div>
 
-            <!-- Sección de Cambio de Contraseña -->
+
+
+            <!-- Tab Content: Seguridad -->
+            <div class="tab-content" data-content="seguridad">
+                <!-- Sección de Cambio de Contraseña -->
             <div class="password-seccion">
                 <h2>Cambiar Contraseña</h2>
                 <form class="formulario-password" id="formularioPassword">
@@ -303,14 +329,42 @@
                     </div>
                 </form>
             </div>
+            </div>
         </div>
     </main>
+
+
+
+    <!-- Modal: Confirmar Eliminación -->
+    <div class="modal-overlay" id="confirmarEliminarModal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-header">
+                <h3>Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #ffc107; margin-bottom: 20px;"></i>
+                <p id="confirmarEliminarMensaje">¿Estás seguro de eliminar este elemento?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelarEliminarBtn">
+                    <i class="bi bi-x-lg"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmarEliminarBtn">
+                    <i class="bi bi-trash"></i>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay" style="display: none;">
         <div class="loading-spinner"></div>
         <p class="loading-texto">Cargando...</p>
     </div>
+
+
 
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>

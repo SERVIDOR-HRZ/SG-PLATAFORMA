@@ -216,6 +216,128 @@ function initializePanelModal() {
     document.head.insertAdjacentHTML('beforeend', modalStyles);
 }
 
+// Show delete video modal
+function showDeleteVideoModal() {
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="panel-modal-overlay" id="deleteVideoModalOverlay">
+                <div class="panel-modal">
+                    <div class="panel-modal-body">
+                        <i class="bi bi-exclamation-triangle panel-modal-icon" style="color: #ffc107;"></i>
+                        <p class="panel-modal-message">¿Estás seguro de que deseas eliminar este video?</p>
+                        <div class="panel-modal-footer">
+                            <button class="panel-modal-btn panel-btn-cancel" id="deleteVideoModalCancel">
+                                <i class="bi bi-x-lg"></i>
+                                Cancelar
+                            </button>
+                            <button class="panel-modal-btn panel-btn-confirm" id="deleteVideoModalConfirm">
+                                <i class="bi bi-trash"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const overlay = document.getElementById('deleteVideoModalOverlay');
+        const confirmBtn = document.getElementById('deleteVideoModalConfirm');
+        const cancelBtn = document.getElementById('deleteVideoModalCancel');
+        
+        setTimeout(() => overlay.classList.add('active'), 10);
+
+        confirmBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(true);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(false);
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal(overlay);
+                resolve(false);
+            }
+        });
+
+        // Handle ESC key
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(overlay);
+                resolve(false);
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+    });
+}
+
+// Show delete question modal
+function showDeleteQuestionModal() {
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="panel-modal-overlay" id="deleteQuestionModalOverlay">
+                <div class="panel-modal">
+                    <div class="panel-modal-body">
+                        <i class="bi bi-exclamation-triangle panel-modal-icon" style="color: #dc3545;"></i>
+                        <p class="panel-modal-message">¿Estás seguro de que deseas eliminar esta pregunta?</p>
+                        <div class="panel-modal-footer">
+                            <button class="panel-modal-btn panel-btn-cancel" id="deleteQuestionModalCancel">
+                                <i class="bi bi-x-lg"></i>
+                                Cancelar
+                            </button>
+                            <button class="panel-modal-btn panel-btn-confirm" id="deleteQuestionModalConfirm">
+                                <i class="bi bi-trash"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const overlay = document.getElementById('deleteQuestionModalOverlay');
+        const confirmBtn = document.getElementById('deleteQuestionModalConfirm');
+        const cancelBtn = document.getElementById('deleteQuestionModalCancel');
+        
+        setTimeout(() => overlay.classList.add('active'), 10);
+
+        confirmBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(true);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(false);
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal(overlay);
+                resolve(false);
+            }
+        });
+
+        // Handle ESC key
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(overlay);
+                resolve(false);
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+    });
+}
+
 // Show logout modal
 function showLogoutModal() {
     return new Promise((resolve) => {
@@ -475,7 +597,7 @@ function createQuestionElement(question, index) {
 
     div.innerHTML = `
         <div class="question-header">
-            <div class="question-number">${index + 1}</div>
+            <div class="question-number">Pregunta ${index + 1}</div>
             <div class="question-type">Selección Múltiple</div>
             <div class="question-actions">
                 <button class="btn btn-sm btn-danger" onclick="deleteQuestion(${index})">
@@ -648,11 +770,14 @@ function changeQuestionType(index) {
 }
 
 // Delete question
-function deleteQuestion(index) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta pregunta?')) {
+async function deleteQuestion(index) {
+    const confirmed = await showDeleteQuestionModal();
+    
+    if (confirmed) {
         const blockKey = `bloque${currentEditingBlock}`;
         testBlocks[blockKey][currentEditingSubject].questions.splice(index, 1);
         loadQuestionsInModal();
+        showNotification('Pregunta eliminada correctamente', 'success');
     }
 }
 
@@ -1032,7 +1157,7 @@ function createQuestionVideosHTML(videos, questionIndex) {
     return html;
 }
 
-// Extract YouTube video ID from URL
+// Extract YouTube video ID from URL and convert to embed format
 function extractYouTubeVideoId(url) {
     const patterns = [
         /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
@@ -1046,6 +1171,23 @@ function extractYouTubeVideoId(url) {
         }
     }
     return null;
+}
+
+// Convert YouTube URL to embed format automatically
+function convertToYouTubeEmbed(url) {
+    if (!url) return url;
+    
+    // If it's already an embed URL, return as is
+    if (url.includes('youtube.com/embed/')) {
+        return url;
+    }
+    
+    const videoId = extractYouTubeVideoId(url);
+    if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    return url;
 }
 
 // Add video to question
@@ -1063,8 +1205,8 @@ function addVideoToQuestion(questionIndex) {
                 <div class="modal-body">
                     <div class="video-input-container">
                         <label for="videoUrl">URL del video de YouTube:</label>
-                        <input type="url" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." class="form-control">
-                        <small class="form-text">Pega aquí el enlace del video de YouTube</small>
+                        <input type="url" id="videoUrl" placeholder="https://www.youtube.com/watch?v=... o https://www.youtube.com/embed/..." class="form-control">
+                        <small class="form-text">Pega aquí el enlace del video de YouTube. Se convertirá automáticamente al formato embed.</small>
                         
                         <div class="video-preview-container" id="videoPreviewContainer" style="display: none;">
                             <h5>Vista previa:</h5>
@@ -1084,9 +1226,21 @@ function addVideoToQuestion(questionIndex) {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     document.getElementById('videoModal').classList.add('active');
 
-    // Add event listener for URL input
+    // Add event listener for URL input with auto-conversion
     document.getElementById('videoUrl').addEventListener('input', function() {
-        const url = this.value.trim();
+        let url = this.value.trim();
+        
+        // Auto-convert to embed format if it's a valid YouTube URL
+        if (url && !url.includes('youtube.com/embed/')) {
+            const videoId = extractYouTubeVideoId(url);
+            if (videoId) {
+                const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                this.value = embedUrl;
+                url = embedUrl;
+                showNotification('URL convertida automáticamente al formato embed', 'info');
+            }
+        }
+        
         const videoId = extractYouTubeVideoId(url);
         const confirmBtn = document.getElementById('confirmVideoBtn');
         
@@ -1101,7 +1255,12 @@ function addVideoToQuestion(questionIndex) {
 
 // Preview video
 function previewVideo() {
-    const url = document.getElementById('videoUrl').value.trim();
+    let url = document.getElementById('videoUrl').value.trim();
+    
+    // Auto-convert to embed format if needed
+    url = convertToYouTubeEmbed(url);
+    document.getElementById('videoUrl').value = url;
+    
     const videoId = extractYouTubeVideoId(url);
     
     if (!videoId) {
@@ -1114,11 +1273,17 @@ function previewVideo() {
     
     previewIframe.src = `https://www.youtube.com/embed/${videoId}`;
     previewContainer.style.display = 'block';
+    
+    showNotification('Vista previa cargada', 'success');
 }
 
 // Confirm add video
 function confirmAddVideo(questionIndex) {
-    const url = document.getElementById('videoUrl').value.trim();
+    let url = document.getElementById('videoUrl').value.trim();
+    
+    // Auto-convert to embed format if needed
+    url = convertToYouTubeEmbed(url);
+    
     const videoId = extractYouTubeVideoId(url);
     
     if (!videoId) {
@@ -1163,8 +1328,10 @@ function hideVideoModal() {
 }
 
 // Remove video from question
-function removeVideoFromQuestion(questionIndex, videoIndex) {
-    if (confirm('¿Estás seguro de que deseas eliminar este video?')) {
+async function removeVideoFromQuestion(questionIndex, videoIndex) {
+    const confirmed = await showDeleteVideoModal();
+    
+    if (confirmed) {
         const blockKey = `bloque${currentEditingBlock}`;
         const question = testBlocks[blockKey][currentEditingSubject].questions[questionIndex];
         
@@ -1229,20 +1396,6 @@ async function addImageToOption(questionIndex, optionIndex) {
     };
 
     input.click();
-}
-
-// Remove image from question
-function removeImageFromQuestion(questionIndex, imageIndex) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
-        const blockKey = `bloque${currentEditingBlock}`;
-        const question = testBlocks[blockKey][currentEditingSubject].questions[questionIndex];
-        
-        if (question.images && question.images[imageIndex]) {
-            question.images.splice(imageIndex, 1);
-            loadQuestionsInModal();
-            showNotification('Imagen eliminada correctamente', 'success');
-        }
-    }
 }
 
 // Show delete image confirmation modal
@@ -1410,3 +1563,11 @@ window.removeImageFromOption = removeImageFromOption;
 window.showImageModal = showImageModal;
 window.hideImageModal = hideImageModal;
 window.showDeleteImageModal = showDeleteImageModal;
+window.addVideoToQuestion = addVideoToQuestion;
+window.removeVideoFromQuestion = removeVideoFromQuestion;
+window.previewVideo = previewVideo;
+window.confirmAddVideo = confirmAddVideo;
+window.hideVideoModal = hideVideoModal;
+window.convertToYouTubeEmbed = convertToYouTubeEmbed;
+window.showDeleteQuestionModal = showDeleteQuestionModal;
+window.showDeleteVideoModal = showDeleteVideoModal;
