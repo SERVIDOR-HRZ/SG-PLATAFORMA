@@ -728,8 +728,17 @@ function showCurrentQuestion() {
     }
 
     const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
-    const question = subjectQuestions[currentQuestionIndex];
+    const currentItem = subjectQuestions[currentQuestionIndex];
     const config = subjectConfig[currentSubject];
+
+    // Contar solo preguntas reales para el selector
+    const realQuestions = subjectQuestions.filter(q => 
+        q.type === 'multiple' || q.type === 'short' || q.type === 'open'
+    );
+    const realQuestionNumber = getRealQuestionNumber(currentQuestionIndex);
+
+    // Recopilar títulos y párrafos anteriores a la pregunta actual
+    const contextElements = getContextElements(currentQuestionIndex);
 
     questionContainer.innerHTML = `
         <div class="question-layout">
@@ -742,41 +751,24 @@ function showCurrentQuestion() {
                         <span>${config.name}</span>
                     </div>
                     <div class="selector-info">
-                        ${subjectQuestions.length} pregunta${subjectQuestions.length !== 1 ? 's' : ''}
+                        ${realQuestions.length} pregunta${realQuestions.length !== 1 ? 's' : ''}
                     </div>
                 </div>
                 <div class="questions-grid">
-                    ${createQuestionsSelector(subjectQuestions.length)}
+                    ${createQuestionsSelector(subjectQuestions)}
                 </div>
             </div>
             
             <div class="question-content active">
-                <div class="question-header">
-                    <div class="question-subject">
-                        <div class="subject-icon ${currentSubject}">
-                            <i class="${config.icon}"></i>
-                        </div>
-                        ${config.name}
-                    </div>
-                    <div class="question-number-badge">
-                        Pregunta ${currentQuestionIndex + 1} de ${subjectQuestions.length}
-                    </div>
-                </div>
-                
-                ${createQuestionMediaHTML(question.images || [], question.videos || [])}
-                
-                <div class="question-text">
-                    ${question.text || 'Pregunta sin texto'}
-                </div>
-                
-                ${question.type === 'multiple' ? createMultipleChoiceHTML(question) : createOpenAnswerHTML(question)}
+                ${renderCurrentItem(currentItem, contextElements, realQuestionNumber, config)}
             </div>
         </div>
     `;
 
     // Update navigation info
-    document.getElementById('questionNumber').textContent = currentQuestionIndex + 1;
-    document.getElementById('totalQuestions').textContent = subjectQuestions.length;
+    const totalRealQuestions = realQuestions.length;
+    document.getElementById('questionNumber').textContent = realQuestionNumber > 0 ? realQuestionNumber : 1;
+    document.getElementById('totalQuestions').textContent = totalRealQuestions;
 
     // Update navigation buttons
     updateNavigationButtons();
@@ -850,23 +842,158 @@ function createQuestionVideosHTML(videos) {
     return html;
 }
 
-// Create questions selector grid
-function createQuestionsSelector(totalQuestions) {
-    let html = '';
-    for (let i = 0; i < totalQuestions; i++) {
-        const isAnswered = userAnswers[currentSubject] && 
-                          userAnswers[currentSubject][i] !== null && 
-                          userAnswers[currentSubject][i] !== undefined && 
-                          userAnswers[currentSubject][i] !== '';
-        const isActive = i === currentQuestionIndex;
+// Get real question number (excluding paragraphs and titles)
+function getRealQuestionNumber(itemIndex) {
+    const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
+    let questionNumber = 0;
+    
+    for (let i = 0; i <= itemIndex; i++) {
+        const item = subjectQuestions[i];
+        if (item.type === 'multiple' || item.type === 'short' || item.type === 'open') {
+            questionNumber++;
+        }
+    }
+    
+    return questionNumber;
+}
 
+// Get context elements (reading texts) before current question
+function getContextElements(currentIndex) {
+    const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
+    const contextElements = [];
+    
+    // Buscar hacia atrás para encontrar textos de lectura que incluyan esta pregunta
+    for (let i = currentIndex - 1; i >= 0; i--) {
+        const item = subjectQuestions[i];
+        
+        // Si encontramos un texto de lectura
+        if (item.type === 'reading') {
+            // Verificar si esta pregunta está en la lista de showInQuestions
+            if (item.showInQuestions && item.showInQuestions.includes(currentIndex)) {
+                contextElements.unshift(item);
+            }
+            // Detener después del primer texto de lectura
+            break;
+        }
+    }
+    
+    return contextElements;
+}
+
+// Render current item (question, paragraph, or title)
+function renderCurrentItem(item, contextElements, questionNumber, config) {
+    let html = '';
+    
+    // Solo mostrar contexto si estamos en una PREGUNTA (no si estamos en el texto de lectura mismo)
+    if (item.type !== 'reading' && contextElements.length > 0) {
+        contextElements.forEach((element, idx) => {
+            if (element.type === 'reading') {
+                // Texto de lectura colapsable
+                html += `
+                    <div class="context-collapsible">
+                        <button class="context-toggle" onclick="toggleContext(${idx})" id="contextToggle_${idx}">
+                            <i class="bi bi-chevron-down context-icon" id="contextIcon_${idx}"></i>
+                            <i class="bi bi-book-half"></i>
+                            <span>${element.title || 'Texto de Lectura'}</span>
+                            <span class="context-hint">Click para ver/ocultar</span>
+                        </button>
+                        <div class="context-content" id="contextContent_${idx}" style="display: none;">
+                            <div class="context-reading-body">
+                                ${createQuestionMediaHTML(element.images || [], element.videos || [])}
+                                <div class="paragraph-content">
+                                    ${element.text}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    }
+    
+    // Renderizar el elemento actual
+    if (item.type === 'reading') {
+        // Texto de lectura completo (título + párrafo)
         html += `
-            <button class="question-btn ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" 
-                    onclick="goToQuestion(${i})" 
-                    title="Pregunta ${i + 1}${isAnswered ? ' (Respondida)' : ''}">
-                ${i + 1}
-            </button>
+            <div class="current-reading-item">
+                <div class="reading-badge-display">
+                    <i class="bi bi-book-half"></i>
+                    Texto de Lectura
+                </div>
+                <div class="reading-title-display">
+                    ${item.title || 'Texto de Lectura'}
+                </div>
+                ${createQuestionMediaHTML(item.images || [], item.videos || [])}
+                <div class="reading-text-display">
+                    ${item.text}
+                </div>
+                <div class="reading-note">
+                    Lee el texto cuidadosamente. Usa los botones de navegación para continuar.
+                </div>
+            </div>
         `;
+    } else {
+        // Es una pregunta normal
+        html += `
+            <div class="question-header">
+                <div class="question-subject">
+                    <div class="subject-icon ${currentSubject}">
+                        <i class="${config.icon}"></i>
+                    </div>
+                    ${config.name}
+                </div>
+                <div class="question-number-badge">
+                    Pregunta ${questionNumber}
+                </div>
+            </div>
+            
+            ${createQuestionMediaHTML(item.images || [], item.videos || [])}
+            
+            <div class="question-text">
+                ${item.text || 'Pregunta sin texto'}
+            </div>
+            
+            ${item.type === 'multiple' ? createMultipleChoiceHTML(item) : createOpenAnswerHTML(item)}
+        `;
+    }
+    
+    return html;
+}
+
+// Create questions selector grid
+function createQuestionsSelector(allItems) {
+    let html = '';
+    let questionNumber = 0;
+    
+    for (let i = 0; i < allItems.length; i++) {
+        const item = allItems[i];
+        const isActive = i === currentQuestionIndex;
+        
+        if (item.type === 'reading') {
+            // Botón para texto de lectura
+            html += `
+                <button class="reading-btn ${isActive ? 'active' : ''}" 
+                        onclick="goToQuestion(${i})" 
+                        title="Texto de Lectura">
+                    <i class="bi bi-book-half"></i>
+                </button>
+            `;
+        } else if (item.type === 'multiple' || item.type === 'short' || item.type === 'open') {
+            // Botón para pregunta
+            questionNumber++;
+            const isAnswered = userAnswers[currentSubject] && 
+                              userAnswers[currentSubject][i] !== null && 
+                              userAnswers[currentSubject][i] !== undefined && 
+                              userAnswers[currentSubject][i] !== '';
+
+            html += `
+                <button class="question-btn ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" 
+                        onclick="goToQuestion(${i})" 
+                        title="Pregunta ${questionNumber}${isAnswered ? ' (Respondida)' : ''}">
+                    ${questionNumber}
+                </button>
+            `;
+        }
     }
     return html;
 }
@@ -876,6 +1003,28 @@ function goToQuestion(questionIndex) {
     currentQuestionIndex = questionIndex;
     showCurrentQuestion();
 }
+
+// Toggle context visibility
+function toggleContext(contextIndex) {
+    const content = document.getElementById(`contextContent_${contextIndex}`);
+    const icon = document.getElementById(`contextIcon_${contextIndex}`);
+    const toggle = document.getElementById(`contextToggle_${contextIndex}`);
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.classList.remove('bi-chevron-down');
+        icon.classList.add('bi-chevron-up');
+        toggle.classList.add('active');
+    } else {
+        content.style.display = 'none';
+        icon.classList.remove('bi-chevron-up');
+        icon.classList.add('bi-chevron-down');
+        toggle.classList.remove('active');
+    }
+}
+
+// Make toggle function global
+window.toggleContext = toggleContext;
 
 // Create combined media HTML for student view (images and videos side by side)
 function createQuestionMediaHTML(images, videos) {
@@ -1037,20 +1186,27 @@ function updateProgress() {
     let totalQuestions = 0;
     let answeredQuestions = 0;
 
-    Object.keys(userAnswers).forEach(subject => {
-        Object.keys(userAnswers[subject]).forEach(questionIndex => {
-            totalQuestions++;
-            const answer = userAnswers[subject][questionIndex];
-            if (answer !== null && answer !== undefined && answer !== '') {
-                answeredQuestions++;
-            }
+    // Contar solo preguntas reales (no párrafos ni títulos)
+    testQuestions.forEach(subjectData => {
+        Object.keys(subjectData).forEach(subject => {
+            const items = subjectData[subject];
+            items.forEach((item, index) => {
+                if (item.type === 'multiple' || item.type === 'short' || item.type === 'open') {
+                    totalQuestions++;
+                    if (userAnswers[subject] && userAnswers[subject][index] !== null && 
+                        userAnswers[subject][index] !== undefined && userAnswers[subject][index] !== '') {
+                        answeredQuestions++;
+                    }
+                }
+            });
         });
     });
 
-    const progressPercentage = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
-
-    document.getElementById('progressFill').style.width = `${progressPercentage}%`;
-    document.getElementById('progressText').textContent = `${answeredQuestions} de ${totalQuestions} preguntas completadas`;
+    // Calcular progreso
+    const progressPercent = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
+    document.getElementById('progressFill').style.width = progressPercent + '%';
+    document.getElementById('progressText').textContent = 
+        `${answeredQuestions} de ${totalQuestions} preguntas completadas`;
 
     // Show submit button if all questions are answered
     if (answeredQuestions === totalQuestions && totalQuestions > 0) {

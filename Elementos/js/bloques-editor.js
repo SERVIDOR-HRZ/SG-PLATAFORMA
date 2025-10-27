@@ -497,7 +497,11 @@ function updateTestInfo() {
 function updateQuestionsCount() {
     // Block 1
     Object.keys(testBlocks.bloque1).forEach(subject => {
-        const count = testBlocks.bloque1[subject].questions.length;
+        const items = testBlocks.bloque1[subject].questions;
+        // Contar solo las preguntas reales (no párrafos ni títulos)
+        const count = items.filter(item => 
+            item.type === 'multiple' || item.type === 'short' || item.type === 'open'
+        ).length;
         const element = document.getElementById(`${subject}-block1-count`);
         const subjectCard = document.querySelector(`[data-block="1"] .subject-card.${subject}`);
         
@@ -507,7 +511,7 @@ function updateQuestionsCount() {
         
         // Add visual indicators
         if (subjectCard) {
-            if (count > 0) {
+            if (items.length > 0) {
                 subjectCard.classList.add('has-questions');
                 subjectCard.classList.remove('no-questions');
             } else {
@@ -519,7 +523,11 @@ function updateQuestionsCount() {
 
     // Block 2
     Object.keys(testBlocks.bloque2).forEach(subject => {
-        const count = testBlocks.bloque2[subject].questions.length;
+        const items = testBlocks.bloque2[subject].questions;
+        // Contar solo las preguntas reales (no párrafos ni títulos)
+        const count = items.filter(item => 
+            item.type === 'multiple' || item.type === 'short' || item.type === 'open'
+        ).length;
         const element = document.getElementById(`${subject}-block2-count`);
         const subjectCard = document.querySelector(`[data-block="2"] .subject-card.${subject}`);
         
@@ -529,7 +537,7 @@ function updateQuestionsCount() {
         
         // Add visual indicators
         if (subjectCard) {
-            if (count > 0) {
+            if (items.length > 0) {
                 subjectCard.classList.add('has-questions');
                 subjectCard.classList.remove('no-questions');
             } else {
@@ -575,56 +583,123 @@ function loadQuestionsInModal() {
         container.innerHTML = `
             <div class="empty-questions">
                 <i class="bi bi-question-circle"></i>
-                <h4>No hay preguntas</h4>
-                <p>Agrega la primera pregunta para esta materia</p>
+                <h4>No hay elementos</h4>
+                <p>Agrega preguntas o textos de lectura para esta materia</p>
             </div>
         `;
         return;
     }
 
     container.innerHTML = '';
+    let questionNumber = 1;
     questions.forEach((question, index) => {
-        const questionElement = createQuestionElement(question, index);
+        const questionElement = createQuestionElement(question, index, questionNumber);
         container.appendChild(questionElement);
+        // Solo incrementar el número si es una pregunta real
+        if (question.type === 'multiple' || question.type === 'short' || question.type === 'open') {
+            questionNumber++;
+        }
     });
 }
 
 // Create question element
-function createQuestionElement(question, index) {
+function createQuestionElement(question, index, questionNumber) {
     const div = document.createElement('div');
-    div.className = 'question-item';
     div.dataset.questionIndex = index;
 
-    div.innerHTML = `
-        <div class="question-header">
-            <div class="question-number">Pregunta ${index + 1}</div>
-            <div class="question-type">Selección Múltiple</div>
-            <div class="question-actions">
-                <button class="btn btn-sm btn-danger" onclick="deleteQuestion(${index})">
-                    <i class="bi bi-trash"></i>
-                    Eliminar
-                </button>
-            </div>
-        </div>
-        <div class="question-content">
-            <div class="question-text-container">
-                ${createQuestionMediaHTML(question.images || [], question.videos || [], index)}
-                <textarea class="question-text" placeholder="Escribe tu pregunta aquí..." 
-                          onchange="updateQuestionText(${index}, this.value)">${question.text || ''}</textarea>
-                <div class="media-controls">
-                    <button class="btn btn-sm btn-info" onclick="addImageToQuestion(${index})">
-                        <i class="bi bi-image"></i>
-                        Agregar Imagen
-                    </button>
-                    <button class="btn btn-sm btn-warning" onclick="addVideoToQuestion(${index})">
-                        <i class="bi bi-youtube"></i>
-                        Agregar Video
+    // Diferentes estilos según el tipo
+    if (question.type === 'reading') {
+        // Texto de lectura (título + párrafo juntos)
+        div.className = 'question-item reading-item';
+        div.innerHTML = `
+            <div class="question-header">
+                <div class="question-number reading-badge">
+                    <i class="bi bi-book-half"></i>
+                    Texto de Lectura
+                </div>
+                <div class="question-actions">
+                    <button class="btn btn-sm btn-danger" onclick="deleteQuestion(${index})">
+                        <i class="bi bi-trash"></i>
+                        Eliminar
                     </button>
                 </div>
             </div>
-            ${createOptionsHTML(question.options || [], index)}
-        </div>
-    `;
+            <div class="question-content">
+                <div class="reading-title-section">
+                    <label class="reading-label">
+                        <i class="bi bi-type-h1"></i>
+                        Título:
+                    </label>
+                    <input type="text" class="title-input" placeholder="Ej: Comprensión de Lectura, Según el texto responde..." 
+                           value="${question.title || ''}"
+                           onchange="updateReadingTitle(${index}, this.value)">
+                </div>
+                <div class="reading-paragraph-section">
+                    <label class="reading-label">
+                        <i class="bi bi-text-paragraph"></i>
+                        Texto:
+                    </label>
+                    <div class="question-text-container">
+                        ${createQuestionMediaHTML(question.images || [], question.videos || [], index)}
+                        <textarea class="question-text paragraph-text" placeholder="Escribe el texto de lectura aquí..." 
+                                  onchange="updateQuestionText(${index}, this.value)">${question.text || ''}</textarea>
+                        <div class="media-controls">
+                            <button class="btn btn-sm btn-info" onclick="addImageToQuestion(${index})">
+                                <i class="bi bi-image"></i>
+                                Agregar Imagen
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="addVideoToQuestion(${index})">
+                                <i class="bi bi-youtube"></i>
+                                Agregar Video
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="reading-context-section">
+                    <label class="reading-label">
+                        <i class="bi bi-eye"></i>
+                        Mostrar como contexto en:
+                    </label>
+                    <div class="context-questions-selector" id="contextSelector_${index}">
+                        ${createContextQuestionsSelector(index)}
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // Pregunta normal (multiple choice)
+        div.className = 'question-item';
+        div.innerHTML = `
+            <div class="question-header">
+                <div class="question-number">Pregunta ${questionNumber}</div>
+                <div class="question-type">Selección Múltiple</div>
+                <div class="question-actions">
+                    <button class="btn btn-sm btn-danger" onclick="deleteQuestion(${index})">
+                        <i class="bi bi-trash"></i>
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+            <div class="question-content">
+                <div class="question-text-container">
+                    ${createQuestionMediaHTML(question.images || [], question.videos || [], index)}
+                    <textarea class="question-text" placeholder="Escribe tu pregunta aquí..." 
+                              onchange="updateQuestionText(${index}, this.value)">${question.text || ''}</textarea>
+                    <div class="media-controls">
+                        <button class="btn btn-sm btn-info" onclick="addImageToQuestion(${index})">
+                            <i class="bi bi-image"></i>
+                            Agregar Imagen
+                        </button>
+                        <button class="btn btn-sm btn-warning" onclick="addVideoToQuestion(${index})">
+                            <i class="bi bi-youtube"></i>
+                            Agregar Video
+                        </button>
+                    </div>
+                </div>
+                ${createOptionsHTML(question.options || [], index)}
+            </div>
+        `;
+    }
 
     return div;
 }
@@ -682,10 +757,37 @@ function addNewQuestion() {
     showQuestionTypeModal();
 }
 
-// Show question type selection modal - Only multiple choice
+// Show question type selection modal - Multiple choice or reading text (title + paragraph)
 function showQuestionTypeModal() {
-    // Directly create multiple choice question since it's the only type allowed
-    createQuestion('multiple');
+    const modalHTML = `
+        <div class="modal-overlay" id="questionTypeModal">
+            <div class="modal modal-sm">
+                <div class="modal-header">
+                    <h3>Seleccionar Tipo de Elemento</h3>
+                    <button class="close-btn" onclick="hideQuestionTypeModal()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="question-type-grid">
+                        <button class="question-type-card" onclick="createQuestion('multiple')">
+                            <i class="bi bi-ui-checks"></i>
+                            <h4>Pregunta</h4>
+                            <p>Pregunta de selección múltiple</p>
+                        </button>
+                        <button class="question-type-card" onclick="createQuestion('reading')">
+                            <i class="bi bi-book-half"></i>
+                            <h4>Texto de Lectura</h4>
+                            <p>Título + Párrafo de contexto</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('questionTypeModal').classList.add('active');
 }
 
 // Hide question type modal
@@ -700,11 +802,10 @@ function hideQuestionTypeModal() {
 // Create question based on type
 function createQuestion(type) {
     const blockKey = `bloque${currentEditingBlock}`;
-    let newQuestion;
 
     switch (type) {
         case 'multiple':
-            newQuestion = {
+            const newQuestion = {
                 type: 'multiple',
                 text: '',
                 images: [],
@@ -716,9 +817,24 @@ function createQuestion(type) {
                     { text: '', isCorrect: false, images: [] }
                 ]
             };
+            testBlocks[blockKey][currentEditingSubject].questions.push(newQuestion);
             break;
+            
+        case 'reading':
+            // Crear título y párrafo juntos como un grupo
+            const readingGroup = {
+                type: 'reading',
+                title: '',
+                text: '',
+                images: [],
+                videos: [],
+                showInQuestions: [] // Array de índices de preguntas donde se mostrará
+            };
+            testBlocks[blockKey][currentEditingSubject].questions.push(readingGroup);
+            break;
+            
         case 'short':
-            newQuestion = {
+            const shortQuestion = {
                 type: 'short',
                 text: '',
                 images: [],
@@ -726,18 +842,20 @@ function createQuestion(type) {
                 correctAnswer: '',
                 caseSensitive: false
             };
+            testBlocks[blockKey][currentEditingSubject].questions.push(shortQuestion);
             break;
+            
         case 'open':
-            newQuestion = {
+            const openQuestion = {
                 type: 'open',
                 text: '',
                 images: [],
                 videos: []
             };
+            testBlocks[blockKey][currentEditingSubject].questions.push(openQuestion);
             break;
     }
 
-    testBlocks[blockKey][currentEditingSubject].questions.push(newQuestion);
     hideQuestionTypeModal();
     loadQuestionsInModal();
 }
@@ -746,6 +864,77 @@ function createQuestion(type) {
 function updateQuestionText(index, text) {
     const blockKey = `bloque${currentEditingBlock}`;
     testBlocks[blockKey][currentEditingSubject].questions[index].text = text;
+}
+
+// Update reading title
+function updateReadingTitle(index, title) {
+    const blockKey = `bloque${currentEditingBlock}`;
+    testBlocks[blockKey][currentEditingSubject].questions[index].title = title;
+}
+
+// Create context questions selector
+function createContextQuestionsSelector(readingIndex) {
+    const blockKey = `bloque${currentEditingBlock}`;
+    const allItems = testBlocks[blockKey][currentEditingSubject].questions;
+    const reading = allItems[readingIndex];
+    
+    let html = '<div class="context-checkboxes">';
+    let questionNumber = 0;
+    
+    // Buscar preguntas que vienen DESPUÉS de este texto de lectura
+    for (let i = readingIndex + 1; i < allItems.length; i++) {
+        const item = allItems[i];
+        
+        // Si es otra lectura, detener
+        if (item.type === 'reading') {
+            break;
+        }
+        
+        // Si es una pregunta
+        if (item.type === 'multiple' || item.type === 'short' || item.type === 'open') {
+            questionNumber++;
+            const isChecked = reading.showInQuestions && reading.showInQuestions.includes(i);
+            
+            html += `
+                <label class="context-checkbox-item">
+                    <input type="checkbox" 
+                           ${isChecked ? 'checked' : ''}
+                           onchange="toggleContextQuestion(${readingIndex}, ${i}, this.checked)">
+                    <span>Pregunta ${questionNumber}</span>
+                </label>
+            `;
+        }
+    }
+    
+    if (questionNumber === 0) {
+        html += '<p class="no-questions-message">No hay preguntas después de este texto. Agrega preguntas para poder seleccionarlas.</p>';
+    }
+    
+    html += '</div>';
+    return html;
+}
+
+// Toggle context question
+function toggleContextQuestion(readingIndex, questionIndex, isChecked) {
+    const blockKey = `bloque${currentEditingBlock}`;
+    const reading = testBlocks[blockKey][currentEditingSubject].questions[readingIndex];
+    
+    if (!reading.showInQuestions) {
+        reading.showInQuestions = [];
+    }
+    
+    if (isChecked) {
+        // Agregar si no existe
+        if (!reading.showInQuestions.includes(questionIndex)) {
+            reading.showInQuestions.push(questionIndex);
+        }
+    } else {
+        // Remover si existe
+        const idx = reading.showInQuestions.indexOf(questionIndex);
+        if (idx > -1) {
+            reading.showInQuestions.splice(idx, 1);
+        }
+    }
 }
 
 // Change question type
@@ -830,17 +1019,29 @@ function saveSubjectData() {
     const blockKey = `bloque${currentEditingBlock}`;
     const questions = testBlocks[blockKey][currentEditingSubject].questions;
     
+    let questionNumber = 1;
     for (let i = 0; i < questions.length; i++) {
         const question = questions[i];
         
-        if (!question.text.trim()) {
-            showNotification(`La pregunta ${i + 1} no puede estar vacía`, 'error');
-            return;
-        }
-        
-        if (question.type === 'multiple') {
+        if (question.type === 'reading') {
+            // Validar texto de lectura
+            if (!question.title || !question.title.trim()) {
+                showNotification('El título del texto de lectura no puede estar vacío', 'error');
+                return;
+            }
+            if (!question.text || !question.text.trim()) {
+                showNotification('El texto de lectura no puede estar vacío', 'error');
+                return;
+            }
+        } else if (question.type === 'multiple') {
+            // Validar pregunta
+            if (!question.text.trim()) {
+                showNotification(`La pregunta ${questionNumber} no puede estar vacía`, 'error');
+                return;
+            }
+            
             if (!question.options || question.options.length < 2) {
-                showNotification(`La pregunta ${i + 1} debe tener al menos 2 opciones`, 'error');
+                showNotification(`La pregunta ${questionNumber} debe tener al menos 2 opciones`, 'error');
                 return;
             }
             
@@ -853,14 +1054,16 @@ function saveSubjectData() {
             }
             
             if (!hasText) {
-                showNotification(`La pregunta ${i + 1} debe tener al menos una opción con texto`, 'error');
+                showNotification(`La pregunta ${questionNumber} debe tener al menos una opción con texto`, 'error');
                 return;
             }
             
             if (!hasCorrect) {
-                showNotification(`La pregunta ${i + 1} debe tener una respuesta correcta marcada`, 'error');
+                showNotification(`La pregunta ${questionNumber} debe tener una respuesta correcta marcada`, 'error');
                 return;
             }
+            
+            questionNumber++;
         }
     }
     
@@ -1550,6 +1753,8 @@ function hideImageModal() {
 window.editSubject = editSubject;
 window.addNewQuestion = addNewQuestion;
 window.updateQuestionText = updateQuestionText;
+window.updateReadingTitle = updateReadingTitle;
+window.toggleContextQuestion = toggleContextQuestion;
 window.changeQuestionType = changeQuestionType;
 window.deleteQuestion = deleteQuestion;
 window.updateOptionText = updateOptionText;

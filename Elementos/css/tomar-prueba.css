@@ -2401,3 +2401,674 @@ body {
         min-width: 80px;
     }
 }
+/* =
+========= CONTEXT ELEMENTS (TITLES AND PARAGRAPHS) ========== */
+
+/* Context elements container */
+.context-elements {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Context title */
+.context-title {
+    background: linear-gradient(135deg, #e6f3ff 0%, #cce5ff 100%);
+    border-left: 4px solid #007bff;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #004085;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.context-title i {
+    font-size: 22px;
+    color: #007bff;
+}
+
+/* Context paragraph */
+.context-paragraph {
+    background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+    border-left: 4px solid #ffc107;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
+}
+
+.paragraph-content {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #333;
+    text-align: justify;
+    white-space: pre-line;
+}
+
+/* Current title item (when navigating to a title) */
+.current-title-item {
+    background: linear-gradient(135deg, #e6f3ff 0%, #f0f8ff 100%);
+    border: 3px solid #007bff;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
+}
+
+.title-badge-display {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.title-badge-display i {
+    font-size: 18px;
+}
+
+.title-text-display {
+    font-size: 28px;
+    font-weight: 700;
+    color: #004085;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.title-note {
+    font-size: 14px;
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 20px;
+}
+
+/* Current paragraph item (when navigating to a paragraph) */
+.current-paragraph-item {
+    background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+    border: 3px solid #ffc107;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.15);
+}
+
+.paragraph-badge-display {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: #333;
+    padding: 12px 24px;
+    border-radius: 25px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.paragraph-badge-display i {
+    font-size: 18px;
+}
+
+.paragraph-text-display {
+    font-size: 17px;
+    line-height: 1.9;
+    color: #333;
+    text-align: justify;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #ffeaa7;
+}
+
+.paragraph-note {
+    font-size: 14px;
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Responsive styles for context elements */
+@media (max-width: 768px) {
+    .context-elements {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .context-title {
+        font-size: 16px;
+        padding: 12px 15px;
+    }
+
+    .context-paragraph {
+        padding: 15px;
+    }
+
+    .paragraph-content {
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .current-title-item,
+    .current-paragraph-item {
+        padding: 25px;
+    }
+
+    .title-text-display {
+        font-size: 22px;
+    }
+
+    .paragraph-text-display {
+        font-size: 15px;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .context-elements {
+        padding: 10px;
+    }
+
+    .context-title {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+    .context-title i {
+        font-size: 18px;
+    }
+
+    .context-paragraph {
+        padding: 12px;
+    }
+
+    .paragraph-content {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .current-title-item,
+    .current-paragraph-item {
+        padding: 20px;
+    }
+
+    .title-badge-display,
+    .paragraph-badge-display {
+        padding: 10px 18px;
+        font-size: 12px;
+    }
+
+    .title-text-display {
+        font-size: 20px;
+    }
+
+    .paragraph-text-display {
+        font-size: 14px;
+        padding: 15px;
+        line-height: 1.7;
+    }
+
+    .title-note,
+    .paragraph-note {
+        font-size: 12px;
+    }
+}
+
+/* Animation for context elements */
+@keyframes contextFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.context-elements {
+    animation: contextFadeIn 0.4s ease;
+}
+
+.current-title-item,
+.current-paragraph-item {
+    animation: fadeInUp 0.4s ease;
+}
+
+/* ========== READING TEXT (TITLE + PARAGRAPH COMBINED) ========== */
+
+/* Context reading (when shown above questions) */
+.context-reading {
+    margin-bottom: 15px;
+}
+
+.context-reading .context-title {
+    background: linear-gradient(135deg, #e6f3ff 0%, #cce5ff 100%);
+    border-left: 4px solid #007bff;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #004085;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.context-reading .context-title i {
+    font-size: 22px;
+    color: #007bff;
+}
+
+.context-reading .context-paragraph {
+    background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+    border-left: 4px solid #ffc107;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
+}
+
+/* Current reading item (when navigating to a reading text) */
+.current-reading-item {
+    background: linear-gradient(135deg, #fff5e6 0%, #fffbf0 100%);
+    border: 3px solid #fd7e14;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 8px 25px rgba(253, 126, 20, 0.15);
+}
+
+.reading-badge-display {
+    background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(253, 126, 20, 0.3);
+}
+
+.reading-badge-display i {
+    font-size: 18px;
+}
+
+.reading-title-display {
+    font-size: 24px;
+    font-weight: 700;
+    color: #004085;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #e6f3ff 0%, #f0f8ff 100%);
+    border-radius: 10px;
+    border-left: 4px solid #007bff;
+    line-height: 1.4;
+}
+
+.reading-text-display {
+    font-size: 17px;
+    line-height: 1.9;
+    color: #333;
+    text-align: justify;
+    margin-bottom: 20px;
+    white-space: pre-line;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    border: 2px solid #ffeaa7;
+}
+
+.reading-note {
+    font-size: 14px;
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Responsive styles for reading elements */
+@media (max-width: 768px) {
+    .context-reading .context-title {
+        font-size: 16px;
+        padding: 12px 15px;
+    }
+
+    .context-reading .context-paragraph {
+        padding: 15px;
+    }
+
+    .current-reading-item {
+        padding: 25px;
+    }
+
+    .reading-title-display {
+        font-size: 20px;
+        padding: 12px 15px;
+    }
+
+    .reading-text-display {
+        font-size: 15px;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .context-reading .context-title {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+    .context-reading .context-title i {
+        font-size: 18px;
+    }
+
+    .context-reading .context-paragraph {
+        padding: 12px;
+    }
+
+    .current-reading-item {
+        padding: 20px;
+    }
+
+    .reading-badge-display {
+        padding: 10px 18px;
+        font-size: 12px;
+    }
+
+    .reading-title-display {
+        font-size: 18px;
+        padding: 10px 12px;
+    }
+
+    .reading-text-display {
+        font-size: 14px;
+        padding: 15px;
+        line-height: 1.7;
+    }
+
+    .reading-note {
+        font-size: 12px;
+    }
+}
+
+/* Animation for reading elements */
+.current-reading-item {
+    animation: fadeInUp 0.4s ease;
+}
+
+.context-reading {
+    animation: contextFadeIn 0.4s ease;
+}
+
+/* ========== READING BUTTON IN SELECTOR ========== */
+
+/* Reading text button in selector */
+.reading-btn {
+    width: 45px;
+    height: 45px;
+    border: 2px solid #fd7e14;
+    background: linear-gradient(135deg, #fff5e6 0%, #fffbf0 100%);
+    border-radius: 8px;
+    font-size: 18px;
+    color: #fd7e14;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.reading-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(253, 126, 20, 0.3);
+    border-color: #fd7e14;
+    background: linear-gradient(135deg, #fffbf0 0%, #fff5e6 100%);
+}
+
+/* Active reading button */
+.reading-btn.active {
+    background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);
+    border-color: #fd7e14;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(253, 126, 20, 0.4);
+}
+
+.reading-btn.active:hover {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+}
+
+/* Responsive styles for reading button */
+@media (max-width: 768px) {
+    .reading-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .reading-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 360px) {
+    .reading-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+}
+
+/* Tooltip for reading button */
+.reading-btn[title]:hover::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-bottom: 8px;
+    z-index: 1000;
+}
+
+.reading-btn[title]:hover::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+    margin-bottom: 3px;
+}
+
+/* ========== COLLAPSIBLE CONTEXT ========== */
+
+.context-collapsible {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.context-toggle {
+    width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #fff5e6 0%, #fffbf0 100%);
+    border: 2px solid #fd7e14;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.context-toggle:hover {
+    background: linear-gradient(135deg, #fffbf0 0%, #fff5e6 100%);
+    border-color: #ffc107;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(253, 126, 20, 0.2);
+}
+
+.context-toggle.active {
+    background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);
+    color: white;
+    border-color: #fd7e14;
+}
+
+.context-toggle.active .context-hint {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.context-icon {
+    font-size: 20px;
+    color: #fd7e14;
+    transition: transform 0.3s ease;
+}
+
+.context-toggle.active .context-icon {
+    color: white;
+}
+
+.context-toggle .bi-book-half {
+    font-size: 20px;
+    color: #fd7e14;
+}
+
+.context-toggle.active .bi-book-half {
+    color: white;
+}
+
+.context-toggle span:first-of-type {
+    flex: 1;
+    text-align: left;
+}
+
+.context-hint {
+    font-size: 12px;
+    font-weight: 400;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.context-content {
+    padding: 0;
+    background: white;
+    border: 2px solid #fd7e14;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px;
+    }
+}
+
+.context-reading-body {
+    padding: 20px;
+}
+
+.context-reading-body .paragraph-content {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #333;
+    text-align: justify;
+    white-space: pre-line;
+    background: #fffbf0;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ffeaa7;
+}
+
+/* Responsive styles for collapsible context */
+@media (max-width: 768px) {
+    .context-toggle {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .context-icon,
+    .context-toggle .bi-book-half {
+        font-size: 18px;
+    }
+
+    .context-hint {
+        font-size: 11px;
+    }
+
+    .context-reading-body {
+        padding: 15px;
+    }
+
+    .context-reading-body .paragraph-content {
+        font-size: 15px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .context-toggle {
+        padding: 10px 12px;
+        font-size: 13px;
+        gap: 8px;
+    }
+
+    .context-icon,
+    .context-toggle .bi-book-half {
+        font-size: 16px;
+    }
+
+    .context-hint {
+        display: none;
+    }
+
+    .context-reading-body {
+        padding: 12px;
+    }
+
+    .context-reading-body .paragraph-content {
+        font-size: 14px;
+        padding: 12px;
+    }
+}
