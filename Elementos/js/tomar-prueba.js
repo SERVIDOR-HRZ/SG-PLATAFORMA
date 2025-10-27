@@ -776,10 +776,83 @@ function showCurrentQuestion() {
     // Update progress
     updateProgress();
 
+    // Render LaTeX formulas
+    setTimeout(() => {
+        renderMathInContainer(questionContainer);
+    }, 50);
+
     // Load saved answer AFTER the question is rendered
     setTimeout(() => {
         loadSavedAnswer();
     }, 100);
+}
+
+// Clean LaTeX document code (remove document structure, keep only math)
+function cleanLatexCode(text) {
+    if (!text) return text;
+    
+    // Si contiene comandos de documento LaTeX, extraer solo el contenido matemático
+    if (text.includes('\\documentclass') || text.includes('\\begin{document}')) {
+        // Extraer contenido entre \begin{document} y \end{document}
+        const docMatch = text.match(/\\begin\{document\}([\s\S]*?)\\end\{document\}/);
+        if (docMatch) {
+            text = docMatch[1];
+        }
+        
+        // Remover comandos de paquetes y configuración
+        text = text.replace(/\\documentclass\{[^}]*\}/g, '');
+        text = text.replace(/\\usepackage(\[[^\]]*\])?\{[^}]*\}/g, '');
+        text = text.replace(/\\begin\{document\}/g, '');
+        text = text.replace(/\\end\{document\}/g, '');
+        
+        // Limpiar espacios extra
+        text = text.trim();
+    }
+    
+    return text;
+}
+
+// Render LaTeX formulas in container with MathJax
+function renderMathInContainer(container) {
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        try {
+            // Limpiar código LaTeX antes de renderizar
+            const textNodes = getTextNodes(container);
+            textNodes.forEach(node => {
+                if (node.nodeValue) {
+                    node.nodeValue = cleanLatexCode(node.nodeValue);
+                }
+            });
+            
+            // Typeset the container with MathJax
+            window.MathJax.typesetPromise([container]).catch((err) => {
+                console.log('MathJax typeset error:', err);
+            });
+        } catch (e) {
+            console.log('MathJax not ready yet:', e);
+        }
+    } else {
+        // Retry after a short delay if MathJax is not ready
+        setTimeout(() => renderMathInContainer(container), 100);
+    }
+}
+
+// Get all text nodes in an element
+function getTextNodes(element) {
+    const textNodes = [];
+    const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+    );
+    
+    let node;
+    while (node = walker.nextNode()) {
+        textNodes.push(node);
+    }
+    
+    return textNodes;
 }
 
 // Create multiple choice HTML

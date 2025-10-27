@@ -3072,3 +3072,33 @@ body {
         padding: 12px;
     }
 }
+
+/* ========== LATEX FORMULAS SUPPORT ========== */
+
+/* MathJax formula styling */
+.MathJax {
+    font-size: 1.1em !important;
+}
+
+mjx-container[display="true"] {
+    margin: 1em 0 !important;
+    text-align: center !important;
+}
+
+mjx-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Ensure formulas are readable in all contexts */
+.question-text mjx-container,
+.option-text mjx-container,
+.paragraph-content mjx-container,
+.reading-text-display mjx-container {
+    color: inherit;
+}
+
+/* Display formulas with proper spacing */
+mjx-container[display="true"] {
+    padding: 10px 0;
+}

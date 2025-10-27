@@ -18,6 +18,23 @@
     <link rel="stylesheet" href="../Elementos/css/bloques-editor.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
 
+    <!-- MathJax for full LaTeX support -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                tags: 'ams'
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
 </head>
 
 <body>
@@ -226,6 +243,10 @@
                         <button class="btn btn-primary" id="addQuestionBtn">
                             <i class="bi bi-plus-circle"></i>
                             Agregar Elemento
+                        </button>
+                        <button class="latex-help-btn" id="latexHelpBtn">
+                            <i class="bi bi-calculator"></i>
+                            Ayuda LaTeX
                         </button>
                     </div>
 

@@ -93,6 +93,9 @@ function setupEventListeners() {
     document.getElementById('saveSubject').addEventListener('click', saveSubjectData);
     document.getElementById('addQuestionBtn').addEventListener('click', addNewQuestion);
 
+    // LaTeX help button
+    document.getElementById('latexHelpBtn').addEventListener('click', showLatexHelp);
+
     // Save blocks button
     document.getElementById('saveBlocksBtn').addEventListener('click', saveAllBlocks);
 
@@ -103,6 +106,136 @@ function setupEventListeners() {
         }
     });
 }
+
+// Show LaTeX help modal
+function showLatexHelp() {
+    const modalHTML = `
+        <div class="modal-overlay" id="latexHelpModal">
+            <div class="modal modal-lg">
+                <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);">
+                    <h3>Ayuda - Fórmulas Matemáticas con LaTeX</h3>
+                    <button class="close-btn" onclick="hideLatexHelp()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="latex-help-content">
+                        <h4>¿Cómo usar fórmulas matemáticas?</h4>
+                        <p>Puedes escribir fórmulas matemáticas usando LaTeX en cualquier texto (preguntas, opciones, párrafos).</p>
+                        
+                        <div style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 4px solid #ffc107; margin: 15px 0;">
+                            <strong>💡 Nota Importante:</strong> Solo necesitas escribir las <strong>fórmulas matemáticas</strong>, 
+                            no el documento completo de LaTeX. El sistema limpia automáticamente comandos como 
+                            <code>\\documentclass</code>, <code>\\usepackage</code>, <code>\\begin{document}</code>, etc.
+                        </div>
+                        
+                        <h4>Sintaxis Básica:</h4>
+                        <ul>
+                            <li><strong>Fórmula en línea:</strong> Usa <code>$formula$</code> o <code>\\(formula\\)</code></li>
+                            <li><strong>Fórmula centrada:</strong> Usa <code>$$formula$$</code> o <code>\\[formula\\]</code></li>
+                        </ul>
+
+                        <h4>Ejemplos Comunes:</h4>
+                        <div class="latex-examples">
+                            <div class="latex-example-item">
+                                <strong>Fracciones:</strong>
+                                <div class="latex-example-code">$\\frac{a}{b}$</div>
+                                <div class="latex-example-result">Resultado: $\\frac{a}{b}$</div>
+                            </div>
+
+                            <div class="latex-example-item">
+                                <strong>Exponentes:</strong>
+                                <div class="latex-example-code">$x^2$ o $a^{n+1}$</div>
+                                <div class="latex-example-result">Resultado: $x^2$ o $a^{n+1}$</div>
+                            </div>
+
+                            <div class="latex-example-item">
+                                <strong>Subíndices:</strong>
+                                <div class="latex-example-code">$x_1$ o $a_{n-1}$</div>
+                                <div class="latex-example-result">Resultado: $x_1$ o $a_{n-1}$</div>
+                            </div>
+
+                            <div class="latex-example-item">
+                                <strong>Raíces:</strong>
+                                <div class="latex-example-code">$\\sqrt{x}$ o $\\sqrt[3]{8}$</div>
+                                <div class="latex-example-result">Resultado: $\\sqrt{x}$ o $\\sqrt[3]{8}$</div>
+                            </div>
+
+                            <div class="latex-example-item">
+                                <strong>Ecuaciones:</strong>
+                                <div class="latex-example-code">$$ax^2 + bx + c = 0$$</div>
+                                <div class="latex-example-result">Resultado: $$ax^2 + bx + c = 0$$</div>
+                            </div>
+
+                            <div class="latex-example-item">
+                                <strong>Símbolos griegos:</strong>
+                                <div class="latex-example-code">$\\alpha$, $\\beta$, $\\pi$, $\\theta$</div>
+                                <div class="latex-example-result">Resultado: $\\alpha$, $\\beta$, $\\pi$, $\\theta$</div>
+                            </div>
+
+                            <div class="latex-example-item">
+                                <strong>Operadores:</strong>
+                                <div class="latex-example-code">$\\times$, $\\div$, $\\pm$, $\\leq$, $\\geq$</div>
+                                <div class="latex-example-result">Resultado: $\\times$, $\\div$, $\\pm$, $\\leq$, $\\geq$</div>
+                            </div>
+
+                            <div class="latex-example-item">
+                                <strong>Sumatorias e integrales:</strong>
+                                <div class="latex-example-code">$$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$</div>
+                                <div class="latex-example-result">Resultado: $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$</div>
+                            </div>
+
+                            <div class="latex-example-item">
+                                <strong>Matrices:</strong>
+                                <div class="latex-example-code">$$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$$</div>
+                                <div class="latex-example-result">Resultado: $$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$$</div>
+                            </div>
+
+                            <div class="latex-example-item">
+                                <strong>Fracciones complejas:</strong>
+                                <div class="latex-example-code">$$\\frac{\\dfrac{3}{4} + \\dfrac{5}{6}}{\\dfrac{7}{8} - \\dfrac{1}{2}}$$</div>
+                                <div class="latex-example-result">Resultado: $$\\frac{\\dfrac{3}{4} + \\dfrac{5}{6}}{\\dfrac{7}{8} - \\dfrac{1}{2}}$$</div>
+                            </div>
+                        </div>
+
+                        <h4>Consejos:</h4>
+                        <ul>
+                            <li>Usa <code>$</code> para fórmulas pequeñas dentro del texto</li>
+                            <li>Usa <code>$$</code> para fórmulas grandes y centradas</li>
+                            <li>Las fórmulas se renderizan automáticamente al guardar</li>
+                            <li>Puedes combinar texto normal con fórmulas: "La ecuación $x^2 + y^2 = r^2$ representa un círculo"</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="hideLatexHelp()">Entendido</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = document.getElementById('latexHelpModal');
+    setTimeout(() => modal.classList.add('active'), 10);
+    
+    // Renderizar las fórmulas de ejemplo
+    setTimeout(() => {
+        const modalBody = modal.querySelector('.modal-body');
+        renderMathInElement(modalBody);
+    }, 100);
+}
+
+// Hide LaTeX help modal
+function hideLatexHelp() {
+    const modal = document.getElementById('latexHelpModal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+// Make function global
+window.hideLatexHelp = hideLatexHelp;
 
 // Go back to tests
 function goBack() {
@@ -600,6 +733,77 @@ function loadQuestionsInModal() {
             questionNumber++;
         }
     });
+    
+    // Renderizar fórmulas LaTeX después de cargar las preguntas
+    setTimeout(() => renderMathInElement(container), 100);
+}
+
+// Clean LaTeX document code (remove document structure, keep only math)
+function cleanLatexCode(text) {
+    if (!text) return text;
+    
+    // Si contiene comandos de documento LaTeX, extraer solo el contenido matemático
+    if (text.includes('\\documentclass') || text.includes('\\begin{document}')) {
+        // Extraer contenido entre \begin{document} y \end{document}
+        const docMatch = text.match(/\\begin\{document\}([\s\S]*?)\\end\{document\}/);
+        if (docMatch) {
+            text = docMatch[1];
+        }
+        
+        // Remover comandos de paquetes y configuración
+        text = text.replace(/\\documentclass\{[^}]*\}/g, '');
+        text = text.replace(/\\usepackage(\[[^\]]*\])?\{[^}]*\}/g, '');
+        text = text.replace(/\\begin\{document\}/g, '');
+        text = text.replace(/\\end\{document\}/g, '');
+        
+        // Limpiar espacios extra
+        text = text.trim();
+    }
+    
+    return text;
+}
+
+// Render LaTeX formulas with MathJax
+function renderMathInElement(element) {
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        try {
+            // Limpiar código LaTeX antes de renderizar
+            const textNodes = getTextNodes(element);
+            textNodes.forEach(node => {
+                if (node.nodeValue) {
+                    node.nodeValue = cleanLatexCode(node.nodeValue);
+                }
+            });
+            
+            // Typeset the element with MathJax
+            window.MathJax.typesetPromise([element]).catch((err) => {
+                console.log('MathJax typeset error:', err);
+            });
+        } catch (e) {
+            console.log('MathJax not ready yet:', e);
+        }
+    } else {
+        // Retry after a short delay if MathJax is not ready
+        setTimeout(() => renderMathInElement(element), 100);
+    }
+}
+
+// Get all text nodes in an element
+function getTextNodes(element) {
+    const textNodes = [];
+    const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+    );
+    
+    let node;
+    while (node = walker.nextNode()) {
+        textNodes.push(node);
+    }
+    
+    return textNodes;
 }
 
 // Create question element

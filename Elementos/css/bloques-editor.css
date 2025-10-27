@@ -2476,3 +2476,83 @@ body {
         padding: 10px;
     }
 }
+
+/* ========== LATEX FORMULAS SUPPORT ========== */
+
+/* MathJax formula styling */
+.MathJax {
+    font-size: 1.1em !important;
+}
+
+mjx-container[display="true"] {
+    margin: 1em 0 !important;
+    text-align: center !important;
+}
+
+mjx-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* LaTeX help button */
+.latex-help-btn {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
+}
+
+.latex-help-btn:hover {
+    background: linear-gradient(135deg, #5a32a3 0%, #4a2885 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);
+}
+
+.latex-help-btn i {
+    font-size: 14px;
+}
+
+/* LaTeX examples in help */
+.latex-examples {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.latex-example-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    border-left: 3px solid #6f42c1;
+}
+
+.latex-example-code {
+    font-family: 'Courier New', monospace;
+    background: #f1f3f5;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #6f42c1;
+    display: inline-block;
+    margin: 5px 0;
+}
+
+.latex-example-result {
+    margin-top: 5px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+}
