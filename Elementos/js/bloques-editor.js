@@ -640,7 +640,6 @@ function createQuestionElement(question, index, questionNumber) {
                         Texto:
                     </label>
                     <div class="question-text-container">
-                        ${createQuestionMediaHTML(question.images || [], question.videos || [], index)}
                         <textarea class="question-text paragraph-text" placeholder="Escribe el texto de lectura aquí..." 
                                   onchange="updateQuestionText(${index}, this.value)">${question.text || ''}</textarea>
                         <div class="media-controls">
@@ -653,6 +652,7 @@ function createQuestionElement(question, index, questionNumber) {
                                 Agregar Video
                             </button>
                         </div>
+                        ${createQuestionMediaHTML(question.images || [], question.videos || [], index)}
                     </div>
                 </div>
                 <div class="reading-context-section">

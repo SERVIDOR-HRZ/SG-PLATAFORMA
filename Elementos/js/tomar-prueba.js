@@ -899,10 +899,10 @@ function renderCurrentItem(item, contextElements, questionNumber, config) {
                         </button>
                         <div class="context-content" id="contextContent_${idx}" style="display: none;">
                             <div class="context-reading-body">
-                                ${createQuestionMediaHTML(element.images || [], element.videos || [])}
                                 <div class="paragraph-content">
                                     ${element.text}
                                 </div>
+                                ${createQuestionMediaHTML(element.images || [], element.videos || [])}
                             </div>
                         </div>
                     </div>
@@ -923,10 +923,10 @@ function renderCurrentItem(item, contextElements, questionNumber, config) {
                 <div class="reading-title-display">
                     ${item.title || 'Texto de Lectura'}
                 </div>
-                ${createQuestionMediaHTML(item.images || [], item.videos || [])}
                 <div class="reading-text-display">
                     ${item.text}
                 </div>
+                ${createQuestionMediaHTML(item.images || [], item.videos || [])}
                 <div class="reading-note">
                     Lee el texto cuidadosamente. Usa los botones de navegación para continuar.
                 </div>
