@@ -4,83 +4,521 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma Oficial Seamos Genios - Login</title>
+    <title>Seamos Genios - Plataforma Educativa</title>
 
     <!-- SEO Meta Tags -->
     <meta name="description"
-        content="Plataforma educativa Seamos Genios - Accede a tu cuenta para comenzar tu experiencia de aprendizaje personalizada">
-    <meta name="keywords" content="educación, plataforma educativa, aprendizaje, Seamos Genios, estudiantes, cursos">
+        content="Plataforma educativa Seamos Genios - Descubre nuestros cursos, pre-ICFES y únete a nuestra comunidad de aprendizaje">
+    <meta name="keywords"
+        content="educación, plataforma educativa, aprendizaje, Seamos Genios, estudiantes, cursos, pre-ICFES">
     <meta name="author" content="Seamos Genios">
     <meta name="robots" content="index, follow">
 
-    <!-- Open Graph Meta Tags (Facebook, WhatsApp, etc.) -->
+    <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Seamos Genios - Plataforma Educativa">
     <meta property="og:description"
-        content="Únete a nuestra plataforma educativa y descubre una nueva forma de aprender. Accede a contenido personalizado y herramientas innovadoras.">
+        content="Únete a nuestra plataforma educativa y descubre una nueva forma de aprender.">
     <meta property="og:image" content="https://seamosgenios.org/Elementos/img/logo1.png">
-    <meta property="og:image:alt" content="Logo de Seamos Genios">
     <meta property="og:url" content="https://seamosgenios.org/">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Seamos Genios">
-    <meta property="og:locale" content="es_ES">
 
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Seamos Genios - Plataforma Educativa">
-    <meta name="twitter:description"
-        content="Únete a nuestra plataforma educativa y descubre una nueva forma de aprender.">
-    <meta name="twitter:image" content="https://seamosgenios.org/Elementos/img/logo1.png">
-
-    <!-- Additional Meta Tags -->
-    <meta name="theme-color" content="#4CAF50">
-    <link rel="canonical" href="https://seamosgenios.org/">
-
-    <link rel="stylesheet" href="Elementos/css/Login.css">
-    <link rel="stylesheet" href="Elementos/css/seguridad.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="Elementos/css/landing.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="shortcut icon" href="Elementos/img/logo1.png" type="image/x-icon">
-
-
 </head>
 
 <body>
-    <div class="login-container">
-        <div class="login-form">
-            <div class="logo-container">
-                <img src="Elementos/img/logo1.png" alt="Seamos Genios Logo" class="logo">
-                <h1>Seamos Genios</h1>
-                <p>Plataforma Educativa</p>
+    <!-- Header/Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo-section">
+                    <img src="Elementos/img/logo1.png" alt="Seamos Genios Logo" class="nav-logo">
+                    <span class="brand-name">Seamos<span class="brand-highlight">Genios</span></span>
+                </div>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#beneficios">Beneficios</a></li>
+                    <li><a href="#plataforma">Plataforma</a></li>
+                    <li><a href="#simulacro">Simulacro</a></li>
+                    <li><a href="#ranking">Ranking</a></li>
+                    <li><a href="#testimonios">Testimonios</a></li>
+                    <li class="mobile-login-btn">
+                        <a href="Secciones/login.html" class="btn-login" id="btnLoginMobile">Iniciar Sesión</a>
+                    </li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="Secciones/login.html" class="btn-login" id="btnLogin">Iniciar Sesión</a>
+                    <button class="menu-toggle" id="menuToggle">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                </div>
             </div>
+        </nav>
+    </header>
 
-            <form id="loginForm" class="form">
-                <div class="input-group">
-                    <label for="usuario">Correo Electrónico</label>
-                    <input type="email" id="usuario" name="usuario" required>
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- Hero Carousel -->
+    <section id="inicio" class="carousel-section">
+        <div class="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="carousel-content">
+                        <h1>Bienvenido a <span class="highlight-text">Seamos Genios</span></h1>
+                        <p>Tu plataforma educativa para alcanzar el éxito en el ICFES</p>
+                        <a href="#simulacro" class="btn-primary">Explorar Simulacros</a>
+                    </div>
                 </div>
-
-                <div class="input-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" name="password" required>
+                <div class="carousel-item">
+                    <div class="carousel-content">
+                        <h1>Prepárate para el <span class="highlight-text">ICFES</span></h1>
+                        <p>Simulacros especializados con los mejores resultados</p>
+                        <a href="#simulacro" class="btn-primary">Ver Simulacros</a>
+                    </div>
                 </div>
-
-                <button type="submit" class="login-btn">Iniciar Sesión</button>
-
-                <div class="form-links">
-                    <!-- <a href="Secciones/registro.html" class="link" id="registerLink">Registrarse</a> -->
-                    <a href="Secciones/recuperar-password.html" class="link" id="forgotPasswordLink">¿Olvidaste tu
-                        contraseña?</a>
+                <div class="carousel-item">
+                    <div class="carousel-content">
+                        <h1>Únete a Nuestra Comunidad</h1>
+                        <p>Miles de estudiantes ya confían en nosotros</p>
+                        <a href="Secciones/login.html" class="btn-primary">Comenzar Ahora</a>
+                    </div>
                 </div>
-            </form>
+            </div>
+            <button class="carousel-control prev" id="prevBtn">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="carousel-control next" id="nextBtn">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            <div class="carousel-indicators" id="carouselIndicators"></div>
+        </div>
+    </section>
+
+    <!-- Posts Section -->
+    <section class="posts-section">
+        <div class="container">
+            <h2 class="section-title">Últimas Publicaciones</h2>
+            <div class="posts-grid" id="postsGrid">
+                <!-- Posts will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Beneficios Section -->
+    <section id="beneficios" class="benefits-section">
+        <div class="container">
+            <h2 class="section-title">Beneficios de Nuestra Plataforma</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon"><i class="bi bi-clipboard-check"></i></div>
+                    <h3>Simulacros Ilimitados</h3>
+                    <p>Acceso a más de 200 simulacros tipo ICFES para practicar sin límites</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h3>Seguimiento Personalizado</h3>
+                    <p>Análisis detallado de tu progreso y áreas de mejora</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon"><i class="bi bi-trophy"></i></div>
+                    <h3>Ranking Competitivo</h3>
+                    <p>Compite con otros estudiantes y mide tu nivel</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon"><i class="bi bi-clock-history"></i></div>
+                    <h3>Disponible 24/7</h3>
+                    <p>Estudia a tu ritmo, cuando y donde quieras</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Plataforma Section -->
+    <section id="plataforma" class="platform-section">
+        <div class="container">
+            <h2 class="section-title">Nuestra Plataforma</h2>
+            <div class="platform-content">
+                <div class="platform-text">
+                    <h3>Tecnología de Última Generación</h3>
+                    <p>Nuestra plataforma está diseñada para brindarte la mejor experiencia de aprendizaje con herramientas innovadoras y fáciles de usar.</p>
+                    <ul class="platform-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Interfaz intuitiva y moderna</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Simulacros cronometrados</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Retroalimentación instantánea</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Estadísticas detalladas</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Compatible con todos los dispositivos</li>
+                    </ul>
+                </div>
+                <div class="platform-image">
+                    <img src="Elementos/img/logo1.png" alt="Plataforma Seamos Genios">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simulacro Section -->
+    <section id="simulacro" class="simulacro-section">
+        <div class="container">
+            <h2 class="section-title">Simulacros Pre-ICFES</h2>
+            <div class="simulacro-grid">
+                <div class="simulacro-card">
+                    <div class="simulacro-badge">Básico</div>
+                    <h3>Simulacro Básico</h3>
+                    <p>Ideal para comenzar tu preparación</p>
+                    <ul>
+                        <li><i class="bi bi-check-circle"></i> 50+ Simulacros</li>
+                        <li><i class="bi bi-check-circle"></i> Material de estudio</li>
+                        <li><i class="bi bi-check-circle"></i> Seguimiento básico</li>
+                        <li><i class="bi bi-check-circle"></i> Resultados inmediatos</li>
+                    </ul>
+                    <div class="price-tag">$50.000 COP</div>
+                </div>
+                <div class="simulacro-card featured">
+                    <div class="simulacro-badge gold">Premium</div>
+                    <h3>Simulacro Premium</h3>
+                    <p>La mejor preparación para tu examen</p>
+                    <ul>
+                        <li><i class="bi bi-check-circle"></i> 200+ Simulacros</li>
+                        <li><i class="bi bi-check-circle"></i> Tutorías personalizadas</li>
+                        <li><i class="bi bi-check-circle"></i> Análisis detallado</li>
+                        <li><i class="bi bi-check-circle"></i> Garantía de resultados</li>
+                        <li><i class="bi bi-check-circle"></i> Acceso de por vida</li>
+                    </ul>
+                    <div class="price-tag featured-price">$80.000 COP</div>
+                </div>
+                <div class="simulacro-card">
+                    <div class="simulacro-badge">Intensivo</div>
+                    <h3>Simulacro Intensivo</h3>
+                    <p>Preparación acelerada y efectiva</p>
+                    <ul>
+                        <li><i class="bi bi-check-circle"></i> 100+ Simulacros</li>
+                        <li><i class="bi bi-check-circle"></i> Clases en vivo</li>
+                        <li><i class="bi bi-check-circle"></i> Seguimiento avanzado</li>
+                        <li><i class="bi bi-check-circle"></i> Soporte prioritario</li>
+                    </ul>
+                    <div class="price-tag">$65.000 COP</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ranking Section -->
+    <section id="ranking" class="ranking-section">
+        <div class="container">
+            <h2 class="section-title">Ranking de Estudiantes ICFES</h2>
+            <div class="ranking-table-container">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Posición</th>
+                            <th>Estudiante</th>
+                            <th>Matemáticas</th>
+                            <th>Lectura Crítica</th>
+                            <th>Sociales</th>
+                            <th>Ciencias</th>
+                            <th>Inglés</th>
+                            <th class="total-score">Puntaje Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="rank-row top-1">
+                            <td class="rank-position">
+                                <div class="rank-badge gold">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    <span>1</span>
+                                </div>
+                            </td>
+                            <td class="student-name">María González</td>
+                            <td>98</td>
+                            <td>95</td>
+                            <td>97</td>
+                            <td>96</td>
+                            <td>99</td>
+                            <td class="total-score"><strong>485</strong></td>
+                        </tr>
+                        <tr class="rank-row top-2">
+                            <td class="rank-position">
+                                <div class="rank-badge silver">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    <span>2</span>
+                                </div>
+                            </td>
+                            <td class="student-name">Carlos Rodríguez</td>
+                            <td>96</td>
+                            <td>97</td>
+                            <td>94</td>
+                            <td>95</td>
+                            <td>97</td>
+                            <td class="total-score"><strong>479</strong></td>
+                        </tr>
+                        <tr class="rank-row top-3">
+                            <td class="rank-position">
+                                <div class="rank-badge bronze">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    <span>3</span>
+                                </div>
+                            </td>
+                            <td class="student-name">Ana Martínez</td>
+                            <td>94</td>
+                            <td>96</td>
+                            <td>93</td>
+                            <td>97</td>
+                            <td>95</td>
+                            <td class="total-score"><strong>475</strong></td>
+                        </tr>
+                        <tr class="rank-row">
+                            <td class="rank-position">
+                                <div class="rank-number">4</div>
+                            </td>
+                            <td class="student-name">Luis Pérez</td>
+                            <td>92</td>
+                            <td>94</td>
+                            <td>95</td>
+                            <td>93</td>
+                            <td>94</td>
+                            <td class="total-score"><strong>468</strong></td>
+                        </tr>
+                        <tr class="rank-row">
+                            <td class="rank-position">
+                                <div class="rank-number">5</div>
+                            </td>
+                            <td class="student-name">Sofia López</td>
+                            <td>91</td>
+                            <td>93</td>
+                            <td>92</td>
+                            <td>94</td>
+                            <td>93</td>
+                            <td class="total-score"><strong>463</strong></td>
+                        </tr>
+                        <tr class="rank-row">
+                            <td class="rank-position">
+                                <div class="rank-number">6</div>
+                            </td>
+                            <td class="student-name">Diego Morales</td>
+                            <td>90</td>
+                            <td>92</td>
+                            <td>91</td>
+                            <td>92</td>
+                            <td>91</td>
+                            <td class="total-score"><strong>456</strong></td>
+                        </tr>
+                        <tr class="rank-row">
+                            <td class="rank-position">
+                                <div class="rank-number">7</div>
+                            </td>
+                            <td class="student-name">Valentina Castro</td>
+                            <td>89</td>
+                            <td>91</td>
+                            <td>90</td>
+                            <td>91</td>
+                            <td>90</td>
+                            <td class="total-score"><strong>451</strong></td>
+                        </tr>
+                        <tr class="rank-row">
+                            <td class="rank-position">
+                                <div class="rank-number">8</div>
+                            </td>
+                            <td class="student-name">Andrés Silva</td>
+                            <td>88</td>
+                            <td>90</td>
+                            <td>89</td>
+                            <td>90</td>
+                            <td>89</td>
+                            <td class="total-score"><strong>446</strong></td>
+                        </tr>
+                        <tr class="rank-row">
+                            <td class="rank-position">
+                                <div class="rank-number">9</div>
+                            </td>
+                            <td class="student-name">Camila Ruiz</td>
+                            <td>87</td>
+                            <td>89</td>
+                            <td>88</td>
+                            <td>89</td>
+                            <td>88</td>
+                            <td class="total-score"><strong>441</strong></td>
+                        </tr>
+                        <tr class="rank-row">
+                            <td class="rank-position">
+                                <div class="rank-number">10</div>
+                            </td>
+                            <td class="student-name">Sebastián Torres</td>
+                            <td>86</td>
+                            <td>88</td>
+                            <td>87</td>
+                            <td>88</td>
+                            <td>87</td>
+                            <td class="total-score"><strong>436</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonios Section -->
+    <section id="testimonios" class="testimonials-section">
+        <div class="container">
+            <h2 class="section-title">Lo Que Dicen Nuestros Estudiantes</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p>"Gracias a Seamos Genios logré mejorar mi puntaje en el ICFES. ¡Excelente plataforma!"</p>
+                    <div class="testimonial-author">
+                        <strong>Juan Ramírez</strong>
+                        <span>Estudiante</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p>"Los simulacros son muy parecidos al examen real. Me sentí muy preparada."</p>
+                    <div class="testimonial-author">
+                        <strong>Laura Sánchez</strong>
+                        <span>Estudiante</span>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <p>"La mejor inversión para mi futuro académico. Totalmente recomendado."</p>
+                    <div class="testimonial-author">
+                        <strong>Diego Torres</strong>
+                        <span>Estudiante</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Videos Section -->
+    <section class="videos-section">
+        <div class="container">
+            <h2 class="section-title">Videos Educativos</h2>
+            <div class="videos-grid">
+                <div class="video-card">
+                    <div class="video-placeholder">
+                        <i class="bi bi-play-circle"></i>
+                    </div>
+                    <h4>Consejos para el ICFES</h4>
+                </div>
+                <div class="video-card">
+                    <div class="video-placeholder">
+                        <i class="bi bi-play-circle"></i>
+                    </div>
+                    <h4>Técnicas de Estudio</h4>
+                </div>
+                <div class="video-card">
+                    <div class="video-placeholder">
+                        <i class="bi bi-play-circle"></i>
+                    </div>
+                    <h4>Matemáticas Fáciles</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="nosotros" class="about-section">
+        <div class="container">
+            <h2 class="section-title">Acerca de Nosotros</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>¿Quiénes Somos?</h3>
+                    <p>Seamos Genios es una plataforma educativa innovadora dedicada a transformar la forma en que los
+                        estudiantes se preparan para el ICFES.</p>
+                    <p>Con años de experiencia en educación, hemos ayudado a miles de estudiantes a alcanzar sus metas
+                        académicas y obtener los mejores resultados en sus exámenes.</p>
+                    <div class="about-stats">
+                        <div class="stat-item">
+                            <h4>5000+</h4>
+                            <p>Estudiantes</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>95%</h4>
+                            <p>Satisfacción</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>200+</h4>
+                            <p>Simulacros</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="Elementos/img/logo1.png" alt="Seamos Genios">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Seamos Genios</h4>
+                    <p>Tu plataforma educativa de confianza</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="#beneficios">Beneficios</a></li>
+                        <li><a href="#simulacro">Simulacros</a></li>
+                        <li><a href="#ranking">Ranking</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Síguenos</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                        <a href="#"><i class="bi bi-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Seamos Genios. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Post Modal -->
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div id="modalPostContent"></div>
         </div>
     </div>
 
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <script src="Elementos/js/config.js"></script>
-    <script src="Elementos/js/login.js"></script>
-    <script src="Elementos/js/seguridad.js"></script>
+    <script src="Elementos/js/landing.js"></script>
 </body>
 
 </html>

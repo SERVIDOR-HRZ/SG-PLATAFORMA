@@ -107,10 +107,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Redirect based on user type
             setTimeout(() => {
+                // Check if we're in the Secciones folder
+                const isInSecciones = window.location.pathname.includes('/Secciones/');
+                
                 if (userData.tipoUsuario === 'admin') {
-                    window.location.href = 'Secciones/Panel_Admin.html';
+                    window.location.href = isInSecciones ? 'Panel_Admin.html' : 'Secciones/Panel_Admin.html';
                 } else {
-                    window.location.href = 'Secciones/Panel_Estudiantes.html';
+                    window.location.href = isInSecciones ? 'Panel_Estudiantes.html' : 'Secciones/Panel_Estudiantes.html';
                 }
             }, 1500);
             
@@ -128,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (registerLink) {
         registerLink.addEventListener('click', function(e) {
             e.preventDefault();
-            window.location.href = 'Secciones/registro.html';
+            const isInSecciones = window.location.pathname.includes('/Secciones/');
+            window.location.href = isInSecciones ? 'registro.html' : 'Secciones/registro.html';
         });
     }
 
@@ -136,7 +140,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener('click', function(e) {
             e.preventDefault();
-            window.location.href = 'Secciones/recuperar-password.html';
+            const isInSecciones = window.location.pathname.includes('/Secciones/');
+            window.location.href = isInSecciones ? 'recuperar-password.html' : 'Secciones/recuperar-password.html';
         });
     }
 
