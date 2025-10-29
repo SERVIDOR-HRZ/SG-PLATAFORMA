@@ -145,7 +145,8 @@
             <div class="platform-content">
                 <div class="platform-text">
                     <h3>Tecnología de Última Generación</h3>
-                    <p>Nuestra plataforma está diseñada para brindarte la mejor experiencia de aprendizaje con herramientas innovadoras y fáciles de usar.</p>
+                    <p>Nuestra plataforma está diseñada para brindarte la mejor experiencia de aprendizaje con
+                        herramientas innovadoras y fáciles de usar.</p>
                     <ul class="platform-features">
                         <li><i class="bi bi-check-circle-fill"></i> Interfaz intuitiva y moderna</li>
                         <li><i class="bi bi-check-circle-fill"></i> Simulacros cronometrados</li>
@@ -217,6 +218,7 @@
                         <tr>
                             <th>Posición</th>
                             <th>Estudiante</th>
+                            <th>Municipio</th>
                             <th>Matemáticas</th>
                             <th>Lectura Crítica</th>
                             <th>Sociales</th>
@@ -225,138 +227,19 @@
                             <th class="total-score">Puntaje Total</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr class="rank-row top-1">
-                            <td class="rank-position">
-                                <div class="rank-badge gold">
-                                    <i class="bi bi-trophy-fill"></i>
-                                    <span>1</span>
-                                </div>
-                            </td>
-                            <td class="student-name">María González</td>
-                            <td>98</td>
-                            <td>95</td>
-                            <td>97</td>
-                            <td>96</td>
-                            <td>99</td>
-                            <td class="total-score"><strong>485</strong></td>
-                        </tr>
-                        <tr class="rank-row top-2">
-                            <td class="rank-position">
-                                <div class="rank-badge silver">
-                                    <i class="bi bi-trophy-fill"></i>
-                                    <span>2</span>
-                                </div>
-                            </td>
-                            <td class="student-name">Carlos Rodríguez</td>
-                            <td>96</td>
-                            <td>97</td>
-                            <td>94</td>
-                            <td>95</td>
-                            <td>97</td>
-                            <td class="total-score"><strong>479</strong></td>
-                        </tr>
-                        <tr class="rank-row top-3">
-                            <td class="rank-position">
-                                <div class="rank-badge bronze">
-                                    <i class="bi bi-trophy-fill"></i>
-                                    <span>3</span>
-                                </div>
-                            </td>
-                            <td class="student-name">Ana Martínez</td>
-                            <td>94</td>
-                            <td>96</td>
-                            <td>93</td>
-                            <td>97</td>
-                            <td>95</td>
-                            <td class="total-score"><strong>475</strong></td>
-                        </tr>
-                        <tr class="rank-row">
-                            <td class="rank-position">
-                                <div class="rank-number">4</div>
-                            </td>
-                            <td class="student-name">Luis Pérez</td>
-                            <td>92</td>
-                            <td>94</td>
-                            <td>95</td>
-                            <td>93</td>
-                            <td>94</td>
-                            <td class="total-score"><strong>468</strong></td>
-                        </tr>
-                        <tr class="rank-row">
-                            <td class="rank-position">
-                                <div class="rank-number">5</div>
-                            </td>
-                            <td class="student-name">Sofia López</td>
-                            <td>91</td>
-                            <td>93</td>
-                            <td>92</td>
-                            <td>94</td>
-                            <td>93</td>
-                            <td class="total-score"><strong>463</strong></td>
-                        </tr>
-                        <tr class="rank-row">
-                            <td class="rank-position">
-                                <div class="rank-number">6</div>
-                            </td>
-                            <td class="student-name">Diego Morales</td>
-                            <td>90</td>
-                            <td>92</td>
-                            <td>91</td>
-                            <td>92</td>
-                            <td>91</td>
-                            <td class="total-score"><strong>456</strong></td>
-                        </tr>
-                        <tr class="rank-row">
-                            <td class="rank-position">
-                                <div class="rank-number">7</div>
-                            </td>
-                            <td class="student-name">Valentina Castro</td>
-                            <td>89</td>
-                            <td>91</td>
-                            <td>90</td>
-                            <td>91</td>
-                            <td>90</td>
-                            <td class="total-score"><strong>451</strong></td>
-                        </tr>
-                        <tr class="rank-row">
-                            <td class="rank-position">
-                                <div class="rank-number">8</div>
-                            </td>
-                            <td class="student-name">Andrés Silva</td>
-                            <td>88</td>
-                            <td>90</td>
-                            <td>89</td>
-                            <td>90</td>
-                            <td>89</td>
-                            <td class="total-score"><strong>446</strong></td>
-                        </tr>
-                        <tr class="rank-row">
-                            <td class="rank-position">
-                                <div class="rank-number">9</div>
-                            </td>
-                            <td class="student-name">Camila Ruiz</td>
-                            <td>87</td>
-                            <td>89</td>
-                            <td>88</td>
-                            <td>89</td>
-                            <td>88</td>
-                            <td class="total-score"><strong>441</strong></td>
-                        </tr>
-                        <tr class="rank-row">
-                            <td class="rank-position">
-                                <div class="rank-number">10</div>
-                            </td>
-                            <td class="student-name">Sebastián Torres</td>
-                            <td>86</td>
-                            <td>88</td>
-                            <td>87</td>
-                            <td>88</td>
-                            <td>87</td>
-                            <td class="total-score"><strong>436</strong></td>
-                        </tr>
+                    <tbody id="rankingTableBody">
+                        <!-- Rows will be loaded dynamically -->
                     </tbody>
                 </table>
+            </div>
+            <div class="ranking-pagination">
+                <button class="pagination-btn" id="prevPage" disabled>
+                    <i class="bi bi-chevron-left"></i> Anterior
+                </button>
+                <span class="pagination-info" id="paginationInfo">Página 1</span>
+                <button class="pagination-btn" id="nextPage">
+                    Siguiente <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
     </section>

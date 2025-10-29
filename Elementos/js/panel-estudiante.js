@@ -397,6 +397,9 @@ function handleCardClick(event) {
             case 'pruebas':
                 window.location.href = 'Pruebas-Estudiante.html';
                 break;
+            case 'clases':
+                window.location.href = 'Clases.html';
+                break;
             case 'simulacros':
                 window.location.href = 'Simulacros.html';
                 break;

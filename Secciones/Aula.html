@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula - Seamos Genios</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/aula.css">
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" id="backBtn">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
+            <h1 id="aulaTitle">Aula</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info" id="userInfoContainer">
+                <span class="user-name" id="userName">USUARIO</span>
+                <div class="user-avatar" id="userAvatarContainer">
+                    <div class="user-avatar-default" id="userAvatarDefault">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto de perfil">
+                </div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <button class="tab-btn active" data-tab="anuncios">
+                <i class="bi bi-megaphone"></i>
+                Anuncios
+            </button>
+            <button class="tab-btn" data-tab="tareas">
+                <i class="bi bi-clipboard-check"></i>
+                Tareas
+            </button>
+            <button class="tab-btn" data-tab="materiales">
+                <i class="bi bi-folder"></i>
+                Materiales
+            </button>
+            <button class="tab-btn" data-tab="estudiantes" id="estudiantesTab" style="display: none;">
+                <i class="bi bi-people"></i>
+                Estudiantes
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Anuncios Tab -->
+            <div class="tab-pane active" id="anunciosPane">
+                <div class="create-post-container" id="createPostContainer" style="display: none;">
+                    <button class="create-post-btn" id="createPostBtn">
+                        <i class="bi bi-plus-circle"></i>
+                        Crear Anuncio
+                    </button>
+                </div>
+                <div class="posts-container" id="postsContainer">
+                    <!-- Posts will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Tareas Tab -->
+            <div class="tab-pane" id="tareasPane">
+                <div class="create-task-container" id="createTaskContainer" style="display: none;">
+                    <button class="create-task-btn" id="createTaskBtn">
+                        <i class="bi bi-plus-circle"></i>
+                        Crear Tarea
+                    </button>
+                </div>
+                <div class="tasks-container" id="tasksContainer">
+                    <!-- Tasks will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Materiales Tab -->
+            <div class="tab-pane" id="materialesPane">
+                <div class="create-material-container" id="createMaterialContainer" style="display: none;">
+                    <button class="create-material-btn" id="createMaterialBtn">
+                        <i class="bi bi-plus-circle"></i>
+                        Agregar Material
+                    </button>
+                </div>
+                <div class="materials-container" id="materialsContainer">
+                    <!-- Materials will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Estudiantes Tab -->
+            <div class="tab-pane" id="estudiantesPane">
+                <div class="students-container" id="studentsContainer">
+                    <!-- Students will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Post Modal -->
+    <div class="modal" id="createPostModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Anuncio</h3>
+                <button class="close-btn" id="closePostModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createPostForm">
+                    <div class="input-group">
+                        <label for="postContent">Mensaje</label>
+                        <textarea id="postContent" rows="5" required placeholder="Escribe tu anuncio..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="cancelPost">Cancelar</button>
+                        <button type="submit" class="submit-btn">
+                            <i class="bi bi-send"></i>
+                            Publicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div class="modal" id="createTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Tarea</h3>
+                <button class="close-btn" id="closeTaskModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createTaskForm">
+                    <div class="input-group">
+                        <label for="taskTitle">Título</label>
+                        <input type="text" id="taskTitle" required placeholder="Título de la tarea">
+                    </div>
+                    <div class="input-group">
+                        <label for="taskDescription">Descripción</label>
+                        <textarea id="taskDescription" rows="4" required placeholder="Descripción de la tarea"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="taskDueDate">Fecha de Entrega</label>
+                        <input type="datetime-local" id="taskDueDate" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="cancelTask">Cancelar</button>
+                        <button type="submit" class="submit-btn">
+                            <i class="bi bi-check-lg"></i>
+                            Crear Tarea
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Material Modal -->
+    <div class="modal" id="createMaterialModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agregar Material</h3>
+                <button class="close-btn" id="closeMaterialModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createMaterialForm">
+                    <div class="input-group">
+                        <label for="materialTitle">Título</label>
+                        <input type="text" id="materialTitle" required placeholder="Título del material">
+                    </div>
+                    <div class="input-group">
+                        <label for="materialType">Tipo</label>
+                        <select id="materialType" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="youtube">Video de YouTube</option>
+                            <option value="drive">Archivo de Drive</option>
+                            <option value="link">Enlace</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="materialUrl">URL</label>
+                        <input type="url" id="materialUrl" required placeholder="https://...">
+                        <div class="url-help" id="urlHelp" style="display: none;">
+                            <i class="bi bi-info-circle"></i>
+                            <span id="urlHelpText"></span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="materialDescription">Descripción (opcional)</label>
+                        <textarea id="materialDescription" rows="3" placeholder="Descripción del material"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="cancelMaterial">Cancelar</button>
+                        <button type="submit" class="submit-btn">
+                            <i class="bi bi-check-lg"></i>
+                            Agregar Material
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/aula.js"></script>
+</body>
+
+</html>

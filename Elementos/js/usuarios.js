@@ -506,16 +506,23 @@ function openEditUserModal(userId) {
     elements.editUserTypeText.textContent = isAdmin ? 'Administrador' : 'Estudiante';
     
     // Show/hide student fields
-    const studentFields = document.querySelector('.student-edit-fields');
+    const studentFields = document.querySelectorAll('.student-edit-fields');
     if (user.tipoUsuario === 'estudiante') {
-        studentFields.style.display = 'block';
+        studentFields.forEach(field => field.style.display = 'block');
         elements.editInstitucion.value = user.institucion || '';
         elements.editGrado.value = user.grado || '';
         elements.editTipoDocumento.value = user.tipoDocumento || '';
         elements.editNumeroDocumento.value = user.numeroDocumento || '';
         elements.editDepartamento.value = user.departamento || '';
+        
+        // Load clases permisos
+        const clasesPermitidas = user.clasesPermitidas || [];
+        const checkboxes = document.querySelectorAll('input[name="clasePermiso"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = clasesPermitidas.includes(checkbox.value);
+        });
     } else {
-        studentFields.style.display = 'none';
+        studentFields.forEach(field => field.style.display = 'none');
     }
     
     elements.editUserModal.classList.add('show');
@@ -676,6 +683,7 @@ async function handleCreateUser(e) {
             userData.tipoDocumento = elements.createTipoDocumento.value;
             userData.numeroDocumento = elements.createNumeroDocumento.value.trim();
             userData.departamento = elements.createDepartamento.value;
+            userData.clasesPermitidas = []; // Initialize empty, admin can edit later
         }
         
         // Add to Firestore
@@ -765,6 +773,14 @@ async function handleEditUser(e) {
             updateData.tipoDocumento = tipoDocumento;
             updateData.numeroDocumento = numeroDocumento;
             updateData.departamento = departamento;
+            
+            // Get selected clases permisos
+            const clasesPermitidas = [];
+            const checkboxes = document.querySelectorAll('input[name="clasePermiso"]:checked');
+            checkboxes.forEach(checkbox => {
+                clasesPermitidas.push(checkbox.value);
+            });
+            updateData.clasesPermitidas = clasesPermitidas;
         }
         
         // Update in Firestore
