@@ -162,8 +162,8 @@ function renderClases(materias) {
         claseCard.setAttribute('data-materia', materia.id);
         claseCard.innerHTML = `
             <div class="clase-header">
-                <h3 class="clase-title">${materia.nombre}</h3>
                 <i class="${materia.icon} clase-icon"></i>
+                <h3 class="clase-title">${materia.nombre}</h3>
             </div>
             <div class="clase-body">
                 <p class="clase-description">${materia.descripcion}</p>
