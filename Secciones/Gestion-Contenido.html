@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Contenido Web - Seamos Genios</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/gestion-contenido.css">
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='Panel_Admin.html'">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <img src="../Elementos/img/logo1.png" alt="Logo" class="header-logo">
+            <h1>Gestión de Contenido Web</h1>
+        </div>
+        <div class="header-right">
+            <span class="user-name" id="userName">ADMIN</span>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <button class="tab-btn active" data-tab="carousel">
+                <i class="bi bi-images"></i>
+                Carrusel
+            </button>
+            <button class="tab-btn" data-tab="posts">
+                <i class="bi bi-file-text"></i>
+                Publicaciones
+            </button>
+            <button class="tab-btn" data-tab="simulacros">
+                <i class="bi bi-card-checklist"></i>
+                Simulacros
+            </button>
+            <button class="tab-btn" data-tab="testimonials">
+                <i class="bi bi-chat-quote"></i>
+                Testimonios
+            </button>
+            <button class="tab-btn" data-tab="videos">
+                <i class="bi bi-play-btn"></i>
+                Videos
+            </button>
+        </div>
+
+        <!-- Carousel Tab -->
+        <div class="tab-content active" id="carousel-tab">
+            <div class="section-header">
+                <h2>Gestión del Carrusel</h2>
+                <button class="btn-primary" id="addCarouselBtn">
+                    <i class="bi bi-plus-circle"></i>
+                    Agregar Slide
+                </button>
+            </div>
+            <div class="carousel-grid" id="carouselGrid">
+                <!-- Carousel items will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Posts Tab -->
+        <div class="tab-content" id="posts-tab">
+            <div class="section-header">
+                <h2>Gestión de Publicaciones</h2>
+                <button class="btn-primary" id="addPostBtn">
+                    <i class="bi bi-plus-circle"></i>
+                    Nueva Publicación
+                </button>
+            </div>
+            <div class="posts-grid" id="postsGrid">
+                <!-- Posts will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Simulacros Tab -->
+        <div class="tab-content" id="simulacros-tab">
+            <div class="section-header">
+                <h2>Gestión de Simulacros</h2>
+                <button class="btn-primary" id="addSimulacroBtn">
+                    <i class="bi bi-plus-circle"></i>
+                    Agregar Simulacro
+                </button>
+            </div>
+            <div class="simulacros-grid" id="simulacrosGrid">
+                <!-- Simulacro cards will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Testimonials Tab -->
+        <div class="tab-content" id="testimonials-tab">
+            <div class="section-header">
+                <h2>Gestión de Testimonios</h2>
+                <button class="btn-primary" id="addTestimonialBtn">
+                    <i class="bi bi-plus-circle"></i>
+                    Agregar Testimonio
+                </button>
+            </div>
+            <div class="testimonials-grid" id="testimonialsGrid">
+                <!-- Testimonials will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Videos Tab -->
+        <div class="tab-content" id="videos-tab">
+            <div class="section-header">
+                <h2>Gestión de Videos Educativos</h2>
+                <button class="btn-primary" id="addVideoBtn">
+                    <i class="bi bi-plus-circle"></i>
+                    Agregar Video
+                </button>
+            </div>
+            <div class="videos-grid" id="videosAdminGrid">
+                <!-- Videos will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Carousel -->
+    <div class="modal" id="carouselModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="carouselModalTitle">Agregar Slide</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="carouselForm">
+                    <input type="hidden" id="carouselId">
+                    
+                    <div class="form-group">
+                        <label>Imagen del Slide</label>
+                        <div class="image-upload-area" id="carouselImageUpload">
+                            <i class="bi bi-cloud-upload"></i>
+                            <p>Click para subir imagen</p>
+                            <input type="file" id="carouselImageInput" accept="image/*" hidden>
+                        </div>
+                        <div class="image-preview" id="carouselImagePreview" style="display: none;">
+                            <img src="" alt="Preview">
+                            <button type="button" class="remove-image-btn">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Título</label>
+                        <input type="text" id="carouselTitle" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="carouselDescription" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Texto del Botón</label>
+                        <input type="text" id="carouselButtonText">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Enlace del Botón</label>
+                        <input type="text" id="carouselButtonLink">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="carouselActive">
+                            Activo
+                        </label>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary modal-close">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-save"></i>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Posts -->
+    <div class="modal" id="postModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="postModalTitle">Nueva Publicación</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="postForm">
+                    <input type="hidden" id="postId">
+                    
+                    <div class="form-group">
+                        <label>Imagen</label>
+                        <div class="image-upload-area" id="postImageUpload">
+                            <i class="bi bi-cloud-upload"></i>
+                            <p>Click para subir imagen</p>
+                            <input type="file" id="postImageInput" accept="image/*" hidden>
+                        </div>
+                        <div class="image-preview" id="postImagePreview" style="display: none;">
+                            <img src="" alt="Preview">
+                            <button type="button" class="remove-image-btn">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Título</label>
+                        <input type="text" id="postTitle" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contenido</label>
+                        <textarea id="postContent" rows="5" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <input type="text" id="postCategory">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary modal-close">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-save"></i>
+                            Publicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Testimonials -->
+    <div class="modal" id="testimonialModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="testimonialModalTitle">Agregar Testimonio</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="testimonialForm">
+                    <input type="hidden" id="testimonialId">
+                    
+                    <div class="form-group">
+                        <label>Nombre del Estudiante</label>
+                        <input type="text" id="testimonialAuthor" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Testimonio</label>
+                        <textarea id="testimonialText" rows="4" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Calificación (1-5)</label>
+                        <input type="number" id="testimonialRating" min="1" max="5" value="5" required>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary modal-close">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-save"></i>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Videos -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="videoModalTitle">Agregar Video</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="videoForm">
+                    <input type="hidden" id="videoId">
+                    
+                    <div class="form-group">
+                        <label>Título del Video</label>
+                        <input type="text" id="videoTitle" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción (opcional)</label>
+                        <textarea id="videoDescription" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>URL del Video (YouTube o enlace directo)</label>
+                        <input type="url" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." required>
+                        <small style="color: #666; display: block; margin-top: 0.5rem;">
+                            Puedes usar enlaces de YouTube, Vimeo u otros servicios
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="videoActive" checked>
+                            Activo
+                        </label>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary modal-close">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-save"></i>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div class="modal" id="videoPlayerModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 id="videoPlayerTitle">Video</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 0;">
+                <div id="videoPlayerContainer" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                    <iframe id="videoPlayerIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Simulacros -->
+    <div class="modal" id="simulacroModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 id="simulacroModalTitle">Agregar Simulacro</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="simulacroForm">
+                    <input type="hidden" id="simulacroId">
+                    
+                    <div class="form-group">
+                        <label>Imagen del Simulacro (opcional)</label>
+                        <div class="image-upload-area" id="simulacroImageUpload">
+                            <i class="bi bi-cloud-upload"></i>
+                            <p>Click para subir imagen</p>
+                            <input type="file" id="simulacroImageInput" accept="image/*" hidden>
+                        </div>
+                        <div class="image-preview" id="simulacroImagePreview" style="display: none;">
+                            <img src="" alt="Preview">
+                            <button type="button" class="remove-image-btn">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Badge</label>
+                        <input type="text" id="simulacroBadge" placeholder="Ej: Básico, Premium, Intensivo" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Color del Badge</label>
+                        <select id="simulacroBadgeColor" required>
+                            <option value="basic">Azul (Básico)</option>
+                            <option value="premium">Dorado (Premium)</option>
+                            <option value="intensive">Morado (Intensivo)</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="customColorGroup" style="display: none;">
+                        <label>Color Personalizado (Hex)</label>
+                        <input type="color" id="simulacroCustomColor" value="#ff0000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Título del Simulacro</label>
+                        <input type="text" id="simulacroTitulo" placeholder="Ej: Simulacro Básico" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="simulacroDescripcion" rows="2" placeholder="Ej: Ideal para comenzar tu preparación" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Características (una por línea)</label>
+                        <textarea id="simulacroCaracteristicas" rows="5" placeholder="50+ Simulacros&#10;Material de estudio&#10;Seguimiento básico&#10;Resultados inmediatos" required></textarea>
+                        <small>Escribe cada característica en una línea nueva</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Precio</label>
+                        <input type="text" id="simulacroPrecio" placeholder="Ej: $50.000 COP" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Color del Precio</label>
+                        <select id="simulacroPrecioColor" required>
+                            <option value="red">Rojo</option>
+                            <option value="gold">Dorado</option>
+                            <option value="blue">Azul</option>
+                            <option value="green">Verde</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="simulacroDestacado">
+                            Destacar esta tarjeta (borde dorado y más grande)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="simulacroActivo" checked>
+                            Activo
+                        </label>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary modal-close">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-save"></i>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Cargando...</p>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/gestion-contenido.js"></script>
+</body>
+
+</html>

@@ -412,6 +412,9 @@ function handleCardClick(event) {
             case 'chat':
                 window.location.href = 'Chat.html';
                 break;
+            case 'contenido':
+                window.location.href = 'Gestion-Contenido.html';
+                break;
             default:
                 console.log('Sección no encontrada:', section);
         }
