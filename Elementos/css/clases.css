@@ -36,23 +36,17 @@ body {
 }
 
 .back-btn {
-    background: transparent;
-    border: 2px solid white;
+    background: #ff0000;
+    border: none;
     color: white;
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: 5%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-}
-
-.back-btn:hover {
-    background: white;
-    color: #000000;
-    transform: scale(1.1);
 }
 
 .header-logo {
@@ -196,23 +190,23 @@ body {
 
 /* Colores por materia */
 .clase-card[data-materia="matematicas"] .clase-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2196F3;
 }
 
 .clase-card[data-materia="lectura"] .clase-header {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: #F44336;
 }
 
 .clase-card[data-materia="sociales"] .clase-header {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: #FF9800;
 }
 
 .clase-card[data-materia="naturales"] .clase-header {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    background: #4CAF50;
 }
 
 .clase-card[data-materia="ingles"] .clase-header {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    background: #9C27B0;
 }
 
 .clase-title {

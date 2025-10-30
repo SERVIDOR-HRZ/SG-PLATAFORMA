@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializePanelModal();
     setupEventListeners();
     loadTestData();
-    
+
     // Inicializar foto de perfil
     if (typeof inicializarPerfilCompartido === 'function') {
         inicializarPerfilCompartido();
@@ -217,7 +217,7 @@ function showLatexHelp() {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     const modal = document.getElementById('latexHelpModal');
     setTimeout(() => modal.classList.add('active'), 10);
-    
+
     // Renderizar las fórmulas de ejemplo
     setTimeout(() => {
         const modalBody = modal.querySelector('.modal-body');
@@ -345,7 +345,7 @@ function initializePanelModal() {
         }
         </style>
     `;
-    
+
     document.head.insertAdjacentHTML('beforeend', modalStyles);
 }
 
@@ -374,11 +374,11 @@ function showDeleteVideoModal() {
         `;
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         const overlay = document.getElementById('deleteVideoModalOverlay');
         const confirmBtn = document.getElementById('deleteVideoModalConfirm');
         const cancelBtn = document.getElementById('deleteVideoModalCancel');
-        
+
         setTimeout(() => overlay.classList.add('active'), 10);
 
         confirmBtn.addEventListener('click', () => {
@@ -435,11 +435,11 @@ function showDeleteQuestionModal() {
         `;
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         const overlay = document.getElementById('deleteQuestionModalOverlay');
         const confirmBtn = document.getElementById('deleteQuestionModalConfirm');
         const cancelBtn = document.getElementById('deleteQuestionModalCancel');
-        
+
         setTimeout(() => overlay.classList.add('active'), 10);
 
         confirmBtn.addEventListener('click', () => {
@@ -496,11 +496,11 @@ function showLogoutModal() {
         `;
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         const overlay = document.getElementById('panelModalOverlay');
         const confirmBtn = document.getElementById('panelModalConfirm');
         const cancelBtn = document.getElementById('panelModalCancel');
-        
+
         setTimeout(() => overlay.classList.add('active'), 10);
 
         confirmBtn.addEventListener('click', () => {
@@ -535,7 +535,7 @@ function closeModal(overlay) {
 // Handle logout
 async function handleLogout() {
     const confirmed = await showLogoutModal();
-    
+
     if (confirmed) {
         sessionStorage.removeItem('currentUser');
         sessionStorage.removeItem('editingTestId');
@@ -551,7 +551,7 @@ async function loadTestData() {
 
         const testId = sessionStorage.getItem('editingTestId');
         console.log('Retrieved testId from sessionStorage:', testId);
-        
+
         if (!testId) {
             console.error('No testId found in sessionStorage');
             throw new Error('No se encontró el ID de la prueba');
@@ -595,7 +595,7 @@ async function loadTestData() {
         console.error('Error loading test data:', error);
         showNotification('Error al cargar los datos de la prueba: ' + error.message, 'error');
         hideLoadingOverlay();
-        
+
         // Redirect back to tests after error
         setTimeout(() => {
             window.location.href = 'Pruebas.html';
@@ -606,7 +606,7 @@ async function loadTestData() {
 // Update test info
 function updateTestInfo() {
     document.getElementById('testName').textContent = currentTest.nombre;
-    
+
     // Format date
     const [year, month, day] = currentTest.fechaDisponible.split('-').map(Number);
     const testDate = new Date(year, month - 1, day);
@@ -616,13 +616,13 @@ function updateTestInfo() {
         month: 'long',
         day: 'numeric'
     });
-    
+
     document.getElementById('testDate').textContent = `Fecha: ${formattedDate}`;
 
     // Update block times
-    document.getElementById('block1Time').textContent = 
+    document.getElementById('block1Time').textContent =
         `${currentTest.bloque1?.horaInicio || 'N/A'} - ${currentTest.bloque1?.horaFin || 'N/A'}`;
-    document.getElementById('block2Time').textContent = 
+    document.getElementById('block2Time').textContent =
         `${currentTest.bloque2?.horaInicio || 'N/A'} - ${currentTest.bloque2?.horaFin || 'N/A'}`;
 }
 
@@ -632,16 +632,16 @@ function updateQuestionsCount() {
     Object.keys(testBlocks.bloque1).forEach(subject => {
         const items = testBlocks.bloque1[subject].questions;
         // Contar solo las preguntas reales (no párrafos ni títulos)
-        const count = items.filter(item => 
+        const count = items.filter(item =>
             item.type === 'multiple' || item.type === 'short' || item.type === 'open'
         ).length;
         const element = document.getElementById(`${subject}-block1-count`);
         const subjectCard = document.querySelector(`[data-block="1"] .subject-card.${subject}`);
-        
+
         if (element) {
             element.textContent = `${count} pregunta${count !== 1 ? 's' : ''}`;
         }
-        
+
         // Add visual indicators
         if (subjectCard) {
             if (items.length > 0) {
@@ -658,16 +658,16 @@ function updateQuestionsCount() {
     Object.keys(testBlocks.bloque2).forEach(subject => {
         const items = testBlocks.bloque2[subject].questions;
         // Contar solo las preguntas reales (no párrafos ni títulos)
-        const count = items.filter(item => 
+        const count = items.filter(item =>
             item.type === 'multiple' || item.type === 'short' || item.type === 'open'
         ).length;
         const element = document.getElementById(`${subject}-block2-count`);
         const subjectCard = document.querySelector(`[data-block="2"] .subject-card.${subject}`);
-        
+
         if (element) {
             element.textContent = `${count} pregunta${count !== 1 ? 's' : ''}`;
         }
-        
+
         // Add visual indicators
         if (subjectCard) {
             if (items.length > 0) {
@@ -733,7 +733,7 @@ function loadQuestionsInModal() {
             questionNumber++;
         }
     });
-    
+
     // Renderizar fórmulas LaTeX después de cargar las preguntas
     setTimeout(() => renderMathInElement(container), 100);
 }
@@ -741,7 +741,7 @@ function loadQuestionsInModal() {
 // Clean LaTeX document code (remove document structure, keep only math)
 function cleanLatexCode(text) {
     if (!text) return text;
-    
+
     // Si contiene comandos de documento LaTeX, extraer solo el contenido matemático
     if (text.includes('\\documentclass') || text.includes('\\begin{document}')) {
         // Extraer contenido entre \begin{document} y \end{document}
@@ -749,17 +749,17 @@ function cleanLatexCode(text) {
         if (docMatch) {
             text = docMatch[1];
         }
-        
+
         // Remover comandos de paquetes y configuración
         text = text.replace(/\\documentclass\{[^}]*\}/g, '');
         text = text.replace(/\\usepackage(\[[^\]]*\])?\{[^}]*\}/g, '');
         text = text.replace(/\\begin\{document\}/g, '');
         text = text.replace(/\\end\{document\}/g, '');
-        
+
         // Limpiar espacios extra
         text = text.trim();
     }
-    
+
     return text;
 }
 
@@ -774,7 +774,7 @@ function renderMathInElement(element) {
                     node.nodeValue = cleanLatexCode(node.nodeValue);
                 }
             });
-            
+
             // Typeset the element with MathJax
             window.MathJax.typesetPromise([element]).catch((err) => {
                 console.log('MathJax typeset error:', err);
@@ -797,12 +797,12 @@ function getTextNodes(element) {
         null,
         false
     );
-    
+
     let node;
     while (node = walker.nextNode()) {
         textNodes.push(node);
     }
-    
+
     return textNodes;
 }
 
@@ -911,7 +911,7 @@ function createQuestionElement(question, index, questionNumber) {
 // Create options HTML
 function createOptionsHTML(options, questionIndex) {
     let html = '<div class="options-container">';
-    
+
     options.forEach((option, optionIndex) => {
         html += `
             <div class="option-item">
@@ -1023,7 +1023,7 @@ function createQuestion(type) {
             };
             testBlocks[blockKey][currentEditingSubject].questions.push(newQuestion);
             break;
-            
+
         case 'reading':
             // Crear título y párrafo juntos como un grupo
             const readingGroup = {
@@ -1036,7 +1036,7 @@ function createQuestion(type) {
             };
             testBlocks[blockKey][currentEditingSubject].questions.push(readingGroup);
             break;
-            
+
         case 'short':
             const shortQuestion = {
                 type: 'short',
@@ -1048,7 +1048,7 @@ function createQuestion(type) {
             };
             testBlocks[blockKey][currentEditingSubject].questions.push(shortQuestion);
             break;
-            
+
         case 'open':
             const openQuestion = {
                 type: 'open',
@@ -1081,24 +1081,24 @@ function createContextQuestionsSelector(readingIndex) {
     const blockKey = `bloque${currentEditingBlock}`;
     const allItems = testBlocks[blockKey][currentEditingSubject].questions;
     const reading = allItems[readingIndex];
-    
+
     let html = '<div class="context-checkboxes">';
     let questionNumber = 0;
-    
+
     // Buscar preguntas que vienen DESPUÉS de este texto de lectura
     for (let i = readingIndex + 1; i < allItems.length; i++) {
         const item = allItems[i];
-        
+
         // Si es otra lectura, detener
         if (item.type === 'reading') {
             break;
         }
-        
+
         // Si es una pregunta
         if (item.type === 'multiple' || item.type === 'short' || item.type === 'open') {
             questionNumber++;
             const isChecked = reading.showInQuestions && reading.showInQuestions.includes(i);
-            
+
             html += `
                 <label class="context-checkbox-item">
                     <input type="checkbox" 
@@ -1109,11 +1109,11 @@ function createContextQuestionsSelector(readingIndex) {
             `;
         }
     }
-    
+
     if (questionNumber === 0) {
         html += '<p class="no-questions-message">No hay preguntas después de este texto. Agrega preguntas para poder seleccionarlas.</p>';
     }
-    
+
     html += '</div>';
     return html;
 }
@@ -1122,11 +1122,11 @@ function createContextQuestionsSelector(readingIndex) {
 function toggleContextQuestion(readingIndex, questionIndex, isChecked) {
     const blockKey = `bloque${currentEditingBlock}`;
     const reading = testBlocks[blockKey][currentEditingSubject].questions[readingIndex];
-    
+
     if (!reading.showInQuestions) {
         reading.showInQuestions = [];
     }
-    
+
     if (isChecked) {
         // Agregar si no existe
         if (!reading.showInQuestions.includes(questionIndex)) {
@@ -1145,7 +1145,7 @@ function toggleContextQuestion(readingIndex, questionIndex, isChecked) {
 function changeQuestionType(index) {
     const blockKey = `bloque${currentEditingBlock}`;
     const question = testBlocks[blockKey][currentEditingSubject].questions[index];
-    
+
     if (question.type === 'multiple') {
         question.type = 'open';
         delete question.options;
@@ -1158,14 +1158,14 @@ function changeQuestionType(index) {
             { text: '', isCorrect: false }
         ];
     }
-    
+
     loadQuestionsInModal();
 }
 
 // Delete question
 async function deleteQuestion(index) {
     const confirmed = await showDeleteQuestionModal();
-    
+
     if (confirmed) {
         const blockKey = `bloque${currentEditingBlock}`;
         testBlocks[blockKey][currentEditingSubject].questions.splice(index, 1);
@@ -1184,7 +1184,7 @@ function updateOptionText(questionIndex, optionIndex, text) {
 function setCorrectOption(questionIndex, optionIndex) {
     const blockKey = `bloque${currentEditingBlock}`;
     const options = testBlocks[blockKey][currentEditingSubject].questions[questionIndex].options;
-    
+
     options.forEach((option, index) => {
         option.isCorrect = index === optionIndex;
     });
@@ -1194,7 +1194,7 @@ function setCorrectOption(questionIndex, optionIndex) {
 function addOption(questionIndex) {
     const blockKey = `bloque${currentEditingBlock}`;
     const options = testBlocks[blockKey][currentEditingSubject].questions[questionIndex].options;
-    
+
     options.push({ text: '', isCorrect: false, images: [] });
     loadQuestionsInModal();
 }
@@ -1203,7 +1203,7 @@ function addOption(questionIndex) {
 function deleteOption(questionIndex, optionIndex) {
     const blockKey = `bloque${currentEditingBlock}`;
     const options = testBlocks[blockKey][currentEditingSubject].questions[questionIndex].options;
-    
+
     if (options.length > 2) {
         options.splice(optionIndex, 1);
         loadQuestionsInModal();
@@ -1222,11 +1222,11 @@ function saveSubjectData() {
     // Validate questions
     const blockKey = `bloque${currentEditingBlock}`;
     const questions = testBlocks[blockKey][currentEditingSubject].questions;
-    
+
     let questionNumber = 1;
     for (let i = 0; i < questions.length; i++) {
         const question = questions[i];
-        
+
         if (question.type === 'reading') {
             // Validar texto de lectura
             if (!question.title || !question.title.trim()) {
@@ -1243,34 +1243,34 @@ function saveSubjectData() {
                 showNotification(`La pregunta ${questionNumber} no puede estar vacía`, 'error');
                 return;
             }
-            
+
             if (!question.options || question.options.length < 2) {
                 showNotification(`La pregunta ${questionNumber} debe tener al menos 2 opciones`, 'error');
                 return;
             }
-            
+
             let hasCorrect = false;
             let hasText = false;
-            
+
             for (const option of question.options) {
                 if (option.text.trim()) hasText = true;
                 if (option.isCorrect) hasCorrect = true;
             }
-            
+
             if (!hasText) {
                 showNotification(`La pregunta ${questionNumber} debe tener al menos una opción con texto`, 'error');
                 return;
             }
-            
+
             if (!hasCorrect) {
                 showNotification(`La pregunta ${questionNumber} debe tener una respuesta correcta marcada`, 'error');
                 return;
             }
-            
+
             questionNumber++;
         }
     }
-    
+
     updateQuestionsCount();
     hideSubjectModal();
     showNotification('Materia guardada correctamente', 'success');
@@ -1355,7 +1355,7 @@ function getNotificationIcon(type) {
 // Create question images HTML
 function createQuestionImagesHTML(images, questionIndex) {
     if (!images || images.length === 0) return '';
-    
+
     let html = '<div class="question-images">';
     images.forEach((image, imageIndex) => {
         html += `
@@ -1376,7 +1376,7 @@ function createQuestionImagesHTML(images, questionIndex) {
 // Create option images HTML
 function createOptionImagesHTML(images, questionIndex, optionIndex) {
     if (!images || images.length === 0) return '';
-    
+
     let html = '<div class="option-images">';
     images.forEach((image, imageIndex) => {
         html += `
@@ -1407,7 +1407,7 @@ async function uploadImageToImgBB(file) {
         });
 
         const result = await response.json();
-        
+
         if (result.success) {
             return {
                 url: result.data.url,
@@ -1430,7 +1430,7 @@ async function addImageToQuestion(questionIndex) {
     input.accept = 'image/*';
     input.multiple = false;
 
-    input.onchange = async function(event) {
+    input.onchange = async function (event) {
         const file = event.target.files[0];
         if (!file) return;
 
@@ -1449,18 +1449,18 @@ async function addImageToQuestion(questionIndex) {
         try {
             showLoadingOverlay();
             const imageData = await uploadImageToImgBB(file);
-            
+
             const blockKey = `bloque${currentEditingBlock}`;
             const question = testBlocks[blockKey][currentEditingSubject].questions[questionIndex];
-            
+
             if (!question.images) {
                 question.images = [];
             }
-            
+
             question.images.push(imageData);
             loadQuestionsInModal();
             showNotification('Imagen agregada correctamente', 'success');
-            
+
         } catch (error) {
             showNotification('Error al subir imagen: ' + error.message, 'error');
         } finally {
@@ -1476,9 +1476,9 @@ async function addImageToQuestion(questionIndex) {
 // Create combined media HTML (images and videos side by side)
 function createQuestionMediaHTML(images, videos, questionIndex) {
     if ((!images || images.length === 0) && (!videos || videos.length === 0)) return '';
-    
+
     let html = '<div class="question-media-container">';
-    
+
     // Add images section
     if (images && images.length > 0) {
         html += '<div class="media-section images-section">';
@@ -1498,7 +1498,7 @@ function createQuestionMediaHTML(images, videos, questionIndex) {
         });
         html += '</div></div>';
     }
-    
+
     // Add videos section
     if (videos && videos.length > 0) {
         html += '<div class="media-section videos-section">';
@@ -1527,7 +1527,7 @@ function createQuestionMediaHTML(images, videos, questionIndex) {
         });
         html += '</div></div>';
     }
-    
+
     html += '</div>';
     return html;
 }
@@ -1537,7 +1537,7 @@ function createQuestionMediaHTML(images, videos, questionIndex) {
 // Create question videos HTML
 function createQuestionVideosHTML(videos, questionIndex) {
     if (!videos || videos.length === 0) return '';
-    
+
     let html = '<div class="question-videos">';
     videos.forEach((video, videoIndex) => {
         html += `
@@ -1570,7 +1570,7 @@ function extractYouTubeVideoId(url) {
         /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
         /youtube\.com\/watch\?.*v=([^&\n?#]+)/
     ];
-    
+
     for (const pattern of patterns) {
         const match = url.match(pattern);
         if (match) {
@@ -1583,17 +1583,17 @@ function extractYouTubeVideoId(url) {
 // Convert YouTube URL to embed format automatically
 function convertToYouTubeEmbed(url) {
     if (!url) return url;
-    
+
     // If it's already an embed URL, return as is
     if (url.includes('youtube.com/embed/')) {
         return url;
     }
-    
+
     const videoId = extractYouTubeVideoId(url);
     if (videoId) {
         return `https://www.youtube.com/embed/${videoId}`;
     }
-    
+
     return url;
 }
 
@@ -1634,9 +1634,9 @@ function addVideoToQuestion(questionIndex) {
     document.getElementById('videoModal').classList.add('active');
 
     // Add event listener for URL input with auto-conversion
-    document.getElementById('videoUrl').addEventListener('input', function() {
+    document.getElementById('videoUrl').addEventListener('input', function () {
         let url = this.value.trim();
-        
+
         // Auto-convert to embed format if it's a valid YouTube URL
         if (url && !url.includes('youtube.com/embed/')) {
             const videoId = extractYouTubeVideoId(url);
@@ -1647,10 +1647,10 @@ function addVideoToQuestion(questionIndex) {
                 showNotification('URL convertida automáticamente al formato embed', 'info');
             }
         }
-        
+
         const videoId = extractYouTubeVideoId(url);
         const confirmBtn = document.getElementById('confirmVideoBtn');
-        
+
         if (videoId) {
             confirmBtn.disabled = false;
         } else {
@@ -1663,62 +1663,62 @@ function addVideoToQuestion(questionIndex) {
 // Preview video
 function previewVideo() {
     let url = document.getElementById('videoUrl').value.trim();
-    
+
     // Auto-convert to embed format if needed
     url = convertToYouTubeEmbed(url);
     document.getElementById('videoUrl').value = url;
-    
+
     const videoId = extractYouTubeVideoId(url);
-    
+
     if (!videoId) {
         showNotification('URL de YouTube no válida', 'error');
         return;
     }
-    
+
     const previewContainer = document.getElementById('videoPreviewContainer');
     const previewIframe = document.getElementById('videoPreview');
-    
+
     previewIframe.src = `https://www.youtube.com/embed/${videoId}`;
     previewContainer.style.display = 'block';
-    
+
     showNotification('Vista previa cargada', 'success');
 }
 
 // Confirm add video
 function confirmAddVideo(questionIndex) {
     let url = document.getElementById('videoUrl').value.trim();
-    
+
     // Auto-convert to embed format if needed
     url = convertToYouTubeEmbed(url);
-    
+
     const videoId = extractYouTubeVideoId(url);
-    
+
     if (!videoId) {
         showNotification('URL de YouTube no válida', 'error');
         return;
     }
-    
+
     const blockKey = `bloque${currentEditingBlock}`;
     const question = testBlocks[blockKey][currentEditingSubject].questions[questionIndex];
-    
+
     if (!question.videos) {
         question.videos = [];
     }
-    
+
     // Check if video already exists
     const existingVideo = question.videos.find(v => v.videoId === videoId);
     if (existingVideo) {
         showNotification('Este video ya está agregado a la pregunta', 'warning');
         return;
     }
-    
+
     const videoData = {
         videoId: videoId,
         url: url,
         title: `Video de YouTube`,
         embedUrl: `https://www.youtube.com/embed/${videoId}`
     };
-    
+
     question.videos.push(videoData);
     loadQuestionsInModal();
     hideVideoModal();
@@ -1737,11 +1737,11 @@ function hideVideoModal() {
 // Remove video from question
 async function removeVideoFromQuestion(questionIndex, videoIndex) {
     const confirmed = await showDeleteVideoModal();
-    
+
     if (confirmed) {
         const blockKey = `bloque${currentEditingBlock}`;
         const question = testBlocks[blockKey][currentEditingSubject].questions[questionIndex];
-        
+
         if (question.videos && question.videos[videoIndex]) {
             question.videos.splice(videoIndex, 1);
             loadQuestionsInModal();
@@ -1754,7 +1754,7 @@ async function removeVideoFromQuestion(questionIndex, videoIndex) {
 async function addImageToOption(questionIndex, optionIndex) {
     const blockKey = `bloque${currentEditingBlock}`;
     const option = testBlocks[blockKey][currentEditingSubject].questions[questionIndex].options[optionIndex];
-    
+
     // Check if option already has an image
     if (option.images && option.images.length > 0) {
         showNotification('Solo se permite una imagen por opción', 'warning');
@@ -1766,7 +1766,7 @@ async function addImageToOption(questionIndex, optionIndex) {
     input.accept = 'image/*';
     input.multiple = false;
 
-    input.onchange = async function(event) {
+    input.onchange = async function (event) {
         const file = event.target.files[0];
         if (!file) return;
 
@@ -1785,16 +1785,16 @@ async function addImageToOption(questionIndex, optionIndex) {
         try {
             showLoadingOverlay();
             const imageData = await uploadImageToImgBB(file);
-            
+
             if (!option.images) {
                 option.images = [];
             }
-            
+
             // Replace existing image or add new one (max 1)
             option.images = [imageData];
             loadQuestionsInModal();
             showNotification('Imagen agregada correctamente', 'success');
-            
+
         } catch (error) {
             showNotification('Error al subir imagen: ' + error.message, 'error');
         } finally {
@@ -1830,11 +1830,11 @@ function showDeleteImageModal(message) {
         `;
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         const overlay = document.getElementById('deleteImageModal');
         const confirmBtn = document.getElementById('deleteImageConfirm');
         const cancelBtn = document.getElementById('deleteImageCancel');
-        
+
         setTimeout(() => overlay.classList.add('active'), 10);
 
         confirmBtn.addEventListener('click', () => {
@@ -1869,11 +1869,11 @@ function showDeleteImageModal(message) {
 // Remove image from question
 async function removeImageFromQuestion(questionIndex, imageIndex) {
     const confirmed = await showDeleteImageModal('¿Estás seguro de que deseas eliminar esta imagen de la pregunta?');
-    
+
     if (confirmed) {
         const blockKey = `bloque${currentEditingBlock}`;
         const question = testBlocks[blockKey][currentEditingSubject].questions[questionIndex];
-        
+
         if (question.images && question.images[imageIndex]) {
             question.images.splice(imageIndex, 1);
             loadQuestionsInModal();
@@ -1885,11 +1885,11 @@ async function removeImageFromQuestion(questionIndex, imageIndex) {
 // Remove image from option
 async function removeImageFromOption(questionIndex, optionIndex, imageIndex) {
     const confirmed = await showDeleteImageModal('¿Estás seguro de que deseas eliminar esta imagen de la opción?');
-    
+
     if (confirmed) {
         const blockKey = `bloque${currentEditingBlock}`;
         const option = testBlocks[blockKey][currentEditingSubject].questions[questionIndex].options[optionIndex];
-        
+
         if (option.images && option.images[imageIndex]) {
             option.images.splice(imageIndex, 1);
             loadQuestionsInModal();
@@ -1917,14 +1917,14 @@ function showImageModal(imageUrl) {
     `;
 
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
+
     // Show modal with animation
     setTimeout(() => {
         document.getElementById('imageModal').classList.add('active');
     }, 10);
 
     // Close modal on overlay click
-    document.getElementById('imageModal').addEventListener('click', function(e) {
+    document.getElementById('imageModal').addEventListener('click', function (e) {
         if (e.target === this) {
             hideImageModal();
         }
