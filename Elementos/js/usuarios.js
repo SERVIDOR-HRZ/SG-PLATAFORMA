@@ -116,10 +116,18 @@ const elements = {
 function checkAuthentication() {
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
     
-    if (!currentUser.id || currentUser.tipoUsuario !== 'admin') {
+    // Permitir acceso a admin, superusuario o tipoUsuario admin
+    const isAdmin = currentUser.tipoUsuario === 'admin' || 
+                    currentUser.rol === 'admin' || 
+                    currentUser.rol === 'superusuario';
+    
+    if (!currentUser.id || !isAdmin) {
         window.location.href = '../index.html';
         return;
     }
+    
+    // Guardar el rol del usuario actual para verificaciones posteriores
+    window.currentUserRole = currentUser.rol || currentUser.tipoUsuario;
 }
 
 // Load user info
@@ -241,14 +249,24 @@ function initializePage() {
 function handleUserTypeChange() {
     const selectedType = document.querySelector('input[name="tipoUsuario"]:checked').value;
     const studentFields = document.querySelector('.student-fields');
+    const roleSelection = document.getElementById('roleSelectionCreate');
     const createButton = elements.createButtonText;
+    const isSuperuser = window.currentUserRole === 'superusuario';
     
     if (selectedType === 'estudiante') {
         studentFields.style.display = 'block';
+        roleSelection.style.display = 'none';
         createButton.textContent = 'Crear Estudiante';
     } else {
         studentFields.style.display = 'none';
-        createButton.textContent = 'Crear Administrador';
+        // Solo mostrar selector de rol si el usuario actual es superusuario
+        if (isSuperuser) {
+            roleSelection.style.display = 'block';
+            createButton.textContent = 'Crear Administrador';
+        } else {
+            roleSelection.style.display = 'none';
+            createButton.textContent = 'Crear Administrador';
+        }
     }
 }
 
@@ -327,6 +345,9 @@ function renderUsers() {
     const tbody = elements.usersTableBody;
     tbody.innerHTML = '';
     
+    const isSuperuser = window.currentUserRole === 'superusuario';
+    const currentUserId = JSON.parse(sessionStorage.getItem('currentUser') || '{}').id;
+    
     filteredUsers.forEach(user => {
         const row = document.createElement('tr');
         
@@ -339,6 +360,24 @@ function renderUsers() {
         const creationDate = user.fechaCreacion ? 
             user.fechaCreacion.toDate().toLocaleDateString('es-ES') : 
             'No disponible';
+        
+        // Determinar el badge del usuario
+        let userBadge = 'EST';
+        let badgeClass = 'estudiante';
+        if (user.tipoUsuario === 'admin' || user.rol === 'admin' || user.rol === 'superusuario') {
+            if (user.rol === 'superusuario') {
+                userBadge = 'SUPER';
+                badgeClass = 'superusuario';
+            } else {
+                userBadge = 'ADM';
+                badgeClass = 'admin';
+            }
+        }
+        
+        // Verificar si el usuario actual puede editar este usuario
+        const canEdit = isSuperuser || 
+                       (user.tipoUsuario === 'estudiante') || 
+                       (user.id === currentUserId);
         
         row.innerHTML = `
             <td>
@@ -360,8 +399,8 @@ function renderUsers() {
                 </div>
             </td>
             <td>
-                <span class="user-type-badge ${user.tipoUsuario}">
-                    ${user.tipoUsuario === 'admin' ? 'ADM' : 'EST'}
+                <span class="user-type-badge ${badgeClass}" title="${user.rol === 'superusuario' ? 'Superusuario - Acceso Total' : user.tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante'}">
+                    ${userBadge}
                 </span>
             </td>
             <td>
@@ -402,21 +441,27 @@ function renderUsers() {
             </td>
             <td>
                 <div class="action-buttons">
-                    <button class="action-btn edit-user-btn" 
-                            onclick="openEditUserModal('${user.id}')"
-                            title="Editar usuario">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                    <button class="action-btn reset-password-btn" 
-                            onclick="openResetPasswordModal('${user.id}')"
-                            title="Restablecer contraseña">
-                        <i class="bi bi-key"></i>
-                    </button>
-                    <button class="action-btn toggle-status-btn ${user.activo ? 'deactivate' : ''}" 
-                            onclick="toggleUserStatus('${user.id}', ${user.activo})"
-                            title="${user.activo ? 'Desactivar usuario' : 'Activar usuario'}">
-                        <i class="bi bi-${user.activo ? 'person-x' : 'person-check'}"></i>
-                    </button>
+                    ${canEdit ? `
+                        <button class="action-btn edit-user-btn" 
+                                onclick="openEditUserModal('${user.id}')"
+                                title="Editar usuario">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="action-btn reset-password-btn" 
+                                onclick="openResetPasswordModal('${user.id}')"
+                                title="Restablecer contraseña">
+                            <i class="bi bi-key"></i>
+                        </button>
+                        <button class="action-btn toggle-status-btn ${user.activo ? 'deactivate' : ''}" 
+                                onclick="toggleUserStatus('${user.id}', ${user.activo})"
+                                title="${user.activo ? 'Desactivar usuario' : 'Activar usuario'}">
+                            <i class="bi bi-${user.activo ? 'person-x' : 'person-check'}"></i>
+                        </button>
+                    ` : `
+                        <span class="no-permission-badge" title="No tienes permisos para editar este usuario">
+                            <i class="bi bi-lock-fill"></i> Sin permisos
+                        </span>
+                    `}
                 </div>
             </td>
         `;
@@ -490,6 +535,15 @@ function openEditUserModal(userId) {
     const user = allUsers.find(u => u.id === userId);
     if (!user) return;
     
+    const isSuperuser = window.currentUserRole === 'superusuario';
+    const currentUserId = JSON.parse(sessionStorage.getItem('currentUser') || '{}').id;
+    
+    // Verificar permisos: superusuario puede editar todo, admin solo estudiantes y su propio perfil
+    if (!isSuperuser && user.tipoUsuario === 'admin' && user.id !== currentUserId) {
+        showMessage('No tienes permisos para editar este administrador', 'error');
+        return;
+    }
+    
     currentUserForEdit = user;
     
     // Fill form with user data
@@ -499,10 +553,39 @@ function openEditUserModal(userId) {
     elements.editEmailRecuperacion.value = user.emailRecuperacion || '';
     
     // Set user type badge
-    const isAdmin = user.tipoUsuario === 'admin';
-    elements.editUserTypeBadge.className = `user-type-badge-display ${user.tipoUsuario}`;
-    elements.editUserTypeBadge.querySelector('i').className = isAdmin ? 'bi bi-person-badge-fill' : 'bi bi-person-fill';
-    elements.editUserTypeText.textContent = isAdmin ? 'Administrador' : 'Estudiante';
+    const isAdmin = user.tipoUsuario === 'admin' || user.rol === 'admin' || user.rol === 'superusuario';
+    const isSuperuserUser = user.rol === 'superusuario';
+    
+    let badgeClass = user.tipoUsuario;
+    let iconClass = 'bi bi-person-fill';
+    let typeText = 'Estudiante';
+    
+    if (isSuperuserUser) {
+        badgeClass = 'superusuario';
+        iconClass = 'bi bi-shield-fill-exclamation';
+        typeText = 'Superusuario';
+    } else if (isAdmin) {
+        badgeClass = 'admin';
+        iconClass = 'bi bi-person-badge-fill';
+        typeText = 'Administrador';
+    }
+    
+    elements.editUserTypeBadge.className = `user-type-badge-display ${badgeClass}`;
+    elements.editUserTypeBadge.querySelector('i').className = iconClass;
+    elements.editUserTypeText.textContent = typeText;
+    
+    // Show/hide role selection for admins (only if current user is superuser)
+    const roleSelectionEdit = document.getElementById('roleSelectionEdit');
+    if (user.tipoUsuario === 'admin' && isSuperuser) {
+        roleSelectionEdit.style.display = 'block';
+        const userRole = user.rol || 'admin';
+        const roleRadio = document.querySelector(`input[name="rolUsuarioEdit"][value="${userRole}"]`);
+        if (roleRadio) {
+            roleRadio.checked = true;
+        }
+    } else {
+        roleSelectionEdit.style.display = 'none';
+    }
     
     // Show/hide student fields
     const studentFields = document.querySelectorAll('.student-edit-fields');
@@ -661,6 +744,17 @@ async function handleCreateUser(e) {
         // Generate recovery code
         const recoveryCode = generateRecoveryCode();
         
+        // Determinar el rol del usuario
+        let rol = tipoUsuario; // Por defecto, el rol es el tipo de usuario
+        if (tipoUsuario === 'admin') {
+            const rolSeleccionado = document.querySelector('input[name="rolUsuario"]:checked');
+            if (rolSeleccionado && window.currentUserRole === 'superusuario') {
+                rol = rolSeleccionado.value; // 'admin' o 'superusuario'
+            } else {
+                rol = 'admin'; // Por defecto admin normal
+            }
+        }
+        
         // Create user data object
         const userData = {
             nombre: nombre,
@@ -669,6 +763,7 @@ async function handleCreateUser(e) {
             telefono: telefono,
             emailRecuperacion: emailRecuperacion,
             tipoUsuario: tipoUsuario,
+            rol: rol, // Nuevo campo rol
             activo: true,
             codigoRecuperacion: recoveryCode,
             fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
@@ -688,7 +783,8 @@ async function handleCreateUser(e) {
         // Add to Firestore
         await window.firebaseDB.collection('usuarios').add(userData);
         
-        showMessage(`${tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante'} creado exitosamente. Código de recuperación: ${recoveryCode}`, 'success');
+        const rolText = rol === 'superusuario' ? 'Superusuario' : (tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante');
+        showMessage(`${rolText} creado exitosamente. Código de recuperación: ${recoveryCode}`, 'success');
         closeCreateUserModal();
         loadUsers(); // Refresh the list
         
@@ -753,6 +849,14 @@ async function handleEditUser(e) {
             emailRecuperacion: emailRecuperacion,
             fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
         };
+        
+        // Update role if user is admin and current user is superuser
+        if (currentUserForEdit.tipoUsuario === 'admin' && window.currentUserRole === 'superusuario') {
+            const rolSeleccionado = document.querySelector('input[name="rolUsuarioEdit"]:checked');
+            if (rolSeleccionado) {
+                updateData.rol = rolSeleccionado.value;
+            }
+        }
         
         // Add student-specific fields if user is a student
         if (currentUserForEdit.tipoUsuario === 'estudiante') {

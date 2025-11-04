@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 nombre: userData.nombre,
                 email: userData.email,
                 tipoUsuario: userData.tipoUsuario,
+                rol: userData.rol || userData.tipoUsuario, // Nuevo campo rol
                 numeroDocumento: userData.numeroDocumento,
                 numeroIdentidad: userData.numeroIdentidad
             }));
@@ -105,12 +106,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             showMessage('¡Inicio de sesión exitoso! Redirigiendo...', 'success');
             
-            // Redirect based on user type
+            // Redirect based on user type and role
             setTimeout(() => {
                 // Check if we're in the Secciones folder
                 const isInSecciones = window.location.pathname.includes('/Secciones/');
                 
-                if (userData.tipoUsuario === 'admin') {
+                // Superusuario y admin van al panel de administración
+                if (userData.tipoUsuario === 'admin' || userData.rol === 'superusuario' || userData.rol === 'admin') {
                     window.location.href = isInSecciones ? 'Panel_Admin.html' : 'Secciones/Panel_Admin.html';
                 } else {
                     window.location.href = isInSecciones ? 'Panel_Estudiantes.html' : 'Secciones/Panel_Estudiantes.html';

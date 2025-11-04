@@ -283,6 +283,29 @@
                         </div>
                     </div>
                     
+                    <!-- Role Selection (only for admins, visible to superusers) -->
+                    <div class="role-selection" id="roleSelectionCreate" style="display: none;">
+                        <label>Nivel de Permisos *</label>
+                        <div class="user-type-options">
+                            <label class="radio-option">
+                                <input type="radio" name="rolUsuario" value="admin" checked>
+                                <div class="option-content">
+                                    <i class="bi bi-shield-check"></i>
+                                    <span>Administrador</span>
+                                    <small style="display: block; font-size: 0.75rem; color: #666;">Gestiona estudiantes</small>
+                                </div>
+                            </label>
+                            <label class="radio-option" id="superuserOptionCreate">
+                                <input type="radio" name="rolUsuario" value="superusuario">
+                                <div class="option-content">
+                                    <i class="bi bi-shield-fill-exclamation"></i>
+                                    <span>Superusuario</span>
+                                    <small style="display: block; font-size: 0.75rem; color: #666;">Acceso total al sistema</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
                     <!-- Basic Information -->
                     <div class="form-section">
                         <h4>Información Básica</h4>
@@ -441,6 +464,29 @@
                         <div class="user-type-badge-display" id="editUserTypeBadge">
                             <i class="bi bi-person-fill"></i>
                             <span id="editUserTypeText">Estudiante</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Role Selection for Edit (only for admins, visible to superusers) -->
+                    <div class="role-selection" id="roleSelectionEdit" style="display: none;">
+                        <label>Nivel de Permisos *</label>
+                        <div class="user-type-options">
+                            <label class="radio-option">
+                                <input type="radio" name="rolUsuarioEdit" value="admin" checked>
+                                <div class="option-content">
+                                    <i class="bi bi-shield-check"></i>
+                                    <span>Administrador</span>
+                                    <small style="display: block; font-size: 0.75rem; color: #666;">Gestiona estudiantes</small>
+                                </div>
+                            </label>
+                            <label class="radio-option" id="superuserOptionEdit">
+                                <input type="radio" name="rolUsuarioEdit" value="superusuario">
+                                <div class="option-content">
+                                    <i class="bi bi-shield-fill-exclamation"></i>
+                                    <span>Superusuario</span>
+                                    <small style="display: block; font-size: 0.75rem; color: #666;">Acceso total al sistema</small>
+                                </div>
+                            </label>
                         </div>
                     </div>
                     

@@ -643,6 +643,23 @@ body {
     border: 1px solid #ff0000;
 }
 
+.user-type-badge.superusuario {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+    color: white;
+    border: 1px solid #9c27b0;
+    box-shadow: 0 2px 4px rgba(156, 39, 176, 0.3);
+    animation: pulse-super 2s infinite;
+}
+
+@keyframes pulse-super {
+    0%, 100% {
+        box-shadow: 0 2px 4px rgba(156, 39, 176, 0.3);
+    }
+    50% {
+        box-shadow: 0 2px 8px rgba(156, 39, 176, 0.6);
+    }
+}
+
 .user-type-badge.estudiante {
     background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
@@ -1400,6 +1417,13 @@ body {
     background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
     border: 1px solid #ff0000;
+}
+
+.user-type-badge-display.superusuario {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+    color: white;
+    border: 1px solid #9c27b0;
+    box-shadow: 0 2px 8px rgba(156, 39, 176, 0.4);
 }
 
 .user-type-badge-display.estudiante {
@@ -2748,4 +2772,55 @@ body {
     right: 10px;
     color: #ff0000;
     font-size: 1.2rem;
+}
+
+/* Role Selection Styles */
+.role-selection {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.role-selection label {
+    display: block;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.role-selection .user-type-options {
+    display: flex;
+    gap: 1rem;
+}
+
+.role-selection .radio-option {
+    flex: 1;
+}
+
+.role-selection .option-content small {
+    display: block;
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+/* No Permission Badge */
+.no-permission-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.no-permission-badge i {
+    font-size: 0.9rem;
 }
