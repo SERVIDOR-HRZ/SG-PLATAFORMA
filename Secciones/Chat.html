@@ -30,7 +30,8 @@
                     <div class="user-avatar-default" id="userAvatarDefault">
                         <i class="bi bi-person-fill"></i>
                     </div>
-                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto de perfil">
+                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src=""
+                        alt="Foto de perfil">
                 </div>
                 <div class="user-dropdown">
                     <button class="user-menu-btn" id="userMenuBtn">
@@ -48,10 +49,6 @@
                     </div>
                 </div>
             </div>
-            <button class="logout-btn" id="logoutBtn">
-                <i class="bi bi-box-arrow-right"></i>
-                Cerrar Sesión
-            </button>
         </div>
     </header>
 
@@ -66,18 +63,18 @@
                 <div class="sidebar-header">
                     <h3>Conversaciones</h3>
                 </div>
-                
+
                 <div class="search-contacts">
                     <i class="bi bi-search"></i>
                     <input type="text" id="searchContactsInput" placeholder="Buscar contacto...">
                 </div>
-                
+
                 <div class="filter-contacts">
                     <button class="filter-contact-btn active" data-filter="todos">Todos</button>
                     <button class="filter-contact-btn" data-filter="admin">Administradores</button>
                     <button class="filter-contact-btn" data-filter="estudiante">Estudiantes</button>
                 </div>
-                
+
                 <div class="contacts-list" id="contactsList">
                     <!-- Contacts will be loaded here -->
                     <div class="loading-contacts">
@@ -93,7 +90,7 @@
                 <button class="mobile-menu-btn-fixed" id="mobileMenuBtn" title="Ver contactos">
                     <i class="bi bi-chevron-right"></i>
                 </button>
-                
+
                 <div class="no-chat-selected">
                     <i class="bi bi-chat-dots"></i>
                     <h3>Selecciona una conversación</h3>
@@ -132,12 +129,8 @@
                                 <i class="bi bi-paperclip"></i>
                             </button>
                             <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                            <textarea 
-                                id="messageInput" 
-                                placeholder="Escribe tu mensaje o pega una imagen..." 
-                                rows="1"
-                                maxlength="1000"
-                            ></textarea>
+                            <textarea id="messageInput" placeholder="Escribe tu mensaje o pega una imagen..." rows="1"
+                                maxlength="1000"></textarea>
                             <button type="submit" class="send-btn" id="sendBtn">
                                 <i class="bi bi-send-fill"></i>
                             </button>
@@ -183,15 +176,37 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div class="confirm-modal" id="confirmLogoutModal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header" style="background: linear-gradient(135deg, #ff0000, #cc0000);">
+                <i class="bi bi-box-arrow-right"></i>
+                <h3>Cerrar Sesión</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p>¿Estás seguro de que deseas cerrar sesión?</p>
+            </div>
+            <div class="confirm-modal-footer">
+                <button class="confirm-cancel-btn" id="cancelLogoutBtn">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
+                </button>
+                <button class="confirm-accept-btn" id="acceptLogoutBtn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
+
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/perfil-compartido.js"></script>
     <script src="../Elementos/js/chat.js"></script>
-    
+
 </body>
 
 </html>
-

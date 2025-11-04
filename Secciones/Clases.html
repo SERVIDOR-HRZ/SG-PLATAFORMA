@@ -35,11 +35,23 @@
                     <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src=""
                         alt="Foto de perfil">
                 </div>
+                <div class="user-dropdown">
+                    <button class="user-menu-btn" id="userMenuBtn">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown-menu" id="userDropdownMenu">
+                        <a href="panelUsuario.html" class="dropdown-item">
+                            <i class="bi bi-person-gear"></i>
+                            Configuración
+                        </a>
+                        <hr class="dropdown-divider">
+                        <button class="dropdown-item" id="logoutBtnDropdown">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
             </div>
-            <button class="logout-btn" id="logoutBtn">
-                <i class="bi bi-box-arrow-right"></i>
-                Cerrar Sesión
-            </button>
         </div>
     </header>
 

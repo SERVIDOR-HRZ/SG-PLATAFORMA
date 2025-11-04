@@ -49,8 +49,7 @@ function setupEventListeners() {
     // Back button
     document.getElementById('backBtn').addEventListener('click', goBack);
 
-    // Logout button
-    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    // Logout button en dropdown (manejado por perfil-compartido.js)
 }
 
 // Go back to student panel

@@ -124,12 +124,6 @@ function updateTimeDisplay() {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Logout button
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
-    }
-    
     // Logout button en dropdown
     const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
     if (logoutBtnDropdown) {
@@ -440,9 +434,9 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('keydown', function(event) {
     // ESC key to logout
     if (event.key === 'Escape') {
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.click();
+        const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
+        if (logoutBtnDropdown) {
+            logoutBtnDropdown.click();
         }
     }
     

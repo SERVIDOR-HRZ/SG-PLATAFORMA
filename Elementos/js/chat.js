@@ -34,7 +34,6 @@ const elements = {
     contactsList: document.getElementById('contactsList'),
     searchContactsInput: document.getElementById('searchContactsInput'),
     backBtn: document.getElementById('backBtn'),
-    logoutBtn: document.getElementById('logoutBtn'),
     
     // Chat Area
     chatArea: document.getElementById('chatArea'),
@@ -90,8 +89,6 @@ function initializePage() {
         }
     });
     
-    // Logout buttons
-    elements.logoutBtn.addEventListener('click', handleLogout);
     // El logout del dropdown se maneja en perfil-compartido.js
     
     // Search contacts
@@ -744,10 +741,36 @@ function showMessage(message, type) {
 
 // Handle logout
 async function handleLogout() {
-    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-        sessionStorage.removeItem('currentUser');
-        window.location.href = '../index.html';
-    }
+    showConfirmLogoutModal();
+}
+
+// Show confirm logout modal
+function showConfirmLogoutModal() {
+    const modal = document.getElementById('confirmLogoutModal');
+    modal.classList.add('active');
+    
+    // Setup buttons
+    document.getElementById('acceptLogoutBtn').onclick = confirmLogout;
+    document.getElementById('cancelLogoutBtn').onclick = hideConfirmLogoutModal;
+    
+    // Close on overlay click
+    modal.onclick = function(e) {
+        if (e.target === modal) {
+            hideConfirmLogoutModal();
+        }
+    };
+}
+
+// Hide confirm logout modal
+function hideConfirmLogoutModal() {
+    const modal = document.getElementById('confirmLogoutModal');
+    modal.classList.remove('active');
+}
+
+// Confirm logout
+function confirmLogout() {
+    sessionStorage.removeItem('currentUser');
+    window.location.href = '../index.html';
 }
 
 // Upload image to ImgBB

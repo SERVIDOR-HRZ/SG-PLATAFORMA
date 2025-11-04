@@ -822,10 +822,28 @@ function setupEventListeners() {
         });
     }
 
-    // Logout button
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
+    // User menu dropdown
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdownMenu = document.getElementById('userDropdownMenu');
+    
+    if (userMenuBtn && userDropdownMenu) {
+        userMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('active');
+        });
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!userMenuBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                userDropdownMenu.classList.remove('active');
+            }
+        });
+    }
+
+    // Logout button en dropdown
+    const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
+    if (logoutBtnDropdown) {
+        logoutBtnDropdown.addEventListener('click', () => {
             sessionStorage.removeItem('currentUser');
             window.location.href = '../index.html';
         });

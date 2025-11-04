@@ -37,7 +37,6 @@ const elements = {
     refreshBtn: document.getElementById('refreshBtn'),
     createUserBtn: document.getElementById('createUserBtn'),
     backBtn: document.getElementById('backBtn'),
-    logoutBtn: document.getElementById('logoutBtn'),
     
     // Export elements
     exportBtn: document.getElementById('exportBtn'),
@@ -141,7 +140,7 @@ function initializePage() {
     elements.refreshBtn.addEventListener('click', loadUsers);
     elements.createUserBtn.addEventListener('click', openCreateUserModal);
     elements.backBtn.addEventListener('click', () => window.location.href = 'Panel_Admin.html');
-    elements.logoutBtn.addEventListener('click', handleLogout);
+    // Logout button manejado por perfil-compartido.js
     
     // Export dropdown events
     elements.exportBtn.addEventListener('click', toggleExportMenu);

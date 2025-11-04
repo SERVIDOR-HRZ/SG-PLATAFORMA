@@ -32,8 +32,29 @@ function configurarEventos() {
     // Botón volver
     document.getElementById('backBtn').addEventListener('click', volverAlPanel);
     
-    // Botón cerrar sesión
-    document.getElementById('logoutBtn').addEventListener('click', manejarCerrarSesion);
+    // User menu dropdown
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdownMenu = document.getElementById('userDropdownMenu');
+    
+    if (userMenuBtn && userDropdownMenu) {
+        userMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('active');
+        });
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!userMenuBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                userDropdownMenu.classList.remove('active');
+            }
+        });
+    }
+    
+    // Botón cerrar sesión en dropdown
+    const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
+    if (logoutBtnDropdown) {
+        logoutBtnDropdown.addEventListener('click', manejarCerrarSesion);
+    }
     
     // Botón cambiar foto
     document.getElementById('cambiarFotoBtn').addEventListener('click', cambiarFotoPerfil);
@@ -143,6 +164,9 @@ async function cargarInformacionUsuario() {
             mostrarAvatarPorDefecto();
         }
 
+        // Actualizar header con nombre y foto
+        actualizarHeaderUsuario(datosUsuario.nombre, datosUsuario.fotoPerfil);
+
         ocultarCargando();
 
     } catch (error) {
@@ -173,6 +197,30 @@ function mostrarAvatarPorDefecto() {
     fotoAvatar.style.display = 'flex';
     fotoImagen.style.display = 'none';
     eliminarBtn.style.display = 'none';
+}
+
+// Actualizar header con nombre y foto del usuario
+function actualizarHeaderUsuario(nombre, fotoPerfil) {
+    // Actualizar nombre en el header
+    const userNameElement = document.getElementById('userName');
+    if (userNameElement) {
+        userNameElement.textContent = nombre || 'USUARIO';
+    }
+
+    // Actualizar foto en el header
+    const userAvatarDefault = document.getElementById('userAvatarDefault');
+    const userAvatarImage = document.getElementById('userAvatarImage');
+
+    if (fotoPerfil && userAvatarImage && userAvatarDefault) {
+        // Mostrar imagen
+        userAvatarImage.src = fotoPerfil;
+        userAvatarImage.style.display = 'block';
+        userAvatarDefault.style.display = 'none';
+    } else if (userAvatarDefault && userAvatarImage) {
+        // Mostrar avatar por defecto
+        userAvatarImage.style.display = 'none';
+        userAvatarDefault.style.display = 'flex';
+    }
 }
 
 // Cambiar foto de perfil
@@ -220,6 +268,9 @@ function cambiarFotoPerfil() {
 
             // Mostrar foto
             mostrarFotoPerfil(datosImagen.url);
+            
+            // Actualizar header
+            actualizarHeaderUsuario(usuarioActual.nombre, datosImagen.url);
             
             mostrarNotificacion('Foto de perfil actualizada correctamente', 'exito');
             ocultarCargando();
@@ -288,6 +339,9 @@ async function eliminarFotoPerfil() {
         // Mostrar avatar por defecto
         mostrarAvatarPorDefecto();
         
+        // Actualizar header
+        actualizarHeaderUsuario(usuarioActual.nombre, null);
+        
         mostrarNotificacion('Foto de perfil eliminada correctamente', 'exito');
         ocultarCargando();
 
@@ -346,6 +400,9 @@ async function guardarInformacion(event) {
         usuarioActual.email = email;
         usuarioActual.telefono = telefono;
         sessionStorage.setItem('currentUser', JSON.stringify(usuarioActual));
+
+        // Actualizar header con el nuevo nombre
+        actualizarHeaderUsuario(nombre, usuarioActual.fotoPerfil);
 
         mostrarNotificacion('Información actualizada correctamente', 'exito');
         ocultarCargando();
@@ -844,21 +901,49 @@ function cambiarPestana(tabName) {
 // ========================================
 
 function configurarEventosPlaylists() {
-    // Botón crear playlist
-    document.getElementById('crearPlaylistBtn').addEventListener('click', abrirModalNuevaPlaylist);
+    // Verificar si los elementos existen antes de agregar event listeners
+    const crearPlaylistBtn = document.getElementById('crearPlaylistBtn');
+    if (crearPlaylistBtn) {
+        crearPlaylistBtn.addEventListener('click', abrirModalNuevaPlaylist);
+    }
     
     // Modal de playlist
-    document.getElementById('closePlaylistModal').addEventListener('click', cerrarModalPlaylist);
-    document.getElementById('cancelarPlaylistBtn').addEventListener('click', cerrarModalPlaylist);
-    document.getElementById('guardarPlaylistBtn').addEventListener('click', guardarPlaylist);
+    const closePlaylistModal = document.getElementById('closePlaylistModal');
+    if (closePlaylistModal) {
+        closePlaylistModal.addEventListener('click', cerrarModalPlaylist);
+    }
+    
+    const cancelarPlaylistBtn = document.getElementById('cancelarPlaylistBtn');
+    if (cancelarPlaylistBtn) {
+        cancelarPlaylistBtn.addEventListener('click', cerrarModalPlaylist);
+    }
+    
+    const guardarPlaylistBtn = document.getElementById('guardarPlaylistBtn');
+    if (guardarPlaylistBtn) {
+        guardarPlaylistBtn.addEventListener('click', guardarPlaylist);
+    }
     
     // Agregar canción
-    document.getElementById('agregarCancionBtn').addEventListener('click', mostrarFormularioCancion);
-    document.getElementById('confirmarAgregarCancion').addEventListener('click', agregarCancion);
-    document.getElementById('cancelarAgregarCancion').addEventListener('click', ocultarFormularioCancion);
+    const agregarCancionBtn = document.getElementById('agregarCancionBtn');
+    if (agregarCancionBtn) {
+        agregarCancionBtn.addEventListener('click', mostrarFormularioCancion);
+    }
+    
+    const confirmarAgregarCancion = document.getElementById('confirmarAgregarCancion');
+    if (confirmarAgregarCancion) {
+        confirmarAgregarCancion.addEventListener('click', agregarCancion);
+    }
+    
+    const cancelarAgregarCancion = document.getElementById('cancelarAgregarCancion');
+    if (cancelarAgregarCancion) {
+        cancelarAgregarCancion.addEventListener('click', ocultarFormularioCancion);
+    }
     
     // Modal de confirmación
-    document.getElementById('cancelarEliminarBtn').addEventListener('click', cerrarModalConfirmar);
+    const cancelarEliminarBtn = document.getElementById('cancelarEliminarBtn');
+    if (cancelarEliminarBtn) {
+        cancelarEliminarBtn.addEventListener('click', cerrarModalConfirmar);
+    }
 }
 
 async function cargarPlaylists() {

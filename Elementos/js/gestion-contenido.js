@@ -33,6 +33,52 @@ function checkAuthentication() {
     if (currentUser.nombre) {
         document.getElementById('userName').textContent = currentUser.nombre.toUpperCase();
     }
+
+    // Cargar foto de perfil
+    cargarFotoPerfil(currentUser.id);
+}
+
+// Cargar foto de perfil
+async function cargarFotoPerfil(usuarioId) {
+    try {
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+
+        const database = window.firebaseDB;
+        const usuarioDoc = await database.collection('usuarios').doc(usuarioId).get();
+
+        if (usuarioDoc.exists) {
+            const datosUsuario = usuarioDoc.data();
+
+            if (datosUsuario.fotoPerfil) {
+                const avatarDefault = document.getElementById('userAvatarDefault');
+                const avatarImage = document.getElementById('userAvatarImage');
+
+                if (avatarDefault && avatarImage) {
+                    avatarDefault.style.display = 'none';
+                    avatarImage.src = datosUsuario.fotoPerfil;
+                    avatarImage.style.display = 'block';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar foto de perfil:', error);
+    }
+}
+
+// Esperar Firebase
+function esperarFirebase() {
+    return new Promise(resolve => {
+        const verificar = () => {
+            if (window.firebaseDB) {
+                resolve();
+            } else {
+                setTimeout(verificar, 100);
+            }
+        };
+        verificar();
+    });
 }
 
 // Initialize Firebase
@@ -54,10 +100,36 @@ async function initializeFirebase() {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Logout button
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
+    // Back button
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            window.location.href = 'Panel_Admin.html';
+        });
+    }
+
+    // User menu dropdown
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdownMenu = document.getElementById('userDropdownMenu');
+    
+    if (userMenuBtn && userDropdownMenu) {
+        userMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('active');
+        });
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!userMenuBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                userDropdownMenu.classList.remove('active');
+            }
+        });
+    }
+
+    // Logout button en dropdown
+    const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
+    if (logoutBtnDropdown) {
+        logoutBtnDropdown.addEventListener('click', handleLogout);
     }
     
     // Tab buttons
