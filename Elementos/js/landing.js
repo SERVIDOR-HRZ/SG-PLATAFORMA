@@ -284,14 +284,14 @@ function checkUserSession() {
 // Update login button based on session
 function updateLoginButton() {
     const btnLogin = document.getElementById('btnLogin');
-    if (!btnLogin) return;
+    const btnLoginMobile = document.getElementById('btnLoginMobile');
 
     const userData = sessionStorage.getItem('currentUser');
     if (userData) {
         try {
             const user = JSON.parse(userData);
-            btnLogin.textContent = 'Ir al Panel';
-            btnLogin.onclick = (e) => {
+            const buttonText = 'Ir al Panel';
+            const clickHandler = (e) => {
                 e.preventDefault();
                 if (user.tipoUsuario === 'admin') {
                     window.location.href = 'Secciones/Panel_Admin.html';
@@ -299,6 +299,18 @@ function updateLoginButton() {
                     window.location.href = 'Secciones/Panel_Estudiantes.html';
                 }
             };
+
+            // Update desktop button
+            if (btnLogin) {
+                btnLogin.textContent = buttonText;
+                btnLogin.onclick = clickHandler;
+            }
+
+            // Update mobile button
+            if (btnLoginMobile) {
+                btnLoginMobile.textContent = buttonText;
+                btnLoginMobile.onclick = clickHandler;
+            }
         } catch (e) {
             console.error('Error parsing user data:', e);
         }

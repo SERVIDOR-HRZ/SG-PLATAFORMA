@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setupEventListeners();
     loadTestData();
 
-    // Inicializar foto de perfil
+    // Inicializar foto de perfil y menú desplegable
     if (typeof inicializarPerfilCompartido === 'function') {
         inicializarPerfilCompartido();
     }
@@ -83,9 +83,6 @@ function checkAuthentication() {
 function setupEventListeners() {
     // Back button
     document.getElementById('backBtn').addEventListener('click', goBack);
-
-    // Logout button
-    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
     // Modal events
     document.getElementById('closeModal').addEventListener('click', hideSubjectModal);
