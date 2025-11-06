@@ -384,8 +384,28 @@ body {
 .post-content {
     color: #333;
     line-height: 1.6;
-    white-space: pre-wrap;
     margin-bottom: 1rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.post-content .content-link {
+    color: #ff0000;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+    word-break: break-all;
+}
+
+.post-content .content-link:hover {
+    border-bottom-color: #ff0000;
+    color: #cc0000;
+}
+
+.post-content .content-link::after {
+    content: ' 🔗';
+    font-size: 0.9em;
 }
 
 /* Post Media Container */
@@ -2228,5 +2248,52 @@ body {
     .task-image,
     .post-image {
         height: 160px;
+    }
+}
+
+/* Estilos para anuncios cancelados */
+.post-card.cancelled {
+    border-left: 4px solid #dc3545;
+    background: #fff5f5;
+    position: relative;
+}
+
+.post-card.cancelled::before {
+    content: '⚠️ CANCELADA';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #dc3545;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.post-card.cancelled .post-title {
+    color: #dc3545;
+}
+
+.post-card.cancelled .post-content {
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .post-card.cancelled::before {
+        font-size: 0.7rem;
+        padding: 3px 10px;
+        top: 8px;
+        right: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .post-card.cancelled::before {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+        top: 6px;
+        right: 6px;
     }
 }

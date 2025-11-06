@@ -249,16 +249,19 @@ function initializePage() {
 function handleUserTypeChange() {
     const selectedType = document.querySelector('input[name="tipoUsuario"]:checked').value;
     const studentFields = document.querySelector('.student-fields');
+    const adminFields = document.querySelectorAll('.admin-fields');
     const roleSelection = document.getElementById('roleSelectionCreate');
     const createButton = elements.createButtonText;
     const isSuperuser = window.currentUserRole === 'superusuario';
     
     if (selectedType === 'estudiante') {
         studentFields.style.display = 'block';
+        adminFields.forEach(field => field.style.display = 'none');
         roleSelection.style.display = 'none';
         createButton.textContent = 'Crear Estudiante';
     } else {
         studentFields.style.display = 'none';
+        adminFields.forEach(field => field.style.display = 'block');
         // Solo mostrar selector de rol si el usuario actual es superusuario
         if (isSuperuser) {
             roleSelection.style.display = 'block';
@@ -589,8 +592,12 @@ function openEditUserModal(userId) {
     
     // Show/hide student fields
     const studentFields = document.querySelectorAll('.student-edit-fields');
+    const adminEditFields = document.querySelectorAll('.admin-edit-fields');
+    
     if (user.tipoUsuario === 'estudiante') {
         studentFields.forEach(field => field.style.display = 'block');
+        adminEditFields.forEach(field => field.style.display = 'none');
+        
         elements.editInstitucion.value = user.institucion || '';
         elements.editGrado.value = user.grado || '';
         elements.editTipoDocumento.value = user.tipoDocumento || '';
@@ -605,6 +612,14 @@ function openEditUserModal(userId) {
         });
     } else {
         studentFields.forEach(field => field.style.display = 'none');
+        adminEditFields.forEach(field => field.style.display = 'block');
+        
+        // Load asignaturas del profesor
+        const asignaturas = user.asignaturas || [];
+        const asignaturasCheckboxes = document.querySelectorAll('input[name="asignaturaProfesorEdit"]');
+        asignaturasCheckboxes.forEach(checkbox => {
+            checkbox.checked = asignaturas.includes(checkbox.value);
+        });
     }
     
     elements.editUserModal.classList.add('show');
@@ -780,6 +795,13 @@ async function handleCreateUser(e) {
             userData.clasesPermitidas = []; // Initialize empty, admin can edit later
         }
         
+        // Add admin-specific fields (asignaturas)
+        if (tipoUsuario === 'admin') {
+            const asignaturasCheckboxes = document.querySelectorAll('input[name="asignaturaProfesor"]:checked');
+            const asignaturas = Array.from(asignaturasCheckboxes).map(cb => cb.value);
+            userData.asignaturas = asignaturas; // Array de asignaturas que puede enseñar
+        }
+        
         // Add to Firestore
         await window.firebaseDB.collection('usuarios').add(userData);
         
@@ -884,6 +906,13 @@ async function handleEditUser(e) {
                 clasesPermitidas.push(checkbox.value);
             });
             updateData.clasesPermitidas = clasesPermitidas;
+        }
+        
+        // Update admin-specific fields (asignaturas)
+        if (currentUserForEdit.tipoUsuario === 'admin') {
+            const asignaturasCheckboxes = document.querySelectorAll('input[name="asignaturaProfesorEdit"]:checked');
+            const asignaturas = Array.from(asignaturasCheckboxes).map(cb => cb.value);
+            updateData.asignaturas = asignaturas; // Array de asignaturas que puede enseñar
         }
         
         // Update in Firestore

@@ -31,22 +31,22 @@ const mapeoMaterias = {
 
 const ordenMaterias = ['LC', 'MT', 'SC', 'CN', 'IN'];
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Verificar autenticación
     checkAuthentication();
-    
+
     // Cargar información del usuario
     loadUserInfo();
-    
+
     // Inicializar gráfico
     inicializarGrafico();
-    
+
     // Cargar reportes del estudiante
     cargarReportesEstudiante();
-    
+
     // Configurar botón de descarga
     document.getElementById('btnDescargarPDF').addEventListener('click', descargarPDF);
-    
+
     // Inicializar foto de perfil
     if (typeof inicializarPerfilCompartido === 'function') {
         inicializarPerfilCompartido();
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Verificar autenticación del estudiante
 function checkAuthentication() {
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-    
+
     if (!currentUser.id || currentUser.tipoUsuario !== 'estudiante') {
         window.location.href = '../index.html';
         return;
@@ -66,7 +66,7 @@ function checkAuthentication() {
 // Cargar información del usuario
 function loadUserInfo() {
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-    
+
     if (currentUser.nombre) {
         document.getElementById('studentName').textContent = currentUser.nombre.toUpperCase();
     }
@@ -146,7 +146,7 @@ async function cargarReportesEstudiante() {
     try {
         const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
         const estudianteId = currentUser.numeroDocumento || currentUser.numeroIdentidad;
-        
+
         if (!estudianteId) {
             throw new Error('No se pudo identificar al estudiante');
         }
@@ -170,14 +170,14 @@ async function cargarReportesEstudiante() {
         }
 
         const db = window.firebaseDB;
-        
+
         // Buscar reportes del estudiante
         const reportesSnapshot = await db.collection('reportes')
             .where('estudianteId', '==', estudianteId)
             .get();
 
         const reportesLista = document.getElementById('reportesLista');
-        
+
         if (reportesSnapshot.empty) {
             reportesLista.innerHTML = `
                 <div class="no-reportes">
@@ -190,12 +190,12 @@ async function cargarReportesEstudiante() {
         }
 
         let reportesHTML = '';
-        
+
         reportesSnapshot.forEach(doc => {
             const reporte = doc.data();
             const fechaGeneracion = reporte.fechaGeneracion?.toDate?.()?.toLocaleDateString() || 'Sin fecha';
             const fechaPrueba = reporte.fechaPrueba?.toDate?.()?.toLocaleDateString() || 'Sin fecha';
-            
+
             reportesHTML += `
                 <div class="reporte-item" data-reporte-id="${doc.id}">
                     <div class="reporte-header">
@@ -238,23 +238,23 @@ async function verReporte(reporteId) {
     try {
         const db = window.firebaseDB;
         const reporteDoc = await db.collection('reportes').doc(reporteId).get();
-        
+
         if (!reporteDoc.exists) {
             throw new Error('Reporte no encontrado');
         }
 
         const reporte = reporteDoc.data();
         reporteActual = reporte;
-        
+
         // Llenar datos del estudiante
         llenarDatosReporte(reporte);
-        
+
         // Actualizar información del panel
         actualizarInfoPanel(reporte);
-        
+
         // Habilitar botón de descarga
         document.getElementById('btnDescargarPDF').disabled = false;
-        
+
         // Marcar reporte como seleccionado
         document.querySelectorAll('.reporte-item').forEach(item => {
             item.classList.remove('selected');
@@ -274,14 +274,14 @@ async function verReporte(reporteId) {
 // Llenar datos del reporte en el formulario
 function llenarDatosReporte(reporte) {
     console.log('Llenando datos del reporte:', reporte);
-    
+
     // Datos del estudiante
     document.getElementById('nombreEstudiante').value = reporte.datosEstudiante.nombre?.toUpperCase() || 'USUARIO';
     document.getElementById('identificacionEstudiante').value = reporte.datosEstudiante.numeroDocumento || '';
     document.getElementById('telefonoEstudiante').value = reporte.datosEstudiante.telefono || '';
     document.getElementById('municipioEstudiante').value = reporte.datosEstudiante.departamento || '';
     document.getElementById('tipoDocumento').value = reporte.datosEstudiante.tipoDocumento || 'CC';
-    
+
     // Mapear grado a tipo de prueba
     const mapeoGrado = {
         'PRESABER': 'PRESABER',
@@ -290,19 +290,19 @@ function llenarDatosReporte(reporte) {
         'SABER11': 'ESTUDIANTE'
     };
     document.getElementById('calEstudiante').value = mapeoGrado[reporte.datosEstudiante.grado] || 'ESTUDIANTE';
-    
+
     // Fecha de la prueba
     if (reporte.fechaPrueba) {
         const fechaFormateada = reporte.fechaPrueba.toDate().toISOString().split('T')[0];
         document.getElementById('fechaAplicacion').value = fechaFormateada;
     }
-    
+
     // Puntaje global
     document.getElementById('puntajeGlobal').textContent = reporte.puntajeGlobal;
-    
+
     // Percentil general
     document.getElementById('percentilGeneral').textContent = reporte.percentilGeneral;
-    
+
     // Resetear todos los inputs primero
     document.querySelectorAll('.puntaje-input').forEach(input => {
         input.value = 0;
@@ -310,31 +310,31 @@ function llenarDatosReporte(reporte) {
         actualizarRangoActivo(input);
         actualizarNivelDesempeno(input, input.dataset.materia === 'IN');
     });
-    
+
     // Puntajes por materia - Crear array ordenado para el gráfico
     const puntajesOrdenados = [0, 0, 0, 0, 0]; // LC, MT, SC, CN, IN
-    
+
     console.log('Materias en el reporte:', Object.keys(reporte.puntajes));
-    
+
     Object.keys(reporte.puntajes).forEach(materia => {
         console.log(`Procesando materia: "${materia}"`);
-        
+
         const codigoMateria = obtenerCodigoMateria(materia);
         console.log(`Código obtenido: "${codigoMateria}"`);
-        
+
         const input = document.querySelector(`.puntaje-input[data-materia="${codigoMateria}"]`);
-        
+
         if (input && reporte.puntajes[materia]) {
             const puntaje = reporte.puntajes[materia].puntaje;
             console.log(`Asignando puntaje ${puntaje} a ${codigoMateria}`);
-            
+
             input.value = puntaje;
-            
+
             // Actualizar nivel visual
             actualizarNivelVisual(input);
             actualizarRangoActivo(input);
             actualizarNivelDesempeno(input, codigoMateria === 'IN');
-            
+
             // Agregar al array ordenado para el gráfico
             const indice = ordenMaterias.indexOf(codigoMateria);
             if (indice !== -1) {
@@ -344,9 +344,9 @@ function llenarDatosReporte(reporte) {
             console.warn(`No se encontró input para materia: ${materia} (código: ${codigoMateria})`);
         }
     });
-    
+
     console.log('Puntajes ordenados para gráfico:', puntajesOrdenados);
-    
+
     // Actualizar gráfico
     graficoBarras.data.datasets[0].data = puntajesOrdenados;
     graficoBarras.update('active');
@@ -355,25 +355,25 @@ function llenarDatosReporte(reporte) {
 // Obtener código de materia
 function obtenerCodigoMateria(materia) {
     const materiaLower = materia.toLowerCase().trim();
-    
+
     // Primero intentar mapeo directo
     if (mapeoMaterias[materiaLower]) {
         return mapeoMaterias[materiaLower];
     }
-    
+
     // Mapeo específico para casos conocidos de Firebase
     const mapeoEspecifico = {
         'ciencias': 'CN',
-        'ingles': 'IN', 
+        'ingles': 'IN',
         'matematicas': 'MT',
         'sociales': 'SC',
         'lectura': 'LC'
     };
-    
+
     if (mapeoEspecifico[materiaLower]) {
         return mapeoEspecifico[materiaLower];
     }
-    
+
     // Mapeo por palabras clave
     if (materiaLower.includes('lectura') || materiaLower.includes('critica')) {
         return 'LC';
@@ -390,7 +390,7 @@ function obtenerCodigoMateria(materia) {
     if (materiaLower.includes('ingles') || materiaLower.includes('english')) {
         return 'IN';
     }
-    
+
     // Fallback - devolver el código tal como viene
     console.warn(`No se pudo mapear la materia: "${materia}"`);
     return materia.toUpperCase();
@@ -447,7 +447,7 @@ function actualizarNivelDesempeno(input, esIngles = false) {
     const columna = Array.from(fila.cells).indexOf(input.closest('td'));
     const tabla = input.closest('table');
     const filaNivel = tabla.querySelector('.fila-desempeno');
-    
+
     if (filaNivel) {
         const celdaNivel = filaNivel.cells[columna];
         if (celdaNivel) {
@@ -471,7 +471,7 @@ function actualizarNivelDesempeno(input, esIngles = false) {
 // Actualizar información del panel
 function actualizarInfoPanel(reporte) {
     const infoPanel = document.getElementById('infoReporte');
-    
+
     let infoHTML = `
         <h4>Información del Reporte</h4>
         <p><strong>Prueba:</strong> ${reporte.pruebaNombre}</p>
@@ -482,12 +482,12 @@ function actualizarInfoPanel(reporte) {
         
         <h5>Puntajes por Materia:</h5>
     `;
-    
+
     Object.keys(reporte.puntajes).forEach(materia => {
         const datos = reporte.puntajes[materia];
         infoHTML += `<p><strong>${materia}:</strong> ${datos.puntaje}% (${datos.correctas}/${datos.total})</p>`;
     });
-    
+
     infoPanel.innerHTML = infoHTML;
 }
 
@@ -547,7 +547,7 @@ async function descargarPDF() {
         // Aplicar estilos temporales para optimizar el PDF
         const estilosOriginales = elemento.style.cssText;
         const bodyOriginal = document.body.style.cssText;
-        
+
         // Configurar elemento para PDF
         elemento.style.width = '770px';
         elemento.style.height = 'auto'; // Cambiar a auto para capturar todo el contenido
@@ -558,7 +558,7 @@ async function descargarPDF() {
         elemento.style.position = 'relative';
         elemento.style.top = '0';
         elemento.style.left = '0';
-        
+
         // Configurar body para evitar problemas de scroll
         document.body.style.overflow = 'visible';
         document.body.style.height = 'auto';
@@ -582,12 +582,12 @@ async function descargarPDF() {
         // Restaurar estilos originales
         elemento.style.cssText = estilosOriginales;
         document.body.style.cssText = bodyOriginal;
-        
+
         // Restaurar posición de scroll
         window.scrollTo(0, scrollPosition);
-        
+
         Swal.close();
-        
+
         Swal.fire({
             icon: 'success',
             title: '¡Descarga exitosa!',

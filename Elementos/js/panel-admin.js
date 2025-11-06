@@ -41,6 +41,35 @@ async function loadUserInfo() {
 
     // Cargar foto de perfil desde Firebase
     await cargarFotoPerfil(currentUser.id);
+    
+    // Mostrar botón de finanzas solo para superadministradores
+    await checkSuperAdminAccess(currentUser.id);
+}
+
+// Check if user is superadmin
+async function checkSuperAdminAccess(usuarioId) {
+    try {
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+
+        const db = window.firebaseDB;
+        const usuarioDoc = await db.collection('usuarios').doc(usuarioId).get();
+
+        if (usuarioDoc.exists) {
+            const datosUsuario = usuarioDoc.data();
+            
+            // Mostrar botón de finanzas solo si es superusuario
+            if (datosUsuario.rol === 'superusuario') {
+                const finanzasCard = document.getElementById('finanzasCard');
+                if (finanzasCard) {
+                    finanzasCard.style.display = 'block';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error checking superadmin access:', error);
+    }
 }
 
 // Cargar foto de perfil del usuario
@@ -408,6 +437,12 @@ function handleCardClick(event) {
                 break;
             case 'contenido':
                 window.location.href = 'Gestion-Contenido.html';
+                break;
+            case 'calendario':
+                window.location.href = 'Calendario.html';
+                break;
+            case 'finanzas':
+                window.location.href = 'Finanzas.html';
                 break;
             default:
                 console.log('Sección no encontrada:', section);

@@ -2824,3 +2824,157 @@ body {
 .no-permission-badge i {
     font-size: 0.9rem;
 }
+
+
+/* Asignaturas Grid */
+.asignaturas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.asignatura-checkbox {
+    cursor: pointer;
+    display: block;
+}
+
+.asignatura-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.asignatura-checkbox .checkbox-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    border: 3px solid #e0e0e0;
+    border-radius: 12px;
+    background: white;
+    transition: all 0.3s ease;
+    min-height: 100px;
+    gap: 0.5rem;
+}
+
+.asignatura-checkbox .checkbox-content i {
+    font-size: 2rem;
+    transition: all 0.3s ease;
+}
+
+.asignatura-checkbox .checkbox-content span {
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: center;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.asignatura-checkbox:hover .checkbox-content {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content {
+    border-width: 3px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+}
+
+/* Colores por asignatura */
+.checkbox-content.matematicas {
+    border-color: #e0e0e0;
+}
+
+.checkbox-content.matematicas i {
+    color: #667eea;
+}
+
+.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.matematicas {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%);
+    border-color: #667eea;
+}
+
+.checkbox-content.ciencias {
+    border-color: #e0e0e0;
+}
+
+.checkbox-content.ciencias i {
+    color: #28a745;
+}
+
+.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.ciencias {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%);
+    border-color: #28a745;
+}
+
+.checkbox-content.sociales {
+    border-color: #e0e0e0;
+}
+
+.checkbox-content.sociales i {
+    color: #ffc107;
+}
+
+.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.sociales {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
+    border-color: #ffc107;
+}
+
+.checkbox-content.ingles {
+    border-color: #e0e0e0;
+}
+
+.checkbox-content.ingles i {
+    color: #17a2b8;
+}
+
+.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.ingles {
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%);
+    border-color: #17a2b8;
+}
+
+.checkbox-content.lectura {
+    border-color: #e0e0e0;
+}
+
+.checkbox-content.lectura i {
+    color: #dc3545;
+}
+
+.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.lectura {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+    border-color: #dc3545;
+}
+
+/* Admin fields visibility */
+.admin-fields,
+.admin-edit-fields {
+    display: none;
+}
+
+/* Responsive para asignaturas */
+@media (max-width: 768px) {
+    .asignaturas-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .asignatura-checkbox .checkbox-content {
+        padding: 1rem;
+        min-height: 90px;
+    }
+    
+    .asignatura-checkbox .checkbox-content i {
+        font-size: 1.5rem;
+    }
+    
+    .asignatura-checkbox .checkbox-content span {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .asignaturas-grid {
+        grid-template-columns: 1fr;
+    }
+}

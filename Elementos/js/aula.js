@@ -167,13 +167,22 @@ async function loadAnuncios() {
             return;
         }
 
-        // Sort manually by fecha
+        // Sort manually by tipo (clases primero) y luego por fecha
         const anuncios = [];
         snapshot.forEach(doc => {
             anuncios.push({ id: doc.id, data: doc.data() });
         });
 
         anuncios.sort((a, b) => {
+            // Primero ordenar por tipo (clases primero)
+            const tipoA = a.data.tipo === 'clase' ? 0 : 1;
+            const tipoB = b.data.tipo === 'clase' ? 0 : 1;
+            
+            if (tipoA !== tipoB) {
+                return tipoA - tipoB;
+            }
+            
+            // Luego ordenar por fecha (más reciente primero)
             const fechaA = a.data.fecha ? a.data.fecha.seconds : 0;
             const fechaB = b.data.fecha ? b.data.fecha.seconds : 0;
             return fechaB - fechaA; // Descending order
@@ -201,6 +210,11 @@ async function loadAnuncios() {
 async function createPostCard(id, anuncio) {
     const card = document.createElement('div');
     card.className = 'post-card';
+    
+    // Agregar clase si el anuncio está cancelado
+    if (anuncio.cancelada === true) {
+        card.classList.add('cancelled');
+    }
 
     // Get author info
     let authorName = 'Usuario';
@@ -305,7 +319,7 @@ async function createPostCard(id, anuncio) {
             ` : ''}
         </div>
         ${anuncio.titulo ? `<h3 class="post-title">${anuncio.titulo}</h3>` : ''}
-        <div class="post-content">${anuncio.contenido}</div>
+        <div class="post-content">${convertirEnlacesAClickeables(anuncio.contenido)}</div>
         ${mediaHTML}
     `;
 
@@ -755,6 +769,51 @@ function extractDriveFileId(url) {
         }
     }
     return null;
+}
+
+// Convertir enlaces en texto a enlaces clickeables
+function convertirEnlacesAClickeables(texto) {
+    if (!texto) return '';
+    
+    // Escapar HTML para prevenir XSS
+    const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+    
+    // Escapar el texto primero
+    let textoEscapado = escapeHtml(texto);
+    
+    // Patrón para detectar URLs (http, https, www)
+    const urlPattern = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
+    
+    // Reemplazar URLs con enlaces clickeables
+    textoEscapado = textoEscapado.replace(urlPattern, (match) => {
+        let url = match;
+        let displayUrl = match;
+        
+        // Si no tiene protocolo, agregarlo
+        if (!url.match(/^https?:\/\//i)) {
+            url = 'https://' + url;
+        }
+        
+        // Limpiar caracteres al final
+        url = url.replace(/[.,;:!?)\]]+$/, '');
+        displayUrl = displayUrl.replace(/[.,;:!?)\]]+$/, '');
+        
+        // Acortar URL para mostrar si es muy larga
+        if (displayUrl.length > 50) {
+            displayUrl = displayUrl.substring(0, 47) + '...';
+        }
+        
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="content-link" title="${url}">${displayUrl}</a>`;
+    });
+    
+    // Restaurar saltos de línea
+    textoEscapado = textoEscapado.replace(/\n/g, '<br>');
+    
+    return textoEscapado;
 }
 
 // Load estudiantes
@@ -2571,3 +2630,5 @@ function closeMediaModal() {
     modal.classList.remove('active');
     modalContent.innerHTML = '';
 }
+
+

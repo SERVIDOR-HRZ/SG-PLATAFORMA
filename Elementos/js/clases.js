@@ -1,5 +1,5 @@
 // Clases JavaScript
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     checkAuthentication();
     loadUserInfo();
     loadClases();
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Check authentication
 function checkAuthentication() {
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-    
+
     if (!currentUser.id) {
         window.location.href = '../index.html';
         return;
@@ -19,7 +19,7 @@ function checkAuthentication() {
 // Load user info
 async function loadUserInfo() {
     const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-    
+
     if (currentUser.nombre) {
         document.getElementById('userName').textContent = currentUser.nombre.toUpperCase();
     }
@@ -39,7 +39,7 @@ async function cargarFotoPerfil(usuarioId) {
 
         if (usuarioDoc.exists) {
             const datosUsuario = usuarioDoc.data();
-            
+
             if (datosUsuario.fotoPerfil) {
                 const avatarDefault = document.getElementById('userAvatarDefault');
                 const avatarImage = document.getElementById('userAvatarImage');
@@ -76,7 +76,7 @@ async function loadClases() {
         await esperarFirebase();
         const db = window.firebaseDB;
         const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-        
+
         const clasesGrid = document.getElementById('clasesGrid');
         clasesGrid.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i><p>Cargando aulas...</p></div>';
 
@@ -114,10 +114,12 @@ async function loadClases() {
             }
         ];
 
+        // Obtener datos del usuario actual
+        const usuarioDoc = await db.collection('usuarios').doc(currentUser.id).get();
+        const userData = usuarioDoc.data();
+
         // Si es estudiante, verificar permisos
         if (currentUser.tipoUsuario === 'estudiante') {
-            const usuarioDoc = await db.collection('usuarios').doc(currentUser.id).get();
-            const userData = usuarioDoc.data();
             const clasesPermitidas = userData.clasesPermitidas || [];
 
             if (clasesPermitidas.length === 0) {
@@ -134,8 +136,37 @@ async function loadClases() {
             // Filtrar solo las materias permitidas
             const materiasPermitidas = materiasDisponibles.filter(m => clasesPermitidas.includes(m.id));
             renderClases(materiasPermitidas);
-        } else {
-            // Admin tiene acceso a todas
+        }
+        // Si es admin/profesor, verificar si es superusuario o tiene asignaturas asignadas
+        else if (currentUser.tipoUsuario === 'admin') {
+            const rol = userData.rol || currentUser.rol;
+
+            // Superusuarios ven todas las aulas
+            if (rol === 'superusuario') {
+                renderClases(materiasDisponibles);
+            }
+            // Profesores solo ven sus asignaturas
+            else {
+                const asignaturas = userData.asignaturas || [];
+
+                if (asignaturas.length === 0) {
+                    clasesGrid.innerHTML = `
+                        <div class="no-access-message">
+                            <i class="bi bi-info-circle"></i>
+                            <h2>Sin asignaturas asignadas</h2>
+                            <p>Contacta con un superusuario para que te asigne las asignaturas que enseñas</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Filtrar solo las asignaturas del profesor
+                const materiasProfesor = materiasDisponibles.filter(m => asignaturas.includes(m.id));
+                renderClases(materiasProfesor);
+            }
+        }
+        // Fallback: mostrar todas
+        else {
             renderClases(materiasDisponibles);
         }
 
@@ -200,7 +231,7 @@ async function loadClaseStats(materiaId) {
         const anunciosSnapshot = await db.collection('anuncios')
             .where('materia', '==', materiaId)
             .get();
-        
+
         const anunciosCount = anunciosSnapshot.size;
         const anunciosElement = document.getElementById(`anuncios-${materiaId}`);
         if (anunciosElement) {
@@ -211,7 +242,7 @@ async function loadClaseStats(materiaId) {
         const tareasSnapshot = await db.collection('tareas')
             .where('materia', '==', materiaId)
             .get();
-        
+
         const tareasCount = tareasSnapshot.size;
         const tareasElement = document.getElementById(`tareas-${materiaId}`);
         if (tareasElement) {
@@ -240,15 +271,15 @@ function setupEventListeners() {
     // User menu dropdown
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdownMenu = document.getElementById('userDropdownMenu');
-    
+
     if (userMenuBtn && userDropdownMenu) {
-        userMenuBtn.addEventListener('click', function(e) {
+        userMenuBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             userDropdownMenu.classList.toggle('active');
         });
 
         // Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!userMenuBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
                 userDropdownMenu.classList.remove('active');
             }

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Clases - Seamos Genios</title>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/calendario.css">
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" id="backBtn">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
+            <h1>Calendario de Clases</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info" id="userInfoContainer">
+                <span class="user-name" id="userName">USUARIO</span>
+                <div class="user-avatar" id="userAvatarContainer">
+                    <div class="user-avatar-default" id="userAvatarDefault">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src=""
+                        alt="Foto de perfil">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Vista Toggle -->
+        <div class="view-toggle">
+            <button class="toggle-btn active" data-view="calendario">
+                <i class="bi bi-calendar-week"></i>
+                Vista Calendario
+            </button>
+            <button class="toggle-btn" data-view="lista">
+                <i class="bi bi-list-ul"></i>
+                Vista Lista
+            </button>
+        </div>
+
+        <!-- Vista Calendario -->
+        <div class="calendar-view" id="calendarView">
+            <div class="calendar-header">
+                <button class="nav-btn" id="prevWeek">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <h2 id="weekRange">Noviembre 2025</h2>
+                <button class="nav-btn" id="nextWeek">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Se generará dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Vista Lista -->
+        <div class="list-view" id="listView" style="display: none;">
+            <div class="list-header">
+                <h2>Clases Programadas</h2>
+                <div class="list-filters">
+                    <select id="filtroMateria" class="filter-select">
+                        <option value="">Todas las materias</option>
+                    </select>
+                    <select id="filtroEstado" class="filter-select">
+                        <option value="">Todos los estados</option>
+                        <option value="confirmada">Confirmadas</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="cancelada">Canceladas</option>
+                    </select>
+                </div>
+                <button class="btn-primary" id="btnNuevaClaseLista">
+                    <i class="bi bi-plus-circle"></i>
+                    Nueva Clase
+                </button>
+            </div>
+            <div class="classes-list" id="classesList">
+                <!-- Se generará dinámicamente -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Nueva Clase -->
+    <div class="modal" id="modalNuevaClase">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Programar Nueva Clase</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formNuevaClase">
+                    <div class="form-group">
+                        <label for="materiaSelect">Materia *</label>
+                        <select id="materiaSelect" required>
+                            <option value="">Selecciona una materia</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipologiaClase">Tipología de la Clase *</label>
+                        <select id="tipologiaClase" required>
+                            <option value="">Seleccionar tipología</option>
+                            <option value="practica_libre">Práctica (Libre)</option>
+                            <option value="practica_simulacro">Práctica (Simulacro)</option>
+                            <option value="teorica_obligatorio">Teórica (Obligatorio)</option>
+                            <option value="teorica_practica_libre">Teórica-Práctica (Libre)</option>
+                            <option value="na">N/A</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="unidadClase">Unidad de la Clase</label>
+                        <input type="text" id="unidadClase" placeholder="Ej: Taller 3, TEORICA">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="temaClase">Tema/Tipología de la Clase</label>
+                        <input type="text" id="temaClase" placeholder="Ej: JERARQUIA OPERACIONES">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tituloClase">Título de la Clase *</label>
+                        <input type="text" id="tituloClase" placeholder="Ej: Introducción al Álgebra" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcionClase">Descripción</label>
+                        <textarea id="descripcionClase" rows="3" placeholder="Describe el contenido de la clase"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tutorSelect">Tutor Encargado *</label>
+                        <select id="tutorSelect" required>
+                            <option value="">Primero selecciona una materia</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaClase">Fecha *</label>
+                        <input type="date" id="fechaClase" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="horaInicioClase">Hora Inicio *</label>
+                            <input type="time" id="horaInicioClase" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="horaFinClase">Hora Fin *</label>
+                            <input type="time" id="horaFinClase" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duracionClase">Duración (minutos)</label>
+                        <input type="number" id="duracionClase" readonly placeholder="Se calcula automáticamente">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="enlaceClase">Enlace de la Clase (opcional)</label>
+                        <input type="url" id="enlaceClase" placeholder="https://meet.google.com/...">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelarClase">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            Programar Clase
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Notificación -->
+    <div class="notification-modal" id="notificationModal">
+        <div class="notification-modal-content">
+            <div class="notification-icon" id="notificationIcon">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <h3 id="notificationTitle">Título</h3>
+            <p id="notificationMessage">Mensaje</p>
+            <div class="notification-actions">
+                <button class="btn-notification-primary" id="notificationBtn">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div class="notification-modal" id="confirmModal">
+        <div class="notification-modal-content">
+            <div class="notification-icon warning">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <h3 id="confirmTitle">Confirmar</h3>
+            <p id="confirmMessage">¿Estás seguro?</p>
+            <div class="notification-actions">
+                <button class="btn-notification-secondary" id="confirmCancelBtn">Cancelar</button>
+                <button class="btn-notification-primary" id="confirmOkBtn">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/calendario.js"></script>
+</body>
+
+</html>
