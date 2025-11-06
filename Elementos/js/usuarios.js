@@ -412,6 +412,43 @@ function renderUsers() {
                 </span>
             </td>
             <td>
+                ${user.tipoUsuario === 'estudiante' ? 
+                    `<div class="puntos-cell">
+                        <i class="bi bi-star-fill" style="color: #ffc107;"></i>
+                        <strong>${user.puntos || user.puntosAcumulados || 0}</strong>
+                    </div>` : 'N/A'}
+            </td>
+            <td>
+                ${user.tipoUsuario === 'estudiante' && user.insignias && user.insignias.length > 0 ? 
+                    `<div class="insignias-cell">
+                        ${user.insignias.slice(0, 3).map(ins => {
+                            // Soporte para ambos formatos: string simple o objeto
+                            const icono = typeof ins === 'string' ? ins : (ins.icono || '🏆');
+                            const nombre = typeof ins === 'string' ? icono : (ins.nombre || 'Insignia');
+                            return `<span class="insignia-badge" title="${nombre}">${icono}</span>`;
+                        }).join('')}
+                        ${user.insignias.length > 3 ? `<span class="insignias-more">+${user.insignias.length - 3}</span>` : ''}
+                    </div>` : 
+                    (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">Sin insignias</span>' : 'N/A')}
+            </td>
+            <td>
+                ${user.tipoUsuario === 'estudiante' && user.clasesPermitidas && user.clasesPermitidas.length > 0 ? 
+                    `<div class="materias-cell">
+                        ${user.clasesPermitidas.map(materia => {
+                            const materiasConfig = {
+                                'matematicas': { inicial: 'MAT', color: '#667eea' },
+                                'lectura': { inicial: 'LEC', color: '#dc3545' },
+                                'sociales': { inicial: 'SOC', color: '#ffc107' },
+                                'naturales': { inicial: 'NAT', color: '#28a745' },
+                                'ingles': { inicial: 'ING', color: '#17a2b8' }
+                            };
+                            const config = materiasConfig[materia] || { inicial: 'N/A', color: '#6c757d' };
+                            return `<span class="materia-badge" style="background: ${config.color};" title="${materia.charAt(0).toUpperCase() + materia.slice(1)}">${config.inicial}</span>`;
+                        }).join('')}
+                    </div>` : 
+                    (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">Sin acceso</span>' : 'N/A')}
+            </td>
+            <td>
                 ${user.telefono || 'No especificado'}
             </td>
             <td>
@@ -603,6 +640,27 @@ function openEditUserModal(userId) {
         elements.editTipoDocumento.value = user.tipoDocumento || '';
         elements.editNumeroDocumento.value = user.numeroDocumento || '';
         elements.editDepartamento.value = user.departamento || '';
+        
+        // Load gamification data
+        document.getElementById('editPuntos').value = user.puntos || user.puntosAcumulados || 0;
+        
+        // Load insignias - soporte para ambos formatos
+        const insigniasArray = user.insignias || [];
+        const insigniasCheckboxes = document.querySelectorAll('input[name="insigniaEdit"]');
+        insigniasCheckboxes.forEach(checkbox => {
+            // Verificar si la insignia está en el array del usuario
+            const insigniaValue = checkbox.value;
+            const hasInsignia = insigniasArray.some(ins => {
+                // Soporte para string simple o objeto
+                if (typeof ins === 'string') {
+                    return ins === insigniaValue;
+                } else if (ins && ins.icono) {
+                    return ins.icono === insigniaValue;
+                }
+                return false;
+            });
+            checkbox.checked = hasInsignia;
+        });
         
         // Load clases permisos
         const clasesPermitidas = user.clasesPermitidas || [];
@@ -898,6 +956,19 @@ async function handleEditUser(e) {
             updateData.tipoDocumento = tipoDocumento;
             updateData.numeroDocumento = numeroDocumento;
             updateData.departamento = departamento;
+            
+            // Get gamification data
+            const puntos = parseInt(document.getElementById('editPuntos').value) || 0;
+            
+            // Get selected insignias
+            const insigniasCheckboxes = document.querySelectorAll('input[name="insigniaEdit"]:checked');
+            const insignias = Array.from(insigniasCheckboxes).map(checkbox => ({
+                icono: checkbox.value,
+                nombre: checkbox.getAttribute('data-nombre')
+            }));
+            
+            updateData.puntos = puntos;
+            updateData.insignias = insignias;
             
             // Get selected clases permisos
             const clasesPermitidas = [];

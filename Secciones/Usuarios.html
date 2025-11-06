@@ -163,6 +163,9 @@
                             <th>Usuario</th>
                             <th>Rol</th>
                             <th>Estado</th>
+                            <th>Puntos</th>
+                            <th>Insignias</th>
+                            <th>Materias Acceso</th>
                             <th>Teléfono</th>
                             <th>Documento</th>
                             <th>Institución</th>
@@ -599,6 +602,79 @@
                                     <span>Lectura Crítica</span>
                                 </div>
                             </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Gamification fields (for students) -->
+                    <div class="form-section student-edit-fields">
+                        <h4>Gamificación</h4>
+                        <div class="form-grid">
+                            <div class="input-group full-width">
+                                <label for="editPuntos">Puntos</label>
+                                <input type="number" id="editPuntos" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 600; color: #333;">Insignias Obtenidas</label>
+                            <div class="insignias-grid">
+                                <label class="insignia-checkbox">
+                                    <input type="checkbox" name="insigniaEdit" value="🏆" data-nombre="Trofeo de Oro">
+                                    <div class="insignia-checkbox-content">
+                                        <span class="insignia-icon">🏆</span>
+                                        <span class="insignia-name">Trofeo de Oro</span>
+                                    </div>
+                                </label>
+                                <label class="insignia-checkbox">
+                                    <input type="checkbox" name="insigniaEdit" value="⭐" data-nombre="Estrella">
+                                    <div class="insignia-checkbox-content">
+                                        <span class="insignia-icon">⭐</span>
+                                        <span class="insignia-name">Estrella</span>
+                                    </div>
+                                </label>
+                                <label class="insignia-checkbox">
+                                    <input type="checkbox" name="insigniaEdit" value="🎯" data-nombre="Objetivo Cumplido">
+                                    <div class="insignia-checkbox-content">
+                                        <span class="insignia-icon">🎯</span>
+                                        <span class="insignia-name">Objetivo</span>
+                                    </div>
+                                </label>
+                                <label class="insignia-checkbox">
+                                    <input type="checkbox" name="insigniaEdit" value="💎" data-nombre="Diamante">
+                                    <div class="insignia-checkbox-content">
+                                        <span class="insignia-icon">💎</span>
+                                        <span class="insignia-name">Diamante</span>
+                                    </div>
+                                </label>
+                                <label class="insignia-checkbox">
+                                    <input type="checkbox" name="insigniaEdit" value="🔥" data-nombre="Racha de Fuego">
+                                    <div class="insignia-checkbox-content">
+                                        <span class="insignia-icon">🔥</span>
+                                        <span class="insignia-name">Racha</span>
+                                    </div>
+                                </label>
+                                <label class="insignia-checkbox">
+                                    <input type="checkbox" name="insigniaEdit" value="🎓" data-nombre="Graduado">
+                                    <div class="insignia-checkbox-content">
+                                        <span class="insignia-icon">🎓</span>
+                                        <span class="insignia-name">Graduado</span>
+                                    </div>
+                                </label>
+                                <label class="insignia-checkbox">
+                                    <input type="checkbox" name="insigniaEdit" value="🚀" data-nombre="Cohete">
+                                    <div class="insignia-checkbox-content">
+                                        <span class="insignia-icon">🚀</span>
+                                        <span class="insignia-name">Cohete</span>
+                                    </div>
+                                </label>
+                                <label class="insignia-checkbox">
+                                    <input type="checkbox" name="insigniaEdit" value="👑" data-nombre="Corona">
+                                    <div class="insignia-checkbox-content">
+                                        <span class="insignia-icon">👑</span>
+                                        <span class="insignia-name">Corona</span>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
                     </div>
                     

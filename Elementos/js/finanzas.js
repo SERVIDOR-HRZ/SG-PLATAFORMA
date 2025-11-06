@@ -19,8 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     await checkAuth();
     initializeWeek();
     setupEventListeners();
-    // Solo cargar tarifas al inicio, los pagos se cargan cuando se cambia al tab
-    await loadTarifas();
+    // Inicializar formateo numérico
+    inicializarFormateoNumerico();
+    // Cargar cuentas al inicio (tab por defecto)
+    await loadCuentas();
 });
 
 // Check authentication and permissions
@@ -134,6 +136,43 @@ function setupEventListeners() {
         });
     });
 
+    // Cuentas bancarias
+    document.getElementById('btnNuevaCuenta').addEventListener('click', openNuevaCuenta);
+    document.getElementById('closeModalCuenta').addEventListener('click', closeModalCuenta);
+    document.getElementById('cancelarCuenta').addEventListener('click', closeModalCuenta);
+    document.getElementById('formCuenta').addEventListener('submit', handleSaveCuenta);
+    
+    // Filtros de cuentas
+    document.getElementById('filtroTipoCuenta').addEventListener('change', aplicarFiltrosCuentas);
+    document.getElementById('filtroBuscarCuenta').addEventListener('input', aplicarFiltrosCuentas);
+    document.getElementById('btnLimpiarFiltros').addEventListener('click', limpiarFiltrosCuentas);
+
+    // Movimientos
+    document.getElementById('btnNuevoIngreso').addEventListener('click', openNuevoIngreso);
+    document.getElementById('btnNuevoGasto').addEventListener('click', openNuevoGasto);
+    document.getElementById('closeModalMovimiento').addEventListener('click', closeModalMovimiento);
+    document.getElementById('cancelarMovimiento').addEventListener('click', closeModalMovimiento);
+    document.getElementById('formMovimiento').addEventListener('submit', handleSaveMovimiento);
+
+    // Filtros de movimientos
+    document.getElementById('filtroTipoMovimiento').addEventListener('change', () => {
+        loadCategoriasFilterMovimientos();
+        loadMovimientos();
+    });
+    document.getElementById('filtroCuentaMovimiento').addEventListener('change', loadMovimientos);
+    document.getElementById('filtroCategoriaMovimiento').addEventListener('change', loadMovimientos);
+    document.getElementById('filtroMesMovimiento').addEventListener('change', loadMovimientos);
+    
+    // Gestionar categorías
+    document.getElementById('btnGestionarCategorias').addEventListener('click', openGestionarCategorias);
+    document.getElementById('closeModalCategorias').addEventListener('click', closeGestionarCategorias);
+    document.getElementById('cerrarCategorias').addEventListener('click', closeGestionarCategorias);
+    
+    // Modal nueva categoría
+    document.getElementById('closeModalNuevaCategoria').addEventListener('click', closeModalNuevaCategoria);
+    document.getElementById('cancelarNuevaCategoria').addEventListener('click', closeModalNuevaCategoria);
+    document.getElementById('formNuevaCategoria').addEventListener('submit', handleCrearCategoria);
+
     // Week navigation
     document.getElementById('prevWeekPagos').addEventListener('click', () => {
         currentWeekStart.setDate(currentWeekStart.getDate() - 7);
@@ -185,12 +224,18 @@ function switchTab(tab) {
     document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
     document.getElementById(`${tab}Tab`).classList.add('active');
 
-    if (tab === 'tarifas') {
+    if (tab === 'cuentas') {
+        loadCuentas();
+    } else if (tab === 'tarifas') {
         loadTarifas();
     } else if (tab === 'pagos') {
         loadPagosSemana();
     } else if (tab === 'historial') {
         loadHistorial();
+    } else if (tab === 'movimientos') {
+        loadMovimientos();
+        loadCuentasFilterMovimientos();
+        loadCategoriasFilterMovimientos();
     }
 }
 
@@ -343,10 +388,13 @@ async function openEditTarifa(profesorId) {
         }
         document.getElementById('modalProfesorNombre').textContent = profesor.nombre;
         document.getElementById('modalProfesorEmail').textContent = profesor.email;
-        document.getElementById('tarifaHora').value = profesor.tarifaPorHora || 0;
+        document.getElementById('tarifaHora').value = (profesor.tarifaPorHora || 0).toLocaleString('es-CO');
         document.getElementById('metodoPago').value = profesor.metodoPago || '';
         document.getElementById('numeroCuenta').value = profesor.numeroCuenta || '';
         document.getElementById('nombreCuenta').value = profesor.nombreCuenta || '';
+        
+        // Inicializar formateo numérico
+        setTimeout(() => inicializarFormateoNumerico(), 100);
 
         document.getElementById('modalEditarTarifa').classList.add('active');
     } catch (error) {
@@ -366,7 +414,7 @@ function closeModalTarifa() {
 async function handleSaveTarifa(e) {
     e.preventDefault();
 
-    const tarifa = parseFloat(document.getElementById('tarifaHora').value);
+    const tarifa = obtenerValorNumerico(document.getElementById('tarifaHora'));
     const metodoPago = document.getElementById('metodoPago').value;
     const numeroCuenta = document.getElementById('numeroCuenta').value.trim();
     const nombreCuenta = document.getElementById('nombreCuenta').value.trim();
@@ -727,9 +775,15 @@ async function handleRegistrarPago(e) {
 
     const fileInput = document.getElementById('comprobantePago');
     const notas = document.getElementById('notasPago').value;
+    const cuentaId = document.getElementById('cuentaPagoForm').value;
 
     if (!fileInput.files[0]) {
         showNotification('error', 'Error', 'Debes subir un comprobante de pago');
+        return;
+    }
+
+    if (!cuentaId) {
+        showNotification('error', 'Error', 'Debes seleccionar una cuenta para realizar el pago');
         return;
     }
 
@@ -748,6 +802,36 @@ async function handleRegistrarPago(e) {
         // Calcular total
         const total = selectedPagoData.tarifa * parseFloat(selectedPagoData.clasesData.totalHoras);
 
+        // Verificar saldo de la cuenta
+        const cuentaDoc = await getDB().collection('cuentas_bancarias').doc(cuentaId).get();
+        if (!cuentaDoc.exists) {
+            throw new Error('Cuenta no encontrada');
+        }
+
+        const cuenta = cuentaDoc.data();
+        if (cuenta.saldo < total) {
+            throw new Error('Saldo insuficiente en la cuenta seleccionada');
+        }
+
+        // Descontar saldo de la cuenta
+        const nuevoSaldo = cuenta.saldo - total;
+        await getDB().collection('cuentas_bancarias').doc(cuentaId).update({
+            saldo: nuevoSaldo,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Registrar el gasto en movimientos
+        await getDB().collection('movimientos').add({
+            tipo: 'gasto',
+            cuentaId: cuentaId,
+            monto: total,
+            categoria: 'Pago a Profesores',
+            descripcion: `Pago a ${selectedPagoData.profesor.nombre} - Semana ${currentWeekStart.toLocaleDateString('es-ES')}`,
+            fecha: firebase.firestore.Timestamp.now(),
+            notas: `${selectedPagoData.clasesData.totalClases} clases, ${selectedPagoData.clasesData.totalHoras}h`,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
         // Guardar pago en Firestore
         await getDB().collection('pagos').add({
             profesorId: selectedPagoData.profesorId,
@@ -760,6 +844,8 @@ async function handleRegistrarPago(e) {
             tarifaPorHora: selectedPagoData.tarifa,
             totalPagado: total,
             comprobanteUrl: comprobanteUrl,
+            cuentaId: cuentaId,
+            cuentaNombre: cuenta.nombre,
             notas: notas || '',
             pagadoPor: currentUser.id,
             pagadoPorNombre: currentUser.nombre || '',
@@ -812,25 +898,34 @@ async function loadHistorial() {
         const filtroProfesor = document.getElementById('filtroProfesor').value;
         const filtroMes = document.getElementById('filtroMes').value;
 
-        let query = getDB().collection('pagos').orderBy('fechaPago', 'desc');
+        // Obtener todos los pagos y filtrar en cliente para evitar índices compuestos
+        const pagosSnapshot = await getDB().collection('pagos')
+            .orderBy('fechaPago', 'desc')
+            .limit(500)
+            .get();
 
-        if (filtroProfesor) {
-            query = query.where('profesorId', '==', filtroProfesor);
-        }
+        // Filtrar en cliente
+        let pagos = [];
+        pagosSnapshot.forEach(doc => {
+            const pago = { id: doc.id, ...doc.data() };
+            
+            // Aplicar filtro de profesor
+            if (filtroProfesor && pago.profesorId !== filtroProfesor) return;
+            
+            // Aplicar filtro de mes
+            if (filtroMes) {
+                const [year, month] = filtroMes.split('-');
+                const startDate = new Date(year, month - 1, 1);
+                const endDate = new Date(year, month, 0, 23, 59, 59);
+                const pagoFecha = pago.fechaPago ? pago.fechaPago.toDate() : new Date();
+                
+                if (pagoFecha < startDate || pagoFecha > endDate) return;
+            }
+            
+            pagos.push(pago);
+        });
 
-        if (filtroMes) {
-            const [year, month] = filtroMes.split('-');
-            const startDate = new Date(year, month - 1, 1);
-            const endDate = new Date(year, month, 0, 23, 59, 59);
-
-            query = query
-                .where('fechaPago', '>=', firebase.firestore.Timestamp.fromDate(startDate))
-                .where('fechaPago', '<=', firebase.firestore.Timestamp.fromDate(endDate));
-        }
-
-        const pagosSnapshot = await query.get();
-
-        if (pagosSnapshot.empty) {
+        if (pagos.length === 0) {
             historialList.innerHTML = `
                 <div class="empty-state">
                     <i class="bi bi-inbox"></i>
@@ -843,8 +938,7 @@ async function loadHistorial() {
 
         historialList.innerHTML = '';
 
-        pagosSnapshot.forEach(doc => {
-            const pago = { id: doc.id, ...doc.data() };
+        pagos.forEach(pago => {
             const historialItem = createHistorialItem(pago);
             historialList.appendChild(historialItem);
         });
@@ -998,3 +1092,409 @@ window.openEditTarifa = openEditTarifa;
 window.openRegistrarPago = openRegistrarPago;
 window.verComprobante = verComprobante;
 window.copiarTexto = copiarTexto;
+
+
+// ========== INTEGRACIÓN CON CUENTAS BANCARIAS ==========
+
+// Cargar cuentas en select de pago
+async function loadCuentasPagoSelect(totalPago) {
+    try {
+        const db = getDB();
+        const cuentasSnapshot = await db.collection('cuentas_bancarias')
+            .orderBy('saldo', 'desc')
+            .get();
+
+        const select = document.getElementById('cuentaPagoForm');
+        select.innerHTML = '<option value="">Seleccionar cuenta</option>';
+
+        cuentasSnapshot.forEach(doc => {
+            const cuenta = { id: doc.id, ...doc.data() };
+            const option = document.createElement('option');
+            option.value = cuenta.id;
+            option.textContent = `${cuenta.nombre} - Saldo: $${formatNumber(cuenta.saldo)}`;
+            option.dataset.saldo = cuenta.saldo;
+            select.appendChild(option);
+        });
+
+        // Listener para mostrar advertencia si el saldo es insuficiente
+        const existingListener = select.onchange;
+        select.onchange = function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const saldoInfo = document.getElementById('saldoCuentaInfo');
+            
+            if (selectedOption.value) {
+                const saldo = parseFloat(selectedOption.dataset.saldo);
+                if (saldo < totalPago) {
+                    saldoInfo.textContent = `⚠️ Saldo insuficiente. Faltan $${formatNumber(totalPago - saldo)}`;
+                    saldoInfo.className = 'form-help warning';
+                } else {
+                    saldoInfo.textContent = `✓ Saldo suficiente. Quedarán $${formatNumber(saldo - totalPago)}`;
+                    saldoInfo.className = 'form-help success';
+                }
+            } else {
+                saldoInfo.textContent = '';
+            }
+        };
+
+    } catch (error) {
+        console.error('Error loading cuentas:', error);
+    }
+}
+
+// Modificar la función openRegistrarPago original para incluir cuentas
+const originalOpenRegistrarPago = window.openRegistrarPago;
+window.openRegistrarPago = async function(profesorId, clasesData, tarifa) {
+    await originalOpenRegistrarPago(profesorId, clasesData, tarifa);
+    const total = tarifa * parseFloat(clasesData.totalHoras);
+    await loadCuentasPagoSelect(total);
+};
+
+// ========== GESTIÓN DE CATEGORÍAS ==========
+
+let tipoCategoriasActual = 'ingreso';
+let contextoCreacionCategoria = null; // 'modal' o 'formulario'
+
+// Abrir modal gestionar categorías
+async function openGestionarCategorias() {
+    tipoCategoriasActual = 'ingreso';
+    document.getElementById('modalGestionarCategorias').classList.add('active');
+    
+    // Setup tabs
+    document.querySelectorAll('.categoria-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.categoria-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            tipoCategoriasActual = btn.dataset.tipo;
+            loadCategoriasModal();
+        });
+    });
+    
+    document.querySelector('.categoria-tab-btn[data-tipo="ingreso"]').classList.add('active');
+    
+    await loadCategoriasModal();
+}
+
+// Cerrar modal gestionar categorías
+function closeGestionarCategorias() {
+    document.getElementById('modalGestionarCategorias').classList.remove('active');
+    // Recargar movimientos para actualizar filtros
+    loadCategoriasFilterMovimientos();
+}
+
+// Cargar categorías en el modal
+async function loadCategoriasModal() {
+    const categoriasListModal = document.getElementById('categoriasListModal');
+    categoriasListModal.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    try {
+        await window.loadCategorias();
+        
+        const categoriasFiltradas = window.categoriasList.filter(cat => cat.tipo === tipoCategoriasActual);
+        
+        categoriasListModal.innerHTML = '';
+        
+        // Botón para agregar nueva categoría
+        const btnNuevaCategoria = document.createElement('div');
+        btnNuevaCategoria.className = 'categoria-item nueva';
+        btnNuevaCategoria.innerHTML = `
+            <div class="categoria-info">
+                <i class="bi bi-plus-circle"></i>
+                <span>Crear nueva categoría</span>
+            </div>
+        `;
+        btnNuevaCategoria.addEventListener('click', () => crearCategoriaDesdModal());
+        categoriasListModal.appendChild(btnNuevaCategoria);
+        
+        if (categoriasFiltradas.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'empty-state-small';
+            emptyMsg.innerHTML = `
+                <p>No hay categorías de ${tipoCategoriasActual === 'ingreso' ? 'ingresos' : 'gastos'} creadas</p>
+            `;
+            categoriasListModal.appendChild(emptyMsg);
+            return;
+        }
+        
+        // Obtener estadísticas de uso
+        const estadisticas = await window.getEstadisticasPorCategoria(tipoCategoriasActual);
+        
+        categoriasFiltradas.forEach(categoria => {
+            const stats = estadisticas[categoria.nombre] || { total: 0, cantidad: 0 };
+            const categoriaItem = document.createElement('div');
+            categoriaItem.className = 'categoria-item';
+            categoriaItem.innerHTML = `
+                <div class="categoria-info">
+                    <i class="bi bi-tag"></i>
+                    <div>
+                        <strong>${categoria.nombre}</strong>
+                        <small>${stats.cantidad} movimiento${stats.cantidad !== 1 ? 's' : ''} - Total: ${formatNumber(stats.total)}</small>
+                    </div>
+                </div>
+                <button class="btn-icon delete" title="Eliminar categoría">
+                    <i class="bi bi-trash"></i>
+                </button>
+            `;
+            
+            const deleteBtn = categoriaItem.querySelector('.btn-icon.delete');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteCategoria(categoria.id, categoria.nombre, stats.cantidad);
+            });
+            
+            categoriasListModal.appendChild(categoriaItem);
+        });
+        
+    } catch (error) {
+        console.error('Error loading categorias:', error);
+        categoriasListModal.innerHTML = `
+            <div class="empty-state-small">
+                <p>Error al cargar categorías</p>
+            </div>
+        `;
+    }
+}
+
+// Crear categoría desde el modal
+function crearCategoriaDesdModal() {
+    const titulo = tipoCategoriasActual === 'ingreso' ? 'Nueva Categoría de Ingreso' : 'Nueva Categoría de Gasto';
+    document.getElementById('modalNuevaCategoriaTitulo').textContent = titulo;
+    document.getElementById('nombreNuevaCategoria').value = '';
+    document.getElementById('modalNuevaCategoria').classList.add('active');
+    
+    // Focus en el input
+    setTimeout(() => {
+        document.getElementById('nombreNuevaCategoria').focus();
+    }, 100);
+}
+
+// Cerrar modal nueva categoría
+function closeModalNuevaCategoria() {
+    document.getElementById('modalNuevaCategoria').classList.remove('active');
+    document.getElementById('formNuevaCategoria').reset();
+}
+
+// Manejar creación de categoría
+async function handleCrearCategoria(e) {
+    e.preventDefault();
+    
+    const nombreCategoria = document.getElementById('nombreNuevaCategoria').value.trim();
+    
+    if (!nombreCategoria) {
+        showNotification('error', 'Error', 'Por favor ingresa un nombre para la categoría');
+        return;
+    }
+    
+    // Verificar si ya existe
+    await window.loadCategorias();
+    const existe = window.categoriasList.some(cat => 
+        cat.nombre.toLowerCase() === nombreCategoria.toLowerCase() && cat.tipo === tipoCategoriasActual
+    );
+    
+    if (existe) {
+        showNotification('warning', 'Categoría Existente', 'Ya existe una categoría con ese nombre');
+        return;
+    }
+
+    try {
+        const db = getDB();
+        await db.collection('categorias_financieras').add({
+            nombre: nombreCategoria,
+            tipo: tipoCategoriasActual,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showNotification('success', 'Categoría Creada', 'La categoría se ha creado correctamente');
+        closeModalNuevaCategoria();
+        
+        // Si se creó desde el formulario de movimiento, recargar y seleccionar
+        if (contextoCreacionCategoria === 'formulario') {
+            await window.loadCategoriasSelect(tipoCategoriasActual);
+            document.getElementById('categoriaMovimientoForm').value = nombreCategoria;
+            contextoCreacionCategoria = null;
+        } else {
+            // Si se creó desde el modal de gestión, recargar la lista
+            await loadCategoriasModal();
+        }
+    } catch (error) {
+        console.error('Error creating categoria:', error);
+        showNotification('error', 'Error', 'No se pudo crear la categoría');
+    }
+}
+
+// Eliminar categoría
+async function deleteCategoria(categoriaId, nombreCategoria, cantidadMovimientos) {
+    if (cantidadMovimientos > 0) {
+        if (!confirm(`Esta categoría tiene ${cantidadMovimientos} movimiento${cantidadMovimientos !== 1 ? 's' : ''} asociado${cantidadMovimientos !== 1 ? 's' : ''}. ¿Estás seguro de que deseas eliminarla? Los movimientos no se eliminarán, pero quedarán sin categoría.`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`¿Estás seguro de que deseas eliminar la categoría "${nombreCategoria}"?`)) {
+            return;
+        }
+    }
+
+    try {
+        const db = getDB();
+        await db.collection('categorias_financieras').doc(categoriaId).delete();
+        
+        showNotification('success', 'Categoría Eliminada', 'La categoría se ha eliminado correctamente');
+        await loadCategoriasModal();
+        loadCategoriasFilterMovimientos();
+    } catch (error) {
+        console.error('Error deleting categoria:', error);
+        showNotification('error', 'Error', 'No se pudo eliminar la categoría');
+    }
+}
+
+// Cargar categorías en filtro de movimientos
+async function loadCategoriasFilterMovimientos() {
+    const select = document.getElementById('filtroCategoriaMovimiento');
+    const filtroTipo = document.getElementById('filtroTipoMovimiento').value;
+    
+    select.innerHTML = '<option value="">Todas las categorías</option>';
+    
+    await window.loadCategorias();
+    
+    let categoriasFiltradas = window.categoriasList;
+    if (filtroTipo) {
+        categoriasFiltradas = categoriasFiltradas.filter(cat => cat.tipo === filtroTipo);
+    }
+    
+    categoriasFiltradas.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.nombre;
+        option.textContent = cat.nombre;
+        select.appendChild(option);
+    });
+}
+
+// Abrir modal nueva categoría desde formulario
+function openModalNuevaCategoriaDesdeFormulario(tipo) {
+    contextoCreacionCategoria = 'formulario';
+    tipoCategoriasActual = tipo;
+    
+    const titulo = tipo === 'ingreso' ? 'Nueva Categoría de Ingreso' : 'Nueva Categoría de Gasto';
+    document.getElementById('modalNuevaCategoriaTitulo').textContent = titulo;
+    document.getElementById('nombreNuevaCategoria').value = '';
+    document.getElementById('modalNuevaCategoria').classList.add('active');
+    
+    // Focus en el input
+    setTimeout(() => {
+        document.getElementById('nombreNuevaCategoria').focus();
+    }, 100);
+}
+
+// Make functions global
+window.openGestionarCategorias = openGestionarCategorias;
+window.closeGestionarCategorias = closeGestionarCategorias;
+window.loadCategoriasFilterMovimientos = loadCategoriasFilterMovimientos;
+window.openModalNuevaCategoriaDesdeFormulario = openModalNuevaCategoriaDesdeFormulario;
+
+// Función para copiar al portapapeles
+function copiarAlPortapapeles(texto, mensaje) {
+    navigator.clipboard.writeText(texto).then(() => {
+        showNotification('success', 'Copiado', mensaje || 'Texto copiado al portapapeles');
+    }).catch(err => {
+        console.error('Error al copiar:', err);
+        showNotification('error', 'Error', 'No se pudo copiar al portapapeles');
+    });
+}
+
+// Actualizar openRegistrarPago para incluir datos de pago
+const originalOpenRegistrarPagoFunc = openRegistrarPago;
+window.openRegistrarPago = async function(profesorId, clasesData, tarifa) {
+    try {
+        const profesorDoc = await getDB().collection('usuarios').doc(profesorId).get();
+        if (!profesorDoc.exists) return;
+
+        const profesor = { id: profesorDoc.id, ...profesorDoc.data() };
+        selectedPagoData = {
+            profesorId,
+            clasesData,
+            tarifa,
+            profesor
+        };
+
+        const avatarUrl = profesor.fotoPerfil || '';
+        const avatarContainer = document.getElementById('modalPagoProfesorAvatar');
+        
+        if (avatarUrl) {
+            avatarContainer.src = avatarUrl;
+            avatarContainer.style.display = 'block';
+        } else {
+            avatarContainer.style.display = 'none';
+            const avatarParent = avatarContainer.parentElement;
+            const existingInitial = avatarParent.querySelector('.avatar-initial');
+            if (existingInitial) existingInitial.remove();
+            
+            const initialDiv = document.createElement('div');
+            initialDiv.className = 'avatar-initial';
+            initialDiv.style.cssText = 'width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold;';
+            initialDiv.textContent = profesor.nombre.charAt(0).toUpperCase();
+            avatarParent.insertBefore(initialDiv, avatarContainer);
+        }
+        
+        document.getElementById('modalPagoProfesorNombre').textContent = profesor.nombre;
+        document.getElementById('modalPagoProfesorEmail').textContent = profesor.email;
+
+        document.getElementById('resumenClases').textContent = clasesData.totalClases;
+        document.getElementById('resumenHoras').textContent = `${clasesData.totalHoras}h`;
+        document.getElementById('resumenTarifa').textContent = `${formatNumber(tarifa)}`;
+
+        const total = tarifa * parseFloat(clasesData.totalHoras);
+        document.getElementById('resumenTotal').textContent = `${formatNumber(total)}`;
+
+        // Llenar datos de pago del profesor
+        const metodoPago = profesor.metodoPago || '';
+        const numeroCuenta = profesor.numeroCuenta || '';
+        const nombreCuenta = profesor.nombreCuenta || '';
+
+        const metodoPagoEl = document.getElementById('profesorMetodoPago');
+        const numeroCuentaEl = document.getElementById('profesorNumeroCuenta');
+        const nombreCuentaEl = document.getElementById('profesorNombreCuenta');
+        const btnCopyNumero = document.getElementById('btnCopyNumeroCuenta');
+        const btnCopyNombre = document.getElementById('btnCopyNombreCuenta');
+
+        if (metodoPago) {
+            metodoPagoEl.textContent = metodoPago;
+            metodoPagoEl.classList.remove('no-especificado');
+        } else {
+            metodoPagoEl.textContent = 'No especificado';
+            metodoPagoEl.classList.add('no-especificado');
+        }
+
+        if (numeroCuenta) {
+            numeroCuentaEl.textContent = numeroCuenta;
+            numeroCuentaEl.classList.remove('no-especificado');
+            btnCopyNumero.style.display = 'flex';
+            btnCopyNumero.onclick = () => copiarAlPortapapeles(numeroCuenta, 'Número de cuenta copiado');
+        } else {
+            numeroCuentaEl.textContent = 'No especificado';
+            numeroCuentaEl.classList.add('no-especificado');
+            btnCopyNumero.style.display = 'none';
+        }
+
+        if (nombreCuenta) {
+            nombreCuentaEl.textContent = nombreCuenta;
+            nombreCuentaEl.classList.remove('no-especificado');
+            btnCopyNombre.style.display = 'flex';
+            btnCopyNombre.onclick = () => copiarAlPortapapeles(nombreCuenta, 'Nombre de cuenta copiado');
+        } else {
+            nombreCuentaEl.textContent = 'No especificado';
+            nombreCuentaEl.classList.add('no-especificado');
+            btnCopyNombre.style.display = 'none';
+        }
+
+        // Cargar cuentas para pagar
+        const totalPago = total;
+        await loadCuentasPagoSelect(totalPago);
+
+        document.getElementById('modalRegistrarPago').classList.add('active');
+    } catch (error) {
+        console.error('Error opening registrar pago:', error);
+        showNotification('error', 'Error', 'No se pudo cargar la información del pago');
+    }
+};
+
+window.copiarAlPortapapeles = copiarAlPortapapeles;

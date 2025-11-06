@@ -26,6 +26,10 @@
             <h1>Calendario de Clases</h1>
         </div>
         <div class="header-right">
+            <button class="btn-historial-pagos" id="btnHistorialPagos" title="Ver Historial de Pagos">
+                <i class="bi bi-cash-stack"></i>
+                <span>Mis Pagos</span>
+            </button>
             <div class="user-info" id="userInfoContainer">
                 <span class="user-name" id="userName">USUARIO</span>
                 <div class="user-avatar" id="userAvatarContainer">
@@ -217,6 +221,53 @@
             <div class="notification-actions">
                 <button class="btn-notification-secondary" id="confirmCancelBtn">Cancelar</button>
                 <button class="btn-notification-primary" id="confirmOkBtn">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Historial de Pagos -->
+    <div class="modal" id="modalHistorialPagos">
+        <div class="modal-content modal-historial-pagos">
+            <div class="modal-header">
+                <h3>Mi Historial de Pagos</h3>
+                <button class="close-btn" id="closeModalHistorial">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="historial-filters">
+                    <div class="week-selector-historial">
+                        <button class="nav-btn" id="prevWeekHistorial">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <span id="weekRangeHistorial">Semana Actual</span>
+                        <button class="nav-btn" id="nextWeekHistorial">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="historial-pagos-content" id="historialPagosContent">
+                    <!-- Se generará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Comprobante -->
+    <div class="modal" id="modalVerComprobanteCalendario">
+        <div class="modal-content modal-comprobante">
+            <div class="modal-header">
+                <h3>Comprobante de Pago</h3>
+                <button class="close-btn" id="closeModalComprobanteCalendario">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="comprobanteImageCalendario" src="" alt="Comprobante">
+                <a id="comprobanteLinkCalendario" href="" target="_blank" class="btn-primary">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    Abrir en nueva pestaña
+                </a>
             </div>
         </div>
     </div>

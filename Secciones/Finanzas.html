@@ -43,7 +43,15 @@
     <main class="main-content">
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" data-tab="tarifas">
+            <button class="tab-btn active" data-tab="cuentas">
+                <i class="bi bi-bank"></i>
+                Cuentas Bancarias
+            </button>
+            <button class="tab-btn" data-tab="movimientos">
+                <i class="bi bi-arrow-left-right"></i>
+                Ingresos y Gastos
+            </button>
+            <button class="tab-btn" data-tab="tarifas">
                 <i class="bi bi-cash-coin"></i>
                 Tarifas por Hora
             </button>
@@ -57,8 +65,77 @@
             </button>
         </div>
 
+        <!-- Tab: Cuentas Bancarias -->
+        <div class="tab-content active" id="cuentasTab">
+            <div class="section-header">
+                <h2>Gestión de Cuentas Bancarias</h2>
+                <button class="btn-primary" id="btnNuevaCuenta">
+                    <i class="bi bi-plus-circle"></i>
+                    Nueva Cuenta
+                </button>
+            </div>
+
+            <!-- Filtros de Cuentas -->
+            <div class="cuentas-filters">
+                <select id="filtroTipoCuenta" class="filter-select">
+                    <option value="">Todos los tipos</option>
+                    <!-- Se cargarán dinámicamente según las cuentas existentes -->
+                </select>
+                <input type="text" id="filtroBuscarCuenta" class="filter-input" placeholder="Buscar por nombre o número...">
+                <button class="btn-secondary" id="btnLimpiarFiltros">
+                    <i class="bi bi-x-circle"></i>
+                    Limpiar
+                </button>
+            </div>
+
+            <!-- Dashboard de Cuentas -->
+            <div class="cuentas-dashboard">
+                <div class="dashboard-card total-balance">
+                    <div class="dashboard-icon">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div class="dashboard-info">
+                        <div class="dashboard-label">Saldo Total</div>
+                        <div class="dashboard-value" id="saldoTotal">$0</div>
+                    </div>
+                </div>
+                <div class="dashboard-card total-cuentas">
+                    <div class="dashboard-icon">
+                        <i class="bi bi-bank"></i>
+                    </div>
+                    <div class="dashboard-info">
+                        <div class="dashboard-label">Cuentas Activas</div>
+                        <div class="dashboard-value" id="totalCuentas">0</div>
+                    </div>
+                </div>
+                <div class="dashboard-card ingresos-mes">
+                    <div class="dashboard-icon">
+                        <i class="bi bi-arrow-down-circle"></i>
+                    </div>
+                    <div class="dashboard-info">
+                        <div class="dashboard-label">Ingresos del Mes</div>
+                        <div class="dashboard-value" id="ingresosMes">$0</div>
+                    </div>
+                </div>
+                <div class="dashboard-card gastos-mes">
+                    <div class="dashboard-icon">
+                        <i class="bi bi-arrow-up-circle"></i>
+                    </div>
+                    <div class="dashboard-info">
+                        <div class="dashboard-label">Gastos del Mes</div>
+                        <div class="dashboard-value" id="gastosMes">$0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Cuentas -->
+            <div class="cuentas-grid" id="cuentasGrid">
+                <!-- Se generará dinámicamente -->
+            </div>
+        </div>
+
         <!-- Tab: Tarifas por Hora -->
-        <div class="tab-content active" id="tarifasTab">
+        <div class="tab-content" id="tarifasTab">
             <div class="section-header">
                 <h2>Tarifas por Hora de Profesores</h2>
                 <button class="btn-primary" id="btnActualizarTarifas">
@@ -143,6 +220,61 @@
                 <!-- Se generará dinámicamente -->
             </div>
         </div>
+
+        <!-- Tab: Ingresos y Gastos -->
+        <div class="tab-content" id="movimientosTab">
+            <div class="section-header">
+                <h2>Ingresos y Gastos</h2>
+                <div class="movimientos-actions">
+                    <button class="btn-primary" id="btnNuevoIngreso">
+                        <i class="bi bi-plus-circle"></i>
+                        Nuevo Ingreso
+                    </button>
+                    <button class="btn-danger" id="btnNuevoGasto">
+                        <i class="bi bi-dash-circle"></i>
+                        Nuevo Gasto
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros de Movimientos -->
+            <div class="movimientos-filters">
+                <select id="filtroTipoMovimiento">
+                    <option value="">Todos los movimientos</option>
+                    <option value="ingreso">Ingresos</option>
+                    <option value="gasto">Gastos</option>
+                </select>
+                <select id="filtroCuentaMovimiento">
+                    <option value="">Todas las cuentas</option>
+                </select>
+                <select id="filtroCategoriaMovimiento">
+                    <option value="">Todas las categorías</option>
+                </select>
+                <input type="month" id="filtroMesMovimiento">
+                <button class="btn-secondary" id="btnGestionarCategorias">
+                    <i class="bi bi-tags"></i>
+                    Gestionar Categorías
+                </button>
+            </div>
+
+            <!-- Resumen por Categorías -->
+            <div class="categorias-resumen" id="categoriasResumen" style="display: none;">
+                <div class="resumen-header">
+                    <h3>Resumen por Categorías</h3>
+                    <button class="btn-icon-small" id="btnCerrarResumen" title="Ocultar resumen">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="resumen-categorias-grid" id="resumenCategoriasGrid">
+                    <!-- Se generará dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Lista de Movimientos -->
+            <div class="movimientos-list" id="movimientosList">
+                <!-- Se generará dinámicamente -->
+            </div>
+        </div>
     </main>
 
     <!-- Modal Editar Tarifa -->
@@ -166,7 +298,7 @@
 
                     <div class="form-group">
                         <label for="tarifaHora">Tarifa por Hora (COP) *</label>
-                        <input type="number" id="tarifaHora" min="0" step="1000" required>
+                        <input type="text" id="tarifaHora" placeholder="0" required inputmode="numeric">
                     </div>
 
                     <div class="form-group">
@@ -208,61 +340,129 @@
 
     <!-- Modal Registrar Pago -->
     <div class="modal" id="modalRegistrarPago">
-        <div class="modal-content">
+        <div class="modal-content modal-pago-grande">
             <div class="modal-header">
-                <h3>Registrar Pago</h3>
+                <h3>Registrar Pago Semanal</h3>
                 <button class="close-btn" id="closeModalPago">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             <div class="modal-body">
                 <form id="formRegistrarPago">
-                    <div class="profesor-info">
-                        <img id="modalPagoProfesorAvatar" src="" alt="Avatar">
-                        <div>
-                            <h4 id="modalPagoProfesorNombre"></h4>
-                            <p id="modalPagoProfesorEmail"></p>
-                        </div>
-                    </div>
-
-                    <div class="pago-resumen">
-                        <div class="resumen-item">
-                            <span>Clases dictadas:</span>
-                            <strong id="resumenClases">0</strong>
-                        </div>
-                        <div class="resumen-item">
-                            <span>Horas totales:</span>
-                            <strong id="resumenHoras">0</strong>
-                        </div>
-                        <div class="resumen-item">
-                            <span>Tarifa por hora:</span>
-                            <strong id="resumenTarifa">$0</strong>
-                        </div>
-                        <div class="resumen-item total">
-                            <span>Total a pagar:</span>
-                            <strong id="resumenTotal">$0</strong>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="comprobantePago">Comprobante de Pago *</label>
-                        <div class="file-upload">
-                            <input type="file" id="comprobantePago" accept="image/*" required>
-                            <label for="comprobantePago" class="file-upload-label">
-                                <i class="bi bi-cloud-upload"></i>
-                                <span>Seleccionar imagen</span>
-                            </label>
-                            <div class="file-preview" id="filePreview" style="display: none;">
-                                <img id="previewImage" src="" alt="Preview">
-                                <button type="button" class="remove-file" id="removeFile">
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
+                    <!-- Información del Profesor -->
+                    <div class="pago-profesor-card">
+                        <div class="profesor-info-header">
+                            <img id="modalPagoProfesorAvatar" src="" alt="Avatar">
+                            <div class="profesor-datos">
+                                <h4 id="modalPagoProfesorNombre"></h4>
+                                <p id="modalPagoProfesorEmail"></p>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Resumen de Clases -->
+                    <div class="pago-seccion">
+                        <h5 class="seccion-titulo">
+                            <i class="bi bi-calendar-check"></i>
+                            Resumen de Clases
+                        </h5>
+                        <div class="pago-resumen">
+                            <div class="resumen-item">
+                                <span>Clases dictadas:</span>
+                                <strong id="resumenClases">0</strong>
+                            </div>
+                            <div class="resumen-item">
+                                <span>Horas totales:</span>
+                                <strong id="resumenHoras">0</strong>
+                            </div>
+                            <div class="resumen-item">
+                                <span>Tarifa por hora:</span>
+                                <strong id="resumenTarifa">$0</strong>
+                            </div>
+                            <div class="resumen-item total">
+                                <span>Total a pagar:</span>
+                                <strong id="resumenTotal">$0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Pago del Profesor -->
+                    <div class="pago-seccion">
+                        <h5 class="seccion-titulo">
+                            <i class="bi bi-credit-card"></i>
+                            Datos de Pago del Profesor
+                        </h5>
+                        <div class="datos-pago-profesor">
+                            <div class="dato-pago-item">
+                                <span class="dato-label">Método de Pago:</span>
+                                <strong id="profesorMetodoPago" class="dato-valor">No especificado</strong>
+                            </div>
+                            <div class="dato-pago-item">
+                                <span class="dato-label">Número de Cuenta:</span>
+                                <div class="dato-valor-copy">
+                                    <strong id="profesorNumeroCuenta" class="dato-valor">No especificado</strong>
+                                    <button type="button" class="btn-copy-small" id="btnCopyNumeroCuenta" style="display: none;" title="Copiar">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="dato-pago-item">
+                                <span class="dato-label">Nombre de Cuenta:</span>
+                                <div class="dato-valor-copy">
+                                    <strong id="profesorNombreCuenta" class="dato-valor">No especificado</strong>
+                                    <button type="button" class="btn-copy-small" id="btnCopyNombreCuenta" style="display: none;" title="Copiar">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cuenta desde donde se paga -->
+                    <div class="pago-seccion">
+                        <h5 class="seccion-titulo">
+                            <i class="bi bi-wallet2"></i>
+                            Cuenta para Realizar el Pago
+                        </h5>
+                        <div class="form-group">
+                            <label for="cuentaPagoForm">Selecciona la cuenta *</label>
+                            <select id="cuentaPagoForm" required>
+                                <option value="">Seleccionar cuenta</option>
+                            </select>
+                            <small class="form-help" id="saldoCuentaInfo"></small>
+                        </div>
+                    </div>
+
+                    <!-- Comprobante -->
+                    <div class="pago-seccion">
+                        <h5 class="seccion-titulo">
+                            <i class="bi bi-file-earmark-image"></i>
+                            Comprobante de Pago
+                        </h5>
+                        <div class="form-group">
+                            <label for="comprobantePago">Sube el comprobante *</label>
+                            <div class="file-upload">
+                                <input type="file" id="comprobantePago" accept="image/*" required>
+                                <label for="comprobantePago" class="file-upload-label">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <span>Seleccionar imagen</span>
+                                </label>
+                                <div class="file-preview" id="filePreview" style="display: none;">
+                                    <img id="previewImage" src="" alt="Preview">
+                                    <button type="button" class="remove-file" id="removeFile">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notas -->
                     <div class="form-group">
-                        <label for="notasPago">Notas (opcional)</label>
+                        <label for="notasPago">
+                            <i class="bi bi-sticky"></i>
+                            Notas adicionales (opcional)
+                        </label>
                         <textarea id="notasPago" rows="3" placeholder="Agregar notas sobre el pago"></textarea>
                     </div>
 
@@ -297,6 +497,260 @@
         </div>
     </div>
 
+    <!-- Modal Nueva/Editar Cuenta -->
+    <div class="modal" id="modalCuenta">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalCuentaTitulo">Nueva Cuenta Bancaria</h3>
+                <button class="close-btn" id="closeModalCuenta">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formCuenta">
+                    <div class="form-group">
+                        <label for="nombreCuentaForm">Nombre de la Cuenta *</label>
+                        <input type="text" id="nombreCuentaForm" placeholder="Ej: Cuenta Nequi Principal" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipoCuentaForm">Tipo de Cuenta *</label>
+                        <select id="tipoCuentaForm" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="Nequi">Nequi</option>
+                            <option value="Daviplata">Daviplata</option>
+                            <option value="Bancolombia">Bancolombia</option>
+                            <option value="Davivienda">Davivienda</option>
+                            <option value="Banco de Bogotá">Banco de Bogotá</option>
+                            <option value="BBVA">BBVA</option>
+                            <option value="Banco Popular">Banco Popular</option>
+                            <option value="Banco de Occidente">Banco de Occidente</option>
+                            <option value="Banco AV Villas">Banco AV Villas</option>
+                            <option value="Banco Caja Social">Banco Caja Social</option>
+                            <option value="Scotiabank Colpatria">Scotiabank Colpatria</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numeroCuentaForm">Número de Cuenta</label>
+                        <input type="text" id="numeroCuentaForm" placeholder="Ej: 1234567890">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="saldoInicialForm">Saldo Inicial *</label>
+                        <input type="text" id="saldoInicialForm" placeholder="0" required inputmode="numeric">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="colorCuentaForm">Color de Identificación</label>
+                        <select id="colorCuentaForm">
+                            <option value="#ff0000">Rojo</option>
+                            <option value="#28a745">Verde</option>
+                            <option value="#007bff">Azul</option>
+                            <option value="#ffc107">Amarillo</option>
+                            <option value="#6f42c1">Morado</option>
+                            <option value="#fd7e14">Naranja</option>
+                            <option value="#20c997">Turquesa</option>
+                            <option value="#e83e8c">Rosa</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notasCuentaForm">Notas</label>
+                        <textarea id="notasCuentaForm" rows="3" placeholder="Notas adicionales sobre esta cuenta"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelarCuenta">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            Guardar Cuenta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Movimiento (Ingreso/Gasto) -->
+    <div class="modal" id="modalMovimiento">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalMovimientoTitulo">Nuevo Ingreso</h3>
+                <button class="close-btn" id="closeModalMovimiento">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formMovimiento">
+                    <input type="hidden" id="tipoMovimientoForm">
+
+                    <div class="form-group">
+                        <label for="cuentaMovimientoForm">Cuenta *</label>
+                        <select id="cuentaMovimientoForm" required>
+                            <option value="">Seleccionar cuenta</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="montoMovimientoForm">Monto *</label>
+                        <input type="text" id="montoMovimientoForm" placeholder="0" required inputmode="numeric">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categoriaMovimientoForm">Categoría *</label>
+                        <select id="categoriaMovimientoForm" required>
+                            <option value="">Seleccionar categoría</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcionMovimientoForm">Descripción *</label>
+                        <input type="text" id="descripcionMovimientoForm" placeholder="Descripción del movimiento" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaMovimientoForm">Fecha *</label>
+                        <input type="date" id="fechaMovimientoForm" required>
+                    </div>
+
+                    <!-- Sección de Gamificación (solo para ingresos) -->
+                    <div class="gamificacion-section" id="gamificacionSection" style="display: none;">
+                        <div class="section-divider">
+                            <i class="bi bi-trophy"></i>
+                            <span>Gamificación y Recompensas</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estudianteCompradorForm">
+                                <i class="bi bi-person-check"></i>
+                                Estudiante Comprador (opcional)
+                            </label>
+                            <select id="estudianteCompradorForm">
+                                <option value="">Sin estudiante asociado</option>
+                            </select>
+                            <small class="form-help">Selecciona el estudiante que realizó la compra para otorgarle recompensas</small>
+                        </div>
+
+                        <div class="recompensas-container" id="recompensasContainer" style="display: none;">
+                            <div class="form-group">
+                                <label for="puntosOtorgadosForm">
+                                    <i class="bi bi-star-fill"></i>
+                                    Puntos a Otorgar
+                                </label>
+                                <input type="number" id="puntosOtorgadosForm" min="0" value="0" placeholder="0">
+                                <small class="form-help">Puntos que recibirá el estudiante por esta compra</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="insigniaForm">
+                                    <i class="bi bi-award"></i>
+                                    Insignia Especial (opcional)
+                                </label>
+                                <select id="insigniaForm">
+                                    <option value="">Sin insignia</option>
+                                    <option value="primera-compra">🎉 Primera Compra</option>
+                                    <option value="comprador-frecuente">⭐ Comprador Frecuente</option>
+                                    <option value="gran-compra">💎 Gran Compra</option>
+                                    <option value="cliente-vip">👑 Cliente VIP</option>
+                                    <option value="apoyo-especial">🏆 Apoyo Especial</option>
+                                    <option value="benefactor">🌟 Benefactor</option>
+                                </select>
+                                <small class="form-help">Insignia única que aparecerá en el perfil del estudiante</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="mensajeRecompensaForm">
+                                    <i class="bi bi-chat-quote"></i>
+                                    Mensaje de Recompensa (opcional)
+                                </label>
+                                <textarea id="mensajeRecompensaForm" rows="2" placeholder="Ej: ¡Gracias por tu apoyo! Sigue así."></textarea>
+                                <small class="form-help">Mensaje personalizado que verá el estudiante</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notasMovimientoForm">Notas</label>
+                        <textarea id="notasMovimientoForm" rows="3" placeholder="Notas adicionales"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelarMovimiento">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            Registrar Movimiento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gestionar Categorías -->
+    <div class="modal" id="modalGestionarCategorias">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Gestionar Categorías</h3>
+                <button class="close-btn" id="closeModalCategorias">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="categorias-tabs">
+                    <button class="categoria-tab-btn active" data-tipo="ingreso">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        Ingresos
+                    </button>
+                    <button class="categoria-tab-btn" data-tipo="gasto">
+                        <i class="bi bi-arrow-up-circle"></i>
+                        Gastos
+                    </button>
+                </div>
+
+                <div class="categorias-content">
+                    <div class="categorias-list" id="categoriasListModal">
+                        <!-- Se generará dinámicamente -->
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cerrarCategorias">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nueva Categoría -->
+    <div class="modal" id="modalNuevaCategoria">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 id="modalNuevaCategoriaTitulo">Nueva Categoría</h3>
+                <button class="close-btn" id="closeModalNuevaCategoria">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formNuevaCategoria">
+                    <div class="form-group">
+                        <label for="nombreNuevaCategoria">Nombre de la Categoría *</label>
+                        <input type="text" id="nombreNuevaCategoria" placeholder="Ej: Matrícula, Servicios, etc." required autofocus>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelarNuevaCategoria">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            Crear Categoría
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Notificación -->
     <div class="notification-modal" id="notificationModal">
         <div class="notification-modal-content">
@@ -316,6 +770,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/finanzas-cuentas.js"></script>
     <script src="../Elementos/js/finanzas.js"></script>
 </body>
 

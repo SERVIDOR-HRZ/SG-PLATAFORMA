@@ -560,7 +560,7 @@ body {
 
 .users-table {
     width: 100%;
-    min-width: 1900px;
+    min-width: 2250px;
     border-collapse: collapse;
     table-layout: fixed;
     border: 1px solid #e0e0e0;
@@ -838,59 +838,99 @@ body {
 }
 
 .users-table th:nth-child(5),
-/* Teléfono */
+/* Puntos */
 .users-table td:nth-child(5) {
-    width: 120px;
+    width: 100px;
+    text-align: center;
 }
 
 .users-table th:nth-child(6),
-/* Documento */
+/* Insignias */
 .users-table td:nth-child(6) {
-    width: 140px;
+    width: 150px;
+    text-align: center;
+    padding: 0.5rem 0.3rem;
 }
 
 .users-table th:nth-child(7),
-/* Institución */
+/* Materias Acceso */
 .users-table td:nth-child(7) {
-    width: 160px;
+    width: 200px;
+    text-align: center;
+    padding: 0.5rem 0.3rem;
 }
 
 .users-table th:nth-child(8),
-/* Grado */
+/* Teléfono */
 .users-table td:nth-child(8) {
-    width: 100px;
+    width: 130px;
 }
 
 .users-table th:nth-child(9),
-/* Departamento */
+/* Documento */
 .users-table td:nth-child(9) {
-    width: 140px;
+    width: 150px;
 }
 
 .users-table th:nth-child(10),
-/* Email Recuperación */
+/* Institución */
 .users-table td:nth-child(10) {
-    width: 180px;
+    width: 170px;
 }
 
 .users-table th:nth-child(11),
-/* Código Recuperación */
+/* Grado */
 .users-table td:nth-child(11) {
-    width: 120px;
+    width: 110px;
 }
 
 .users-table th:nth-child(12),
-/* Fecha Registro */
+/* Departamento */
 .users-table td:nth-child(12) {
-    width: 120px;
+    width: 150px;
 }
 
 .users-table th:nth-child(13),
-/* Acciones */
+/* Email Recuperación */
 .users-table td:nth-child(13) {
+    width: 200px;
+}
+
+.users-table th:nth-child(14),
+/* Código Recuperación */
+.users-table td:nth-child(14) {
     width: 130px;
+}
+
+.users-table th:nth-child(15),
+/* Fecha Registro */
+.users-table td:nth-child(15) {
+    width: 130px;
+}
+
+.users-table th:nth-child(16),
+/* Acciones */
+.users-table td:nth-child(16) {
+    width: 140px;
     text-align: center;
     padding: 0.8rem 0.4rem;
+    position: sticky;
+    right: 0;
+    background: #f8f9fa;
+    z-index: 8;
+    border-left: 2px solid #dee2e6;
+}
+
+.users-table td:nth-child(16) {
+    background: white;
+}
+
+.users-table tr.inactive td:nth-child(16) {
+    background: #ffcccc;
+}
+
+.users-table th:nth-child(16) {
+    z-index: 11;
 }
 
 /* Action Buttons */
@@ -1733,7 +1773,7 @@ body {
     }
     
     .users-table {
-        min-width: 1900px;
+        min-width: 2200px;
     }
     
     .stats-grid {
@@ -1743,7 +1783,7 @@ body {
 
 @media (max-width: 1200px) {
     .users-table {
-        min-width: 1800px;
+        min-width: 2200px;
     }
     
     .table-header {
@@ -1921,7 +1961,7 @@ body {
     }
     
     .users-table {
-        min-width: 1700px;
+        min-width: 2200px;
     }
 
     .users-table th,
@@ -2127,7 +2167,7 @@ body {
     }
 
     .users-table {
-        min-width: 1600px;
+        min-width: 2200px;
     }
 
     .users-table th,
@@ -2703,6 +2743,92 @@ body {
     }
 }
 
+/* Insignias Grid */
+.insignias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.insignia-checkbox {
+    position: relative;
+    cursor: pointer;
+    display: block;
+}
+
+.insignia-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.insignia-checkbox-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 0.75rem;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.insignia-icon {
+    font-size: 2rem;
+    transition: all 0.3s ease;
+}
+
+.insignia-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #666;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.insignia-checkbox:hover .insignia-checkbox-content {
+    background: #e9ecef;
+    border-color: #ced4da;
+    transform: translateY(-2px);
+}
+
+.insignia-checkbox input[type="checkbox"]:checked + .insignia-checkbox-content {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border-color: #667eea;
+    border-width: 3px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.insignia-checkbox input[type="checkbox"]:checked + .insignia-checkbox-content .insignia-icon {
+    transform: scale(1.2);
+}
+
+.insignia-checkbox input[type="checkbox"]:checked + .insignia-checkbox-content .insignia-name {
+    color: #667eea;
+    font-weight: 700;
+}
+
+.insignia-checkbox input[type="checkbox"]:checked + .insignia-checkbox-content::after {
+    content: '\F26B';
+    font-family: 'bootstrap-icons';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: #667eea;
+    font-size: 1.1rem;
+    background: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
 /* Clases Permisos Grid */
 .clases-permisos-grid {
     display: grid;
@@ -2973,8 +3099,139 @@ body {
     }
 }
 
+@media (max-width: 768px) {
+    .insignias-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .insignia-checkbox-content {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .insignia-icon {
+        font-size: 1.5rem;
+    }
+    
+    .insignia-name {
+        font-size: 0.7rem;
+    }
+}
+
 @media (max-width: 480px) {
     .asignaturas-grid {
         grid-template-columns: 1fr;
     }
+    
+    .insignias-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+}
+
+/* Ajustes para tabla con más columnas */
+.table-wrapper {
+    overflow-x: auto;
+    max-width: 100%;
+    position: relative;
+}
+
+.users-table {
+    min-width: 2200px; /* Ancho mínimo para acomodar todas las columnas */
+}
+
+.users-table th,
+.users-table td {
+    white-space: nowrap;
+    padding: 0.75rem 0.5rem;
+}
+
+/* Columnas de Gamificación */
+.puntos-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    min-width: 80px;
+}
+
+.puntos-cell i {
+    font-size: 1.1rem;
+}
+
+.puntos-cell strong {
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.insignias-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    min-width: 120px;
+    max-width: 150px;
+    padding: 0.25rem;
+}
+
+.insignia-badge {
+    font-size: 1.2rem;
+    display: inline-block;
+    transition: transform 0.2s ease;
+    cursor: help;
+    line-height: 1;
+}
+
+.insignia-badge:hover {
+    transform: scale(1.3);
+}
+
+.insignias-more {
+    background: #667eea;
+    color: white;
+    padding: 0.15rem 0.4rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.materias-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    min-width: 150px;
+    max-width: 200px;
+    padding: 0.25rem;
+}
+
+.materia-badge {
+    color: white;
+    padding: 0.25rem 0.4rem;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+    cursor: help;
+    min-width: 36px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    line-height: 1;
+}
+
+.materia-badge:hover {
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    filter: brightness(1.15);
+}
+
+.text-muted {
+    color: #999;
+    font-style: italic;
+    font-size: 0.8rem;
 }

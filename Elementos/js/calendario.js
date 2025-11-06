@@ -2,6 +2,8 @@
 let currentWeekStart = null;
 let currentUser = null;
 let userAsignaturas = [];
+let historialWeekStart = null;
+let historialWeekEnd = null;
 
 document.addEventListener('DOMContentLoaded', function () {
     checkAuthentication();
@@ -1032,6 +1034,36 @@ function setupEventListeners() {
 
     // Form submit
     document.getElementById('formNuevaClase').addEventListener('submit', handleFormSubmit);
+
+    // Historial de pagos
+    document.getElementById('btnHistorialPagos').addEventListener('click', openHistorialPagos);
+    document.getElementById('closeModalHistorial').addEventListener('click', closeHistorialPagos);
+    document.getElementById('prevWeekHistorial').addEventListener('click', () => {
+        historialWeekStart.setDate(historialWeekStart.getDate() - 7);
+        historialWeekEnd.setDate(historialWeekEnd.getDate() - 7);
+        updateHistorialWeekDisplay();
+        loadHistorialPagos();
+    });
+    document.getElementById('nextWeekHistorial').addEventListener('click', () => {
+        historialWeekStart.setDate(historialWeekStart.getDate() + 7);
+        historialWeekEnd.setDate(historialWeekEnd.getDate() + 7);
+        updateHistorialWeekDisplay();
+        loadHistorialPagos();
+    });
+    document.getElementById('closeModalComprobanteCalendario').addEventListener('click', closeComprobanteCalendario);
+
+    // Close modal on outside click
+    document.getElementById('modalHistorialPagos').addEventListener('click', (e) => {
+        if (e.target.id === 'modalHistorialPagos') {
+            closeHistorialPagos();
+        }
+    });
+
+    document.getElementById('modalVerComprobanteCalendario').addEventListener('click', (e) => {
+        if (e.target.id === 'modalVerComprobanteCalendario') {
+            closeComprobanteCalendario();
+        }
+    });
 }
 
 // Handle form submit
@@ -1439,3 +1471,172 @@ window.deleteClass = deleteClass;
 // Make confirmClass and cancelClass global
 window.confirmClass = confirmClass;
 window.cancelClass = cancelClass;
+
+// ========== HISTORIAL DE PAGOS ==========
+
+// Inicializar semana del historial
+function initializeHistorialWeek() {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Lunes como inicio
+
+    historialWeekStart = new Date(today);
+    historialWeekStart.setDate(today.getDate() + diff);
+    historialWeekStart.setHours(0, 0, 0, 0);
+
+    historialWeekEnd = new Date(historialWeekStart);
+    historialWeekEnd.setDate(historialWeekStart.getDate() + 6);
+    historialWeekEnd.setHours(23, 59, 59, 999);
+}
+
+// Actualizar display de la semana del historial
+function updateHistorialWeekDisplay() {
+    const weekRangeHistorial = document.getElementById('weekRangeHistorial');
+    const options = { day: 'numeric', month: 'short' };
+    const start = historialWeekStart.toLocaleDateString('es-ES', options);
+    const end = historialWeekEnd.toLocaleDateString('es-ES', options);
+    weekRangeHistorial.textContent = `${start} - ${end}`;
+}
+
+// Abrir modal de historial de pagos
+async function openHistorialPagos() {
+    initializeHistorialWeek();
+    updateHistorialWeekDisplay();
+    
+    document.getElementById('modalHistorialPagos').classList.add('active');
+    
+    await loadHistorialPagos();
+}
+
+// Cerrar modal de historial de pagos
+function closeHistorialPagos() {
+    document.getElementById('modalHistorialPagos').classList.remove('active');
+}
+
+// Cargar historial de pagos
+async function loadHistorialPagos() {
+    const historialContent = document.getElementById('historialPagosContent');
+    historialContent.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+
+        // Buscar pagos del profesor actual en la semana seleccionada
+        const pagosSnapshot = await db.collection('pagos')
+            .where('profesorId', '==', currentUser.id)
+            .where('semanaInicio', '==', firebase.firestore.Timestamp.fromDate(historialWeekStart))
+            .where('semanaFin', '==', firebase.firestore.Timestamp.fromDate(historialWeekEnd))
+            .get();
+
+        if (pagosSnapshot.empty) {
+            historialContent.innerHTML = `
+                <div class="historial-empty">
+                    <i class="bi bi-inbox"></i>
+                    <h4>No hay pagos registrados</h4>
+                    <p>No se encontraron pagos para esta semana</p>
+                </div>
+            `;
+            return;
+        }
+
+        historialContent.innerHTML = '';
+
+        pagosSnapshot.forEach(doc => {
+            const pago = { id: doc.id, ...doc.data() };
+            const pagoCard = createPagoCard(pago);
+            historialContent.appendChild(pagoCard);
+        });
+
+    } catch (error) {
+        console.error('Error al cargar historial de pagos:', error);
+        historialContent.innerHTML = `
+            <div class="historial-empty">
+                <i class="bi bi-exclamation-triangle"></i>
+                <h4>Error al cargar historial</h4>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Crear tarjeta de pago
+function createPagoCard(pago) {
+    const card = document.createElement('div');
+    card.className = 'historial-pago-card';
+
+    const fechaPago = pago.fechaPago ? pago.fechaPago.toDate() : new Date();
+    const fechaStr = fechaPago.toLocaleDateString('es-ES', { 
+        weekday: 'long', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    });
+
+    const semanaInicio = pago.semanaInicio ? pago.semanaInicio.toDate() : new Date();
+    const semanaFin = pago.semanaFin ? pago.semanaFin.toDate() : new Date();
+    const semanaStr = `${semanaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} - ${semanaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}`;
+
+    card.innerHTML = `
+        <div class="historial-pago-header">
+            <div class="historial-pago-info">
+                <h4>Pago Semanal</h4>
+                <div class="historial-pago-fecha">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Pagado el ${fechaStr}</span>
+                </div>
+            </div>
+            <div class="historial-pago-monto">
+                <div class="monto-label">Total Pagado</div>
+                <div class="monto-valor">$${formatNumber(pago.totalPagado)}</div>
+            </div>
+        </div>
+        <div class="historial-pago-detalles">
+            <div class="historial-detalle-item">
+                <div class="label">Semana</div>
+                <div class="value">${semanaStr}</div>
+            </div>
+            <div class="historial-detalle-item">
+                <div class="label">Clases Dictadas</div>
+                <div class="value">${pago.clasesTotales}</div>
+            </div>
+            <div class="historial-detalle-item">
+                <div class="label">Horas Totales</div>
+                <div class="value">${pago.horasTotales}h</div>
+            </div>
+            <div class="historial-detalle-item">
+                <div class="label">Tarifa por Hora</div>
+                <div class="value">$${formatNumber(pago.tarifaPorHora)}</div>
+            </div>
+        </div>
+        ${pago.notas ? `<div class="historial-pago-notas"><strong>Notas:</strong> ${pago.notas}</div>` : ''}
+        <div class="historial-pago-actions">
+            <button class="btn-ver-comprobante" onclick="verComprobanteCalendario('${pago.comprobanteUrl}')">
+                <i class="bi bi-eye"></i>
+                Ver Comprobante
+            </button>
+        </div>
+    `;
+
+    return card;
+}
+
+// Ver comprobante en calendario
+function verComprobanteCalendario(url) {
+    document.getElementById('comprobanteImageCalendario').src = url;
+    document.getElementById('comprobanteLinkCalendario').href = url;
+    document.getElementById('modalVerComprobanteCalendario').classList.add('active');
+}
+
+// Cerrar modal de comprobante
+function closeComprobanteCalendario() {
+    document.getElementById('modalVerComprobanteCalendario').classList.remove('active');
+}
+
+// Formatear número
+function formatNumber(num) {
+    return new Intl.NumberFormat('es-CO').format(Math.round(num));
+}
+
+// Make functions global
+window.verComprobanteCalendario = verComprobanteCalendario;
