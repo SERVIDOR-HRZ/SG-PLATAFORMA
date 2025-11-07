@@ -844,8 +844,33 @@ function cargarNombreAdministrador() {
     }
 }
 
+// Función para cerrar sesión
+function handleLogout() {
+    Swal.fire({
+        title: '¿Cerrar sesión?',
+        text: '¿Estás seguro de que deseas cerrar sesión?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ff0000',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            sessionStorage.clear();
+            localStorage.clear();
+            window.location.href = '../index.html';
+        }
+    });
+}
+
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function () {
+    // Inicializar foto de perfil y menú desplegable
+    if (typeof inicializarPerfilCompartido === 'function') {
+        inicializarPerfilCompartido();
+    }
+
     // Cargar nombre del administrador
     cargarNombreAdministrador();
 
@@ -880,8 +905,21 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inicializar percentil general
     actualizarPercentilGeneral();
 
-    // Inicializar foto de perfil
-    if (typeof inicializarPerfilCompartido === 'function') {
-        inicializarPerfilCompartido();
+    // Configurar botón de logout - Usar delegación de eventos en el contenedor
+    const userDropdownMenu = document.getElementById('userDropdownMenu');
+    if (userDropdownMenu) {
+        userDropdownMenu.addEventListener('click', function(e) {
+            // Verificar si el click fue en el botón de logout o en alguno de sus hijos
+            const logoutBtn = e.target.closest('#logoutBtnDropdown');
+            if (logoutBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Click en botón de logout detectado');
+                handleLogout();
+            }
+        });
+        console.log('Evento de logout configurado mediante delegación');
+    } else {
+        console.error('No se encontró el dropdown menu');
     }
 });

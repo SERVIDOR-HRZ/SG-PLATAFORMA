@@ -130,34 +130,48 @@
                     </div>
 
                     <div class="blocks-container">
-                        <h4>Configuración de Bloques</h4>
+                        <h4>Configuración de Bloques <span style="color: #dc3545; font-size: 0.9rem;">(Al menos 1 bloque requerido)</span></h4>
 
                         <!-- Bloque 1 -->
                         <div class="block-config">
-                            <h5>Bloque 1</h5>
-                            <div class="form-row">
+                            <div class="block-header-with-toggle">
+                                <h5>Bloque 1</h5>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="enableBlock1" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Habilitar</span>
+                                </label>
+                            </div>
+                            <div class="form-row" id="block1Fields">
                                 <div class="form-group">
                                     <label for="block1StartTime">Hora de Inicio</label>
-                                    <input type="time" id="block1StartTime" name="block1StartTime" required>
+                                    <input type="time" id="block1StartTime" name="block1StartTime">
                                 </div>
                                 <div class="form-group">
                                     <label for="block1EndTime">Hora de Fin</label>
-                                    <input type="time" id="block1EndTime" name="block1EndTime" required>
+                                    <input type="time" id="block1EndTime" name="block1EndTime">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Bloque 2 -->
                         <div class="block-config">
-                            <h5>Bloque 2</h5>
-                            <div class="form-row">
+                            <div class="block-header-with-toggle">
+                                <h5>Bloque 2</h5>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="enableBlock2">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Habilitar</span>
+                                </label>
+                            </div>
+                            <div class="form-row" id="block2Fields" style="display: none;">
                                 <div class="form-group">
                                     <label for="block2StartTime">Hora de Inicio</label>
-                                    <input type="time" id="block2StartTime" name="block2StartTime" required>
+                                    <input type="time" id="block2StartTime" name="block2StartTime">
                                 </div>
                                 <div class="form-group">
                                     <label for="block2EndTime">Hora de Fin</label>
-                                    <input type="time" id="block2EndTime" name="block2EndTime" required>
+                                    <input type="time" id="block2EndTime" name="block2EndTime">
                                 </div>
                             </div>
                         </div>
@@ -212,34 +226,48 @@
                     </div>
 
                     <div class="blocks-container">
-                        <h4>Configuración de Bloques</h4>
+                        <h4>Configuración de Bloques <span style="color: #dc3545; font-size: 0.9rem;">(Al menos 1 bloque requerido)</span></h4>
 
                         <!-- Bloque 1 -->
                         <div class="block-config">
-                            <h5>Bloque 1</h5>
-                            <div class="form-row">
+                            <div class="block-header-with-toggle">
+                                <h5>Bloque 1</h5>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="editEnableBlock1" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Habilitar</span>
+                                </label>
+                            </div>
+                            <div class="form-row" id="editBlock1Fields">
                                 <div class="form-group">
                                     <label for="editBlock1StartTime">Hora de Inicio</label>
-                                    <input type="time" id="editBlock1StartTime" name="editBlock1StartTime" required>
+                                    <input type="time" id="editBlock1StartTime" name="editBlock1StartTime">
                                 </div>
                                 <div class="form-group">
                                     <label for="editBlock1EndTime">Hora de Fin</label>
-                                    <input type="time" id="editBlock1EndTime" name="editBlock1EndTime" required>
+                                    <input type="time" id="editBlock1EndTime" name="editBlock1EndTime">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Bloque 2 -->
                         <div class="block-config">
-                            <h5>Bloque 2</h5>
-                            <div class="form-row">
+                            <div class="block-header-with-toggle">
+                                <h5>Bloque 2</h5>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="editEnableBlock2">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Habilitar</span>
+                                </label>
+                            </div>
+                            <div class="form-row" id="editBlock2Fields" style="display: none;">
                                 <div class="form-group">
                                     <label for="editBlock2StartTime">Hora de Inicio</label>
-                                    <input type="time" id="editBlock2StartTime" name="editBlock2StartTime" required>
+                                    <input type="time" id="editBlock2StartTime" name="editBlock2StartTime">
                                 </div>
                                 <div class="form-group">
                                     <label for="editBlock2EndTime">Hora de Fin</label>
-                                    <input type="time" id="editBlock2EndTime" name="editBlock2EndTime" required>
+                                    <input type="time" id="editBlock2EndTime" name="editBlock2EndTime">
                                 </div>
                             </div>
                         </div>

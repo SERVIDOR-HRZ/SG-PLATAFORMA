@@ -72,6 +72,98 @@ function setupEventListeners() {
     document.getElementById('cancelEditTest').addEventListener('click', hideEditTestModal);
     document.getElementById('editTestForm').addEventListener('submit', handleEditTest);
 
+    // Block 1 toggle for create modal
+    document.getElementById('enableBlock1').addEventListener('change', function() {
+        const block1Fields = document.getElementById('block1Fields');
+        const block1StartTime = document.getElementById('block1StartTime');
+        const block1EndTime = document.getElementById('block1EndTime');
+        const enableBlock2 = document.getElementById('enableBlock2');
+        
+        if (this.checked) {
+            block1Fields.style.display = 'grid';
+        } else {
+            // Si se intenta desactivar Bloque 1, verificar que Bloque 2 esté activo
+            if (!enableBlock2.checked) {
+                showNotification('Debes tener al menos un bloque activo', 'warning');
+                this.checked = true;
+                return;
+            }
+            block1Fields.style.display = 'none';
+            // Clear fields when disabled
+            block1StartTime.value = '';
+            block1EndTime.value = '';
+        }
+    });
+
+    // Block 2 toggle for create modal
+    document.getElementById('enableBlock2').addEventListener('change', function() {
+        const block2Fields = document.getElementById('block2Fields');
+        const block2StartTime = document.getElementById('block2StartTime');
+        const block2EndTime = document.getElementById('block2EndTime');
+        const enableBlock1 = document.getElementById('enableBlock1');
+        
+        if (this.checked) {
+            block2Fields.style.display = 'grid';
+        } else {
+            // Si se intenta desactivar Bloque 2, verificar que Bloque 1 esté activo
+            if (!enableBlock1.checked) {
+                showNotification('Debes tener al menos un bloque activo', 'warning');
+                this.checked = true;
+                return;
+            }
+            block2Fields.style.display = 'none';
+            // Clear fields when disabled
+            block2StartTime.value = '';
+            block2EndTime.value = '';
+        }
+    });
+
+    // Block 1 toggle for edit modal
+    document.getElementById('editEnableBlock1').addEventListener('change', function() {
+        const block1Fields = document.getElementById('editBlock1Fields');
+        const block1StartTime = document.getElementById('editBlock1StartTime');
+        const block1EndTime = document.getElementById('editBlock1EndTime');
+        const enableBlock2 = document.getElementById('editEnableBlock2');
+        
+        if (this.checked) {
+            block1Fields.style.display = 'grid';
+        } else {
+            // Si se intenta desactivar Bloque 1, verificar que Bloque 2 esté activo
+            if (!enableBlock2.checked) {
+                showNotification('Debes tener al menos un bloque activo', 'warning');
+                this.checked = true;
+                return;
+            }
+            block1Fields.style.display = 'none';
+            // Clear fields when disabled
+            block1StartTime.value = '';
+            block1EndTime.value = '';
+        }
+    });
+
+    // Block 2 toggle for edit modal
+    document.getElementById('editEnableBlock2').addEventListener('change', function() {
+        const block2Fields = document.getElementById('editBlock2Fields');
+        const block2StartTime = document.getElementById('editBlock2StartTime');
+        const block2EndTime = document.getElementById('editBlock2EndTime');
+        const enableBlock1 = document.getElementById('editEnableBlock1');
+        
+        if (this.checked) {
+            block2Fields.style.display = 'grid';
+        } else {
+            // Si se intenta desactivar Bloque 2, verificar que Bloque 1 esté activo
+            if (!enableBlock1.checked) {
+                showNotification('Debes tener al menos un bloque activo', 'warning');
+                this.checked = true;
+                return;
+            }
+            block2Fields.style.display = 'none';
+            // Clear fields when disabled
+            block2StartTime.value = '';
+            block2EndTime.value = '';
+        }
+    });
+
     // Close modals on overlay click
     document.getElementById('createTestModal').addEventListener('click', function (e) {
         if (e.target === this) {
@@ -489,6 +581,14 @@ function showCreateTestModal() {
     // Clear form
     document.getElementById('createTestForm').reset();
 
+    // Reset Block 1 toggle and show fields (default active)
+    document.getElementById('enableBlock1').checked = true;
+    document.getElementById('block1Fields').style.display = 'grid';
+
+    // Reset Block 2 toggle and hide fields
+    document.getElementById('enableBlock2').checked = false;
+    document.getElementById('block2Fields').style.display = 'none';
+
     // Populate students selector
     populateStudentsSelector();
 
@@ -531,16 +631,8 @@ function populateStudentsSelector() {
             }
         }
         
-        // Try multiple possible field names for email
-        const possibleEmailFields = ['email', 'correo', 'correoElectronico'];
-        let studentEmail = 'Sin email';
-        
-        for (const field of possibleEmailFields) {
-            if (student[field] && student[field] !== 'Sin email') {
-                studentEmail = student[field];
-                break;
-            }
-        }
+        // Get student email (usuario field contains the email)
+        const studentEmail = student.usuario || student.email || student.emailRecuperacion || 'Sin email';
         
         checkboxDiv.innerHTML = `
             <input type="checkbox" id="student_${student.id}" value="${student.id}" class="student-check">
@@ -633,57 +725,90 @@ async function handleCreateTest(e) {
             throw new Error('Debes seleccionar al menos un estudiante');
         }
 
-        if (!formData.get('block1StartTime') || !formData.get('block2StartTime') ||
-            !formData.get('block1EndTime') || !formData.get('block2EndTime')) {
-            throw new Error('Debes configurar las horas de inicio y fin de ambos bloques');
+        // Verificar que al menos un bloque esté habilitado
+        const enableBlock1 = document.getElementById('enableBlock1').checked;
+        const enableBlock2 = document.getElementById('enableBlock2').checked;
+        
+        if (!enableBlock1 && !enableBlock2) {
+            throw new Error('Debes habilitar al menos un bloque');
         }
 
         // Crear fechas completas combinando fecha y hora (evitando problemas de zona horaria)
         const testDate = formData.get('testDate');
         const [year, month, day] = testDate.split('-').map(Number);
         
-        // Crear fechas usando el constructor de Date para evitar problemas de zona horaria
-        const block1StartTime = formData.get('block1StartTime').split(':');
-        const block1EndTime = formData.get('block1EndTime').split(':');
-        const block2StartTime = formData.get('block2StartTime').split(':');
-        const block2EndTime = formData.get('block2EndTime').split(':');
-        
-        const block1Start = new Date(year, month - 1, day, parseInt(block1StartTime[0]), parseInt(block1StartTime[1]));
-        const block1End = new Date(year, month - 1, day, parseInt(block1EndTime[0]), parseInt(block1EndTime[1]));
-        const block2Start = new Date(year, month - 1, day, parseInt(block2StartTime[0]), parseInt(block2StartTime[1]));
-        const block2End = new Date(year, month - 1, day, parseInt(block2EndTime[0]), parseInt(block2EndTime[1]));
-
-        // Validar que las horas sean lógicas
-        if (block1Start >= block1End) {
-            throw new Error('La hora de fin del Bloque 1 debe ser posterior a la hora de inicio');
-        }
-        if (block2Start >= block2End) {
-            throw new Error('La hora de fin del Bloque 2 debe ser posterior a la hora de inicio');
-        }
-        if (block1End > block2Start) {
-            throw new Error('El Bloque 2 debe iniciar después de que termine el Bloque 1');
-        }
-
         const testData = {
             nombre: formData.get('testName').trim(),
             fechaDisponible: testDate,
             estudiantesAsignados: selectedStudents,
-            bloque1: {
-                horaInicio: formData.get('block1StartTime'),
-                horaFin: formData.get('block1EndTime'),
-                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block1Start),
-                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block1End)
-            },
-            bloque2: {
-                horaInicio: formData.get('block2StartTime'),
-                horaFin: formData.get('block2EndTime'),
-                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block2Start),
-                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block2End)
-            },
             fechaCreacion: firebase.firestore.Timestamp.now(),
             creadoPor: currentUser.numeroIdentidad || currentUser.id,
             estado: 'activa'
         };
+
+        // Agregar Bloque 1 solo si está habilitado
+        if (enableBlock1) {
+            const block1StartTimeStr = formData.get('block1StartTime');
+            const block1EndTimeStr = formData.get('block1EndTime');
+            
+            if (!block1StartTimeStr || !block1EndTimeStr) {
+                throw new Error('Debes completar las horas de inicio y fin del Bloque 1');
+            }
+            
+            const block1StartTime = block1StartTimeStr.split(':');
+            const block1EndTime = block1EndTimeStr.split(':');
+            
+            const block1Start = new Date(year, month - 1, day, parseInt(block1StartTime[0]), parseInt(block1StartTime[1]));
+            const block1End = new Date(year, month - 1, day, parseInt(block1EndTime[0]), parseInt(block1EndTime[1]));
+
+            // Validar que las horas del Bloque 1 sean lógicas
+            if (block1Start >= block1End) {
+                throw new Error('La hora de fin del Bloque 1 debe ser posterior a la hora de inicio');
+            }
+
+            testData.bloque1 = {
+                horaInicio: block1StartTimeStr,
+                horaFin: block1EndTimeStr,
+                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block1Start),
+                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block1End)
+            };
+        }
+
+        // Agregar Bloque 2 solo si está habilitado
+        if (enableBlock2) {
+            const block2StartTimeStr = formData.get('block2StartTime');
+            const block2EndTimeStr = formData.get('block2EndTime');
+            
+            if (!block2StartTimeStr || !block2EndTimeStr) {
+                throw new Error('Debes completar las horas de inicio y fin del Bloque 2');
+            }
+            
+            const block2StartTime = block2StartTimeStr.split(':');
+            const block2EndTime = block2EndTimeStr.split(':');
+            
+            const block2Start = new Date(year, month - 1, day, parseInt(block2StartTime[0]), parseInt(block2StartTime[1]));
+            const block2End = new Date(year, month - 1, day, parseInt(block2EndTime[0]), parseInt(block2EndTime[1]));
+
+            // Validar que las horas del Bloque 2 sean lógicas
+            if (block2Start >= block2End) {
+                throw new Error('La hora de fin del Bloque 2 debe ser posterior a la hora de inicio');
+            }
+            
+            // Si ambos bloques están habilitados, validar que no se traslapen
+            if (enableBlock1 && testData.bloque1) {
+                const block1End = new Date(year, month - 1, day, parseInt(testData.bloque1.horaFin.split(':')[0]), parseInt(testData.bloque1.horaFin.split(':')[1]));
+                if (block1End > block2Start) {
+                    throw new Error('El Bloque 2 debe iniciar después de que termine el Bloque 1');
+                }
+            }
+
+            testData.bloque2 = {
+                horaInicio: block2StartTimeStr,
+                horaFin: block2EndTimeStr,
+                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block2Start),
+                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block2End)
+            };
+        }
 
         // Wait for Firebase to be initialized
         if (!db) {
@@ -759,6 +884,34 @@ function createTestCard(test) {
         day: 'numeric'
     });
 
+    // Construir HTML de bloques dinámicamente
+    let blocksHTML = `
+        <div class="block-info">
+            <div class="block-title">
+                <i class="bi bi-clock"></i> Bloque 1
+            </div>
+            <div class="block-time">
+                <strong>Inicio:</strong> ${test.bloque1?.horaInicio || 'N/A'}<br>
+                <strong>Fin:</strong> ${test.bloque1?.horaFin || 'N/A'}
+            </div>
+        </div>
+    `;
+
+    // Solo agregar Bloque 2 si existe
+    if (test.bloque2 && test.bloque2.horaInicio && test.bloque2.horaFin) {
+        blocksHTML += `
+            <div class="block-info">
+                <div class="block-title">
+                    <i class="bi bi-clock"></i> Bloque 2
+                </div>
+                <div class="block-time">
+                    <strong>Inicio:</strong> ${test.bloque2.horaInicio}<br>
+                    <strong>Fin:</strong> ${test.bloque2.horaFin}
+                </div>
+            </div>
+        `;
+    }
+
     card.innerHTML = `
         <div class="test-header">
             <h3 class="test-title">${test.nombre}</h3>
@@ -767,24 +920,7 @@ function createTestCard(test) {
         
         <div class="test-info">
             <div class="test-blocks">
-                <div class="block-info">
-                    <div class="block-title">
-                        <i class="bi bi-clock"></i> Bloque 1
-                    </div>
-                    <div class="block-time">
-                        <strong>Inicio:</strong> ${test.bloque1?.horaInicio || 'N/A'}<br>
-                        <strong>Fin:</strong> ${test.bloque1?.horaFin || 'N/A'}
-                    </div>
-                </div>
-                <div class="block-info">
-                    <div class="block-title">
-                        <i class="bi bi-clock"></i> Bloque 2
-                    </div>
-                    <div class="block-time">
-                        <strong>Inicio:</strong> ${test.bloque2?.horaInicio || 'N/A'}<br>
-                        <strong>Fin:</strong> ${test.bloque2?.horaFin || 'N/A'}
-                    </div>
-                </div>
+                ${blocksHTML}
             </div>
         </div>
         
@@ -870,6 +1006,34 @@ function createStudentTestCard(test) {
         day: 'numeric'
     });
 
+    // Construir HTML de bloques dinámicamente
+    let blocksHTML = `
+        <div class="block-info">
+            <div class="block-title">
+                <i class="bi bi-clock"></i> Bloque 1
+            </div>
+            <div class="block-time">
+                <strong>Inicio:</strong> ${test.bloque1?.horaInicio || 'N/A'}<br>
+                <strong>Fin:</strong> ${test.bloque1?.horaFin || 'N/A'}
+            </div>
+        </div>
+    `;
+
+    // Solo agregar Bloque 2 si existe
+    if (test.bloque2 && test.bloque2.horaInicio && test.bloque2.horaFin) {
+        blocksHTML += `
+            <div class="block-info">
+                <div class="block-title">
+                    <i class="bi bi-clock"></i> Bloque 2
+                </div>
+                <div class="block-time">
+                    <strong>Inicio:</strong> ${test.bloque2.horaInicio}<br>
+                    <strong>Fin:</strong> ${test.bloque2.horaFin}
+                </div>
+            </div>
+        `;
+    }
+
     card.innerHTML = `
         <div class="student-test-header">
             <h3 class="test-title">${test.nombre}</h3>
@@ -880,24 +1044,7 @@ function createStudentTestCard(test) {
             <p><strong>Fecha:</strong> ${formattedDate}</p>
             
             <div class="test-blocks">
-                <div class="block-info">
-                    <div class="block-title">
-                        <i class="bi bi-clock"></i> Bloque 1
-                    </div>
-                    <div class="block-time">
-                        <strong>Inicio:</strong> ${test.bloque1?.horaInicio || 'N/A'}<br>
-                        <strong>Fin:</strong> ${test.bloque1?.horaFin || 'N/A'}
-                    </div>
-                </div>
-                <div class="block-info">
-                    <div class="block-title">
-                        <i class="bi bi-clock"></i> Bloque 2
-                    </div>
-                    <div class="block-time">
-                        <strong>Inicio:</strong> ${test.bloque2?.horaInicio || 'N/A'}<br>
-                        <strong>Fin:</strong> ${test.bloque2?.horaFin || 'N/A'}
-                    </div>
-                </div>
+                ${blocksHTML}
             </div>
         </div>
         
@@ -929,10 +1076,40 @@ async function editTest(testId) {
         document.getElementById('editTestId').value = testId;
         document.getElementById('editTestName').value = test.nombre;
         document.getElementById('editTestDate').value = test.fechaDisponible;
-        document.getElementById('editBlock1StartTime').value = test.bloque1?.horaInicio || '';
-        document.getElementById('editBlock1EndTime').value = test.bloque1?.horaFin || '';
-        document.getElementById('editBlock2StartTime').value = test.bloque2?.horaInicio || '';
-        document.getElementById('editBlock2EndTime').value = test.bloque2?.horaFin || '';
+        
+        // Configure Block 1 toggle and fields
+        const hasBlock1 = test.bloque1 && test.bloque1.horaInicio && test.bloque1.horaFin;
+        const enableBlock1Checkbox = document.getElementById('editEnableBlock1');
+        const block1Fields = document.getElementById('editBlock1Fields');
+        
+        if (hasBlock1) {
+            enableBlock1Checkbox.checked = true;
+            block1Fields.style.display = 'grid';
+            document.getElementById('editBlock1StartTime').value = test.bloque1.horaInicio;
+            document.getElementById('editBlock1EndTime').value = test.bloque1.horaFin;
+        } else {
+            enableBlock1Checkbox.checked = false;
+            block1Fields.style.display = 'none';
+            document.getElementById('editBlock1StartTime').value = '';
+            document.getElementById('editBlock1EndTime').value = '';
+        }
+        
+        // Configure Block 2 toggle and fields
+        const hasBlock2 = test.bloque2 && test.bloque2.horaInicio && test.bloque2.horaFin;
+        const enableBlock2Checkbox = document.getElementById('editEnableBlock2');
+        const block2Fields = document.getElementById('editBlock2Fields');
+        
+        if (hasBlock2) {
+            enableBlock2Checkbox.checked = true;
+            block2Fields.style.display = 'grid';
+            document.getElementById('editBlock2StartTime').value = test.bloque2.horaInicio;
+            document.getElementById('editBlock2EndTime').value = test.bloque2.horaFin;
+        } else {
+            enableBlock2Checkbox.checked = false;
+            block2Fields.style.display = 'none';
+            document.getElementById('editBlock2StartTime').value = '';
+            document.getElementById('editBlock2EndTime').value = '';
+        }
 
         // Populate students selector for edit
         populateEditStudentsSelector(test.estudiantesAsignados || []);
@@ -1059,16 +1236,8 @@ function populateEditStudentsSelector(assignedStudents = []) {
             }
         }
         
-        // Try multiple possible field names for email
-        const possibleEmailFields = ['email', 'correo', 'correoElectronico'];
-        let studentEmail = 'Sin email';
-        
-        for (const field of possibleEmailFields) {
-            if (student[field] && student[field] !== 'Sin email') {
-                studentEmail = student[field];
-                break;
-            }
-        }
+        // Get student email (usuario field contains the email)
+        const studentEmail = student.usuario || student.email || student.emailRecuperacion || 'Sin email';
         
         // Check if student is assigned
         const isAssigned = assignedStudents.includes(student.id);
@@ -1165,55 +1334,94 @@ async function handleEditTest(e) {
             throw new Error('Debes seleccionar al menos un estudiante');
         }
 
-        if (!formData.get('editBlock1StartTime') || !formData.get('editBlock2StartTime') ||
-            !formData.get('editBlock1EndTime') || !formData.get('editBlock2EndTime')) {
-            throw new Error('Debes configurar las horas de inicio y fin de ambos bloques');
+        // Verificar que al menos un bloque esté habilitado
+        const enableBlock1 = document.getElementById('editEnableBlock1').checked;
+        const enableBlock2 = document.getElementById('editEnableBlock2').checked;
+        
+        if (!enableBlock1 && !enableBlock2) {
+            throw new Error('Debes habilitar al menos un bloque');
         }
 
         // Crear fechas completas combinando fecha y hora (evitando problemas de zona horaria)
         const testDate = formData.get('editTestDate');
         const [year, month, day] = testDate.split('-').map(Number);
         
-        // Crear fechas usando el constructor de Date para evitar problemas de zona horaria
-        const block1StartTime = formData.get('editBlock1StartTime').split(':');
-        const block1EndTime = formData.get('editBlock1EndTime').split(':');
-        const block2StartTime = formData.get('editBlock2StartTime').split(':');
-        const block2EndTime = formData.get('editBlock2EndTime').split(':');
-        
-        const block1Start = new Date(year, month - 1, day, parseInt(block1StartTime[0]), parseInt(block1StartTime[1]));
-        const block1End = new Date(year, month - 1, day, parseInt(block1EndTime[0]), parseInt(block1EndTime[1]));
-        const block2Start = new Date(year, month - 1, day, parseInt(block2StartTime[0]), parseInt(block2StartTime[1]));
-        const block2End = new Date(year, month - 1, day, parseInt(block2EndTime[0]), parseInt(block2EndTime[1]));
-
-        // Validar que las horas sean lógicas
-        if (block1Start >= block1End) {
-            throw new Error('La hora de fin del Bloque 1 debe ser posterior a la hora de inicio');
-        }
-        if (block2Start >= block2End) {
-            throw new Error('La hora de fin del Bloque 2 debe ser posterior a la hora de inicio');
-        }
-        if (block1End > block2Start) {
-            throw new Error('El Bloque 2 debe iniciar después de que termine el Bloque 1');
-        }
-
         const updateData = {
             nombre: formData.get('editTestName').trim(),
             fechaDisponible: testDate,
             estudiantesAsignados: selectedStudents,
-            bloque1: {
-                horaInicio: formData.get('editBlock1StartTime'),
-                horaFin: formData.get('editBlock1EndTime'),
-                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block1Start),
-                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block1End)
-            },
-            bloque2: {
-                horaInicio: formData.get('editBlock2StartTime'),
-                horaFin: formData.get('editBlock2EndTime'),
-                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block2Start),
-                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block2End)
-            },
             fechaModificacion: firebase.firestore.Timestamp.now()
         };
+
+        // Agregar Bloque 1 solo si está habilitado
+        if (enableBlock1) {
+            const block1StartTimeStr = formData.get('editBlock1StartTime');
+            const block1EndTimeStr = formData.get('editBlock1EndTime');
+            
+            if (!block1StartTimeStr || !block1EndTimeStr) {
+                throw new Error('Debes completar las horas de inicio y fin del Bloque 1');
+            }
+            
+            const block1StartTime = block1StartTimeStr.split(':');
+            const block1EndTime = block1EndTimeStr.split(':');
+            
+            const block1Start = new Date(year, month - 1, day, parseInt(block1StartTime[0]), parseInt(block1StartTime[1]));
+            const block1End = new Date(year, month - 1, day, parseInt(block1EndTime[0]), parseInt(block1EndTime[1]));
+
+            // Validar que las horas del Bloque 1 sean lógicas
+            if (block1Start >= block1End) {
+                throw new Error('La hora de fin del Bloque 1 debe ser posterior a la hora de inicio');
+            }
+
+            updateData.bloque1 = {
+                horaInicio: block1StartTimeStr,
+                horaFin: block1EndTimeStr,
+                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block1Start),
+                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block1End)
+            };
+        } else {
+            // Si el Bloque 1 está deshabilitado, eliminar el campo si existía
+            updateData.bloque1 = firebase.firestore.FieldValue.delete();
+        }
+
+        // Agregar Bloque 2 solo si está habilitado
+        if (enableBlock2) {
+            const block2StartTimeStr = formData.get('editBlock2StartTime');
+            const block2EndTimeStr = formData.get('editBlock2EndTime');
+            
+            if (!block2StartTimeStr || !block2EndTimeStr) {
+                throw new Error('Debes completar las horas de inicio y fin del Bloque 2');
+            }
+            
+            const block2StartTime = block2StartTimeStr.split(':');
+            const block2EndTime = block2EndTimeStr.split(':');
+            
+            const block2Start = new Date(year, month - 1, day, parseInt(block2StartTime[0]), parseInt(block2StartTime[1]));
+            const block2End = new Date(year, month - 1, day, parseInt(block2EndTime[0]), parseInt(block2EndTime[1]));
+
+            // Validar que las horas del Bloque 2 sean lógicas
+            if (block2Start >= block2End) {
+                throw new Error('La hora de fin del Bloque 2 debe ser posterior a la hora de inicio');
+            }
+            
+            // Si ambos bloques están habilitados, validar que no se traslapen
+            if (enableBlock1 && updateData.bloque1) {
+                const block1End = new Date(year, month - 1, day, parseInt(updateData.bloque1.horaFin.split(':')[0]), parseInt(updateData.bloque1.horaFin.split(':')[1]));
+                if (block1End > block2Start) {
+                    throw new Error('El Bloque 2 debe iniciar después de que termine el Bloque 1');
+                }
+            }
+
+            updateData.bloque2 = {
+                horaInicio: block2StartTimeStr,
+                horaFin: block2EndTimeStr,
+                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block2Start),
+                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block2End)
+            };
+        } else {
+            // Si el Bloque 2 está deshabilitado, eliminar el campo si existía
+            updateData.bloque2 = firebase.firestore.FieldValue.delete();
+        }
 
         // Wait for Firebase to be initialized
         if (!db) {

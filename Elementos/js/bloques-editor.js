@@ -616,11 +616,29 @@ function updateTestInfo() {
 
     document.getElementById('testDate').textContent = `Fecha: ${formattedDate}`;
 
-    // Update block times
-    document.getElementById('block1Time').textContent =
-        `${currentTest.bloque1?.horaInicio || 'N/A'} - ${currentTest.bloque1?.horaFin || 'N/A'}`;
-    document.getElementById('block2Time').textContent =
-        `${currentTest.bloque2?.horaInicio || 'N/A'} - ${currentTest.bloque2?.horaFin || 'N/A'}`;
+    // Check which blocks are enabled
+    const hasBlock1 = currentTest.bloque1 && currentTest.bloque1.horaInicio && currentTest.bloque1.horaFin;
+    const hasBlock2 = currentTest.bloque2 && currentTest.bloque2.horaInicio && currentTest.bloque2.horaFin;
+
+    // Update block times and visibility
+    const block1Card = document.getElementById('block1Card');
+    const block2Card = document.getElementById('block2Card');
+
+    if (hasBlock1) {
+        block1Card.style.display = 'block';
+        document.getElementById('block1Time').textContent =
+            `${currentTest.bloque1.horaInicio} - ${currentTest.bloque1.horaFin}`;
+    } else {
+        block1Card.style.display = 'none';
+    }
+
+    if (hasBlock2) {
+        block2Card.style.display = 'block';
+        document.getElementById('block2Time').textContent =
+            `${currentTest.bloque2.horaInicio} - ${currentTest.bloque2.horaFin}`;
+    } else {
+        block2Card.style.display = 'none';
+    }
 }
 
 // Update questions count

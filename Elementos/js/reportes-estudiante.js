@@ -47,9 +47,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Configurar botón de descarga
     document.getElementById('btnDescargarPDF').addEventListener('click', descargarPDF);
 
-    // Inicializar foto de perfil
+    // Inicializar foto de perfil y menú desplegable
     if (typeof inicializarPerfilCompartido === 'function') {
         inicializarPerfilCompartido();
+    }
+
+    // Configurar botón de logout
+    const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
+    if (logoutBtnDropdown) {
+        logoutBtnDropdown.addEventListener('click', handleLogout);
     }
 });
 
@@ -611,4 +617,24 @@ function formatearNombrePDF(nombre) {
     return nombre.split(' ')
         .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
         .join('_');
+}
+
+// Función para cerrar sesión
+function handleLogout() {
+    Swal.fire({
+        title: '¿Cerrar sesión?',
+        text: '¿Estás seguro de que deseas cerrar sesión?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ff0000',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            sessionStorage.clear();
+            localStorage.clear();
+            window.location.href = '../index.html';
+        }
+    });
 }

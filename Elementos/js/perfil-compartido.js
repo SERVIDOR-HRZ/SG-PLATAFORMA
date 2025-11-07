@@ -56,29 +56,46 @@ function configurarMenuUsuarioCompartido() {
     const userDropdownMenu = document.getElementById('userDropdownMenu');
     const userAvatar = document.getElementById('userAvatarContainer');
     
+    console.log('Configurando menú de usuario...');
+    console.log('userMenuBtn:', userMenuBtn);
+    console.log('userDropdownMenu:', userDropdownMenu);
+    
     if (userMenuBtn && userDropdownMenu) {
-        userMenuBtn.addEventListener('click', function(e) {
+        // Remover listeners previos si existen
+        const newUserMenuBtn = userMenuBtn.cloneNode(true);
+        userMenuBtn.parentNode.replaceChild(newUserMenuBtn, userMenuBtn);
+        
+        newUserMenuBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             e.preventDefault();
+            console.log('Click en botón de menú');
             userDropdownMenu.classList.toggle('active');
+            console.log('Dropdown active:', userDropdownMenu.classList.contains('active'));
         });
 
         // Cerrar dropdown al hacer clic fuera
         document.addEventListener('click', function(e) {
-            if (!userMenuBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+            const isClickInsideMenu = newUserMenuBtn.contains(e.target) || userDropdownMenu.contains(e.target);
+            if (!isClickInsideMenu && userDropdownMenu.classList.contains('active')) {
+                console.log('Click fuera del menú, cerrando...');
                 userDropdownMenu.classList.remove('active');
             }
         });
+    } else {
+        console.error('No se encontraron elementos del menú de usuario');
     }
 
     // Click en avatar para ir a configuración (pero no si se hace clic en el botón del menú)
     if (userAvatar) {
         userAvatar.addEventListener('click', function(e) {
             // No redirigir si se hace clic en el botón del menú o en el dropdown
-            if (userMenuBtn && (e.target === userMenuBtn || userMenuBtn.contains(e.target))) {
+            const userMenuBtnElement = document.getElementById('userMenuBtn');
+            const userDropdownMenuElement = document.getElementById('userDropdownMenu');
+            
+            if (userMenuBtnElement && (e.target === userMenuBtnElement || userMenuBtnElement.contains(e.target))) {
                 return;
             }
-            if (userDropdownMenu && userDropdownMenu.contains(e.target)) {
+            if (userDropdownMenuElement && userDropdownMenuElement.contains(e.target)) {
                 return;
             }
             window.location.href = 'panelUsuario.html';
@@ -86,10 +103,7 @@ function configurarMenuUsuarioCompartido() {
     }
 
     // Botón de logout en dropdown
-    const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
-    if (logoutBtnDropdown && typeof handleLogout === 'function') {
-        logoutBtnDropdown.addEventListener('click', handleLogout);
-    }
+    // Nota: El evento de logout se configura en el archivo específico de cada página
 }
 
 // Inicializar foto de perfil automáticamente
