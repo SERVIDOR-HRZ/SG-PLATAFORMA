@@ -507,6 +507,57 @@ function createStudentTestCard(test) {
         }
     }
 
+    // Build blocks HTML - only show enabled blocks
+    let blocksHTML = '';
+    
+    // Show Block 1 only if it exists
+    if (test.bloque1) {
+        blocksHTML += `
+            <div class="block-info ${block1Status === 'completed' ? 'completed' : ''}">
+                <div class="block-title">
+                    <i class="bi bi-clock"></i> Bloque 1
+                    ${block1Status === 'completed' ? '<i class="bi bi-check-circle-fill completed-icon"></i>' : ''}
+                </div>
+                <div class="block-time">
+                    <strong>Inicio:</strong> ${test.bloque1.horaInicio}<br>
+                    <strong>Fin:</strong> ${test.bloque1.horaFin}
+                </div>
+                <div class="block-action">
+                    <button class="btn btn-sm ${block1ButtonClass}" 
+                            onclick="startBlock('${test.id}', 1)" 
+                            ${block1Disabled ? 'disabled' : ''}>
+                        <i class="bi bi-${getBlockIcon(block1Status)}"></i>
+                        ${block1ButtonText}
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Show Block 2 only if it exists
+    if (test.bloque2) {
+        blocksHTML += `
+            <div class="block-info ${block2Status === 'completed' ? 'completed' : ''}">
+                <div class="block-title">
+                    <i class="bi bi-clock"></i> Bloque 2
+                    ${block2Status === 'completed' ? '<i class="bi bi-check-circle-fill completed-icon"></i>' : ''}
+                </div>
+                <div class="block-time">
+                    <strong>Inicio:</strong> ${test.bloque2.horaInicio}<br>
+                    <strong>Fin:</strong> ${test.bloque2.horaFin}
+                </div>
+                <div class="block-action">
+                    <button class="btn btn-sm ${block2ButtonClass}" 
+                            onclick="startBlock('${test.id}', 2)" 
+                            ${block2Disabled ? 'disabled' : ''}>
+                        <i class="bi bi-${getBlockIcon(block2Status)}"></i>
+                        ${block2ButtonText}
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
     card.innerHTML = `
         <div class="student-test-header">
             <h3 class="test-title">${test.nombre}</h3>
@@ -517,42 +568,7 @@ function createStudentTestCard(test) {
             <p><strong>Fecha:</strong> ${formattedDate}</p>
             
             <div class="test-blocks">
-                <div class="block-info ${block1Status === 'completed' ? 'completed' : ''}">
-                    <div class="block-title">
-                        <i class="bi bi-clock"></i> Bloque 1
-                        ${block1Status === 'completed' ? '<i class="bi bi-check-circle-fill completed-icon"></i>' : ''}
-                    </div>
-                    <div class="block-time">
-                        <strong>Inicio:</strong> ${test.bloque1?.horaInicio || 'N/A'}<br>
-                        <strong>Fin:</strong> ${test.bloque1?.horaFin || 'N/A'}
-                    </div>
-                    <div class="block-action">
-                        <button class="btn btn-sm ${block1ButtonClass}" 
-                                onclick="startBlock('${test.id}', 1)" 
-                                ${block1Disabled ? 'disabled' : ''}>
-                            <i class="bi bi-${getBlockIcon(block1Status)}"></i>
-                            ${block1ButtonText}
-                        </button>
-                    </div>
-                </div>
-                <div class="block-info ${block2Status === 'completed' ? 'completed' : ''}">
-                    <div class="block-title">
-                        <i class="bi bi-clock"></i> Bloque 2
-                        ${block2Status === 'completed' ? '<i class="bi bi-check-circle-fill completed-icon"></i>' : ''}
-                    </div>
-                    <div class="block-time">
-                        <strong>Inicio:</strong> ${test.bloque2?.horaInicio || 'N/A'}<br>
-                        <strong>Fin:</strong> ${test.bloque2?.horaFin || 'N/A'}
-                    </div>
-                    <div class="block-action">
-                        <button class="btn btn-sm ${block2ButtonClass}" 
-                                onclick="startBlock('${test.id}', 2)" 
-                                ${block2Disabled ? 'disabled' : ''}>
-                            <i class="bi bi-${getBlockIcon(block2Status)}"></i>
-                            ${block2ButtonText}
-                        </button>
-                    </div>
-                </div>
+                ${blocksHTML}
             </div>
         </div>
     `;

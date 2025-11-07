@@ -606,18 +606,19 @@ function populateStudentsSelector() {
     studentsList.innerHTML = '';
     
     if (allStudents.length === 0) {
-        studentsList.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No hay estudiantes registrados</p>';
-        studentsCounter.textContent = '0 estudiantes disponibles';
+        studentsList.innerHTML = `
+            <div class="students-list-empty">
+                <i class="bi bi-people"></i>
+                <p>No hay estudiantes registrados</p>
+            </div>
+        `;
+        studentsCounter.innerHTML = '<i class="bi bi-people-fill"></i> 0 estudiantes disponibles';
         return;
     }
 
     allStudents.forEach(student => {
         const checkboxDiv = document.createElement('div');
         checkboxDiv.className = 'student-checkbox';
-        
-        // Debug: Log student data to see what's available
-        console.log('Student data:', student);
-        console.log('Available fields:', Object.keys(student));
         
         // Try multiple possible field names for ID
         const possibleIdFields = ['numeroIdentidad', 'numeroDocumento', 'cedula', 'documento', 'id'];
@@ -626,27 +627,41 @@ function populateStudentsSelector() {
         for (const field of possibleIdFields) {
             if (student[field] && student[field] !== 'N/A') {
                 studentId = student[field];
-                console.log(`Found ID in field: ${field} = ${studentId}`);
                 break;
             }
         }
         
-        // Get student email (usuario field contains the email)
+        // Get student email
         const studentEmail = student.usuario || student.email || student.emailRecuperacion || 'Sin email';
+        
+        // Get initials for avatar
+        const initials = (student.nombre || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
         
         checkboxDiv.innerHTML = `
             <input type="checkbox" id="student_${student.id}" value="${student.id}" class="student-check">
-            <label for="student_${student.id}">
-                <span class="student-name">${student.nombre || 'Sin nombre'}</span>
-                <span class="student-meta">ID: ${studentId} - ${studentEmail}</span>
-            </label>
+            <div class="student-checkbox-content">
+                <div class="student-avatar">${initials}</div>
+                <div class="student-info">
+                    <label for="student_${student.id}">
+                        <span class="student-name">${student.nombre || 'Sin nombre'}</span>
+                        <div class="student-meta">
+                            <span><i class="bi bi-card-text"></i> ${studentId}</span>
+                            <span><i class="bi bi-envelope"></i> ${studentEmail}</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
         `;
         studentsList.appendChild(checkboxDiv);
     });
 
     // Add event listeners to individual checkboxes
     document.querySelectorAll('.student-check').forEach(checkbox => {
-        checkbox.addEventListener('change', updateStudentsCounter);
+        checkbox.addEventListener('change', function() {
+            updateStudentsCounter();
+            // Toggle selected class
+            this.closest('.student-checkbox').classList.toggle('selected', this.checked);
+        });
     });
 
     updateStudentsCounter();
@@ -655,14 +670,34 @@ function populateStudentsSelector() {
 // Setup select all functionality
 function setupSelectAllStudents() {
     const selectAllCheckbox = document.getElementById('selectAllStudents');
+    const searchInput = document.getElementById('searchStudents');
     
     selectAllCheckbox.addEventListener('change', function() {
-        const studentCheckboxes = document.querySelectorAll('.student-check');
+        const studentCheckboxes = document.querySelectorAll('.student-check:not([style*="display: none"])');
         studentCheckboxes.forEach(checkbox => {
             checkbox.checked = this.checked;
+            checkbox.closest('.student-checkbox').classList.toggle('selected', this.checked);
         });
         updateStudentsCounter();
     });
+    
+    // Setup search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const studentCheckboxes = document.querySelectorAll('.student-checkbox');
+            
+            studentCheckboxes.forEach(checkbox => {
+                const studentName = checkbox.querySelector('.student-name').textContent.toLowerCase();
+                const studentMeta = checkbox.querySelector('.student-meta').textContent.toLowerCase();
+                const matches = studentName.includes(searchTerm) || studentMeta.includes(searchTerm);
+                
+                checkbox.style.display = matches ? 'flex' : 'none';
+            });
+            
+            updateStudentsCounter();
+        });
+    }
 }
 
 // Update students counter
@@ -672,7 +707,7 @@ function updateStudentsCounter() {
     const counter = document.getElementById('studentsCounter');
     const selectAllCheckbox = document.getElementById('selectAllStudents');
     
-    counter.textContent = `${selectedCount} de ${totalCount} estudiantes seleccionados`;
+    counter.innerHTML = `<i class="bi bi-people-fill"></i> ${selectedCount} de ${totalCount} estudiantes seleccionados`;
     
     // Update select all checkbox state
     if (selectedCount === 0) {
@@ -1216,8 +1251,13 @@ function populateEditStudentsSelector(assignedStudents = []) {
     studentsList.innerHTML = '';
     
     if (allStudents.length === 0) {
-        studentsList.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No hay estudiantes registrados</p>';
-        studentsCounter.textContent = '0 estudiantes disponibles';
+        studentsList.innerHTML = `
+            <div class="students-list-empty">
+                <i class="bi bi-people"></i>
+                <p>No hay estudiantes registrados</p>
+            </div>
+        `;
+        studentsCounter.innerHTML = '<i class="bi bi-people-fill"></i> 0 estudiantes disponibles';
         return;
     }
 
@@ -1236,25 +1276,45 @@ function populateEditStudentsSelector(assignedStudents = []) {
             }
         }
         
-        // Get student email (usuario field contains the email)
+        // Get student email
         const studentEmail = student.usuario || student.email || student.emailRecuperacion || 'Sin email';
         
         // Check if student is assigned
         const isAssigned = assignedStudents.includes(student.id);
         
+        // Get initials for avatar
+        const initials = (student.nombre || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        
         checkboxDiv.innerHTML = `
             <input type="checkbox" id="edit_student_${student.id}" value="${student.id}" class="edit-student-check" ${isAssigned ? 'checked' : ''}>
-            <label for="edit_student_${student.id}">
-                <span class="student-name">${student.nombre || 'Sin nombre'}</span>
-                <span class="student-meta">ID: ${studentId} - ${studentEmail}</span>
-            </label>
+            <div class="student-checkbox-content">
+                <div class="student-avatar">${initials}</div>
+                <div class="student-info">
+                    <label for="edit_student_${student.id}">
+                        <span class="student-name">${student.nombre || 'Sin nombre'}</span>
+                        <div class="student-meta">
+                            <span><i class="bi bi-card-text"></i> ${studentId}</span>
+                            <span><i class="bi bi-envelope"></i> ${studentEmail}</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
         `;
+        
+        if (isAssigned) {
+            checkboxDiv.classList.add('selected');
+        }
+        
         studentsList.appendChild(checkboxDiv);
     });
 
     // Add event listeners to individual checkboxes
     document.querySelectorAll('.edit-student-check').forEach(checkbox => {
-        checkbox.addEventListener('change', updateEditStudentsCounter);
+        checkbox.addEventListener('change', function() {
+            updateEditStudentsCounter();
+            // Toggle selected class
+            this.closest('.student-checkbox').classList.toggle('selected', this.checked);
+        });
     });
 
     updateEditStudentsCounter();
@@ -1263,14 +1323,34 @@ function populateEditStudentsSelector(assignedStudents = []) {
 // Setup select all functionality for edit
 function setupEditSelectAllStudents() {
     const selectAllCheckbox = document.getElementById('editSelectAllStudents');
+    const searchInput = document.getElementById('editSearchStudents');
     
     selectAllCheckbox.addEventListener('change', function() {
-        const studentCheckboxes = document.querySelectorAll('.edit-student-check');
+        const studentCheckboxes = document.querySelectorAll('.edit-student-check:not([style*="display: none"])');
         studentCheckboxes.forEach(checkbox => {
             checkbox.checked = this.checked;
+            checkbox.closest('.student-checkbox').classList.toggle('selected', this.checked);
         });
         updateEditStudentsCounter();
     });
+    
+    // Setup search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const studentCheckboxes = document.querySelectorAll('#editStudentsList .student-checkbox');
+            
+            studentCheckboxes.forEach(checkbox => {
+                const studentName = checkbox.querySelector('.student-name').textContent.toLowerCase();
+                const studentMeta = checkbox.querySelector('.student-meta').textContent.toLowerCase();
+                const matches = studentName.includes(searchTerm) || studentMeta.includes(searchTerm);
+                
+                checkbox.style.display = matches ? 'flex' : 'none';
+            });
+            
+            updateEditStudentsCounter();
+        });
+    }
 }
 
 // Update students counter for edit
@@ -1280,7 +1360,7 @@ function updateEditStudentsCounter() {
     const counter = document.getElementById('editStudentsCounter');
     const selectAllCheckbox = document.getElementById('editSelectAllStudents');
     
-    counter.textContent = `${selectedCount} de ${totalCount} estudiantes seleccionados`;
+    counter.innerHTML = `<i class="bi bi-people-fill"></i> ${selectedCount} de ${totalCount} estudiantes seleccionados`;
     
     // Update select all checkbox state
     if (selectedCount === 0) {

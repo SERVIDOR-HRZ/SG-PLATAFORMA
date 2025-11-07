@@ -116,12 +116,18 @@
                     <div class="form-group">
                         <label for="assignedStudents">Estudiantes Asignados</label>
                         <div class="students-selector" id="studentsSelector">
-                            <div class="select-all-container">
-                                <input type="checkbox" id="selectAllStudents">
-                                <label for="selectAllStudents">Seleccionar Todos</label>
+                            <div class="students-selector-header">
+                                <div class="select-all-container">
+                                    <input type="checkbox" id="selectAllStudents">
+                                    <label for="selectAllStudents">Seleccionar Todos</label>
+                                </div>
+                                <div class="students-search">
+                                    <i class="bi bi-search"></i>
+                                    <input type="text" id="searchStudents" placeholder="Buscar estudiante...">
+                                </div>
                             </div>
                             <div class="students-counter" id="studentsCounter">
-                                0 estudiantes seleccionados
+                                <i class="bi bi-people-fill"></i> 0 estudiantes seleccionados
                             </div>
                             <div class="students-list" id="studentsList">
                                 <!-- Students will be loaded here -->
@@ -212,12 +218,18 @@
                     <div class="form-group">
                         <label for="editAssignedStudents">Estudiantes Asignados</label>
                         <div class="students-selector" id="editStudentsSelector">
-                            <div class="select-all-container">
-                                <input type="checkbox" id="editSelectAllStudents">
-                                <label for="editSelectAllStudents">Seleccionar Todos</label>
+                            <div class="students-selector-header">
+                                <div class="select-all-container">
+                                    <input type="checkbox" id="editSelectAllStudents">
+                                    <label for="editSelectAllStudents">Seleccionar Todos</label>
+                                </div>
+                                <div class="students-search">
+                                    <i class="bi bi-search"></i>
+                                    <input type="text" id="editSearchStudents" placeholder="Buscar estudiante...">
+                                </div>
                             </div>
                             <div class="students-counter" id="editStudentsCounter">
-                                0 estudiantes seleccionados
+                                <i class="bi bi-people-fill"></i> 0 estudiantes seleccionados
                             </div>
                             <div class="students-list" id="editStudentsList">
                                 <!-- Students will be loaded here -->
