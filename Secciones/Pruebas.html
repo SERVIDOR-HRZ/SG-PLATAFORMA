@@ -16,6 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../Elementos/css/panel.css">
     <link rel="stylesheet" href="../Elementos/css/pruebas.css">
+    <link rel="stylesheet" href="../Elementos/css/time-picker.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
 
 </head>
@@ -150,12 +151,18 @@
                             </div>
                             <div class="form-row" id="block1Fields">
                                 <div class="form-group">
-                                    <label for="block1StartTime">Hora de Inicio</label>
-                                    <input type="time" id="block1StartTime" name="block1StartTime">
+                                    <label>Hora de Inicio</label>
+                                    <div class="time-input-display empty" id="block1StartTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="block1EndTime">Hora de Fin</label>
-                                    <input type="time" id="block1EndTime" name="block1EndTime">
+                                    <label>Hora de Fin</label>
+                                    <div class="time-input-display empty" id="block1EndTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -172,12 +179,18 @@
                             </div>
                             <div class="form-row" id="block2Fields" style="display: none;">
                                 <div class="form-group">
-                                    <label for="block2StartTime">Hora de Inicio</label>
-                                    <input type="time" id="block2StartTime" name="block2StartTime">
+                                    <label>Hora de Inicio</label>
+                                    <div class="time-input-display empty" id="block2StartTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="block2EndTime">Hora de Fin</label>
-                                    <input type="time" id="block2EndTime" name="block2EndTime">
+                                    <label>Hora de Fin</label>
+                                    <div class="time-input-display empty" id="block2EndTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -252,12 +265,18 @@
                             </div>
                             <div class="form-row" id="editBlock1Fields">
                                 <div class="form-group">
-                                    <label for="editBlock1StartTime">Hora de Inicio</label>
-                                    <input type="time" id="editBlock1StartTime" name="editBlock1StartTime">
+                                    <label>Hora de Inicio</label>
+                                    <div class="time-input-display empty" id="editBlock1StartTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="editBlock1EndTime">Hora de Fin</label>
-                                    <input type="time" id="editBlock1EndTime" name="editBlock1EndTime">
+                                    <label>Hora de Fin</label>
+                                    <div class="time-input-display empty" id="editBlock1EndTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -274,12 +293,18 @@
                             </div>
                             <div class="form-row" id="editBlock2Fields" style="display: none;">
                                 <div class="form-group">
-                                    <label for="editBlock2StartTime">Hora de Inicio</label>
-                                    <input type="time" id="editBlock2StartTime" name="editBlock2StartTime">
+                                    <label>Hora de Inicio</label>
+                                    <div class="time-input-display empty" id="editBlock2StartTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="editBlock2EndTime">Hora de Fin</label>
-                                    <input type="time" id="editBlock2EndTime" name="editBlock2EndTime">
+                                    <label>Hora de Fin</label>
+                                    <div class="time-input-display empty" id="editBlock2EndTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -300,6 +325,7 @@
 
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/perfil-compartido.js"></script>
+    <script src="../Elementos/js/time-picker.js"></script>
     <script src="../Elementos/js/pruebas-admin.js"></script>
 
 </body>

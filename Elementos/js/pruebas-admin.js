@@ -90,8 +90,12 @@ function setupEventListeners() {
             }
             block1Fields.style.display = 'none';
             // Clear fields when disabled
-            block1StartTime.value = '';
-            block1EndTime.value = '';
+            block1StartTime.dataset.timeValue = '';
+            block1StartTime.querySelector('span').textContent = 'Seleccionar hora';
+            block1StartTime.classList.add('empty');
+            block1EndTime.dataset.timeValue = '';
+            block1EndTime.querySelector('span').textContent = 'Seleccionar hora';
+            block1EndTime.classList.add('empty');
         }
     });
 
@@ -113,8 +117,12 @@ function setupEventListeners() {
             }
             block2Fields.style.display = 'none';
             // Clear fields when disabled
-            block2StartTime.value = '';
-            block2EndTime.value = '';
+            block2StartTime.dataset.timeValue = '';
+            block2StartTime.querySelector('span').textContent = 'Seleccionar hora';
+            block2StartTime.classList.add('empty');
+            block2EndTime.dataset.timeValue = '';
+            block2EndTime.querySelector('span').textContent = 'Seleccionar hora';
+            block2EndTime.classList.add('empty');
         }
     });
 
@@ -136,8 +144,12 @@ function setupEventListeners() {
             }
             block1Fields.style.display = 'none';
             // Clear fields when disabled
-            block1StartTime.value = '';
-            block1EndTime.value = '';
+            block1StartTime.dataset.timeValue = '';
+            block1StartTime.querySelector('span').textContent = 'Seleccionar hora';
+            block1StartTime.classList.add('empty');
+            block1EndTime.dataset.timeValue = '';
+            block1EndTime.querySelector('span').textContent = 'Seleccionar hora';
+            block1EndTime.classList.add('empty');
         }
     });
 
@@ -159,8 +171,12 @@ function setupEventListeners() {
             }
             block2Fields.style.display = 'none';
             // Clear fields when disabled
-            block2StartTime.value = '';
-            block2EndTime.value = '';
+            block2StartTime.dataset.timeValue = '';
+            block2StartTime.querySelector('span').textContent = 'Seleccionar hora';
+            block2StartTime.classList.add('empty');
+            block2EndTime.dataset.timeValue = '';
+            block2EndTime.querySelector('span').textContent = 'Seleccionar hora';
+            block2EndTime.classList.add('empty');
         }
     });
 
@@ -783,15 +799,29 @@ async function handleCreateTest(e) {
 
         // Agregar Bloque 1 solo si está habilitado
         if (enableBlock1) {
-            const block1StartTimeStr = formData.get('block1StartTime');
-            const block1EndTimeStr = formData.get('block1EndTime');
+            const block1StartTimeEl = document.getElementById('block1StartTime');
+            const block1EndTimeEl = document.getElementById('block1EndTime');
+            const block1StartTimeStr = block1StartTimeEl.dataset.timeValue;
+            const block1EndTimeStr = block1EndTimeEl.dataset.timeValue;
             
             if (!block1StartTimeStr || !block1EndTimeStr) {
                 throw new Error('Debes completar las horas de inicio y fin del Bloque 1');
             }
             
-            const block1StartTime = block1StartTimeStr.split(':');
-            const block1EndTime = block1EndTimeStr.split(':');
+            // Convert 12-hour format to 24-hour format for processing
+            const convertTo24Hour = (timeStr) => {
+                const [time, period] = timeStr.split(' ');
+                let [hours, minutes] = time.split(':').map(Number);
+                if (period === 'PM' && hours !== 12) hours += 12;
+                if (period === 'AM' && hours === 12) hours = 0;
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            };
+            
+            const block1StartTime24 = convertTo24Hour(block1StartTimeStr);
+            const block1EndTime24 = convertTo24Hour(block1EndTimeStr);
+            
+            const block1StartTime = block1StartTime24.split(':');
+            const block1EndTime = block1EndTime24.split(':');
             
             const block1Start = new Date(year, month - 1, day, parseInt(block1StartTime[0]), parseInt(block1StartTime[1]));
             const block1End = new Date(year, month - 1, day, parseInt(block1EndTime[0]), parseInt(block1EndTime[1]));
@@ -802,8 +832,8 @@ async function handleCreateTest(e) {
             }
 
             testData.bloque1 = {
-                horaInicio: block1StartTimeStr,
-                horaFin: block1EndTimeStr,
+                horaInicio: block1StartTime24,
+                horaFin: block1EndTime24,
                 fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block1Start),
                 fechaHoraFin: firebase.firestore.Timestamp.fromDate(block1End)
             };
@@ -811,15 +841,29 @@ async function handleCreateTest(e) {
 
         // Agregar Bloque 2 solo si está habilitado
         if (enableBlock2) {
-            const block2StartTimeStr = formData.get('block2StartTime');
-            const block2EndTimeStr = formData.get('block2EndTime');
+            const block2StartTimeEl = document.getElementById('block2StartTime');
+            const block2EndTimeEl = document.getElementById('block2EndTime');
+            const block2StartTimeStr = block2StartTimeEl.dataset.timeValue;
+            const block2EndTimeStr = block2EndTimeEl.dataset.timeValue;
             
             if (!block2StartTimeStr || !block2EndTimeStr) {
                 throw new Error('Debes completar las horas de inicio y fin del Bloque 2');
             }
             
-            const block2StartTime = block2StartTimeStr.split(':');
-            const block2EndTime = block2EndTimeStr.split(':');
+            // Convert 12-hour format to 24-hour format for processing
+            const convertTo24Hour = (timeStr) => {
+                const [time, period] = timeStr.split(' ');
+                let [hours, minutes] = time.split(':').map(Number);
+                if (period === 'PM' && hours !== 12) hours += 12;
+                if (period === 'AM' && hours === 12) hours = 0;
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            };
+            
+            const block2StartTime24 = convertTo24Hour(block2StartTimeStr);
+            const block2EndTime24 = convertTo24Hour(block2EndTimeStr);
+            
+            const block2StartTime = block2StartTime24.split(':');
+            const block2EndTime = block2EndTime24.split(':');
             
             const block2Start = new Date(year, month - 1, day, parseInt(block2StartTime[0]), parseInt(block2StartTime[1]));
             const block2End = new Date(year, month - 1, day, parseInt(block2EndTime[0]), parseInt(block2EndTime[1]));
@@ -838,8 +882,8 @@ async function handleCreateTest(e) {
             }
 
             testData.bloque2 = {
-                horaInicio: block2StartTimeStr,
-                horaFin: block2EndTimeStr,
+                horaInicio: block2StartTime24,
+                horaFin: block2EndTime24,
                 fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block2Start),
                 fechaHoraFin: firebase.firestore.Timestamp.fromDate(block2End)
             };
@@ -1120,13 +1164,42 @@ async function editTest(testId) {
         if (hasBlock1) {
             enableBlock1Checkbox.checked = true;
             block1Fields.style.display = 'grid';
-            document.getElementById('editBlock1StartTime').value = test.bloque1.horaInicio;
-            document.getElementById('editBlock1EndTime').value = test.bloque1.horaFin;
+            
+            // Convert 24-hour format to 12-hour format for display
+            const convertTo12Hour = (time24) => {
+                const [hours, minutes] = time24.split(':').map(Number);
+                const period = hours >= 12 ? 'PM' : 'AM';
+                const hours12 = hours % 12 || 12;
+                return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+            };
+            
+            const startTime12 = convertTo12Hour(test.bloque1.horaInicio);
+            const endTime12 = convertTo12Hour(test.bloque1.horaFin);
+            
+            const startTimeEl = document.getElementById('editBlock1StartTime');
+            const endTimeEl = document.getElementById('editBlock1EndTime');
+            
+            startTimeEl.dataset.timeValue = startTime12;
+            startTimeEl.querySelector('span').textContent = startTime12;
+            startTimeEl.classList.remove('empty');
+            
+            endTimeEl.dataset.timeValue = endTime12;
+            endTimeEl.querySelector('span').textContent = endTime12;
+            endTimeEl.classList.remove('empty');
         } else {
             enableBlock1Checkbox.checked = false;
             block1Fields.style.display = 'none';
-            document.getElementById('editBlock1StartTime').value = '';
-            document.getElementById('editBlock1EndTime').value = '';
+            
+            const startTimeEl = document.getElementById('editBlock1StartTime');
+            const endTimeEl = document.getElementById('editBlock1EndTime');
+            
+            startTimeEl.dataset.timeValue = '';
+            startTimeEl.querySelector('span').textContent = 'Seleccionar hora';
+            startTimeEl.classList.add('empty');
+            
+            endTimeEl.dataset.timeValue = '';
+            endTimeEl.querySelector('span').textContent = 'Seleccionar hora';
+            endTimeEl.classList.add('empty');
         }
         
         // Configure Block 2 toggle and fields
@@ -1137,13 +1210,42 @@ async function editTest(testId) {
         if (hasBlock2) {
             enableBlock2Checkbox.checked = true;
             block2Fields.style.display = 'grid';
-            document.getElementById('editBlock2StartTime').value = test.bloque2.horaInicio;
-            document.getElementById('editBlock2EndTime').value = test.bloque2.horaFin;
+            
+            // Convert 24-hour format to 12-hour format for display
+            const convertTo12Hour = (time24) => {
+                const [hours, minutes] = time24.split(':').map(Number);
+                const period = hours >= 12 ? 'PM' : 'AM';
+                const hours12 = hours % 12 || 12;
+                return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+            };
+            
+            const startTime12 = convertTo12Hour(test.bloque2.horaInicio);
+            const endTime12 = convertTo12Hour(test.bloque2.horaFin);
+            
+            const startTimeEl = document.getElementById('editBlock2StartTime');
+            const endTimeEl = document.getElementById('editBlock2EndTime');
+            
+            startTimeEl.dataset.timeValue = startTime12;
+            startTimeEl.querySelector('span').textContent = startTime12;
+            startTimeEl.classList.remove('empty');
+            
+            endTimeEl.dataset.timeValue = endTime12;
+            endTimeEl.querySelector('span').textContent = endTime12;
+            endTimeEl.classList.remove('empty');
         } else {
             enableBlock2Checkbox.checked = false;
             block2Fields.style.display = 'none';
-            document.getElementById('editBlock2StartTime').value = '';
-            document.getElementById('editBlock2EndTime').value = '';
+            
+            const startTimeEl = document.getElementById('editBlock2StartTime');
+            const endTimeEl = document.getElementById('editBlock2EndTime');
+            
+            startTimeEl.dataset.timeValue = '';
+            startTimeEl.querySelector('span').textContent = 'Seleccionar hora';
+            startTimeEl.classList.add('empty');
+            
+            endTimeEl.dataset.timeValue = '';
+            endTimeEl.querySelector('span').textContent = 'Seleccionar hora';
+            endTimeEl.classList.add('empty');
         }
 
         // Populate students selector for edit
@@ -1435,15 +1537,29 @@ async function handleEditTest(e) {
 
         // Agregar Bloque 1 solo si está habilitado
         if (enableBlock1) {
-            const block1StartTimeStr = formData.get('editBlock1StartTime');
-            const block1EndTimeStr = formData.get('editBlock1EndTime');
+            const block1StartTimeEl = document.getElementById('editBlock1StartTime');
+            const block1EndTimeEl = document.getElementById('editBlock1EndTime');
+            const block1StartTimeStr = block1StartTimeEl.dataset.timeValue;
+            const block1EndTimeStr = block1EndTimeEl.dataset.timeValue;
             
             if (!block1StartTimeStr || !block1EndTimeStr) {
                 throw new Error('Debes completar las horas de inicio y fin del Bloque 1');
             }
             
-            const block1StartTime = block1StartTimeStr.split(':');
-            const block1EndTime = block1EndTimeStr.split(':');
+            // Convert 12-hour format to 24-hour format for processing
+            const convertTo24Hour = (timeStr) => {
+                const [time, period] = timeStr.split(' ');
+                let [hours, minutes] = time.split(':').map(Number);
+                if (period === 'PM' && hours !== 12) hours += 12;
+                if (period === 'AM' && hours === 12) hours = 0;
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            };
+            
+            const block1StartTime24 = convertTo24Hour(block1StartTimeStr);
+            const block1EndTime24 = convertTo24Hour(block1EndTimeStr);
+            
+            const block1StartTime = block1StartTime24.split(':');
+            const block1EndTime = block1EndTime24.split(':');
             
             const block1Start = new Date(year, month - 1, day, parseInt(block1StartTime[0]), parseInt(block1StartTime[1]));
             const block1End = new Date(year, month - 1, day, parseInt(block1EndTime[0]), parseInt(block1EndTime[1]));
@@ -1454,8 +1570,8 @@ async function handleEditTest(e) {
             }
 
             updateData.bloque1 = {
-                horaInicio: block1StartTimeStr,
-                horaFin: block1EndTimeStr,
+                horaInicio: block1StartTime24,
+                horaFin: block1EndTime24,
                 fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block1Start),
                 fechaHoraFin: firebase.firestore.Timestamp.fromDate(block1End)
             };
@@ -1466,15 +1582,29 @@ async function handleEditTest(e) {
 
         // Agregar Bloque 2 solo si está habilitado
         if (enableBlock2) {
-            const block2StartTimeStr = formData.get('editBlock2StartTime');
-            const block2EndTimeStr = formData.get('editBlock2EndTime');
+            const block2StartTimeEl = document.getElementById('editBlock2StartTime');
+            const block2EndTimeEl = document.getElementById('editBlock2EndTime');
+            const block2StartTimeStr = block2StartTimeEl.dataset.timeValue;
+            const block2EndTimeStr = block2EndTimeEl.dataset.timeValue;
             
             if (!block2StartTimeStr || !block2EndTimeStr) {
                 throw new Error('Debes completar las horas de inicio y fin del Bloque 2');
             }
             
-            const block2StartTime = block2StartTimeStr.split(':');
-            const block2EndTime = block2EndTimeStr.split(':');
+            // Convert 12-hour format to 24-hour format for processing
+            const convertTo24Hour = (timeStr) => {
+                const [time, period] = timeStr.split(' ');
+                let [hours, minutes] = time.split(':').map(Number);
+                if (period === 'PM' && hours !== 12) hours += 12;
+                if (period === 'AM' && hours === 12) hours = 0;
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            };
+            
+            const block2StartTime24 = convertTo24Hour(block2StartTimeStr);
+            const block2EndTime24 = convertTo24Hour(block2EndTimeStr);
+            
+            const block2StartTime = block2StartTime24.split(':');
+            const block2EndTime = block2EndTime24.split(':');
             
             const block2Start = new Date(year, month - 1, day, parseInt(block2StartTime[0]), parseInt(block2StartTime[1]));
             const block2End = new Date(year, month - 1, day, parseInt(block2EndTime[0]), parseInt(block2EndTime[1]));
@@ -1493,8 +1623,8 @@ async function handleEditTest(e) {
             }
 
             updateData.bloque2 = {
-                horaInicio: block2StartTimeStr,
-                horaFin: block2EndTimeStr,
+                horaInicio: block2StartTime24,
+                horaFin: block2EndTime24,
                 fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block2Start),
                 fechaHoraFin: firebase.firestore.Timestamp.fromDate(block2End)
             };
@@ -1638,3 +1768,21 @@ function editBlocks(testId) {
 
 // Make function globally accessible
 window.editBlocks = editBlocks;
+
+// Initialize time pickers after DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for time picker to be initialized
+    setTimeout(() => {
+        // Attach time pickers to create modal
+        attachTimePicker('block1StartTime');
+        attachTimePicker('block1EndTime');
+        attachTimePicker('block2StartTime');
+        attachTimePicker('block2EndTime');
+        
+        // Attach time pickers to edit modal
+        attachTimePicker('editBlock1StartTime');
+        attachTimePicker('editBlock1EndTime');
+        attachTimePicker('editBlock2StartTime');
+        attachTimePicker('editBlock2EndTime');
+    }, 500);
+});
