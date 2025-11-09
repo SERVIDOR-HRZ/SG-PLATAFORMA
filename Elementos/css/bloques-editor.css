@@ -1,7 +1,7 @@
 /* Bloques Editor Styles */
 
 body {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: #f5f5f5;
     min-height: 100vh;
 }
 
@@ -201,25 +201,12 @@ body {
 }
 
 .test-info-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 15px;
+    background: #ffffff;
+    border-radius: 8px;
     padding: 25px;
     margin-bottom: 30px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #dc3545;
-    border: 1px solid #e9ecef;
-    position: relative;
-    overflow: hidden;
-}
-
-.test-info-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #dc3545, #fd7e14, #28a745, #007bff, #6f42c1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #dc3545;
 }
 
 .test-info-card h2 {
@@ -242,29 +229,16 @@ body {
 }
 
 .block-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 15px;
+    background: #ffffff;
+    border-radius: 8px;
     padding: 25px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.block-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #dc3545, #fd7e14, #28a745, #007bff);
 }
 
 .block-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     border-color: #dc3545;
 }
 
@@ -274,29 +248,30 @@ body {
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: 2px solid #dc3545;
 }
 
 .block-header h3 {
     margin: 0;
-    color: #333;
+    color: #1a1a1a;
     font-size: 20px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .block-header h3 i {
-    color: #007bff;
+    color: #dc3545;
 }
 
 .block-time {
-    background: #f8f9fa;
-    padding: 8px 12px;
-    border-radius: 6px;
+    background: #1a1a1a;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 4px;
     font-size: 14px;
-    color: #666;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .subjects-grid {
@@ -306,24 +281,13 @@ body {
 }
 
 .subject-card {
-    background: #f8f9fa;
-    border-radius: 10px;
+    background: #ffffff;
+    border-radius: 8px;
     padding: 20px;
     text-align: center;
     transition: all 0.3s ease;
-    border: 2px solid transparent;
-    position: relative;
-    overflow: hidden;
-}
-
-.subject-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    transition: all 0.3s ease;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* Subject Colors */
@@ -331,65 +295,50 @@ body {
     border-color: #007bff;
 }
 
-.subject-card.matematicas::before {
-    background: #007bff;
-}
-
 .subject-card.matematicas:hover {
-    background: rgba(0, 123, 255, 0.1);
+    background: #f0f7ff;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+    transform: translateY(-2px);
 }
 
 .subject-card.lectura {
     border-color: #dc3545;
 }
 
-.subject-card.lectura::before {
-    background: #dc3545;
-}
-
 .subject-card.lectura:hover {
-    background: rgba(220, 53, 69, 0.1);
+    background: #fff5f5;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+    transform: translateY(-2px);
 }
 
 .subject-card.sociales {
     border-color: #fd7e14;
 }
 
-.subject-card.sociales::before {
-    background: #fd7e14;
-}
-
 .subject-card.sociales:hover {
-    background: rgba(253, 126, 20, 0.1);
+    background: #fff8f0;
+    box-shadow: 0 4px 15px rgba(253, 126, 20, 0.2);
+    transform: translateY(-2px);
 }
 
 .subject-card.ciencias {
     border-color: #28a745;
 }
 
-.subject-card.ciencias::before {
-    background: #28a745;
-}
-
 .subject-card.ciencias:hover {
-    background: rgba(40, 167, 69, 0.1);
+    background: #f0fff4;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+    transform: translateY(-2px);
 }
 
 .subject-card.ingles {
     border-color: #6f42c1;
 }
 
-.subject-card.ingles::before {
-    background: #6f42c1;
-}
-
 .subject-card.ingles:hover {
-    background: rgba(111, 66, 193, 0.1);
-}
-
-.subject-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    background: #f8f5ff;
+    box-shadow: 0 4px 15px rgba(111, 66, 193, 0.2);
+    transform: translateY(-2px);
 }
 
 .subject-icon {
@@ -420,10 +369,9 @@ body {
 
 .subject-card h4 {
     margin: 0 0 10px 0;
-    color: #333;
+    color: #1a1a1a;
     font-size: 18px;
     font-weight: 700;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .questions-count {
@@ -431,110 +379,58 @@ body {
     color: #666;
     margin-bottom: 15px;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 5px 10px;
-    border-radius: 15px;
+    background: #f5f5f5;
+    padding: 6px 12px;
+    border-radius: 4px;
     display: inline-block;
+    border: 1px solid #e0e0e0;
 }
 
 .subject-card .btn {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 2px solid;
+    background: #1a1a1a;
+    color: #ffffff;
+    border: none;
     font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 10px 20px;
+    border-radius: 4px;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.subject-card.matematicas .btn {
-    border-color: #007bff;
-    color: #007bff;
-}
-
-.subject-card.matematicas .btn:hover {
-    background: #007bff;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-}
-
-.subject-card.lectura .btn {
-    border-color: #dc3545;
-    color: #dc3545;
-}
-
-.subject-card.lectura .btn:hover {
+.subject-card .btn:hover {
     background: #dc3545;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-}
-
-.subject-card.sociales .btn {
-    border-color: #fd7e14;
-    color: #fd7e14;
-}
-
-.subject-card.sociales .btn:hover {
-    background: #fd7e14;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(253, 126, 20, 0.3);
-}
-
-.subject-card.ciencias .btn {
-    border-color: #28a745;
-    color: #28a745;
-}
-
-.subject-card.ciencias .btn:hover {
-    background: #28a745;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-}
-
-.subject-card.ingles .btn {
-    border-color: #6f42c1;
-    color: #6f42c1;
-}
-
-.subject-card.ingles .btn:hover {
-    background: #6f42c1;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    transform: translateY(-1px);
 }
 
 .save-container {
     text-align: center;
     padding: 30px 0;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 15px;
+    background: #ffffff;
+    border-radius: 8px;
     margin-top: 20px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
 }
 
 .btn-lg {
-    padding: 18px 40px;
-    font-size: 18px;
+    padding: 16px 50px;
+    font-size: 16px;
     font-weight: 700;
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: #dc3545;
     border: none;
-    border-radius: 12px;
+    border-radius: 4px;
     color: white;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
 .btn-lg:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
-    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+    background: #1a1a1a;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
 }
 
 /* Modal Styles */
@@ -560,9 +456,9 @@ body {
 }
 
 .modal {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 15px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     transform: scale(0.8);
     transition: all 0.3s ease;
     overflow: hidden;
@@ -577,19 +473,42 @@ body {
     max-width: 95vw;
     width: 95vw;
     max-height: 95vh;
+    min-width: 95vw;
+    min-height: 95vh;
     display: flex;
     flex-direction: column;
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: #1a1a1a;
     color: white;
     padding: 20px 25px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 3px solid #a71e2a;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
+    transition: background 0.3s ease;
+}
+
+.modal-header.matematicas {
+    background: #007bff;
+}
+
+.modal-header.lectura {
+    background: #dc3545;
+}
+
+.modal-header.sociales {
+    background: #fd7e14;
+}
+
+.modal-header.ciencias {
+    background: #28a745;
+}
+
+.modal-header.ingles {
+    background: #6f42c1;
 }
 
 .modal-header h3 {
@@ -645,9 +564,10 @@ body {
 }
 
 .modal-footer .btn-secondary {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    background: #1a1a1a;
     border: none;
     color: white;
+    font-weight: 600;
 }
 
 .modal-footer .btn-secondary:hover {
@@ -656,9 +576,10 @@ body {
 }
 
 .modal-footer .btn-primary {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: #dc3545;
     border: none;
     color: white;
+    font-weight: 600;
 }
 
 .modal-footer .btn-primary:hover {
@@ -683,10 +604,9 @@ body {
     align-items: center;
     margin-bottom: 30px;
     padding: 25px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 12px;
-    border: 1px solid #dee2e6;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    background: #1a1a1a;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
     flex-shrink: 0;
 }
 
@@ -729,13 +649,14 @@ body {
 
 .subject-info h4 {
     margin: 0;
-    color: #333;
+    color: #ffffff;
     font-size: 20px;
+    font-weight: 700;
 }
 
 .subject-info p {
     margin: 5px 0 0 0;
-    color: #666;
+    color: #cccccc;
     font-size: 14px;
 }
 
@@ -747,36 +668,42 @@ body {
     max-width: 900px;
     min-width: 900px;
     margin: 0 auto;
-    min-height: 400px;
+    min-height: calc(95vh - 350px);
     max-height: calc(95vh - 300px);
 }
 
 .question-item {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
     padding: 25px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.question-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #007bff, #28a745, #fd7e14, #dc3545);
-}
-
-.question-item:hover {
+.question-item.matematicas {
+    background: #bbdefb;
     border-color: #007bff;
-    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
-    transform: translateY(-2px);
+}
+
+.question-item.lectura {
+    background: #ffcdd2;
+    border-color: #dc3545;
+}
+
+.question-item.sociales {
+    background: #ffe0b2;
+    border-color: #fd7e14;
+}
+
+.question-item.ciencias {
+    background: #c8e6c9;
+    border-color: #28a745;
+}
+
+.question-item.ingles {
+    background: #e1bee7;
+    border-color: #6f42c1;
 }
 
 .question-header {
@@ -1006,70 +933,45 @@ body {
 /* Botón
  Agregar Pregunta */
 #addQuestionBtn {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: #dc3545;
     border: none;
     color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-weight: 700;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
 #addQuestionBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
-    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+    background: #ffffff;
+    color: #dc3545;
+    border: 2px solid #dc3545;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
-/* Estilos mejorados para preguntas */
-.question-item {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
 
-.question-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #007bff, #28a745, #fd7e14, #dc3545);
-}
 
-.question-item:hover {
-    border-color: #007bff;
-    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
-    transform: translateY(-2px);
-}
+
 
 .question-number {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: #1a1a1a;
     color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 4px;
+    display: inline-block;
     font-weight: 700;
-    font-size: 16px;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .question-type {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 12px;
-    color: #666;
-    font-weight: 600;
-    border: 1px solid #dee2e6;
+    background: #dc3545;
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -1083,9 +985,10 @@ body {
 }
 
 .question-actions .btn-secondary {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    background: #1a1a1a;
     border: none;
     color: white;
+    font-weight: 600;
 }
 
 .question-actions .btn-secondary:hover {
@@ -1094,9 +997,10 @@ body {
 }
 
 .question-actions .btn-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: #dc3545;
     border: none;
     color: white;
+    font-weight: 600;
 }
 
 .question-actions .btn-danger:hover {
@@ -1114,14 +1018,57 @@ body {
     min-height: 100px;
     font-family: inherit;
     transition: all 0.3s ease;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.matematicas .question-text {
+    background: #bbdefb;
+}
+
+.lectura .question-text {
+    background: #ffcdd2;
+}
+
+.sociales .question-text {
+    background: #ffe0b2;
+}
+
+.ciencias .question-text {
+    background: #c8e6c9;
+}
+
+.ingles .question-text {
+    background: #f3e5f5;
 }
 
 .question-text:focus {
     outline: none;
+    border-color: currentColor;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.matematicas .question-text:focus {
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-    background: white;
+}
+
+.lectura .question-text:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.sociales .question-text:focus {
+    border-color: #fd7e14;
+    box-shadow: 0 0 0 3px rgba(253, 126, 20, 0.1);
+}
+
+.ciencias .question-text:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.ingles .question-text:focus {
+    border-color: #6f42c1;
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
 }
 
 /* Estilos para opciones de respuesta múltiple */
@@ -1131,7 +1078,7 @@ body {
     gap: 12px;
     margin-bottom: 12px;
     padding: 10px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: #f8f9fa;
     border-radius: 8px;
     border: 1px solid #e9ecef;
     transition: all 0.3s ease;
@@ -1151,10 +1098,55 @@ body {
     transition: all 0.3s ease;
 }
 
+.matematicas .option-item input[type="text"] {
+    background: #bbdefb !important;
+}
+
+.lectura .option-item input[type="text"] {
+    background: #ffcdd2 !important;
+}
+
+.sociales .option-item input[type="text"] {
+    background: #ffe0b2 !important;
+}
+
+.ciencias .option-item input[type="text"] {
+    background: #c8e6c9 !important;
+}
+
+.ingles .option-item input[type="text"] {
+    background: #e1bee7 !important;
+}
+
 .option-item input[type="text"]:focus {
     outline: none;
+    border-color: currentColor;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.matematicas .option-item input[type="text"]:focus {
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.lectura .option-item input[type="text"]:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+}
+
+.sociales .option-item input[type="text"]:focus {
+    border-color: #fd7e14;
+    box-shadow: 0 0 0 2px rgba(253, 126, 20, 0.1);
+}
+
+.ciencias .option-item input[type="text"]:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
+}
+
+.ingles .option-item input[type="text"]:focus {
+    border-color: #6f42c1;
+    box-shadow: 0 0 0 2px rgba(111, 66, 193, 0.1);
 }
 
 .option-item input[type="radio"] {
@@ -1167,7 +1159,7 @@ body {
 .option-item .btn-danger {
     padding: 6px 10px;
     font-size: 12px;
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: #dc3545;
     border: none;
     color: white;
     border-radius: 4px;
@@ -1182,19 +1174,18 @@ body {
     margin-top: 15px;
     width: 100%;
     padding: 10px;
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: #1a1a1a;
     border: none;
     color: white;
-    border-radius: 8px;
+    border-radius: 4px;
     font-weight: 600;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .add-option-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    background: #dc3545;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
 /* Estado vacío mejorado */
@@ -1202,9 +1193,14 @@ body {
     text-align: center;
     padding: 60px 20px;
     color: #666;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: #fafbfc;
     border-radius: 12px;
     border: 2px dashed #dee2e6;
+    min-height: calc(95vh - 350px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .empty-questions i {
@@ -1323,15 +1319,17 @@ body {
 }
 
 .subject-card.has-questions .questions-count {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: #1a1a1a;
     color: white;
     font-weight: 700;
+    border-color: #1a1a1a;
 }
 
 .subject-card.no-questions .questions-count {
-    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-    color: #333;
+    background: #dc3545;
+    color: white;
     font-weight: 700;
+    border-color: #dc3545;
 }
 
 /* ========== IMAGE STYLES ========== */
@@ -1414,7 +1412,7 @@ body {
     gap: 15px;
     margin: 15px 0;
     padding: 15px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: #f8f9fa;
     border-radius: 8px;
     border: 2px dashed #dee2e6;
     max-width: 100%;
@@ -2112,13 +2110,11 @@ body {
 
 /* Paragraph item styles */
 .paragraph-item {
-    background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
-    border: 2px solid #ffc107;
+    background: #ffffff;
+    border: 2px solid #e0e0e0;
 }
 
-.paragraph-item::before {
-    background: linear-gradient(90deg, #ffc107, #fd7e14);
-}
+
 
 .paragraph-item:hover {
     border-color: #ffc107;
@@ -2126,7 +2122,7 @@ body {
 }
 
 .paragraph-badge {
-    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    background: #ffc107;
     color: #333;
     padding: 8px 16px;
     border-radius: 4px;
@@ -2142,7 +2138,7 @@ body {
 
 .paragraph-text {
     min-height: 150px;
-    background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
+    background: #ffffff;
     border: 2px solid #ffc107;
 }
 
@@ -2153,13 +2149,11 @@ body {
 
 /* Title item styles */
 .title-item {
-    background: linear-gradient(135deg, #e6f3ff 0%, #f0f8ff 100%);
-    border: 2px solid #007bff;
+    background: #ffffff;
+    border: 2px solid #e0e0e0;
 }
 
-.title-item::before {
-    background: linear-gradient(90deg, #007bff, #0056b3);
-}
+
 
 .title-item:hover {
     border-color: #007bff;
@@ -2167,7 +2161,7 @@ body {
 }
 
 .title-badge {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: #007bff;
     color: white;
     padding: 8px 16px;
     border-radius: 4px;
@@ -2354,15 +2348,12 @@ body {
 
 /* ========== READING ITEM (TITLE + PARAGRAPH COMBINED) ========== */
 
-/* Reading item styles */
+/* Reading item styles - El color del borde se define por la clase de materia */
 .reading-item {
-    background: linear-gradient(135deg, #fff5e6 0%, #fffbf0 100%);
-    border: 2px solid #fd7e14;
+    background: #ffffff;
 }
 
-.reading-item::before {
-    background: linear-gradient(90deg, #fd7e14, #ffc107);
-}
+
 
 .reading-item:hover {
     border-color: #fd7e14;
@@ -2370,7 +2361,7 @@ body {
 }
 
 .reading-badge {
-    background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);
+    background: #fd7e14;
     color: white;
     padding: 8px 16px;
     border-radius: 4px;
@@ -2387,14 +2378,14 @@ body {
 .reading-title-section {
     margin-bottom: 20px;
     padding: 15px;
-    background: linear-gradient(135deg, #e6f3ff 0%, #f0f8ff 100%);
+    background: #fafafa;
     border-radius: 8px;
     border: 2px solid #007bff;
 }
 
 .reading-paragraph-section {
     padding: 15px;
-    background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+    background: #fafafa;
     border-radius: 8px;
     border: 2px solid #ffc107;
 }
@@ -2427,6 +2418,62 @@ body {
 
 .reading-paragraph-section .reading-label i {
     color: #ffc107;
+}
+
+/* Question label */
+.question-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.question-label i {
+    font-size: 16px;
+}
+
+/* Question label colors by subject */
+.matematicas .question-label {
+    color: #004085;
+}
+
+.matematicas .question-label i {
+    color: #007bff;
+}
+
+.lectura .question-label {
+    color: #721c24;
+}
+
+.lectura .question-label i {
+    color: #dc3545;
+}
+
+.sociales .question-label {
+    color: #856404;
+}
+
+.sociales .question-label i {
+    color: #fd7e14;
+}
+
+.ciencias .question-label {
+    color: #155724;
+}
+
+.ciencias .question-label i {
+    color: #28a745;
+}
+
+.ingles .question-label {
+    color: #4a2c6f;
+}
+
+.ingles .question-label i {
+    color: #6f42c1;
 }
 
 .reading-title-section .title-input {
@@ -2622,9 +2669,9 @@ mjx-container {
 
 /* LaTeX help button */
 .latex-help-btn {
-    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
-    color: white;
-    border: none;
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 2px solid #ffffff;
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 12px;
@@ -2638,9 +2685,10 @@ mjx-container {
 }
 
 .latex-help-btn:hover {
-    background: linear-gradient(135deg, #5a32a3 0%, #4a2885 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);
+    background: #dc3545;
+    color: #ffffff;
+    border-color: #dc3545;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
 .latex-help-btn i {

@@ -709,6 +709,10 @@ function editSubject(subject, block) {
     document.getElementById('modalSubjectName').textContent = config.name;
     document.getElementById('modalBlockInfo').textContent = `Bloque ${block}`;
 
+    // Update modal header color based on subject
+    const modalHeader = document.querySelector('.modal-header');
+    modalHeader.className = `modal-header ${subject}`;
+
     // Update subject icon
     const iconElement = document.getElementById('modalSubjectIcon');
     iconElement.className = `subject-icon-large ${subject}`;
@@ -732,7 +736,7 @@ function loadQuestionsInModal() {
             <div class="empty-questions">
                 <i class="bi bi-question-circle"></i>
                 <h4>No hay elementos</h4>
-                <p>Agrega preguntas o textos de lectura para esta materia</p>
+                <p>Agrega preguntas o bloques de lectura para esta materia</p>
             </div>
         `;
         return;
@@ -829,7 +833,7 @@ function createQuestionElement(question, index, questionNumber) {
     // Diferentes estilos según el tipo
     if (question.type === 'reading') {
         // Texto de lectura (título + párrafo juntos)
-        div.className = 'question-item reading-item';
+        div.className = `question-item reading-item ${currentEditingSubject}`;
         div.innerHTML = `
             <div class="question-header">
                 <div class="question-number reading-badge">
@@ -887,7 +891,7 @@ function createQuestionElement(question, index, questionNumber) {
         `;
     } else {
         // Pregunta normal (multiple choice)
-        div.className = 'question-item';
+        div.className = `question-item ${currentEditingSubject}`;
         div.innerHTML = `
             <div class="question-header">
                 <div class="question-number">Pregunta ${questionNumber}</div>
@@ -902,6 +906,10 @@ function createQuestionElement(question, index, questionNumber) {
             <div class="question-content">
                 <div class="question-text-container">
                     ${createQuestionMediaHTML(question.images || [], question.videos || [], index)}
+                    <label class="question-label">
+                        <i class="bi bi-question-circle"></i>
+                        Pregunta:
+                    </label>
                     <textarea class="question-text" placeholder="Escribe tu pregunta aquí..." 
                               onchange="updateQuestionText(${index}, this.value)">${question.text || ''}</textarea>
                     <div class="media-controls">
@@ -996,7 +1004,7 @@ function showQuestionTypeModal() {
                         </button>
                         <button class="question-type-card" onclick="createQuestion('reading')">
                             <i class="bi bi-book-half"></i>
-                            <h4>Texto de Lectura</h4>
+                            <h4>Bloque de Lectura</h4>
                             <p>Título + Párrafo de contexto</p>
                         </button>
                     </div>
