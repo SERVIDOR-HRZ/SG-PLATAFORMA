@@ -7,11 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Prevent navigation away from test
     preventNavigation();
-    
-    // Inicializar foto de perfil
-    if (typeof inicializarPerfilCompartido === 'function') {
-        inicializarPerfilCompartido();
-    }
 });
 
 let currentUser = null;
@@ -62,11 +57,6 @@ function checkAuthentication() {
     if (!currentUser.id || currentUser.tipoUsuario !== 'estudiante') {
         window.location.href = '../index.html';
         return;
-    }
-
-    // Load user info
-    if (currentUser.nombre) {
-        document.getElementById('userName').textContent = currentUser.nombre.toUpperCase();
     }
 }
 

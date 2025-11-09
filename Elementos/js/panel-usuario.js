@@ -1348,3 +1348,579 @@ function reproducirPlaylist(id, playlist) {
 // Hacer funciones globales
 window.cerrarNotificacion = cerrarNotificacion;
 
+// ========================================
+// SISTEMA DE PLAYLIST PERSONALIZADA DE MÚSICA
+// ========================================
+
+let playlistPersonal = [];
+const PLAYLIST_POR_DEFECTO = [
+    { id: 'QzlcxmVBIFo', title: 'Música para Estudiar y Concentrarse' },
+    { id: 'lFcSrYw-ARY', title: 'Sonidos Relajantes de la Naturaleza' },
+    { id: 'hHW1oY26kxQ', title: 'Música Instrumental Suave' },
+    { id: '5qap5aO4i9A', title: 'Música Clásica para Estudiar' },
+    { id: 'M4QVjBzuVdc', title: 'Música Ambiental Relajante' },
+    { id: 'DWcJFNfaw9c', title: 'Sonidos del Océano' },
+    { id: 'UfcAVejslrU', title: 'Música para Concentración Profunda' },
+    { id: 'kK42LZqO0wA', title: 'Piano Suave para Estudiar' },
+    { id: 'jfKfPfyJRdk', title: 'Música Lo-Fi para Estudiar' },
+    { id: 'n61ULEU7CO0', title: 'Música de Fondo para Concentración' }
+];
+
+// Configurar eventos de música
+document.addEventListener('DOMContentLoaded', function() {
+    configurarEventosMusica();
+});
+
+function configurarEventosMusica() {
+    const formularioAgregarCancion = document.getElementById('formularioAgregarCancion');
+    if (formularioAgregarCancion) {
+        formularioAgregarCancion.addEventListener('submit', agregarCancionPersonalizada);
+    }
+    
+    const probarVideoBtn = document.getElementById('probarVideoBtn');
+    if (probarVideoBtn) {
+        probarVideoBtn.addEventListener('click', probarVideoAntesDeSumar);
+    }
+    
+    const restaurarPlaylistBtn = document.getElementById('restaurarPlaylistBtn');
+    if (restaurarPlaylistBtn) {
+        restaurarPlaylistBtn.addEventListener('click', restaurarPlaylistPorDefecto);
+    }
+    
+    const guardarPlaylistBtn = document.getElementById('guardarPlaylistBtn');
+    if (guardarPlaylistBtn) {
+        guardarPlaylistBtn.addEventListener('click', guardarPlaylistPersonalizada);
+    }
+    
+    // Cargar playlist cuando se active la pestaña de música
+    const tabMusica = document.querySelector('[data-tab="musica"]');
+    if (tabMusica) {
+        tabMusica.addEventListener('click', function() {
+            cargarPlaylistPersonalizada();
+        });
+    }
+}
+
+// Cargar playlist personalizada del usuario
+async function cargarPlaylistPersonalizada() {
+    try {
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+        
+        const db = window.firebaseDB;
+        const usuarioId = usuarioActual.id || usuarioActual.numeroDocumento;
+        
+        const playlistDoc = await db.collection('playlistsPersonales').doc(usuarioId).get();
+        
+        if (playlistDoc.exists) {
+            const data = playlistDoc.data();
+            playlistPersonal = data.canciones || PLAYLIST_POR_DEFECTO;
+        } else {
+            playlistPersonal = [...PLAYLIST_POR_DEFECTO];
+        }
+        
+        renderizarPlaylist();
+        
+    } catch (error) {
+        console.error('Error al cargar playlist:', error);
+        playlistPersonal = [...PLAYLIST_POR_DEFECTO];
+        renderizarPlaylist();
+    }
+}
+
+// Extraer ID de video de YouTube de una URL
+function extraerYouTubeID(url) {
+    const patrones = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\?\/]+)/,
+        /^([a-zA-Z0-9_-]{11})$/
+    ];
+    
+    for (const patron of patrones) {
+        const match = url.match(patron);
+        if (match && match[1]) {
+            return match[1];
+        }
+    }
+    
+    return null;
+}
+
+// Verificar si un video de YouTube se puede reproducir como embebido y obtener información
+async function verificarYVerificarVideoYouTube(videoId) {
+    try {
+        console.log('📋 Paso 1: Verificando con oEmbed API...');
+        
+        // PASO 1: Verificar con oEmbed primero (más rápido y confiable)
+        let infoVideo = null;
+        try {
+            const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+            const response = await fetch(oEmbedUrl);
+            
+            if (!response.ok) {
+                console.log('❌ Video no encontrado o privado en oEmbed');
+                return null;
+            }
+            
+            const data = await response.json();
+            infoVideo = {
+                title: data.title || 'Video de YouTube',
+                author: data.author_name || '',
+                thumbnail: data.thumbnail_url || ''
+            };
+            console.log('✅ Video encontrado en oEmbed:', infoVideo.title);
+        } catch (e) {
+            console.log('❌ Error con oEmbed - Video probablemente no existe:', e);
+            return null;
+        }
+        
+        console.log('📋 Paso 2: Verificando si se puede embeber...');
+        
+        // PASO 2: Verificar si realmente se puede embeber
+        const puedeEmbeber = await verificarVideoEmbebible(videoId);
+        
+        if (!puedeEmbeber) {
+            console.log('❌ Video NO se puede embeber - Tiene restricciones');
+            return null;
+        }
+        
+        console.log('✅ Verificación completa - Video aprobado');
+        return infoVideo;
+        
+    } catch (error) {
+        console.error('❌ Error general en verificación:', error);
+        return null;
+    }
+}
+
+// Verificar si un video se puede embeber en iframe usando método directo
+function verificarVideoEmbebible(videoId) {
+    return new Promise((resolve) => {
+        console.log('🔍 Probando carga de iframe para video:', videoId);
+        
+        // Crear un iframe temporal para probar
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.style.position = 'fixed';
+        iframe.style.top = '-9999px';
+        iframe.style.left = '-9999px';
+        iframe.style.width = '200px';
+        iframe.style.height = '200px';
+        iframe.style.zIndex = '-1';
+        iframe.id = 'temp-yt-check-' + Date.now();
+        
+        // Importante: Usar parámetros que fuerzan la carga real del player
+        // autoplay=1 y mute=1 para que intente reproducir y así detectar restricciones
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&enablejsapi=0&modestbranding=1&rel=0`;
+        
+        let resuelto = false;
+        let cargaDetectada = false;
+        
+        // Timeout MÁS ESTRICTO de 5 segundos - Si no carga, definitivamente rechazar
+        const timeout = setTimeout(() => {
+            if (!resuelto) {
+                console.log('❌ TIMEOUT - El video tardó demasiado en cargar (5 seg) - RECHAZADO');
+                resuelto = true;
+                limpiar();
+                resolve(false);
+            }
+        }, 5000);
+        
+        function limpiar() {
+            try {
+                clearTimeout(timeout);
+                if (iframe && iframe.parentNode) {
+                    document.body.removeChild(iframe);
+                }
+            } catch (e) {
+                // Ignorar errores de limpieza
+            }
+        }
+        
+        // Detectar cuando el iframe carga
+        iframe.addEventListener('load', function() {
+            if (!resuelto) {
+                cargaDetectada = true;
+                console.log('⏳ Iframe cargado, esperando confirmación...');
+                
+                // Esperar 2 segundos adicionales para ver si realmente se reproduce
+                // Los videos con restricciones fallan aquí
+                setTimeout(() => {
+                    if (!resuelto) {
+                        console.log('✅ Video APROBADO - Se cargó correctamente');
+                        resuelto = true;
+                        limpiar();
+                        resolve(true);
+                    }
+                }, 2000);
+            }
+        });
+        
+        // Detectar errores explícitos
+        iframe.addEventListener('error', function(e) {
+            console.log('❌ ERROR explícito al cargar iframe - RECHAZADO');
+            if (!resuelto) {
+                resuelto = true;
+                limpiar();
+                resolve(false);
+            }
+        });
+        
+        // Agregar al DOM para iniciar la carga
+        try {
+            document.body.appendChild(iframe);
+            console.log('📺 Iframe agregado al DOM');
+        } catch (e) {
+            console.log('❌ Error al agregar iframe al DOM - RECHAZADO');
+            resuelto = true;
+            limpiar();
+            resolve(false);
+        }
+    });
+}
+
+// Probar video antes de agregarlo
+function probarVideoAntesDeSumar() {
+    const youtubeUrl = document.getElementById('youtubeUrl').value.trim();
+    
+    if (!youtubeUrl) {
+        mostrarNotificacion('Por favor ingresa una URL de YouTube primero', 'advertencia');
+        return;
+    }
+    
+    const videoId = extraerYouTubeID(youtubeUrl);
+    
+    if (!videoId) {
+        mostrarNotificacion('URL de YouTube inválida. Por favor verifica el enlace.', 'error');
+        return;
+    }
+    
+    // Abrir modal de vista previa
+    const tituloCancion = document.getElementById('tituloCancion').value.trim();
+    const titulo = tituloCancion || 'Vista Previa - Verifica que el video se reproduzca';
+    
+    previewCancion(videoId, titulo);
+    
+    // Mostrar mensaje informativo
+    setTimeout(() => {
+        mostrarNotificacion('💡 Si el video se reproduce correctamente, puedes agregarlo a tu playlist. Si muestra error, busca otro video.', 'info');
+    }, 500);
+}
+
+// Agregar canción personalizada
+async function agregarCancionPersonalizada(e) {
+    e.preventDefault();
+    
+    const youtubeUrl = document.getElementById('youtubeUrl').value.trim();
+    const tituloCancion = document.getElementById('tituloCancion').value.trim();
+    
+    const videoId = extraerYouTubeID(youtubeUrl);
+    
+    if (!videoId) {
+        mostrarNotificacion('URL de YouTube inválida. Por favor verifica el enlace.', 'error');
+        return;
+    }
+    
+    // Verificar límite de canciones
+    if (playlistPersonal.length >= 20) {
+        mostrarNotificacion('Has alcanzado el límite de 20 canciones', 'advertencia');
+        return;
+    }
+    
+    // Verificar si ya existe
+    if (playlistPersonal.some(cancion => cancion.id === videoId)) {
+        mostrarNotificacion('Esta canción ya está en tu playlist', 'advertencia');
+        return;
+    }
+    
+    try {
+        mostrarCargando('Verificando video... Esto puede tomar unos segundos');
+        
+        console.log('🔍 Iniciando verificación para video:', videoId);
+        
+        // Verificar si el video se puede reproducir y obtener información
+        const infoVideo = await verificarYVerificarVideoYouTube(videoId);
+        
+        if (!infoVideo) {
+            ocultarCargando();
+            console.log('❌ Video rechazado por verificación');
+            console.log('💡 TIP: Abre la consola del navegador (F12) para ver detalles de la verificación');
+            mostrarNotificacion('❌ Este video NO se puede agregar. El propietario no permite reproducción embebida, el video no existe, o está restringido. 💡 Usa el botón "Probar" para verificar antes de agregar.', 'error');
+            return;
+        }
+        
+        console.log('✅ Video aprobado:', infoVideo.title);
+        
+        // Usar el título detectado o el ingresado por el usuario
+        const tituloFinal = tituloCancion || infoVideo.title || `Canción ${playlistPersonal.length + 1}`;
+        
+        // Agregar canción
+        const nuevaCancion = {
+            id: videoId,
+            title: tituloFinal
+        };
+        
+        playlistPersonal.push(nuevaCancion);
+        renderizarPlaylist();
+        
+        // Limpiar formulario
+        document.getElementById('formularioAgregarCancion').reset();
+        
+        ocultarCargando();
+        mostrarNotificacion(`✅ Canción agregada: ${tituloFinal}. No olvides guardar los cambios.`, 'exito');
+        
+    } catch (error) {
+        console.error('❌ Error al verificar video:', error);
+        ocultarCargando();
+        mostrarNotificacion('Error al verificar el video. Por favor intenta nuevamente.', 'error');
+    }
+}
+
+// Renderizar playlist
+function renderizarPlaylist() {
+    const playlistItems = document.getElementById('playlistItems');
+    const playlistCount = document.getElementById('playlistCount');
+    const playlistEmpty = document.getElementById('playlistEmpty');
+    
+    if (!playlistItems || !playlistCount) return;
+    
+    playlistCount.textContent = `(${playlistPersonal.length} cancion${playlistPersonal.length !== 1 ? 'es' : ''})`;
+    
+    if (playlistPersonal.length === 0) {
+        playlistItems.innerHTML = `
+            <div class="playlist-empty">
+                <i class="bi bi-music-note-beamed"></i>
+                <p>No hay canciones en tu playlist</p>
+                <p class="text-muted">Agrega tu primera canción usando el formulario arriba</p>
+            </div>
+        `;
+        return;
+    }
+    
+    if (playlistEmpty) {
+        playlistEmpty.style.display = 'none';
+    }
+    
+    playlistItems.innerHTML = playlistPersonal.map((cancion, index) => `
+        <div class="playlist-item">
+            <div class="playlist-item-number">${index + 1}</div>
+            <div class="playlist-item-info">
+                <div class="playlist-item-titulo">${cancion.title}</div>
+                <div class="playlist-item-youtube">
+                    <i class="bi bi-youtube"></i>
+                    ID: <span class="playlist-item-id">${cancion.id}</span>
+                </div>
+            </div>
+            <div class="playlist-item-acciones">
+                <button class="btn-icon-small btn-play" onclick="previewCancion('${cancion.id}', '${cancion.title.replace(/'/g, "\\'")}')" title="Vista previa">
+                    <i class="bi bi-play-fill"></i>
+                </button>
+                <button class="btn-icon-small btn-move-up" onclick="moverCancionArriba(${index})" 
+                        ${index === 0 ? 'disabled' : ''} title="Subir">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
+                <button class="btn-icon-small btn-move-down" onclick="moverCancionAbajo(${index})" 
+                        ${index === playlistPersonal.length - 1 ? 'disabled' : ''} title="Bajar">
+                    <i class="bi bi-arrow-down"></i>
+                </button>
+                <button class="btn-icon-small btn-delete" onclick="eliminarCancionPersonalizada(${index})" title="Eliminar">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Mover canción arriba
+function moverCancionArriba(index) {
+    if (index === 0) return;
+    
+    const temp = playlistPersonal[index];
+    playlistPersonal[index] = playlistPersonal[index - 1];
+    playlistPersonal[index - 1] = temp;
+    
+    renderizarPlaylist();
+    mostrarNotificacion('Orden modificado. No olvides guardar los cambios.', 'info');
+}
+
+// Mover canción abajo
+function moverCancionAbajo(index) {
+    if (index === playlistPersonal.length - 1) return;
+    
+    const temp = playlistPersonal[index];
+    playlistPersonal[index] = playlistPersonal[index + 1];
+    playlistPersonal[index + 1] = temp;
+    
+    renderizarPlaylist();
+    mostrarNotificacion('Orden modificado. No olvides guardar los cambios.', 'info');
+}
+
+// Eliminar canción
+function eliminarCancionPersonalizada(index) {
+    const cancion = playlistPersonal[index];
+    
+    if (confirm(`¿Eliminar "${cancion.title}" de tu playlist?`)) {
+        playlistPersonal.splice(index, 1);
+        renderizarPlaylist();
+        mostrarNotificacion('Canción eliminada. No olvides guardar los cambios.', 'info');
+    }
+}
+
+// Preview de canción (reproduce en modal embebido)
+function previewCancion(videoId, titulo) {
+    const modal = document.getElementById('modalReproductorPreview');
+    const videoContainer = document.getElementById('videoPreviewContainer');
+    const modalTitulo = document.getElementById('modalReproductorTitulo');
+    
+    // Establecer título
+    if (titulo) {
+        modalTitulo.textContent = titulo;
+    } else {
+        modalTitulo.textContent = 'Vista Previa de Canción';
+    }
+    
+    // Mostrar loading
+    videoContainer.innerHTML = `
+        <div class="video-loading">
+            <div class="loading-spinner"></div>
+            <p>Cargando video...</p>
+        </div>
+    `;
+    
+    // Mostrar modal
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
+    
+    // Crear iframe después de un momento
+    setTimeout(() => {
+        videoContainer.innerHTML = `
+            <iframe 
+                src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        `;
+    }, 300);
+}
+
+// Cerrar modal reproductor
+function cerrarModalReproductor() {
+    const modal = document.getElementById('modalReproductorPreview');
+    const videoContainer = document.getElementById('videoPreviewContainer');
+    
+    // Ocultar modal con animación
+    modal.classList.remove('active');
+    
+    setTimeout(() => {
+        modal.style.display = 'none';
+        // Detener reproducción eliminando iframe
+        videoContainer.innerHTML = `
+            <div class="video-loading">
+                <div class="loading-spinner"></div>
+                <p>Cargando video...</p>
+            </div>
+        `;
+    }, 300);
+}
+
+// Configurar event listeners para el modal reproductor
+document.addEventListener('DOMContentLoaded', function() {
+    const cerrarBtn1 = document.getElementById('cerrarReproductorPreview');
+    const cerrarBtn2 = document.getElementById('cerrarPreviewBtn');
+    const modal = document.getElementById('modalReproductorPreview');
+    
+    if (cerrarBtn1) {
+        cerrarBtn1.addEventListener('click', cerrarModalReproductor);
+    }
+    
+    if (cerrarBtn2) {
+        cerrarBtn2.addEventListener('click', cerrarModalReproductor);
+    }
+    
+    // Cerrar al hacer clic fuera del modal
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModalReproductor();
+            }
+        });
+    }
+    
+    // Cerrar con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('modalReproductorPreview');
+            if (modal && modal.style.display === 'flex') {
+                cerrarModalReproductor();
+            }
+        }
+    });
+});
+
+// Guardar playlist personalizada
+async function guardarPlaylistPersonalizada() {
+    try {
+        mostrarCargando('Guardando playlist...');
+        
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+        
+        const db = window.firebaseDB;
+        const usuarioId = usuarioActual.id || usuarioActual.numeroDocumento;
+        
+        const playlistData = {
+            canciones: playlistPersonal,
+            usuarioId: usuarioId,
+            fechaActualizacion: firebase.firestore.Timestamp.now()
+        };
+        
+        await db.collection('playlistsPersonales').doc(usuarioId).set(playlistData);
+        
+        // Actualizar el music player si está activo
+        if (window.musicPlayer && typeof window.musicPlayer.actualizarPlaylist === 'function') {
+            window.musicPlayer.actualizarPlaylist(playlistPersonal);
+        }
+        
+        mostrarNotificacion('Playlist guardada correctamente', 'exito');
+        ocultarCargando();
+        
+    } catch (error) {
+        console.error('Error al guardar playlist:', error);
+        mostrarNotificacion('Error al guardar la playlist', 'error');
+        ocultarCargando();
+    }
+}
+
+// Restaurar playlist por defecto
+function restaurarPlaylistPorDefecto() {
+    if (confirm('¿Restaurar la playlist por defecto? Esto eliminará todas tus canciones personalizadas.')) {
+        playlistPersonal = [...PLAYLIST_POR_DEFECTO];
+        renderizarPlaylist();
+        mostrarNotificacion('Playlist restaurada. No olvides guardar los cambios.', 'info');
+    }
+}
+
+// Esperar a que Firebase esté listo
+function esperarFirebase() {
+    return new Promise((resolve) => {
+        const checkFirebase = () => {
+            if (window.firebaseDB) {
+                resolve();
+            } else {
+                setTimeout(checkFirebase, 100);
+            }
+        };
+        checkFirebase();
+    });
+}
+
+// Hacer funciones globales para que se puedan llamar desde onclick en HTML
+window.moverCancionArriba = moverCancionArriba;
+window.moverCancionAbajo = moverCancionAbajo;
+window.eliminarCancionPersonalizada = eliminarCancionPersonalizada;
+window.previewCancion = previewCancion;
+window.cerrarModalReproductor = cerrarModalReproductor;
+

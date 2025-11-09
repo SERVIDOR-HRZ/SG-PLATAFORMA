@@ -12,8 +12,8 @@ class MusicPlayer {
         this.player = null;
         this.isPlayerReady = false;
         
-        // Lista de videos de la playlist de concentración
-        this.playlist = [
+        // Lista de videos de la playlist por defecto
+        this.playlistPorDefecto = [
             {
                 id: 'QzlcxmVBIFo',
                 title: 'Música para Estudiar y Concentrarse'
@@ -55,8 +55,12 @@ class MusicPlayer {
                 title: 'Música de Fondo para Concentración'
             }
         ];
+        
+        // Usar playlist por defecto inicialmente
+        this.playlist = [...this.playlistPorDefecto];
 
         this.initializeElements();
+        this.cargarPlaylistPersonalizada();
         this.loadYouTubeAPI();
         this.setupEventListeners();
     }
@@ -254,6 +258,78 @@ class MusicPlayer {
     updateTrackTitle() {
         const currentTrack = this.playlist[this.currentTrackIndex];
         this.trackTitle.textContent = currentTrack.title;
+    }
+
+    // Cargar playlist personalizada del usuario desde Firebase
+    async cargarPlaylistPersonalizada() {
+        try {
+            // Esperar a que Firebase esté disponible
+            await this.esperarFirebase();
+            
+            const db = window.firebaseDB;
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            
+            if (!currentUser.id) {
+                console.log('No hay usuario logueado, usando playlist por defecto');
+                return;
+            }
+            
+            const usuarioId = currentUser.id || currentUser.numeroDocumento;
+            const playlistDoc = await db.collection('playlistsPersonales').doc(usuarioId).get();
+            
+            if (playlistDoc.exists) {
+                const data = playlistDoc.data();
+                if (data.canciones && data.canciones.length > 0) {
+                    this.playlist = data.canciones;
+                    console.log('Playlist personalizada cargada:', this.playlist.length, 'canciones');
+                    
+                    // Actualizar título de la canción actual
+                    if (this.trackTitle) {
+                        this.updateTrackTitle();
+                    }
+                } else {
+                    console.log('Playlist vacía, usando por defecto');
+                }
+            } else {
+                console.log('No hay playlist personalizada, usando por defecto');
+            }
+            
+        } catch (error) {
+            console.error('Error al cargar playlist personalizada:', error);
+            console.log('Usando playlist por defecto');
+        }
+    }
+    
+    // Esperar a que Firebase esté disponible
+    esperarFirebase() {
+        return new Promise((resolve) => {
+            const checkFirebase = () => {
+                if (window.firebaseDB) {
+                    resolve();
+                } else {
+                    setTimeout(checkFirebase, 100);
+                }
+            };
+            checkFirebase();
+        });
+    }
+    
+    // Actualizar playlist (puede ser llamado desde el panel de usuario)
+    actualizarPlaylist(nuevaPlaylist) {
+        if (!nuevaPlaylist || nuevaPlaylist.length === 0) {
+            console.log('Playlist vacía, manteniendo actual');
+            return;
+        }
+        
+        this.playlist = nuevaPlaylist;
+        this.currentTrackIndex = 0;
+        
+        console.log('Playlist actualizada:', this.playlist.length, 'canciones');
+        
+        // Si el reproductor está listo, cargar la primera canción
+        if (this.isPlayerReady) {
+            this.loadCurrentTrack();
+        }
     }
 }
 

@@ -72,6 +72,10 @@
                     <i class="bi bi-shield-lock"></i>
                     Seguridad
                 </button>
+                <button class="tab-btn" data-tab="musica">
+                    <i class="bi bi-music-note-beamed"></i>
+                    Mi Música
+                </button>
             </div>
 
             <!-- Tab Content: Perfil -->
@@ -350,6 +354,114 @@
                     </form>
                 </div>
             </div>
+
+            <!-- Tab Content: Música -->
+            <div class="tab-content" data-content="musica">
+                <!-- Sección de Playlist Personal -->
+                <div class="musica-seccion">
+                    <h2>
+                        <i class="bi bi-music-note-list"></i>
+                        Mi Playlist Personalizada
+                    </h2>
+                    <p class="seccion-descripcion">
+                        Crea tu propia playlist con música de YouTube para escuchar durante las pruebas.
+                        Agrega canciones relajantes, instrumentales o lo que te ayude a concentrarte.
+                    </p>
+
+                    <!-- Agregar Nueva Canción -->
+                    <div class="agregar-cancion-container">
+                        <h3>
+                            <i class="bi bi-plus-circle"></i>
+                            Agregar Nueva Canción
+                        </h3>
+                        <form class="formulario-agregar-cancion" id="formularioAgregarCancion">
+                            <div class="form-grupo-inline">
+                                <div class="form-grupo flex-grow">
+                                    <label for="youtubeUrl">
+                                        <i class="bi bi-youtube"></i>
+                                        URL de YouTube
+                                    </label>
+                                    <input type="text" id="youtubeUrl" name="youtubeUrl" class="form-control"
+                                        placeholder="https://youtu.be/glYtuMeMOfs o https://www.youtube.com/watch?v=..."
+                                        required>
+                                    <small class="form-texto-ayuda">
+                                        💡 <strong>Recomendación:</strong> Usa el botón "Probar" para ver si el video funciona antes de agregarlo.
+                                        El sistema verificará automáticamente si se puede reproducir embebido.
+                                    </small>
+                                </div>
+                                <div class="form-grupo">
+                                    <label for="tituloCancion">
+                                        <i class="bi bi-card-text"></i>
+                                        Título (Opcional)
+                                    </label>
+                                    <input type="text" id="tituloCancion" name="tituloCancion" class="form-control"
+                                        placeholder="Se detectará automáticamente desde YouTube">
+                                </div>
+                                <div class="form-grupo-boton">
+                                    <button type="button" class="btn btn-info" id="probarVideoBtn" style="margin-right: 10px;">
+                                        <i class="bi bi-play-circle"></i>
+                                        Probar
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-plus-lg"></i>
+                                        Agregar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Lista de Canciones -->
+                    <div class="playlist-container">
+                        <div class="playlist-header">
+                            <h3>
+                                <i class="bi bi-list-ul"></i>
+                                Tu Playlist
+                                <span class="playlist-count" id="playlistCount">(0 canciones)</span>
+                            </h3>
+                            <div class="playlist-acciones">
+                                <button class="btn btn-secondary btn-sm" id="restaurarPlaylistBtn">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                    Restaurar Playlist por Defecto
+                                </button>
+                                <button class="btn btn-primary btn-sm" id="guardarPlaylistBtn">
+                                    <i class="bi bi-save"></i>
+                                    Guardar Playlist
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="playlist-items" id="playlistItems">
+                            <!-- Las canciones se cargarán aquí dinámicamente -->
+                            <div class="playlist-empty" id="playlistEmpty">
+                                <i class="bi bi-music-note-beamed"></i>
+                                <p>No hay canciones en tu playlist</p>
+                                <p class="text-muted">Agrega tu primera canción usando el formulario arriba</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Playlist por Defecto -->
+                    <div class="playlist-info-box">
+                        <i class="bi bi-info-circle"></i>
+                        <div>
+                            <strong>Consejos:</strong>
+                            <ul>
+                                <li><strong>💡 USA EL BOTÓN "PROBAR"</strong> para verificar que el video funcione antes de agregarlo</li>
+                                <li>Busca música instrumental, lo-fi o ambiental en YouTube</li>
+                                <li>Evita canciones con letra que puedan distraerte</li>
+                                <li>Puedes agregar hasta 20 canciones</li>
+                                <li>La playlist se reproducirá en orden durante tus pruebas</li>
+                                <li><strong>⚠️ Solo se pueden agregar videos que permitan reproducción embebida</strong></li>
+                                <li>El sistema verificará automáticamente cada video, pero puede haber falsos positivos</li>
+                                <li>El título se detectará automáticamente desde YouTube</li>
+                                <li>Si un video muestra error al reproducir, busca otro del mismo artista o tema</li>
+                                <li>Los videos de canales independientes suelen funcionar mejor que los de discográficas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -378,6 +490,32 @@
         </div>
     </div>
 
+    <!-- Modal: Reproductor de Vista Previa -->
+    <div class="modal-overlay" id="modalReproductorPreview" style="display: none;">
+        <div class="modal-dialog modal-video">
+            <div class="modal-header">
+                <h3 id="modalReproductorTitulo">Vista Previa de Canción</h3>
+                <button type="button" class="btn-close-modal" id="cerrarReproductorPreview">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body modal-body-video">
+                <div class="video-container" id="videoPreviewContainer">
+                    <div class="video-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Cargando video...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cerrarPreviewBtn">
+                    <i class="bi bi-x-circle"></i>
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay" style="display: none;">
         <div class="loading-spinner"></div>
@@ -389,6 +527,15 @@
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- YouTube IFrame API -->
+    <script>
+        // Variable global para el callback de YouTube API
+        var onYouTubeIframeAPIReady = function() {
+            console.log('YouTube IFrame API está lista');
+            window.youtubeAPIReady = true;
+        };
+    </script>
 
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/panel-usuario.js"></script>
