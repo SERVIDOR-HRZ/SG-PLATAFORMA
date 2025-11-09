@@ -261,6 +261,26 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 let currentUser = null;
 
+// Helper function to get current user data
+function getCurrentUserData() {
+    const userData = sessionStorage.getItem('currentUser');
+    if (!userData) return null;
+    
+    try {
+        const user = JSON.parse(userData);
+        // Normalizar el objeto de usuario para asegurar que tenga las propiedades correctas
+        return {
+            id: user.usuario || user.email || user.id,
+            email: user.usuario || user.email,
+            nombre: user.nombre || user.name || 'Usuario',
+            tipoUsuario: user.tipoUsuario || user.tipo || 'estudiante'
+        };
+    } catch (e) {
+        console.error('Error parsing user data:', e);
+        return null;
+    }
+}
+
 // Check authentication state
 auth.onAuthStateChanged((user) => {
     currentUser = user;
@@ -350,6 +370,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadSimulacrosFromFirebase();
     await loadTestimonialsFromFirebase();
     await loadVideosFromFirebase();
+    
+    // Setup modal listeners
+    setupModalListeners();
 
     console.log('All content loaded');
 });
@@ -371,83 +394,155 @@ async function loadPosts() {
             return;
         }
 
-        snapshot.forEach(doc => {
+        // Cargar posts con contadores de likes y comentarios
+        for (const doc of snapshot.docs) {
+            const postData = doc.data();
+            
+            let likesCount = 0;
+            let commentsCount = 0;
+            
+            try {
+                // Contar likes
+                const likesSnapshot = await db.collection('publicacionLikes')
+                    .where('publicacionId', '==', doc.id)
+                    .get();
+                likesCount = likesSnapshot.size;
+            } catch (e) {
+                console.log('No se pudieron cargar likes para', doc.id);
+            }
+            
+            try {
+                // Contar comentarios - sin ordenar para evitar error de índice
+                const commentsSnapshot = await db.collection('publicacionComentarios')
+                    .where('publicacionId', '==', doc.id)
+                    .get();
+                commentsCount = commentsSnapshot.size;
+            } catch (e) {
+                console.log('No se pudieron cargar comentarios para', doc.id);
+            }
+            
             const post = {
                 id: doc.id,
-                ...doc.data(),
-                likes: 0,
-                comments: 0
+                ...postData,
+                likes: likesCount,
+                comments: commentsCount
             };
-            const postCard = createPostCard(post);
+            
+            const postCard = await createPostCard(post);
             postsGrid.appendChild(postCard);
-        });
+        }
     } catch (error) {
         console.error('Error loading posts:', error);
         postsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Error al cargar publicaciones</p>';
     }
 }
 
-function createPostCard(post) {
+async function createPostCard(post) {
     const card = document.createElement('div');
     card.classList.add('post-card');
 
-    const isLiked = false; // Check if user has liked this post
+    // Verificar si el usuario actual ha dado like
+    let isLiked = false;
+    const user = getCurrentUserData();
+    
+    if (user) {
+        try {
+            const db = firebase.firestore();
+            const userId = user.email || user.id;
+            const likeDoc = await db.collection('publicacionLikes')
+                .doc(`${userId}_${post.id}`)
+                .get();
+            isLiked = likeDoc.exists;
+        } catch (e) {
+            console.error('Error checking like status:', e);
+        }
+    }
+
     const imagen = post.imagen || post.image || 'Elementos/img/logo1.png';
     const titulo = post.titulo || post.title || 'Sin título';
     const contenido = post.contenido || post.content || '';
 
     card.innerHTML = `
-        <img src="${imagen}" alt="${titulo}" class="post-image">
+        <img src="${imagen}" alt="${titulo}" class="post-image" data-image-src="${imagen}" data-image-title="${titulo}">
         <div class="post-content">
             <h3>${titulo}</h3>
             <p>${contenido.substring(0, 150)}${contenido.length > 150 ? '...' : ''}</p>
             <div class="post-actions">
                 <div class="post-action ${isLiked ? 'liked' : ''}" data-post-id="${post.id}" onclick="handleLike('${post.id}')">
                     <i class="bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}"></i>
-                    <span>${post.likes || 0}</span>
+                    <span class="like-count">${post.likes || 0}</span>
                 </div>
                 <div class="post-action" onclick="openPostModal('${post.id}')">
                     <i class="bi bi-chat"></i>
-                    <span>${post.comments || 0}</span>
+                    <span class="comment-count">${post.comments || 0}</span>
                 </div>
             </div>
         </div>
     `;
+    
+    // Agregar evento click a la imagen para abrir lightbox
+    const postImage = card.querySelector('.post-image');
+    if (postImage) {
+        postImage.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evitar que se abra el modal
+            openImageLightbox(imagen, titulo);
+        });
+    }
 
     return card;
 }
 
-function handleLike(postId) {
-    if (!currentUser) {
+async function handleLike(postId) {
+    // Verificar sesión usando la función helper
+    const user = getCurrentUserData();
+    if (!user) {
         alert('Debes iniciar sesión para dar like');
         window.location.href = 'Secciones/login.html';
         return;
     }
 
-    // Toggle like functionality
-    const postAction = document.querySelector(`[data-post-id="${postId}"]`);
-    const icon = postAction.querySelector('i');
-    const likeCount = postAction.querySelector('span');
+    try {
+        const db = firebase.firestore();
+        const userId = user.email || user.id;
+        const likeId = `${userId}_${postId}`;
+        const likeRef = db.collection('publicacionLikes').doc(likeId);
+        const likeDoc = await likeRef.get();
 
-    if (postAction.classList.contains('liked')) {
-        postAction.classList.remove('liked');
-        icon.classList.remove('bi-heart-fill');
-        icon.classList.add('bi-heart');
-        likeCount.textContent = parseInt(likeCount.textContent) - 1;
-    } else {
-        postAction.classList.add('liked');
-        icon.classList.remove('bi-heart');
-        icon.classList.add('bi-heart-fill');
-        likeCount.textContent = parseInt(likeCount.textContent) + 1;
+        const postAction = document.querySelector(`[data-post-id="${postId}"]`);
+        const icon = postAction.querySelector('i');
+        const likeCount = postAction.querySelector('.like-count');
+
+        if (likeDoc.exists) {
+            // Quitar like
+            await likeRef.delete();
+            postAction.classList.remove('liked');
+            icon.classList.remove('bi-heart-fill');
+            icon.classList.add('bi-heart');
+            likeCount.textContent = parseInt(likeCount.textContent) - 1;
+        } else {
+            // Dar like
+            await likeRef.set({
+                publicacionId: postId,
+                usuarioId: userId,
+                nombreUsuario: user.nombre,
+                fecha: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            postAction.classList.add('liked');
+            icon.classList.remove('bi-heart');
+            icon.classList.add('bi-heart-fill');
+            likeCount.textContent = parseInt(likeCount.textContent) + 1;
+        }
+    } catch (error) {
+        console.error('Error handling like:', error);
+        alert('Error al procesar el like. Intenta de nuevo.');
     }
-
-    // Save to Firebase
-    // db.collection('postLikes').doc(`${currentUser.uid}_${postId}`).set({...})
 }
 
 async function openPostModal(postId) {
-    if (!currentUser) {
-        alert('Debes iniciar sesión para comentar');
+    // Verificar sesión usando la función helper
+    const user = getCurrentUserData();
+    if (!user) {
+        alert('Debes iniciar sesión para ver los comentarios');
         window.location.href = 'Secciones/login.html';
         return;
     }
@@ -465,30 +560,149 @@ async function openPostModal(postId) {
         const modal = document.getElementById('postModal');
         const modalContent = document.getElementById('modalPostContent');
 
+        // Cargar comentarios sin ordenar (para evitar error de índice)
+        let commentsSnapshot;
+        try {
+            commentsSnapshot = await db.collection('publicacionComentarios')
+                .where('publicacionId', '==', postId)
+                .get();
+        } catch (e) {
+            console.error('Error loading comments:', e);
+            commentsSnapshot = { empty: true, size: 0, docs: [] };
+        }
+
+        // Ordenar comentarios en el cliente
+        const comments = [];
+        commentsSnapshot.forEach(doc => {
+            comments.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Obtener tipos de usuario para comentarios que no lo tienen
+        for (let comment of comments) {
+            if (!comment.tipoUsuario && comment.usuarioId) {
+                try {
+                    const userDoc = await db.collection('usuarios').doc(comment.usuarioId).get();
+                    if (userDoc.exists) {
+                        comment.tipoUsuario = userDoc.data().tipoUsuario || 'estudiante';
+                    }
+                } catch (e) {
+                    console.log('Error obteniendo tipo de usuario:', e);
+                    comment.tipoUsuario = 'estudiante';
+                }
+            }
+        }
+        
+        // Ordenar por fecha (más recientes primero)
+        comments.sort((a, b) => {
+            if (!a.fecha) return 1;
+            if (!b.fecha) return -1;
+            return b.fecha.toMillis() - a.fecha.toMillis();
+        });
+
+        let commentsHTML = '';
+        if (comments.length === 0) {
+            commentsHTML = `
+                <div class="comments-empty-state">
+                    <i class="bi bi-chat-dots"></i>
+                    <p>No hay comentarios aún. ¡Sé el primero en comentar!</p>
+                </div>
+            `;
+        } else {
+            commentsHTML = '<div class="comments-list">';
+            comments.forEach(comment => {
+                const fecha = comment.fecha ? comment.fecha.toDate().toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : 'Fecha desconocida';
+
+                const nombreUsuario = comment.nombreUsuario || 'Usuario';
+                const comentarioTexto = comment.comentario || '';
+                const tipoUsuario = comment.tipoUsuario || 'estudiante';
+                
+                // Determinar el estilo del avatar y badge según el tipo de usuario
+                let avatarClass = 'comment-avatar-circle';
+                let badgeHTML = '';
+                
+                if (tipoUsuario === 'superusuario') {
+                    avatarClass += ' avatar-superusuario';
+                    badgeHTML = '<span class="user-badge badge-superusuario"><i class="bi bi-star-fill"></i> Super Admin</span>';
+                } else if (tipoUsuario === 'admin') {
+                    avatarClass += ' avatar-admin';
+                    badgeHTML = '<span class="user-badge badge-admin"><i class="bi bi-shield-fill-check"></i> Admin</span>';
+                } else {
+                    avatarClass += ' avatar-estudiante';
+                    badgeHTML = '<span class="user-badge badge-estudiante"><i class="bi bi-person-fill"></i> Estudiante</span>';
+                }
+
+                commentsHTML += `
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <div class="${avatarClass}">
+                                ${nombreUsuario.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="comment-user-info">
+                                <div class="comment-user-name-row">
+                                    <span class="comment-user-name">${nombreUsuario}</span>
+                                    ${badgeHTML}
+                                </div>
+                                <span class="comment-date">${fecha}</span>
+                            </div>
+                        </div>
+                        <p class="comment-text">${comentarioTexto}</p>
+                    </div>
+                `;
+            });
+            commentsHTML += '</div>';
+        }
+
         modalContent.innerHTML = `
-            <h2>${post.titulo}</h2>
-            <img src="${post.imagen || 'Elementos/img/logo1.png'}" alt="${post.titulo}" style="width: 100%; border-radius: 10px; margin: 1rem 0;">
-            <p>${post.contenido}</p>
-            <div style="margin-top: 2rem;">
-                <h3>Comentarios</h3>
-                <div id="commentsSection" style="margin-top: 1rem;">
-                    <p style="color: #666;">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+            <div class="modal-image-header">
+                <img src="${post.imagen || 'Elementos/img/logo1.png'}" alt="${post.titulo}" class="modal-header-image">
+                <div class="modal-image-overlay">
+                    <h2 class="modal-title-overlay">${post.titulo}</h2>
                 </div>
-                <div style="margin-top: 1.5rem;">
-                    <textarea id="commentInput" placeholder="Escribe tu comentario..." style="width: 100%; padding: 1rem; border: 2px solid #ddd; border-radius: 10px; min-height: 100px; font-family: inherit;"></textarea>
-                    <button onclick="submitComment('${postId}')" style="margin-top: 1rem; background: linear-gradient(135deg, #DC143C, #8B0000); color: white; padding: 0.7rem 2rem; border: none; border-radius: 25px; cursor: pointer; font-weight: 600;">Publicar Comentario</button>
+            </div>
+            <div class="modal-body-section">
+                <div class="modal-post-content">${post.contenido}</div>
+                
+                <div class="modal-comments-section">
+                    <div class="modal-comments-header">
+                        <i class="bi bi-chat-dots"></i>
+                        <span>Comentarios (${comments.length})</span>
+                    </div>
+                    <div id="commentsSection">
+                        ${commentsHTML}
+                    </div>
                 </div>
+            </div>
+            <div class="modal-comment-input-section">
+                <textarea id="commentInput" placeholder="Escribe tu comentario..."></textarea>
+                <button onclick="submitComment('${postId}')" class="modal-submit-button">
+                    <i class="bi bi-send"></i>
+                    <span>Publicar Comentario</span>
+                </button>
             </div>
         `;
 
         modal.style.display = 'block';
+        
+        // Agregar evento click a la imagen para abrir lightbox
+        const modalImage = document.querySelector('.modal-header-image');
+        if (modalImage) {
+            modalImage.addEventListener('click', () => {
+                openImageLightbox(post.imagen || 'Elementos/img/logo1.png', post.titulo);
+            });
+        }
     } catch (error) {
         console.error('Error loading post:', error);
         alert('Error al cargar la publicación');
     }
 }
 
-function submitComment(postId) {
+async function submitComment(postId) {
     const commentInput = document.getElementById('commentInput');
     const comment = commentInput.value.trim();
 
@@ -497,25 +711,65 @@ function submitComment(postId) {
         return;
     }
 
-    // Save comment to Firebase
-    // db.collection('comments').add({...})
+    // Verificar sesión usando la función helper
+    const user = getCurrentUserData();
+    if (!user) {
+        alert('Debes iniciar sesión para comentar');
+        window.location.href = 'Secciones/login.html';
+        return;
+    }
 
-    alert('Comentario publicado exitosamente');
-    commentInput.value = '';
-    document.getElementById('postModal').style.display = 'none';
+    try {
+        const db = firebase.firestore();
+
+        // Guardar comentario
+        const comentarioData = {
+            publicacionId: postId,
+            usuarioId: user.email || user.id,
+            nombreUsuario: user.nombre,
+            tipoUsuario: user.tipoUsuario || 'estudiante',
+            comentario: comment,
+            fecha: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        console.log('Guardando comentario:', comentarioData);
+        await db.collection('publicacionComentarios').add(comentarioData);
+
+        // Actualizar contador en la tarjeta de la publicación
+        const commentCountElement = document.querySelector(`[data-post-id="${postId}"]`)
+            ?.parentElement
+            ?.querySelector('.comment-count');
+        
+        if (commentCountElement) {
+            commentCountElement.textContent = parseInt(commentCountElement.textContent) + 1;
+        }
+
+        // Recargar el modal para mostrar el nuevo comentario
+        document.getElementById('postModal').style.display = 'none';
+        await openPostModal(postId);
+
+    } catch (error) {
+        console.error('Error submitting comment:', error);
+        alert('Error al publicar el comentario. Intenta de nuevo.');
+    }
 }
 
-// Close modal
-document.querySelector('.modal-close').addEventListener('click', () => {
-    document.getElementById('postModal').style.display = 'none';
-});
-
-window.addEventListener('click', (e) => {
-    const modal = document.getElementById('postModal');
-    if (e.target === modal) {
-        modal.style.display = 'none';
+// Close modal function
+function setupModalListeners() {
+    const modalClose = document.querySelector('.modal-close');
+    if (modalClose) {
+        modalClose.addEventListener('click', () => {
+            document.getElementById('postModal').style.display = 'none';
+        });
     }
-});
+
+    window.addEventListener('click', (e) => {
+        const modal = document.getElementById('postModal');
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+}
 
 // Scroll animations
 const observerOptions = {
@@ -1050,3 +1304,47 @@ function contactarWhatsApp(simulacro) {
     // Abrir WhatsApp en una nueva ventana
     window.open(whatsappURL, '_blank');
 }
+
+
+// Image Lightbox Functions
+function openImageLightbox(imageSrc, caption) {
+    const lightbox = document.getElementById('imageLightbox');
+    const lightboxImg = document.getElementById('lightboxImage');
+    const lightboxCaption = document.getElementById('lightboxCaption');
+    
+    lightbox.classList.add('active');
+    lightboxImg.src = imageSrc;
+    lightboxCaption.textContent = caption || '';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageLightbox() {
+    const lightbox = document.getElementById('imageLightbox');
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Setup lightbox listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const lightbox = document.getElementById('imageLightbox');
+    const lightboxClose = document.querySelector('.lightbox-close');
+    
+    if (lightboxClose) {
+        lightboxClose.addEventListener('click', closeImageLightbox);
+    }
+    
+    if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeImageLightbox();
+            }
+        });
+    }
+    
+    // Close lightbox with ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeImageLightbox();
+        }
+    });
+});
