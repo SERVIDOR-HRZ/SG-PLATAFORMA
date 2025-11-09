@@ -1811,6 +1811,7 @@ button[onclick^="submitComment"]:active {
 }
 
 .modal-image-overlay {
+    display: none;
     position: absolute;
     bottom: 0;
     left: 0;
@@ -1820,6 +1821,7 @@ button[onclick^="submitComment"]:active {
 }
 
 .modal-title-overlay {
+    display: none;
     color: #ffffff;
     margin: 0;
     font-size: 1.75rem;
@@ -2169,7 +2171,7 @@ button[onclick^="submitComment"]:active {
 
 /* Image Lightbox */
 .image-lightbox {
-    display: none;
+    display: none !important;
     position: fixed;
     z-index: 20000;
     padding: 50px 20px 20px;
@@ -2180,10 +2182,12 @@ button[onclick^="submitComment"]:active {
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.95);
     animation: fadeIn 0.3s ease;
+    align-items: center;
+    justify-content: center;
 }
 
 .image-lightbox.active {
-    display: block;
+    display: flex !important;
 }
 
 .lightbox-content {
@@ -2236,8 +2240,8 @@ button[onclick^="submitComment"]:active {
 }
 
 .lightbox-caption {
+    display: none;
     margin: auto;
-    display: block;
     width: 80%;
     max-width: 700px;
     text-align: center;
@@ -2283,9 +2287,20 @@ button[onclick^="submitComment"]:active {
 }
 
 @media (max-width: 768px) {
+    .image-lightbox {
+        padding: 20px 15px;
+    }
+    
+    .image-lightbox.active {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    
     .lightbox-content {
         max-width: 95%;
-        max-height: 80vh;
+        max-height: 75vh;
+        margin: 0 auto;
     }
     
     .lightbox-close {
