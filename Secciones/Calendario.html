@@ -12,6 +12,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../Elementos/css/calendario.css">
+    <link rel="stylesheet" href="../Elementos/css/time-picker.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
 </head>
 
@@ -165,12 +166,18 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="horaInicioClase">Hora Inicio *</label>
-                            <input type="time" id="horaInicioClase" required>
+                            <div class="time-input-display empty" id="horaInicioClase" data-time-value="">
+                                <i class="bi bi-clock"></i>
+                                <span>Seleccionar hora</span>
+                            </div>
                         </div>
 
                         <div class="form-group">
                             <label for="horaFinClase">Hora Fin *</label>
-                            <input type="time" id="horaFinClase" required>
+                            <div class="time-input-display empty" id="horaFinClase" data-time-value="">
+                                <i class="bi bi-clock"></i>
+                                <span>Seleccionar hora</span>
+                            </div>
                         </div>
                     </div>
 
@@ -277,6 +284,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/time-picker.js"></script>
     <script src="../Elementos/js/calendario.js"></script>
 </body>
 

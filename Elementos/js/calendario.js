@@ -855,20 +855,38 @@ async function editClass(claseId) {
         document.getElementById('tituloClase').value = clase.titulo;
         document.getElementById('descripcionClase').value = clase.descripcion || '';
         document.getElementById('fechaClase').value = clase.fecha;
-        document.getElementById('horaInicioClase').value = clase.horaInicio || clase.hora || '';
-        document.getElementById('horaFinClase').value = clase.horaFin || '';
         document.getElementById('duracionClase').value = clase.duracion;
         document.getElementById('enlaceClase').value = clase.enlace || '';
 
-        // Calcular duración si no existe horaFin
-        if (clase.horaInicio && !clase.horaFin && clase.duracion) {
-            const [hora, min] = clase.horaInicio.split(':').map(Number);
-            const minutosInicio = hora * 60 + min;
-            const minutosFin = minutosInicio + clase.duracion;
-            const horaFin = Math.floor(minutosFin / 60);
-            const minFin = minutosFin % 60;
-            document.getElementById('horaFinClase').value = `${horaFin.toString().padStart(2, '0')}:${minFin.toString().padStart(2, '0')}`;
+        // Configurar time pickers con valores existentes
+        const horaInicioEl = document.getElementById('horaInicioClase');
+        const horaFinEl = document.getElementById('horaFinClase');
+        
+        if (clase.horaInicio) {
+            // Convertir formato 24h a 12h AM/PM si es necesario
+            const horaInicioFormateada = convertirHora24a12(clase.horaInicio);
+            horaInicioEl.dataset.timeValue = horaInicioFormateada;
+            horaInicioEl.querySelector('span').textContent = horaInicioFormateada;
+            horaInicioEl.classList.remove('empty');
         }
+        
+        if (clase.horaFin) {
+            const horaFinFormateada = convertirHora24a12(clase.horaFin);
+            horaFinEl.dataset.timeValue = horaFinFormateada;
+            horaFinEl.querySelector('span').textContent = horaFinFormateada;
+            horaFinEl.classList.remove('empty');
+        } else if (clase.horaInicio && clase.duracion) {
+            // Calcular hora fin si no existe
+            const minutosInicio = convertirHora24aMinutos(clase.horaInicio);
+            const minutosFin = minutosInicio + clase.duracion;
+            const horaFinFormateada = convertirMinutosAHora(minutosFin);
+            horaFinEl.dataset.timeValue = horaFinFormateada;
+            horaFinEl.querySelector('span').textContent = horaFinFormateada;
+            horaFinEl.classList.remove('empty');
+        }
+        
+        // Recalcular duración
+        calcularDuracion();
 
         // Cambiar el título del modal
         document.querySelector('#modalNuevaClase .modal-header h3').textContent = 'Editar Clase';
@@ -888,6 +906,35 @@ async function editClass(claseId) {
 
 // Make editClass global
 window.editClass = editClass;
+
+// Convertir hora en formato 24h (HH:MM) a formato 12h (HH:MM AM/PM)
+function convertirHora24a12(hora24) {
+    const [hora, min] = hora24.split(':').map(Number);
+    const period = hora >= 12 ? 'PM' : 'AM';
+    let hora12 = hora % 12;
+    if (hora12 === 0) hora12 = 12;
+    return `${hora12.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')} ${period}`;
+}
+
+// Convertir hora en formato 24h a minutos desde medianoche
+function convertirHora24aMinutos(hora24) {
+    const [hora, min] = hora24.split(':').map(Number);
+    return hora * 60 + min;
+}
+
+// Convertir hora en formato 12h (HH:MM AM/PM) a formato 24h (HH:MM)
+function convertirHora12a24(hora12) {
+    const [time, period] = hora12.split(' ');
+    let [hora, min] = time.split(':').map(Number);
+    
+    if (period === 'PM' && hora !== 12) {
+        hora += 12;
+    } else if (period === 'AM' && hora === 12) {
+        hora = 0;
+    }
+    
+    return `${hora.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+}
 
 // Open new class modal
 function openNewClassModal(date = null) {
@@ -916,15 +963,16 @@ function openNewClassModal(date = null) {
 
 // Calcular duración automáticamente
 function calcularDuracion() {
-    const horaInicio = document.getElementById('horaInicioClase').value;
-    const horaFin = document.getElementById('horaFinClase').value;
+    const horaInicioEl = document.getElementById('horaInicioClase');
+    const horaFinEl = document.getElementById('horaFinClase');
+    
+    const horaInicio = horaInicioEl.dataset.timeValue;
+    const horaFin = horaFinEl.dataset.timeValue;
 
     if (horaInicio && horaFin) {
-        const [horaI, minI] = horaInicio.split(':').map(Number);
-        const [horaF, minF] = horaFin.split(':').map(Number);
-
-        const minutosInicio = horaI * 60 + minI;
-        const minutosFin = horaF * 60 + minF;
+        // Convertir formato "HH:MM AM/PM" a minutos
+        const minutosInicio = convertirHoraAMinutos(horaInicio);
+        const minutosFin = convertirHoraAMinutos(horaFin);
 
         let duracion = minutosFin - minutosInicio;
 
@@ -937,6 +985,36 @@ function calcularDuracion() {
     }
 }
 
+// Convertir hora en formato "HH:MM AM/PM" a minutos desde medianoche
+function convertirHoraAMinutos(horaStr) {
+    const [time, period] = horaStr.split(' ');
+    let [hora, min] = time.split(':').map(Number);
+    
+    // Convertir a formato 24 horas
+    if (period === 'PM' && hora !== 12) {
+        hora += 12;
+    } else if (period === 'AM' && hora === 12) {
+        hora = 0;
+    }
+    
+    return hora * 60 + min;
+}
+
+// Convertir minutos desde medianoche a formato "HH:MM AM/PM"
+function convertirMinutosAHora(minutos) {
+    let hora = Math.floor(minutos / 60);
+    const min = minutos % 60;
+    const period = hora >= 12 ? 'PM' : 'AM';
+    
+    if (hora > 12) {
+        hora -= 12;
+    } else if (hora === 0) {
+        hora = 12;
+    }
+    
+    return `${hora.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')} ${period}`;
+}
+
 // Setup event listeners
 function setupEventListeners() {
     // Back button
@@ -944,6 +1022,10 @@ function setupEventListeners() {
         window.location.href = 'Panel_Admin.html';
     });
 
+    // Inicializar time pickers
+    attachTimePicker('horaInicioClase');
+    attachTimePicker('horaFinClase');
+    
     // Calcular duración cuando cambian las horas
     document.getElementById('horaInicioClase').addEventListener('change', calcularDuracion);
     document.getElementById('horaFinClase').addEventListener('change', calcularDuracion);
@@ -1082,8 +1164,15 @@ async function handleFormSubmit(e) {
         const descripcion = document.getElementById('descripcionClase').value;
         const tutorId = document.getElementById('tutorSelect').value;
         const fecha = document.getElementById('fechaClase').value;
-        const horaInicio = document.getElementById('horaInicioClase').value;
-        const horaFin = document.getElementById('horaFinClase').value;
+        
+        // Obtener valores del time picker y convertir a formato 24h
+        const horaInicioEl = document.getElementById('horaInicioClase');
+        const horaFinEl = document.getElementById('horaFinClase');
+        const horaInicio12 = horaInicioEl.dataset.timeValue;
+        const horaFin12 = horaFinEl.dataset.timeValue;
+        
+        const horaInicio = horaInicio12 ? convertirHora12a24(horaInicio12) : '';
+        const horaFin = horaFin12 ? convertirHora12a24(horaFin12) : '';
         const duracion = document.getElementById('duracionClase').value;
         const enlace = document.getElementById('enlaceClase').value;
 
