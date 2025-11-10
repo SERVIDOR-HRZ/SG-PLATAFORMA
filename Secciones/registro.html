@@ -24,14 +24,19 @@
 
             <form id="registerForm" class="form">
                 <div class="input-group">
-                    <label for="email">Correo (@seamosgenios.com)</label>
-                    <input type="email" id="email" name="email" placeholder="usuario@seamosgenios.com" required>
+                    <label for="email">Usuario</label>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="text" id="username" name="username" placeholder="usuario" required
+                            style="flex: 1;">
+                        <span style="color: #666;">@seamosgenios.com</span>
+                    </div>
+                    <input type="hidden" id="email" name="email">
                 </div>
 
                 <div class="input-group">
-                    <label for="emailRecuperacion">Correo de recuperación</label>
-                    <input type="email" id="emailRecuperacion" name="emailRecuperacion" placeholder="correo@ejemplo.com"
-                        required>
+                    <label for="emailRecuperacion">Correo de recuperación (tu correo principal)</label>
+                    <input type="email" id="emailRecuperacion" name="emailRecuperacion"
+                        placeholder="correo_de_ejemplo@gmail.com" required>
                 </div>
 
                 <div class="input-group">
@@ -45,8 +50,9 @@
                 </div>
 
                 <div class="input-group">
-                    <label for="nombre">Nombre completo</label>
-                    <input type="text" id="nombre" name="nombre" required>
+                    <label for="nombre">Nombre completo (solo mayúsculas)</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Ejemplo: DANNA MARIA PEREZ PEREZ"
+                        required>
                 </div>
 
                 <div class="input-group">
@@ -55,8 +61,9 @@
                 </div>
 
                 <div class="input-group">
-                    <label for="institucion">Institución</label>
-                    <input type="text" id="institucion" name="institucion" required>
+                    <label for="institucion">Tu institución educativa</label>
+                    <input type="text" id="institucion" name="institucion"
+                        placeholder="Si no estás en 11°, escribe: SeamosGenios" required>
                 </div>
 
                 <div class="input-group">

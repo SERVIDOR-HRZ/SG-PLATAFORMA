@@ -81,6 +81,25 @@
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/login.js"></script>
     <script src="../Elementos/js/seguridad.js"></script>
+    
+    <!-- Keyboard shortcut for registration -->
+    <script>
+        let keysPressed = {};
+        
+        document.addEventListener('keydown', function(event) {
+            keysPressed[event.key.toLowerCase()] = true;
+            
+            // Check if Alt + S + G are pressed
+            if (event.altKey && keysPressed['s'] && keysPressed['g']) {
+                event.preventDefault();
+                window.location.href = 'registro.html';
+            }
+        });
+        
+        document.addEventListener('keyup', function(event) {
+            delete keysPressed[event.key.toLowerCase()];
+        });
+    </script>
 </body>
 
 </html>

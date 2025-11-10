@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form validation - All new fields
     const inputs = {
+        username: document.getElementById('username'),
         email: document.getElementById('email'),
         emailRecuperacion: document.getElementById('emailRecuperacion'),
         password: document.getElementById('password'),
@@ -19,9 +20,15 @@ document.addEventListener('DOMContentLoaded', function() {
         departamento: document.getElementById('departamento')
     };
 
-    // Add validation messages to all inputs except selects
+    // Update email field when username changes
+    inputs.username.addEventListener('input', function() {
+        const username = this.value.trim();
+        inputs.email.value = username ? username + '@seamosgenios.com' : '';
+    });
+
+    // Add validation messages to all inputs except selects and hidden fields
     Object.keys(inputs).forEach(key => {
-        if (inputs[key].tagName !== 'SELECT') {
+        if (inputs[key].tagName !== 'SELECT' && inputs[key].type !== 'hidden') {
             const validationMsg = document.createElement('div');
             validationMsg.className = 'validation-message';
             inputs[key].parentNode.appendChild(validationMsg);
@@ -64,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addPasswordToggle('confirmPassword');
 
     // Real-time validation
-    inputs.email.addEventListener('blur', () => validateSeamosGeniosEmail());
+    inputs.username.addEventListener('blur', () => validateUsername());
     inputs.emailRecuperacion.addEventListener('blur', () => validateRecoveryEmail());
     inputs.password.addEventListener('blur', () => validatePassword());
     inputs.confirmPassword.addEventListener('blur', () => validateConfirmPassword());
@@ -88,23 +95,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function validateSeamosGeniosEmail() {
-        const email = inputs.email.value.trim();
-        const validationMsg = inputs.email.parentNode.querySelector('.validation-message');
+    function validateUsername() {
+        const username = inputs.username.value.trim();
+        const validationMsg = inputs.username.parentNode.querySelector('.validation-message');
         
-        // Must be @seamosgenios.com domain
-        const seamosGeniosRegex = /^[a-zA-Z0-9._%+-]+@seamosgenios\.com$/;
+        // Username validation (alphanumeric, dots, underscores, hyphens)
+        const usernameRegex = /^[a-zA-Z0-9._-]+$/;
         
-        if (!seamosGeniosRegex.test(email)) {
-            inputs.email.classList.add('invalid');
-            inputs.email.classList.remove('valid');
-            validationMsg.textContent = 'Debe ser un correo @seamosgenios.com';
+        if (username.length < 3) {
+            inputs.username.classList.add('invalid');
+            inputs.username.classList.remove('valid');
+            validationMsg.textContent = 'El usuario debe tener al menos 3 caracteres';
             validationMsg.classList.add('show');
             return false;
         }
         
-        inputs.email.classList.add('valid');
-        inputs.email.classList.remove('invalid');
+        if (!usernameRegex.test(username)) {
+            inputs.username.classList.add('invalid');
+            inputs.username.classList.remove('valid');
+            validationMsg.textContent = 'Solo letras, números, puntos, guiones y guiones bajos';
+            validationMsg.classList.add('show');
+            return false;
+        }
+        
+        inputs.username.classList.add('valid');
+        inputs.username.classList.remove('invalid');
         validationMsg.classList.remove('show');
         return true;
     }
@@ -320,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validate all fields
         const validations = [
-            validateSeamosGeniosEmail(),
+            validateUsername(),
             validateRecoveryEmail(),
             validatePassword(),
             validateConfirmPassword(),
