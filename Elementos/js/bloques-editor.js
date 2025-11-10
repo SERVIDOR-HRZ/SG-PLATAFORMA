@@ -93,6 +93,9 @@ function setupEventListeners() {
     // LaTeX help button
     document.getElementById('latexHelpBtn').addEventListener('click', showLatexHelp);
 
+    // Question bank button
+    document.getElementById('questionBankBtn').addEventListener('click', showQuestionBank);
+
     // Save blocks button
     document.getElementById('saveBlocksBtn').addEventListener('click', saveAllBlocks);
 
@@ -1241,7 +1244,7 @@ function hideSubjectModal() {
 }
 
 // Save subject data
-function saveSubjectData() {
+async function saveSubjectData() {
     // Validate questions
     const blockKey = `bloque${currentEditingBlock}`;
     const questions = testBlocks[blockKey][currentEditingSubject].questions;
@@ -1292,6 +1295,16 @@ function saveSubjectData() {
 
             questionNumber++;
         }
+    }
+
+    // Save questions to bank
+    try {
+        showLoadingOverlay();
+        await saveQuestionsToBank();
+        hideLoadingOverlay();
+    } catch (error) {
+        console.error('Error saving to bank:', error);
+        hideLoadingOverlay();
     }
 
     updateQuestionsCount();
@@ -1976,6 +1989,359 @@ function hideImageModal() {
     }
 }
 
+// ========== QUESTION BANK FUNCTIONS ==========
+
+let selectedBankQuestions = [];
+
+// Show question bank modal
+async function showQuestionBank() {
+    try {
+        showLoadingOverlay();
+        
+        // Update modal title
+        const config = subjectConfig[currentEditingSubject];
+        document.getElementById('bankSubjectName').textContent = config.name;
+        
+        // Load questions from bank
+        await loadQuestionBank();
+        
+        // Setup bank modal events
+        setupBankModalEvents();
+        
+        // Show modal
+        document.getElementById('questionBankModal').classList.add('active');
+        
+        hideLoadingOverlay();
+    } catch (error) {
+        console.error('Error showing question bank:', error);
+        showNotification('Error al cargar el banco de preguntas: ' + error.message, 'error');
+        hideLoadingOverlay();
+    }
+}
+
+// Setup bank modal events
+function setupBankModalEvents() {
+    // Close button
+    document.getElementById('closeBankModal').addEventListener('click', hideQuestionBank);
+    document.getElementById('cancelBank').addEventListener('click', hideQuestionBank);
+    
+    // Add selected questions button
+    document.getElementById('addSelectedQuestions').addEventListener('click', addSelectedQuestionsToTest);
+    
+    // Search input
+    const searchInput = document.getElementById('bankSearchInput');
+    searchInput.addEventListener('input', filterBankQuestions);
+    
+    // Close on overlay click
+    document.getElementById('questionBankModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideQuestionBank();
+        }
+    });
+}
+
+// Load question bank from Firebase
+async function loadQuestionBank() {
+    try {
+        const db = window.firebaseDB;
+        
+        // Get all questions for this subject from the question bank
+        const bankRef = db.collection('bancoPreguntas').doc(currentEditingSubject);
+        const bankDoc = await bankRef.get();
+        
+        let bankQuestions = [];
+        if (bankDoc.exists) {
+            bankQuestions = bankDoc.data().questions || [];
+        }
+        
+        // Display questions
+        displayBankQuestions(bankQuestions);
+        
+    } catch (error) {
+        console.error('Error loading question bank:', error);
+        throw error;
+    }
+}
+
+// Display bank questions
+function displayBankQuestions(questions) {
+    const container = document.getElementById('bankQuestionsContainer');
+    selectedBankQuestions = [];
+    
+    if (!questions || questions.length === 0) {
+        container.innerHTML = `
+            <div class="bank-empty-state">
+                <i class="bi bi-inbox"></i>
+                <h4>No hay preguntas en el banco</h4>
+                <p>Las preguntas que guardes se agregarán automáticamente al banco para reutilizarlas en otras pruebas</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    questions.forEach((question, index) => {
+        const questionElement = createBankQuestionElement(question, index);
+        container.appendChild(questionElement);
+    });
+    
+    // Render LaTeX
+    setTimeout(() => renderMathInElement(container), 100);
+}
+
+// Create bank question element
+function createBankQuestionElement(question, index) {
+    const div = document.createElement('div');
+    div.className = 'bank-question-item';
+    div.dataset.questionIndex = index;
+    
+    if (question.type === 'reading') {
+        div.innerHTML = `
+            <div class="bank-question-checkbox">
+                <input type="checkbox" onchange="toggleBankQuestionSelection(${index})">
+            </div>
+            <div class="bank-question-header">
+                <span class="bank-question-type-badge reading">
+                    <i class="bi bi-book-half"></i>
+                    Texto de Lectura
+                </span>
+            </div>
+            <div class="bank-reading-title">
+                <i class="bi bi-type-h1"></i>
+                ${question.title || 'Sin título'}
+            </div>
+            <div class="bank-reading-text">
+                ${question.text ? question.text.substring(0, 200) + (question.text.length > 200 ? '...' : '') : 'Sin texto'}
+            </div>
+            ${createBankQuestionMediaPreview(question)}
+        `;
+    } else {
+        div.innerHTML = `
+            <div class="bank-question-checkbox">
+                <input type="checkbox" onchange="toggleBankQuestionSelection(${index})">
+            </div>
+            <div class="bank-question-header">
+                <span class="bank-question-type-badge multiple">
+                    <i class="bi bi-ui-checks"></i>
+                    Selección Múltiple
+                </span>
+            </div>
+            <div class="bank-question-text">
+                ${question.text || 'Sin pregunta'}
+            </div>
+            ${createBankQuestionMediaPreview(question)}
+            ${createBankOptionsPreview(question.options || [])}
+        `;
+    }
+    
+    // Click on card to toggle selection
+    div.addEventListener('click', function(e) {
+        if (e.target.type !== 'checkbox') {
+            const checkbox = div.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            toggleBankQuestionSelection(index);
+        }
+    });
+    
+    return div;
+}
+
+// Create bank question media preview
+function createBankQuestionMediaPreview(question) {
+    if ((!question.images || question.images.length === 0) && 
+        (!question.videos || question.videos.length === 0)) {
+        return '';
+    }
+    
+    let html = '<div class="bank-question-media">';
+    
+    if (question.images && question.images.length > 0) {
+        question.images.slice(0, 2).forEach(image => {
+            html += `<img src="${image.url}" alt="Imagen">`;
+        });
+        if (question.images.length > 2) {
+            html += `<span>+${question.images.length - 2} más</span>`;
+        }
+    }
+    
+    if (question.videos && question.videos.length > 0) {
+        html += `<span><i class="bi bi-youtube"></i> ${question.videos.length} video(s)</span>`;
+    }
+    
+    html += '</div>';
+    return html;
+}
+
+// Create bank options preview
+function createBankOptionsPreview(options) {
+    if (!options || options.length === 0) return '';
+    
+    let html = '<div class="bank-question-options">';
+    
+    options.forEach(option => {
+        const isCorrect = option.isCorrect;
+        html += `
+            <div class="bank-option-item ${isCorrect ? 'correct' : ''}">
+                ${isCorrect ? '<i class="bi bi-check-circle-fill bank-option-icon"></i>' : ''}
+                <span>${option.text || 'Sin texto'}</span>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    return html;
+}
+
+// Toggle bank question selection
+function toggleBankQuestionSelection(index) {
+    const questionItem = document.querySelector(`.bank-question-item[data-question-index="${index}"]`);
+    const checkbox = questionItem.querySelector('input[type="checkbox"]');
+    
+    if (checkbox.checked) {
+        questionItem.classList.add('selected');
+        if (!selectedBankQuestions.includes(index)) {
+            selectedBankQuestions.push(index);
+        }
+    } else {
+        questionItem.classList.remove('selected');
+        const idx = selectedBankQuestions.indexOf(index);
+        if (idx > -1) {
+            selectedBankQuestions.splice(idx, 1);
+        }
+    }
+    
+    // Update button text
+    updateAddButtonText();
+}
+
+// Update add button text
+function updateAddButtonText() {
+    const button = document.getElementById('addSelectedQuestions');
+    const count = selectedBankQuestions.length;
+    
+    if (count === 0) {
+        button.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Seleccionadas';
+        button.disabled = true;
+    } else {
+        button.innerHTML = `<i class="bi bi-plus-circle"></i> Agregar ${count} Pregunta${count > 1 ? 's' : ''}`;
+        button.disabled = false;
+    }
+}
+
+// Filter bank questions
+function filterBankQuestions() {
+    const searchTerm = document.getElementById('bankSearchInput').value.toLowerCase();
+    const questionItems = document.querySelectorAll('.bank-question-item');
+    
+    questionItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Add selected questions to test
+async function addSelectedQuestionsToTest() {
+    try {
+        if (selectedBankQuestions.length === 0) {
+            showNotification('Selecciona al menos una pregunta', 'warning');
+            return;
+        }
+        
+        showLoadingOverlay();
+        
+        const db = window.firebaseDB;
+        const bankRef = db.collection('bancoPreguntas').doc(currentEditingSubject);
+        const bankDoc = await bankRef.get();
+        
+        if (!bankDoc.exists) {
+            throw new Error('No se encontró el banco de preguntas');
+        }
+        
+        const bankQuestions = bankDoc.data().questions || [];
+        const blockKey = `bloque${currentEditingBlock}`;
+        
+        // Add selected questions to current test
+        selectedBankQuestions.forEach(index => {
+            if (bankQuestions[index]) {
+                // Create a deep copy of the question
+                const questionCopy = JSON.parse(JSON.stringify(bankQuestions[index]));
+                testBlocks[blockKey][currentEditingSubject].questions.push(questionCopy);
+            }
+        });
+        
+        // Reload questions in modal
+        loadQuestionsInModal();
+        
+        // Hide bank modal
+        hideQuestionBank();
+        
+        showNotification(`${selectedBankQuestions.length} pregunta(s) agregada(s) correctamente`, 'success');
+        hideLoadingOverlay();
+        
+    } catch (error) {
+        console.error('Error adding questions:', error);
+        showNotification('Error al agregar preguntas: ' + error.message, 'error');
+        hideLoadingOverlay();
+    }
+}
+
+// Hide question bank modal
+function hideQuestionBank() {
+    document.getElementById('questionBankModal').classList.remove('active');
+    selectedBankQuestions = [];
+    document.getElementById('bankSearchInput').value = '';
+}
+
+// Save questions to bank (called when saving subject)
+async function saveQuestionsToBank() {
+    try {
+        const db = window.firebaseDB;
+        const blockKey = `bloque${currentEditingBlock}`;
+        const questions = testBlocks[blockKey][currentEditingSubject].questions;
+        
+        if (questions.length === 0) {
+            return; // No questions to save
+        }
+        
+        // Get existing bank
+        const bankRef = db.collection('bancoPreguntas').doc(currentEditingSubject);
+        const bankDoc = await bankRef.get();
+        
+        let existingQuestions = [];
+        if (bankDoc.exists) {
+            existingQuestions = bankDoc.data().questions || [];
+        }
+        
+        // Add new questions to bank (avoid duplicates by checking text)
+        questions.forEach(question => {
+            const isDuplicate = existingQuestions.some(existing => 
+                existing.text === question.text && 
+                existing.type === question.type
+            );
+            
+            if (!isDuplicate) {
+                existingQuestions.push(JSON.parse(JSON.stringify(question)));
+            }
+        });
+        
+        // Save to Firebase
+        await bankRef.set({
+            materia: currentEditingSubject,
+            questions: existingQuestions,
+            fechaActualizacion: firebase.firestore.Timestamp.now()
+        });
+        
+    } catch (error) {
+        console.error('Error saving to question bank:', error);
+        // Don't throw error, just log it
+    }
+}
+
 // Make functions globally accessible
 window.editSubject = editSubject;
 window.addNewQuestion = addNewQuestion;
@@ -2003,3 +2369,5 @@ window.hideVideoModal = hideVideoModal;
 window.convertToYouTubeEmbed = convertToYouTubeEmbed;
 window.showDeleteQuestionModal = showDeleteQuestionModal;
 window.showDeleteVideoModal = showDeleteVideoModal;
+window.showQuestionBank = showQuestionBank;
+window.toggleBankQuestionSelection = toggleBankQuestionSelection;
