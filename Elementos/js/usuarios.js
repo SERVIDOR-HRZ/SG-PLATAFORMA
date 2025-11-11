@@ -253,12 +253,20 @@ function handleUserTypeChange() {
     const roleSelection = document.getElementById('roleSelectionCreate');
     const createButton = elements.createButtonText;
     const isSuperuser = window.currentUserRole === 'superusuario';
+    const usuarioInput = elements.createUsuario;
+    const usuarioLabel = document.getElementById('createUsuarioLabel');
+    const usuarioHint = document.getElementById('createUsuarioHint');
     
     if (selectedType === 'estudiante') {
         studentFields.style.display = 'block';
         adminFields.forEach(field => field.style.display = 'none');
         roleSelection.style.display = 'none';
         createButton.textContent = 'Crear Estudiante';
+        // Cambiar placeholder para estudiantes
+        usuarioInput.placeholder = 'nombre.usuario';
+        usuarioInput.type = 'text';
+        if (usuarioLabel) usuarioLabel.textContent = 'Nombre de Usuario *';
+        if (usuarioHint) usuarioHint.style.display = 'block';
     } else {
         studentFields.style.display = 'none';
         adminFields.forEach(field => field.style.display = 'block');
@@ -270,6 +278,11 @@ function handleUserTypeChange() {
             roleSelection.style.display = 'none';
             createButton.textContent = 'Crear Administrador';
         }
+        // Cambiar placeholder para administradores
+        usuarioInput.placeholder = 'nombre.usuario';
+        usuarioInput.type = 'text';
+        if (usuarioLabel) usuarioLabel.textContent = 'Nombre de Usuario *';
+        if (usuarioHint) usuarioHint.style.display = 'block';
     }
 }
 
@@ -446,7 +459,22 @@ function renderUsers() {
                             return `<span class="materia-badge" style="background: ${config.color};" title="${materia.charAt(0).toUpperCase() + materia.slice(1)}">${config.inicial}</span>`;
                         }).join('')}
                     </div>` : 
-                    (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">Sin acceso</span>' : 'N/A')}
+                    (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">Sin acceso</span>' : 
+                    (user.tipoUsuario === 'admin' && user.asignaturas && user.asignaturas.length > 0 ? 
+                        `<div class="materias-cell">
+                            ${user.asignaturas.map(materia => {
+                                const materiasConfig = {
+                                    'matematicas': { inicial: 'MAT', color: '#667eea' },
+                                    'lectura': { inicial: 'LEC', color: '#dc3545' },
+                                    'sociales': { inicial: 'SOC', color: '#ffc107' },
+                                    'ciencias': { inicial: 'CIE', color: '#28a745' },
+                                    'ingles': { inicial: 'ING', color: '#17a2b8' }
+                                };
+                                const config = materiasConfig[materia] || { inicial: 'N/A', color: '#6c757d' };
+                                return `<span class="materia-badge" style="background: ${config.color};" title="${materia.charAt(0).toUpperCase() + materia.slice(1)}">${config.inicial}</span>`;
+                            }).join('')}
+                        </div>` : 
+                        (user.tipoUsuario === 'admin' ? '<span class="text-muted">Sin asignaturas</span>' : 'N/A')))}
             </td>
             <td>
                 ${user.telefono || 'No especificado'}
@@ -760,10 +788,16 @@ async function handleCreateUser(e) {
     
     const tipoUsuario = document.querySelector('input[name="tipoUsuario"]:checked').value;
     const nombre = elements.createNombre.value.trim();
-    const usuario = elements.createUsuario.value.trim();
+    let usuario = elements.createUsuario.value.trim();
     const password = elements.createPassword.value;
     const telefono = elements.createTelefono.value.trim();
     const emailRecuperacion = elements.createEmailRecuperacion.value.trim();
+    
+    // Agregar @seamosgenios.com automáticamente para todos los usuarios
+    // Remover @seamosgenios.com si el usuario lo escribió
+    usuario = usuario.replace(/@seamosgenios\.com$/i, '');
+    // Agregar el dominio
+    usuario = usuario + '@seamosgenios.com';
     
     // Basic validation
     if (!nombre || !usuario || !password || !telefono || !emailRecuperacion) {
