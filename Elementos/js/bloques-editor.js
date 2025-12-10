@@ -857,7 +857,7 @@ function createQuestionElement(question, index, questionNumber) {
                         Título:
                     </label>
                     <input type="text" class="title-input" placeholder="Ej: Comprensión de Lectura, Según el texto responde..." 
-                           value="${question.title || ''}"
+                           value="${(question.title || '').replace(/"/g, '&quot;')}"
                            onchange="updateReadingTitle(${index}, this.value)">
                 </div>
                 <div class="reading-paragraph-section">
@@ -946,7 +946,7 @@ function createOptionsHTML(options, questionIndex) {
                            ${option.isCorrect ? 'checked' : ''} 
                            onchange="setCorrectOption(${questionIndex}, ${optionIndex})">
                     <div class="option-content-editor">
-                        <input type="text" value="${option.text || ''}" 
+                        <input type="text" value="${(option.text || '').replace(/"/g, '&quot;')}" 
                                placeholder="Opción ${optionIndex + 1}"
                                onchange="updateOptionText(${questionIndex}, ${optionIndex}, this.value)">
                         ${createOptionImagesHTML(option.images || [], questionIndex, optionIndex)}
@@ -2112,7 +2112,7 @@ function createBankQuestionElement(question, index) {
                 ${question.title || 'Sin título'}
             </div>
             <div class="bank-reading-text">
-                ${question.text ? question.text.substring(0, 200) + (question.text.length > 200 ? '...' : '') : 'Sin texto'}
+                ${question.text ? escapeHtml(question.text.substring(0, 200) + (question.text.length > 200 ? '...' : '')) : 'Sin texto'}
             </div>
             ${createBankQuestionMediaPreview(question)}
         `;
@@ -2128,7 +2128,7 @@ function createBankQuestionElement(question, index) {
                 </span>
             </div>
             <div class="bank-question-text">
-                ${question.text || 'Sin pregunta'}
+                ${escapeHtml(question.text || 'Sin pregunta')}
             </div>
             ${createBankQuestionMediaPreview(question)}
             ${createBankOptionsPreview(question.options || [])}
@@ -2184,7 +2184,7 @@ function createBankOptionsPreview(options) {
         html += `
             <div class="bank-option-item ${isCorrect ? 'correct' : ''}">
                 ${isCorrect ? '<i class="bi bi-check-circle-fill bank-option-icon"></i>' : ''}
-                <span>${option.text || 'Sin texto'}</span>
+                <span>${escapeHtml(option.text || 'Sin texto')}</span>
             </div>
         `;
     });
@@ -2367,6 +2367,13 @@ window.previewVideo = previewVideo;
 window.confirmAddVideo = confirmAddVideo;
 window.hideVideoModal = hideVideoModal;
 window.convertToYouTubeEmbed = convertToYouTubeEmbed;
+// Escape HTML to prevent issues with special characters
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 window.showDeleteQuestionModal = showDeleteQuestionModal;
 window.showDeleteVideoModal = showDeleteVideoModal;
 window.showQuestionBank = showQuestionBank;

@@ -858,7 +858,7 @@ function createMultipleChoiceHTML(question) {
             <div class="option-item" onclick="selectOption(${index})">
                 <input type="radio" name="question_${currentQuestionIndex}" value="${index}" id="option_${index}">
                 <div class="option-content">
-                    <div class="option-text">${option.text || `Opción ${index + 1}`}</div>
+                    <div class="option-text">${escapeHtml(option.text || `Opción ${index + 1}`)}</div>
                     ${createOptionImagesHTML(option.images || [])}
                 </div>
             </div>
@@ -963,7 +963,7 @@ function renderCurrentItem(item, contextElements, questionNumber, config) {
                         <div class="context-content" id="contextContent_${idx}" style="display: none;">
                             <div class="context-reading-body">
                                 <div class="paragraph-content">
-                                    ${element.text}
+                                    ${escapeHtml(element.text)}
                                 </div>
                                 ${createQuestionMediaHTML(element.images || [], element.videos || [])}
                             </div>
@@ -987,7 +987,7 @@ function renderCurrentItem(item, contextElements, questionNumber, config) {
                     ${item.title || 'Texto de Lectura'}
                 </div>
                 <div class="reading-text-display">
-                    ${item.text}
+                    ${escapeHtml(item.text)}
                 </div>
                 ${createQuestionMediaHTML(item.images || [], item.videos || [])}
                 <div class="reading-note">
@@ -1013,7 +1013,7 @@ function renderCurrentItem(item, contextElements, questionNumber, config) {
             ${createQuestionMediaHTML(item.images || [], item.videos || [])}
             
             <div class="question-text">
-                ${item.text || 'Pregunta sin texto'}
+                ${escapeHtml(item.text || 'Pregunta sin texto')}
             </div>
             
             ${item.type === 'multiple' ? createMultipleChoiceHTML(item) : createOpenAnswerHTML(item)}
@@ -2136,6 +2136,13 @@ function debugAutoSave() {
         console.error('Error in debug function:', error);
         showNotification('❌ Error al verificar auto-guardado', 'error');
     }
+}
+
+// Escape HTML to prevent issues with special characters
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Make debug function globally accessible
