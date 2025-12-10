@@ -225,7 +225,8 @@ body {
     max-width: 100%;
     margin: 0 auto;
     width: 100%;
-    margin-top: 80px; /* Espacio para el header fijo */
+    margin-top: 80px;
+    /* Espacio para el header fijo */
 }
 
 /* User name with photo in table */
@@ -652,9 +653,12 @@ body {
 }
 
 @keyframes pulse-super {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 2px 4px rgba(156, 39, 176, 0.3);
     }
+
     50% {
         box-shadow: 0 2px 8px rgba(156, 39, 176, 0.6);
     }
@@ -954,7 +958,7 @@ body {
     justify-content: center;
     width: 32px;
     height: 32px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .reset-password-btn {
@@ -965,7 +969,7 @@ body {
 .reset-password-btn:hover {
     background: #cc0000;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-status-btn {
@@ -976,7 +980,7 @@ body {
 .toggle-status-btn:hover {
     background: #218838;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-status-btn.deactivate {
@@ -986,7 +990,7 @@ body {
 .toggle-status-btn.deactivate:hover {
     background: #c82333;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Loading and No Results */
@@ -1292,7 +1296,7 @@ body {
     accent-color: #28a745;
 }
 
-.radio-option input[type="radio"]:checked ~ .option-content {
+.radio-option input[type="radio"]:checked~.option-content {
     color: #28a745;
 }
 
@@ -1504,7 +1508,7 @@ body {
 .edit-user-btn:hover {
     background: #0056b3;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Confirmation Modal Styles */
@@ -1771,11 +1775,11 @@ body {
     .table-wrapper {
         overflow-x: auto;
     }
-    
+
     .users-table {
         min-width: 2200px;
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -1785,11 +1789,11 @@ body {
     .users-table {
         min-width: 2200px;
     }
-    
+
     .table-header {
         flex-wrap: wrap;
     }
-    
+
     .table-actions {
         flex-wrap: wrap;
         gap: 0.5rem;
@@ -1801,48 +1805,48 @@ body {
     .header {
         padding: 0.75rem 1rem;
     }
-    
+
     .header-left {
         gap: 0.75rem;
     }
-    
+
     .header-logo {
         width: 35px;
         height: 35px;
     }
-    
+
     .header h1 {
         font-size: 1.2rem;
     }
-    
+
     .back-btn {
         width: 35px;
         height: 35px;
         font-size: 1rem;
     }
-    
+
     .main-content {
         padding: 1.5rem;
         margin-top: 80px;
     }
-    
+
     .controls-section {
         gap: 1rem;
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
     }
-    
+
     .stat-card {
         padding: 1rem;
     }
-    
+
     .stat-icon {
         font-size: 2rem;
     }
-    
+
     .stat-content h3 {
         font-size: 1.5rem;
     }
@@ -1854,30 +1858,30 @@ body {
         padding: 0.5rem 0.75rem;
         gap: 0.75rem;
     }
-    
+
     .header-left {
         gap: 0.5rem;
     }
-    
+
     .header-logo {
         width: 30px;
         height: 30px;
     }
-    
+
     .header h1 {
         font-size: 1rem;
     }
-    
+
     .back-btn {
         width: 32px;
         height: 32px;
         font-size: 0.9rem;
     }
-    
+
     .user-name {
         font-size: 0.85rem;
     }
-    
+
     .user-avatar {
         width: 32px;
         height: 32px;
@@ -1897,7 +1901,7 @@ body {
     .search-container {
         min-width: auto;
     }
-    
+
     .search-box {
         width: 100%;
     }
@@ -1906,7 +1910,7 @@ body {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .filter-select {
         width: 100%;
     }
@@ -1915,19 +1919,19 @@ body {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.75rem;
     }
-    
+
     .stat-card {
         padding: 0.75rem;
     }
-    
+
     .stat-icon {
         font-size: 1.75rem;
     }
-    
+
     .stat-content h3 {
         font-size: 1.3rem;
     }
-    
+
     .stat-content p {
         font-size: 0.8rem;
     }
@@ -1938,16 +1942,16 @@ body {
         gap: 1rem;
         align-items: stretch;
     }
-    
+
     .table-header h2 {
         font-size: 1.2rem;
     }
-    
+
     .table-actions {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .create-user-btn,
     .refresh-btn,
     .export-btn {
@@ -1959,7 +1963,7 @@ body {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .users-table {
         min-width: 2200px;
     }
@@ -1974,7 +1978,7 @@ body {
         flex-direction: column;
         gap: 0.25rem;
     }
-    
+
     .action-btn {
         padding: 0.4rem 0.6rem;
         font-size: 0.75rem;
@@ -2000,7 +2004,7 @@ body {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .modal-actions button {
         width: 100%;
     }
@@ -2034,7 +2038,7 @@ body {
         padding: 0.6rem 0.8rem;
         font-size: 0.9rem;
     }
-    
+
     .clases-permisos-grid {
         grid-template-columns: 1fr;
     }
@@ -2045,27 +2049,27 @@ body {
     .header {
         padding: 0.5rem;
     }
-    
+
     .header-left {
         gap: 0.4rem;
     }
-    
+
     .header-logo {
         width: 28px;
         height: 28px;
     }
-    
+
     .header h1 {
         font-size: 0.9rem;
     }
-    
+
     .back-btn {
         width: 30px;
         height: 30px;
         font-size: 0.85rem;
         padding: 0.3rem;
     }
-    
+
     .user-name {
         font-size: 0.8rem;
         max-width: 80px;
@@ -2073,18 +2077,18 @@ body {
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    
+
     .user-avatar {
         width: 28px;
         height: 28px;
         font-size: 0.9rem;
     }
-    
+
     .user-menu-btn {
         font-size: 0.85rem;
         padding: 3px;
     }
-    
+
     .user-dropdown-menu {
         right: 10px;
         min-width: 180px;
@@ -2098,12 +2102,12 @@ body {
     .controls-section {
         gap: 0.5rem;
     }
-    
+
     .search-box input {
         font-size: 0.85rem;
         padding: 0.6rem 0.6rem 0.6rem 2.2rem;
     }
-    
+
     .filter-select {
         font-size: 0.85rem;
         padding: 0.6rem;
@@ -2113,25 +2117,25 @@ body {
         grid-template-columns: 1fr;
         gap: 0.5rem;
     }
-    
+
     .stat-card {
         padding: 0.6rem;
         flex-direction: row;
         gap: 0.75rem;
     }
-    
+
     .stat-icon {
         font-size: 1.5rem;
     }
-    
+
     .stat-content {
         text-align: left;
     }
-    
+
     .stat-content h3 {
         font-size: 1.2rem;
     }
-    
+
     .stat-content p {
         font-size: 0.75rem;
     }
@@ -2139,27 +2143,27 @@ body {
     .table-container {
         margin-top: 1rem;
     }
-    
+
     .table-header {
         padding: 0.75rem;
         gap: 0.75rem;
     }
-    
+
     .table-header h2 {
         font-size: 1.1rem;
     }
-    
+
     .table-actions {
         gap: 0.4rem;
     }
-    
+
     .create-user-btn,
     .refresh-btn,
     .export-btn {
         padding: 0.6rem;
         font-size: 0.85rem;
     }
-    
+
     .create-user-btn i,
     .refresh-btn i,
     .export-btn i {
@@ -2175,7 +2179,7 @@ body {
         padding: 0.4rem;
         font-size: 0.75rem;
     }
-    
+
     .action-btn {
         padding: 0.3rem 0.5rem;
         font-size: 0.7rem;
@@ -2188,11 +2192,11 @@ body {
         border-radius: 0;
         max-height: 100vh;
     }
-    
+
     .modal-header {
         padding: 0.75rem;
     }
-    
+
     .modal-header h3 {
         font-size: 1.1rem;
     }
@@ -2200,11 +2204,11 @@ body {
     .modal-body {
         padding: 0.75rem;
     }
-    
+
     .form-section {
         margin-bottom: 1rem;
     }
-    
+
     .form-section h4 {
         font-size: 0.95rem;
         margin-bottom: 0.75rem;
@@ -2213,7 +2217,7 @@ body {
     .input-group {
         margin-bottom: 0.75rem;
     }
-    
+
     .input-group label {
         font-size: 0.85rem;
         margin-bottom: 0.3rem;
@@ -2224,75 +2228,75 @@ body {
         padding: 0.5rem 0.7rem;
         font-size: 0.85rem;
     }
-    
+
     .user-type-options {
         gap: 0.4rem;
     }
-    
+
     .radio-option {
         padding: 0.6rem;
     }
-    
+
     .option-content {
         font-size: 0.85rem;
     }
-    
+
     .option-content i {
         font-size: 1.2rem;
     }
-    
+
     .clases-permisos-grid {
         gap: 0.5rem;
     }
-    
+
     .clase-checkbox {
         padding: 0.6rem;
     }
-    
+
     .checkbox-content {
         font-size: 0.85rem;
     }
-    
+
     .modal-actions {
         padding-top: 0.75rem;
         gap: 0.4rem;
     }
-    
+
     .modal-actions button {
         padding: 0.6rem;
         font-size: 0.85rem;
     }
-    
+
     /* Confirmation modal */
     .confirmation-content {
         padding: 0.75rem;
     }
-    
+
     .confirmation-icon {
         font-size: 2.5rem;
         margin-bottom: 0.75rem;
     }
-    
+
     .confirmation-text p {
         font-size: 0.9rem;
     }
-    
+
     /* User info in modals */
     .user-info-modal {
         padding: 0.75rem;
         gap: 0.75rem;
     }
-    
+
     .user-avatar-modal {
         width: 50px;
         height: 50px;
         font-size: 1.5rem;
     }
-    
+
     .user-details-modal h4 {
         font-size: 1rem;
     }
-    
+
     .user-details-modal p {
         font-size: 0.8rem;
     }
@@ -2303,15 +2307,16 @@ body {
     .header h1 {
         font-size: 0.85rem;
     }
-    
+
     .user-name {
-        display: none; /* Ocultar nombre en pantallas muy pequeñas */
+        display: none;
+        /* Ocultar nombre en pantallas muy pequeñas */
     }
-    
+
     .stat-content h3 {
         font-size: 1.1rem;
     }
-    
+
     .table-header h2 {
         font-size: 1rem;
     }
@@ -2332,6 +2337,7 @@ body {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -2693,50 +2699,50 @@ body {
         max-width: 95%;
         margin: 10px;
     }
-    
+
     .profile-modal-header {
         padding: 35px 20px 25px;
     }
-    
+
     .profile-avatar-large {
         width: 110px;
         height: 110px;
     }
-    
+
     .profile-user-name {
         font-size: 24px;
     }
-    
+
     .profile-user-type {
         font-size: 13px;
         padding: 6px 16px;
     }
-    
+
     .profile-modal-body {
         padding: 25px 20px;
     }
-    
+
     .profile-section {
         padding: 20px;
     }
-    
+
     .profile-section h3 {
         font-size: 18px;
     }
-    
+
     .profile-info-grid {
         grid-template-columns: 1fr;
         gap: 14px;
     }
-    
+
     .profile-info-item {
         padding: 14px 16px;
     }
-    
+
     .profile-social-links {
         gap: 10px;
     }
-    
+
     .social-link {
         padding: 10px 16px;
         font-size: 14px;
@@ -2795,23 +2801,23 @@ body {
     transform: translateY(-2px);
 }
 
-.insignia-checkbox input[type="checkbox"]:checked + .insignia-checkbox-content {
+.insignia-checkbox input[type="checkbox"]:checked+.insignia-checkbox-content {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
     border-color: #667eea;
     border-width: 3px;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
-.insignia-checkbox input[type="checkbox"]:checked + .insignia-checkbox-content .insignia-icon {
+.insignia-checkbox input[type="checkbox"]:checked+.insignia-checkbox-content .insignia-icon {
     transform: scale(1.2);
 }
 
-.insignia-checkbox input[type="checkbox"]:checked + .insignia-checkbox-content .insignia-name {
+.insignia-checkbox input[type="checkbox"]:checked+.insignia-checkbox-content .insignia-name {
     color: #667eea;
     font-weight: 700;
 }
 
-.insignia-checkbox input[type="checkbox"]:checked + .insignia-checkbox-content::after {
+.insignia-checkbox input[type="checkbox"]:checked+.insignia-checkbox-content::after {
     content: '\F26B';
     font-family: 'bootstrap-icons';
     position: absolute;
@@ -2880,17 +2886,17 @@ body {
     border-color: #bbb;
 }
 
-.clase-checkbox input[type="checkbox"]:checked + .checkbox-content {
+.clase-checkbox input[type="checkbox"]:checked+.checkbox-content {
     background: #fff0f0;
     border-color: #ff0000;
 }
 
-.clase-checkbox input[type="checkbox"]:checked + .checkbox-content i,
-.clase-checkbox input[type="checkbox"]:checked + .checkbox-content span {
+.clase-checkbox input[type="checkbox"]:checked+.checkbox-content i,
+.clase-checkbox input[type="checkbox"]:checked+.checkbox-content span {
     color: #ff0000;
 }
 
-.clase-checkbox input[type="checkbox"]:checked + .checkbox-content::after {
+.clase-checkbox input[type="checkbox"]:checked+.checkbox-content::after {
     content: '\F26B';
     font-family: 'bootstrap-icons';
     position: absolute;
@@ -3000,7 +3006,7 @@ body {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content {
+.asignatura-checkbox input[type="checkbox"]:checked+.checkbox-content {
     border-width: 3px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     transform: translateY(-3px);
@@ -3015,7 +3021,7 @@ body {
     color: #667eea;
 }
 
-.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.matematicas {
+.asignatura-checkbox input[type="checkbox"]:checked+.checkbox-content.matematicas {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%);
     border-color: #667eea;
 }
@@ -3028,7 +3034,7 @@ body {
     color: #28a745;
 }
 
-.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.ciencias {
+.asignatura-checkbox input[type="checkbox"]:checked+.checkbox-content.ciencias {
     background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%);
     border-color: #28a745;
 }
@@ -3041,7 +3047,7 @@ body {
     color: #ffc107;
 }
 
-.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.sociales {
+.asignatura-checkbox input[type="checkbox"]:checked+.checkbox-content.sociales {
     background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
     border-color: #ffc107;
 }
@@ -3054,7 +3060,7 @@ body {
     color: #17a2b8;
 }
 
-.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.ingles {
+.asignatura-checkbox input[type="checkbox"]:checked+.checkbox-content.ingles {
     background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%);
     border-color: #17a2b8;
 }
@@ -3067,7 +3073,7 @@ body {
     color: #dc3545;
 }
 
-.asignatura-checkbox input[type="checkbox"]:checked + .checkbox-content.lectura {
+.asignatura-checkbox input[type="checkbox"]:checked+.checkbox-content.lectura {
     background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
     border-color: #dc3545;
 }
@@ -3084,16 +3090,16 @@ body {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.75rem;
     }
-    
+
     .asignatura-checkbox .checkbox-content {
         padding: 1rem;
         min-height: 90px;
     }
-    
+
     .asignatura-checkbox .checkbox-content i {
         font-size: 1.5rem;
     }
-    
+
     .asignatura-checkbox .checkbox-content span {
         font-size: 0.85rem;
     }
@@ -3104,15 +3110,15 @@ body {
         grid-template-columns: repeat(3, 1fr);
         gap: 0.5rem;
     }
-    
+
     .insignia-checkbox-content {
         padding: 0.75rem 0.5rem;
     }
-    
+
     .insignia-icon {
         font-size: 1.5rem;
     }
-    
+
     .insignia-name {
         font-size: 0.7rem;
     }
@@ -3122,7 +3128,7 @@ body {
     .asignaturas-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .insignias-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.5rem;
@@ -3137,7 +3143,8 @@ body {
 }
 
 .users-table {
-    min-width: 2200px; /* Ancho mínimo para acomodar todas las columnas */
+    min-width: 2200px;
+    /* Ancho mínimo para acomodar todas las columnas */
 }
 
 .users-table th,
@@ -3234,4 +3241,1390 @@ body {
     color: #999;
     font-style: italic;
     font-size: 0.8rem;
+}
+
+/* Dashboard Menu Styles */
+.dashboard-menu {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.dashboard-tabs {
+    display: flex;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.dashboard-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    position: relative;
+    border-bottom: 3px solid transparent;
+}
+
+.dashboard-tab:hover {
+    background: rgba(255, 0, 0, 0.05);
+    color: #ff0000;
+}
+
+.dashboard-tab.active {
+    background: white;
+    color: #ff0000;
+    border-bottom-color: #ff0000;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-tab i {
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.dashboard-tab.active i {
+    transform: scale(1.1);
+}
+
+.dashboard-tab span {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Responsive Dashboard Menu */
+@media (max-width: 768px) {
+    .dashboard-tabs {
+        flex-direction: column;
+    }
+
+    .dashboard-tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #e0e0e0;
+        border-right: none;
+    }
+
+    .dashboard-tab:last-child {
+        border-bottom: none;
+    }
+
+    .dashboard-tab.active {
+        border-bottom: 1px solid #e0e0e0;
+        border-left: 3px solid #ff0000;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-menu {
+        margin-bottom: 1.5rem;
+    }
+
+    .dashboard-tab {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.85rem;
+        gap: 0.5rem;
+    }
+
+    .dashboard-tab i {
+        font-size: 1rem;
+    }
+
+    .dashboard-tab span {
+        font-size: 0.85rem;
+    }
+}
+
+/* Additional styles for user management */
+
+/* Puntos cell styling */
+.puntos-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.puntos-cell strong {
+    font-weight: 700;
+    color: #333;
+}
+
+/* Insignias cell styling */
+.insignias-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.insignia-badge {
+    font-size: 1.2rem;
+    padding: 0.2rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #e0e0e0;
+    display: inline-block;
+    min-width: 24px;
+    text-align: center;
+}
+
+.insignias-more {
+    font-size: 0.7rem;
+    color: #666;
+    font-weight: 600;
+    background: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+}
+
+/* Materias cell styling */
+.materias-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.materia-badge {
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    text-align: center;
+    min-width: 30px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Text muted styling */
+.text-muted {
+    color: #6c757d !important;
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+/* Responsive adjustments for new elements */
+@media (max-width: 768px) {
+    .puntos-cell {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .insignias-cell,
+    .materias-cell {
+        gap: 0.2rem;
+    }
+
+    .insignia-badge {
+        font-size: 1rem;
+        min-width: 20px;
+    }
+
+    .materia-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.3rem;
+        min-width: 25px;
+    }
+}
+
+/* Supe
+ruser tab special styling */
+.dashboard-tab[data-view="superusuarios"] {
+    position: relative;
+}
+
+.dashboard-tab[data-view="superusuarios"]:hover {
+    background: rgba(156, 39, 176, 0.05);
+    color: #9c27b0;
+}
+
+.dashboard-tab[data-view="superusuarios"].active {
+    background: white;
+    color: #9c27b0;
+    border-bottom-color: #9c27b0;
+    box-shadow: 0 -2px 8px rgba(156, 39, 176, 0.2);
+}
+
+.dashboard-tab[data-view="superusuarios"].active i {
+    color: #9c27b0;
+    animation: pulse-super-tab 2s infinite;
+}
+
+@keyframes pulse-super-tab {
+
+    0%,
+    100% {
+        transform: scale(1.1);
+        text-shadow: 0 0 5px rgba(156, 39, 176, 0.3);
+    }
+
+    50% {
+        transform: scale(1.2);
+        text-shadow: 0 0 10px rgba(156, 39, 176, 0.6);
+    }
+}
+
+/* Responsive adjustments for 4 tabs */
+@media (max-width: 1024px) {
+    .dashboard-tab {
+        padding: 0.8rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .dashboard-tab span {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-tab span {
+        display: none;
+    }
+
+    .dashboard-tab {
+        flex-direction: column;
+        padding: 0.6rem 0.5rem;
+        gap: 0.25rem;
+    }
+
+    .dashboard-tab i {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-tabs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0;
+    }
+
+    .dashboard-tab {
+        border-bottom: 1px solid #e0e0e0;
+        border-right: 1px solid #e0e0e0;
+    }
+
+    .dashboard-tab:nth-child(2n) {
+        border-right: none;
+    }
+
+    .dashboard-tab:nth-child(n+3) {
+        border-bottom: none;
+    }
+
+    .dashboard-tab.active {
+        border-bottom: 1px solid #e0e0e0;
+        border-left: 3px solid #ff0000;
+    }
+
+    .dashboard-tab[data-view="superusuarios"].active {
+        border-left: 3px solid #9c27b0;
+    }
+}
+
+/* Superus
+er stat card styling */
+.superuser-card .stat-icon {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+    animation: pulse-super-stat 3s infinite;
+}
+
+@keyframes pulse-super-stat {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(156, 39, 176, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(156, 39, 176, 0);
+    }
+}
+
+.superuser-card:hover .stat-icon {
+    animation: pulse-super-stat 1s infinite;
+}
+
+/* Responsive grid adjustment for 5 cards */
+@media (max-width: 1400px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 
+Column visibility transitions */
+.users-table th,
+.users-table td {
+    transition: all 0.3s ease;
+}
+
+/* Adjust table layout when columns are hidden */
+.users-table th[style*="display: none"],
+.users-table td[style*="display: none"] {
+    width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden;
+}
+
+/* Responsive adjustments for hidden columns */
+@media (max-width: 768px) {
+    .users-table {
+        min-width: 2000px;
+        /* Reduced from 2200px when gamification columns are hidden */
+    }
+
+    .users-table.hide-gamification {
+        min-width: 1800px;
+        /* Further reduced when both columns are hidden */
+    }
+}
+
+@media (max-width: 480px) {
+    .users-table {
+        min-width: 2000px;
+    }
+
+    .users-table.hide-gamification {
+        min-width: 1800px;
+    }
+}
+
+/* Enhanced column visibility animations */
+.users-table th:nth-child(5),
+.users-table td:nth-child(5),
+.users-table th:nth-child(6),
+.users-table td:nth-child(6) {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+/* Smooth hiding animation */
+.users-table th[style*="display: none"],
+.users-table td[style*="display: none"] {
+    opacity: 0;
+    transform: scaleX(0);
+    max-width: 0;
+    min-width: 0;
+}
+
+/* Visual feedback for gamification columns - REMOVED */
+
+/* Hide gamification indicators when columns are hidden */
+.users-table.hide-gamification th:nth-child(5)::after,
+.users-table.hide-gamification th:nth-child(6)::after {
+    display: none;
+}
+
+/* Improved responsive behavior */
+@media (max-width: 1200px) {
+    .users-table.hide-gamification {
+        min-width: 1900px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .users-table.hide-gamification {
+        min-width: 1700px;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table.hide-gamification {
+        min-width: 1600px;
+    }
+
+    /* Hide gamification indicators on mobile - REMOVED */
+}
+
+/* Stu
+dent columns visibility for profesores view */
+.users-table.hide-student-columns {
+    min-width: 1900px;
+    /* Reduced width when student columns are hidden */
+}
+
+/* Combined hiding (both gamification and student columns) */
+.users-table.hide-gamification.hide-student-columns {
+    min-width: 1700px;
+    /* Further reduced when both sets of columns are hidden */
+}
+
+/* Visual indicators for student-specific columns - REMOVED */
+
+/* Hide student indicators when columns are hidden */
+.users-table.hide-student-columns th:nth-child(10)::after,
+.users-table.hide-student-columns th:nth-child(11)::after {
+    display: none;
+}
+
+/* Enhanced transitions for student columns */
+.users-table th:nth-child(10),
+.users-table td:nth-child(10),
+.users-table th:nth-child(11),
+.users-table td:nth-child(11) {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+/* Responsive adjustments for hidden student columns */
+@media (max-width: 1400px) {
+    .users-table.hide-student-columns {
+        min-width: 1800px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 1600px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .users-table.hide-student-columns {
+        min-width: 1700px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 1500px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .users-table.hide-student-columns {
+        min-width: 1600px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 1400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table.hide-student-columns {
+        min-width: 1500px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 1300px;
+    }
+
+    /* Hide student indicators on mobile - REMOVED */
+}
+
+@media (max-width: 480px) {
+    .users-table.hide-student-columns {
+        min-width: 1400px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 1200px;
+    }
+}
+
+/* S
+tudent columns visibility for profesores view */
+.users-table.hide-student-columns {
+    min-width: 1600px;
+    /* Reduced width when student columns are hidden */
+}
+
+/* Combined hiding (both gamification and student columns) */
+.users-table.hide-gamification.hide-student-columns {
+    min-width: 1400px;
+    /* Further reduced when both sets of columns are hidden */
+}
+
+/* Visual indicators for student-specific columns - REMOVED */
+
+/* Hide student indicators when columns are hidden */
+.users-table.hide-student-columns th:nth-child(9)::after,
+.users-table.hide-student-columns th:nth-child(10)::after,
+.users-table.hide-student-columns th:nth-child(11)::after,
+.users-table.hide-student-columns th:nth-child(12)::after {
+    display: none;
+}
+
+/* Enhanced transitions for student columns */
+.users-table th:nth-child(9),
+.users-table td:nth-child(9),
+.users-table th:nth-child(10),
+.users-table td:nth-child(10),
+.users-table th:nth-child(11),
+.users-table td:nth-child(11),
+.users-table th:nth-child(12),
+.users-table td:nth-child(12) {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+/* Responsive adjustments for hidden student columns */
+@media (max-width: 1400px) {
+    .users-table.hide-student-columns {
+        min-width: 1500px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 1300px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .users-table.hide-student-columns {
+        min-width: 1400px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 1200px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .users-table.hide-student-columns {
+        min-width: 1300px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 1100px;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table.hide-student-columns {
+        min-width: 1200px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 1000px;
+    }
+
+    /* Hide student indicators on mobile */
+    .users-table th:nth-child(9)::after,
+    .users-table th:nth-child(10)::after,
+    .users-table th:nth-child(11)::after,
+    .users-table th:nth-child(12)::after {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-table.hide-student-columns {
+        min-width: 1100px;
+    }
+
+    .users-table.hide-gamification.hide-student-columns {
+        min-width: 900px;
+    }
+}/* Recovery
+ codes view styling */
+.users-table.recovery-view {
+    min-width: 800px; /* Much smaller width for recovery view */
+}
+
+/* Recovery codes tab special styling */
+.dashboard-tab[data-view="codigos"] {
+    position: relative;
+}
+
+.dashboard-tab[data-view="codigos"]:hover {
+    background: rgba(255, 193, 7, 0.05);
+    color: #ffc107;
+}
+
+.dashboard-tab[data-view="codigos"].active {
+    background: white;
+    color: #ffc107;
+    border-bottom-color: #ffc107;
+    box-shadow: 0 -2px 8px rgba(255, 193, 7, 0.2);
+}
+
+.dashboard-tab[data-view="codigos"].active i {
+    color: #ffc107;
+    animation: pulse-recovery-tab 2s infinite;
+}
+
+@keyframes pulse-recovery-tab {
+    0%, 100% {
+        transform: scale(1.1);
+        text-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
+    }
+    50% {
+        transform: scale(1.2);
+        text-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+    }
+}
+
+/* Visual indicators for recovery columns - REMOVED */
+
+/* Enhanced styling for recovery code cells */
+.users-table.recovery-view .recovery-code {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+    color: #856404;
+}
+
+.users-table.recovery-view .recovery-email {
+    color: #0066cc;
+    font-weight: 500;
+}
+
+/* Responsive adjustments for recovery view */
+@media (max-width: 1200px) {
+    .users-table.recovery-view {
+        min-width: 700px;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table.recovery-view {
+        min-width: 600px;
+    }
+    
+    .dashboard-tab[data-view="codigos"] span {
+        display: none;
+    }
+    
+    .dashboard-tab[data-view="codigos"] {
+        flex-direction: column;
+        padding: 0.6rem 0.5rem;
+        gap: 0.25rem;
+    }
+    
+    .dashboard-tab[data-view="codigos"] i {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-table.recovery-view {
+        min-width: 500px;
+    }
+    
+    .recovery-code {
+        font-size: 0.8rem !important;
+        padding: 0.3rem !important;
+    }
+}/*
+ Copy buttons for recovery view */
+.copy-code-btn {
+    background: #ffc107;
+    color: #212529;
+}
+
+.copy-code-btn:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+.copy-email-btn {
+    background: #17a2b8;
+    color: white;
+}
+
+.copy-email-btn:hover {
+    background: #138496;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+}
+
+/* Enhanced recovery code styling with copy feedback */
+.recovery-code {
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.recovery-code:hover {
+    background: rgba(255, 193, 7, 0.2) !important;
+    transform: scale(1.02);
+}
+
+/* Enhanced recovery email styling with copy feedback */
+.recovery-email {
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.recovery-email:hover {
+    background: rgba(0, 102, 204, 0.1);
+    border-radius: 4px;
+    padding: 0.25rem;
+    margin: -0.25rem;
+}
+
+/* Recovery view action buttons layout */
+.recovery-view .action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.recovery-view .action-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+}
+
+/* Tooltip-like effect for copy buttons */
+.copy-code-btn::after,
+.copy-email-btn::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.copy-code-btn:hover::after,
+.copy-email-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
+    bottom: calc(100% + 5px);
+}
+
+/* Responsive adjustments for recovery actions */
+@media (max-width: 768px) {
+    .recovery-view .action-buttons {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+    
+    .recovery-view .action-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+    
+    .copy-code-btn::after,
+    .copy-email-btn::after {
+        display: none; /* Hide tooltips on mobile */
+    }
+}
+
+/* Click animation for copy buttons */
+.copy-code-btn:active,
+.copy-email-btn:active {
+    transform: translateY(1px) scale(0.95);
+}
+
+/* Success feedback animation */
+@keyframes copySuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.copy-success {
+    animation: copySuccess 0.3s ease;
+}/* Recove
+ry codes view table styling */
+.users-table.recovery-view {
+    min-width: 950px; /* Width for recovery view with actions column */
+}
+
+@media (max-width: 1200px) {
+    .users-table.recovery-view {
+        min-width: 850px;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table.recovery-view {
+        min-width: 750px;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-table.recovery-view {
+        min-width: 650px;
+    }
+}/* Click-t
+o-copy indicators */
+/* Removed emoji indicator */
+
+/* Removed emoji indicator */
+
+/* Hover effects for clickable recovery elements */
+/* Removed emoji indicator */
+
+/* Removed emoji indicator */
+
+/* Mobile adjustments for copy indicators */
+@media (max-width: 768px) {
+    /* Removed emoji indicators */
+}
+
+/* Hide recovery columns in non-recovery views */
+.users-table:not(.recovery-view) {
+    min-width: 2000px; /* Default width when recovery columns are hidden */
+}
+
+.users-table:not(.recovery-view).hide-gamification {
+    min-width: 1800px; /* Reduced when gamification columns are hidden */
+}
+
+.users-table:not(.recovery-view).hide-student-columns {
+    min-width: 1700px; /* Reduced when student columns are hidden */
+}
+
+.users-table:not(.recovery-view).hide-gamification.hide-student-columns {
+    min-width: 1500px; /* Reduced when both gamification and student columns are hidden */
+}
+
+/* Recovery columns should only be visible in recovery view */
+.users-table:not(.recovery-view) th:nth-child(13),
+.users-table:not(.recovery-view) td:nth-child(13),
+.users-table:not(.recovery-view) th:nth-child(14),
+.users-table:not(.recovery-view) td:nth-child(14) {
+    display: none !important;
+}
+
+/* Responsive adjustments for non-recovery views */
+@media (max-width: 1400px) {
+    .users-table:not(.recovery-view) {
+        min-width: 1900px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification {
+        min-width: 1700px;
+    }
+    
+    .users-table:not(.recovery-view).hide-student-columns {
+        min-width: 1600px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
+        min-width: 1400px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .users-table:not(.recovery-view) {
+        min-width: 1800px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification {
+        min-width: 1600px;
+    }
+    
+    .users-table:not(.recovery-view).hide-student-columns {
+        min-width: 1500px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
+        min-width: 1300px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .users-table:not(.recovery-view) {
+        min-width: 1700px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification {
+        min-width: 1500px;
+    }
+    
+    .users-table:not(.recovery-view).hide-student-columns {
+        min-width: 1400px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
+        min-width: 1200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table:not(.recovery-view) {
+        min-width: 1600px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification {
+        min-width: 1400px;
+    }
+    
+    .users-table:not(.recovery-view).hide-student-columns {
+        min-width: 1300px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
+        min-width: 1100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-table:not(.recovery-view) {
+        min-width: 1500px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification {
+        min-width: 1300px;
+    }
+    
+    .users-table:not(.recovery-view).hide-student-columns {
+        min-width: 1200px;
+    }
+    
+    .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
+        min-width: 1000px;
+    }
+}/* 
+Recovery codes view table width adjustments */
+.users-table.recovery-view {
+    min-width: 1050px; /* Width for recovery view with Rol, recovery columns, and actions */
+}
+
+@media (max-width: 1200px) {
+    .users-table.recovery-view {
+        min-width: 950px;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table.recovery-view {
+        min-width: 850px;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-table.recovery-view {
+        min-width: 750px;
+    }
+}/* Enha
+nced Rol column styling in recovery view */
+.users-table.recovery-view .user-type-badge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+    min-width: 30px;
+}
+
+.users-table.recovery-view th:nth-child(3) {
+    width: 80px; /* Rol column width in recovery view */
+    text-align: center;
+}
+
+.users-table.recovery-view td:nth-child(3) {
+    text-align: center;
+    padding: 0.5rem 0.3rem;
+}
+
+/* Visual indicator for Rol column in recovery view - REMOVED */
+
+/* Fixed/Sticky Dashboard Menu */
+.dashboard-menu {
+    position: sticky;
+    top: 80px; /* Below the fixed header */
+    z-index: 100;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+/* Enhanced shadow when scrolling */
+.dashboard-menu.scrolled {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Ensure dashboard tabs container has proper background */
+.dashboard-tabs {
+    display: flex;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    position: relative;
+}
+
+/* Enhanced active tab styling for better visibility when fixed */
+.dashboard-tab.active {
+    background: white;
+    color: #ff0000;
+    border-bottom-color: #ff0000;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+}
+
+/* Special styling for superuser tab when active */
+.dashboard-tab[data-view="superusuarios"].active {
+    color: #9c27b0;
+    border-bottom-color: #9c27b0;
+    box-shadow: 0 -2px 8px rgba(156, 39, 176, 0.2);
+}
+
+/* Special styling for recovery codes tab when active */
+.dashboard-tab[data-view="codigos"].active {
+    color: #ffc107;
+    border-bottom-color: #ffc107;
+    box-shadow: 0 -2px 8px rgba(255, 193, 7, 0.2);
+}
+
+/* Responsive adjustments for fixed menu */
+@media (max-width: 768px) {
+    .dashboard-menu {
+        top: 70px; /* Adjust for smaller header on mobile */
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-menu {
+        top: 65px; /* Adjust for even smaller header */
+        margin-bottom: 1rem;
+        border-radius: 6px;
+    }
+    
+    .dashboard-tabs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0;
+    }
+    
+    .dashboard-tab {
+        border-bottom: 1px solid #e0e0e0;
+        border-right: 1px solid #e0e0e0;
+    }
+    
+    .dashboard-tab:nth-child(2n) {
+        border-right: none;
+    }
+    
+    .dashboard-tab:nth-child(n+4) {
+        border-bottom: none;
+    }
+    
+    .dashboard-tab.active {
+        border-bottom: 1px solid #e0e0e0;
+        border-left: 3px solid #ff0000;
+    }
+    
+    .dashboard-tab[data-view="superusuarios"].active {
+        border-left: 3px solid #9c27b0;
+    }
+    
+    .dashboard-tab[data-view="codigos"].active {
+        border-left: 3px solid #ffc107;
+    }
+}/* Ens
+ure proper spacing with fixed dashboard menu */
+.controls-section {
+    margin-top: 0;
+    position: relative;
+    z-index: 50;
+}
+
+.stats-grid {
+    position: relative;
+    z-index: 50;
+}
+
+.table-container {
+    position: relative;
+    z-index: 50;
+}
+
+/* Smooth transitions for dashboard menu */
+.dashboard-menu {
+    transition: box-shadow 0.3s ease;
+}
+
+/* Enhanced visual feedback for tab switching */
+.dashboard-tab {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-tab:hover {
+    transform: translateY(-1px);
+}
+
+.dashboard-tab.active {
+    transform: translateY(0);
+}
+
+/* Loading state for dashboard menu */
+.dashboard-menu.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.dashboard-menu.loading .dashboard-tab {
+    cursor: not-allowed;
+}
+
+/* Insignias view styling */
+.users-table.insignias-view {
+    min-width: 800px; /* Width for insignias view with gamification columns */
+}
+
+/* Insignias tab special styling */
+.dashboard-tab[data-view="insignias"] {
+    position: relative;
+}
+
+.dashboard-tab[data-view="insignias"]:hover {
+    background: rgba(102, 126, 234, 0.05);
+    color: #667eea;
+}
+
+.dashboard-tab[data-view="insignias"].active {
+    background: white;
+    color: #667eea;
+    border-bottom-color: #667eea;
+    box-shadow: 0 -2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.dashboard-tab[data-view="insignias"].active i {
+    color: #667eea;
+    animation: pulse-insignias-tab 2s infinite;
+}
+
+@keyframes pulse-insignias-tab {
+    0%, 100% {
+        transform: scale(1.1);
+        text-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    }
+    50% {
+        transform: scale(1.2);
+        text-shadow: 0 0 10px rgba(102, 126, 234, 0.6);
+    }
+}
+
+/* Enhanced gamification styling in insignias view */
+.users-table.insignias-view .puntos-cell {
+    background: rgba(255, 193, 7, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0.25rem;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.users-table.insignias-view .insignias-cell {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0.25rem;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.users-table.insignias-view .insignia-badge {
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.users-table.insignias-view .insignia-badge:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.users-table.insignias-view .puntos-cell strong {
+    font-size: 1.2rem;
+    color: #856404;
+}
+
+.users-table.insignias-view .puntos-cell i {
+    font-size: 1.3rem;
+}
+
+/* Visual indicators for gamification columns - REMOVED */
+
+/* Responsive adjustments for insignias view */
+@media (max-width: 1200px) {
+    .users-table.insignias-view {
+        min-width: 700px;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table.insignias-view {
+        min-width: 600px;
+    }
+    
+    .dashboard-tab[data-view="insignias"] span {
+        display: none;
+    }
+    
+    .dashboard-tab[data-view="insignias"] {
+        flex-direction: column;
+        padding: 0.6rem 0.5rem;
+        gap: 0.25rem;
+    }
+    
+    .dashboard-tab[data-view="insignias"] i {
+        font-size: 1.3rem;
+    }
+    
+    .users-table.insignias-view .puntos-cell,
+    .users-table.insignias-view .insignias-cell {
+        margin: 0.1rem;
+        padding: 0.5rem;
+    }
+    
+    .users-table.insignias-view .insignia-badge {
+        font-size: 1.2rem;
+        padding: 0.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-table.insignias-view {
+        min-width: 500px;
+    }
+    
+    .users-table.insignias-view .puntos-cell strong {
+        font-size: 1rem;
+    }
+    
+    .users-table.insignias-view .puntos-cell i {
+        font-size: 1.1rem;
+    }
+}/*
+ Responsive adjustments for 6 tabs */
+@media (max-width: 1400px) {
+    .dashboard-tab {
+        padding: 0.6rem 0.7rem;
+        font-size: 0.75rem;
+    }
+    
+    .dashboard-tab span {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    .dashboard-tab {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.7rem;
+    }
+    
+    .dashboard-tab span {
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .dashboard-tab {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.65rem;
+    }
+    
+    .dashboard-tab span {
+        font-size: 0.6rem;
+    }
+}
+
+/* Mobile layout for 6 tabs - 3x2 grid */
+@media (max-width: 768px) {
+    .dashboard-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+    }
+    
+    .dashboard-tab {
+        border-bottom: 1px solid #e0e0e0;
+        border-right: 1px solid #e0e0e0;
+        padding: 0.6rem 0.4rem;
+        font-size: 0.6rem;
+    }
+    
+    .dashboard-tab:nth-child(3n) {
+        border-right: none;
+    }
+    
+    .dashboard-tab:nth-child(n+4) {
+        border-bottom: none;
+    }
+    
+    .dashboard-tab span {
+        display: none;
+    }
+    
+    .dashboard-tab i {
+        font-size: 1.2rem;
+    }
+}
+
+/* Very small mobile - 2x3 grid */
+@media (max-width: 480px) {
+    .dashboard-tabs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0;
+    }
+    
+    .dashboard-tab {
+        border-bottom: 1px solid #e0e0e0;
+        border-right: 1px solid #e0e0e0;
+        padding: 0.5rem 0.3rem;
+        font-size: 0.55rem;
+    }
+    
+    .dashboard-tab:nth-child(2n) {
+        border-right: none;
+    }
+    
+    .dashboard-tab:nth-child(n+5) {
+        border-bottom: none;
+    }
+    
+    .dashboard-tab i {
+        font-size: 1.1rem;
+    }
 }

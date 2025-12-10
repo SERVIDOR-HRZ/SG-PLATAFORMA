@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../Elementos/css/usuarios.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
-    
+
 </head>
 
 <body>
@@ -28,7 +28,8 @@
                     <div class="user-avatar-default" id="userAvatarDefault">
                         <i class="bi bi-person-fill"></i>
                     </div>
-                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto de perfil">
+                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src=""
+                        alt="Foto de perfil">
                 </div>
                 <div class="user-dropdown">
                     <button class="user-menu-btn" id="userMenuBtn">
@@ -51,6 +52,36 @@
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Dashboard Menu -->
+        <div class="dashboard-menu">
+            <div class="dashboard-tabs">
+                <button class="dashboard-tab active" data-view="dashboard" id="dashboardTab">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="dashboard-tab" data-view="profesores" id="profesoresTab">
+                    <i class="bi bi-person-badge-fill"></i>
+                    <span>Profesores</span>
+                </button>
+                <button class="dashboard-tab" data-view="estudiantes" id="estudiantesTab">
+                    <i class="bi bi-person-fill"></i>
+                    <span>Estudiantes</span>
+                </button>
+                <button class="dashboard-tab" data-view="superusuarios" id="superusuariosTab">
+                    <i class="bi bi-shield-fill-exclamation"></i>
+                    <span>Super Usuarios</span>
+                </button>
+                <button class="dashboard-tab" data-view="codigos" id="codigosTab">
+                    <i class="bi bi-key-fill"></i>
+                    <span>Códigos de Recuperación</span>
+                </button>
+                <button class="dashboard-tab" data-view="insignias" id="insigniasTab">
+                    <i class="bi bi-award-fill"></i>
+                    <span>Insignias</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Controls Section -->
         <div class="controls-section">
             <div class="search-container">
@@ -59,14 +90,14 @@
                     <input type="text" id="searchInput" placeholder="Buscar usuarios...">
                 </div>
             </div>
-            
+
             <div class="filter-container">
                 <select id="userTypeFilter" class="filter-select">
                     <option value="">Todos los usuarios</option>
                     <option value="admin">Administradores</option>
                     <option value="estudiante">Estudiantes</option>
                 </select>
-                
+
                 <select id="statusFilter" class="filter-select">
                     <option value="">Todos los estados</option>
                     <option value="true">Activos</option>
@@ -86,7 +117,7 @@
                     <p>Total Usuarios</p>
                 </div>
             </div>
-            
+
             <div class="stat-card">
                 <div class="stat-icon">
                     <i class="bi bi-person-badge-fill"></i>
@@ -96,7 +127,17 @@
                     <p>Administradores</p>
                 </div>
             </div>
-            
+
+            <div class="stat-card superuser-card">
+                <div class="stat-icon">
+                    <i class="bi bi-shield-fill-exclamation"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalSuperusers">0</h3>
+                    <p>Super Usuarios</p>
+                </div>
+            </div>
+
             <div class="stat-card">
                 <div class="stat-icon">
                     <i class="bi bi-person-fill"></i>
@@ -106,7 +147,7 @@
                     <p>Estudiantes</p>
                 </div>
             </div>
-            
+
             <div class="stat-card">
                 <div class="stat-icon">
                     <i class="bi bi-person-check-fill"></i>
@@ -142,6 +183,18 @@
                                 <i class="bi bi-person-badge-fill"></i>
                                 Solo Administradores
                             </button>
+                            <button class="export-option" data-type="superusuario">
+                                <i class="bi bi-shield-fill-exclamation"></i>
+                                Solo Super Usuarios
+                            </button>
+                            <button class="export-option" data-type="codigos">
+                                <i class="bi bi-key-fill"></i>
+                                Códigos de Recuperación
+                            </button>
+                            <button class="export-option" data-type="insignias">
+                                <i class="bi bi-award-fill"></i>
+                                Insignias y Gamificación
+                            </button>
                         </div>
                     </div>
                     <button class="create-user-btn" id="createUserBtn">
@@ -154,7 +207,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <div class="table-wrapper">
                 <table class="users-table" id="usersTable">
                     <thead>
@@ -182,12 +235,12 @@
                     </tbody>
                 </table>
             </div>
-            
+
             <div class="loading-spinner" id="loadingSpinner">
                 <i class="bi bi-arrow-clockwise spin"></i>
                 <p>Cargando usuarios...</p>
             </div>
-            
+
             <div class="no-results" id="noResults" style="display: none;">
                 <i class="bi bi-person-x"></i>
                 <p>No se encontraron usuarios</p>
@@ -215,7 +268,7 @@
                         <span class="user-type-badge" id="modalUserType">Estudiante</span>
                     </div>
                 </div>
-                
+
                 <form id="resetPasswordForm" class="reset-form">
                     <div class="input-group">
                         <label for="newPassword">Nueva Contraseña</label>
@@ -226,7 +279,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="confirmPassword">Confirmar Contraseña</label>
                         <div class="password-input">
@@ -236,12 +289,12 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="recovery-code-info">
                         <i class="bi bi-info-circle"></i>
                         <p>Se generará un nuevo código de recuperación automáticamente</p>
                     </div>
-                    
+
                     <div class="modal-actions">
                         <button type="button" class="cancel-btn" id="cancelReset">Cancelar</button>
                         <button type="submit" class="reset-btn">
@@ -285,7 +338,7 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Role Selection (only for admins, visible to superusers) -->
                     <div class="role-selection" id="roleSelectionCreate" style="display: none;">
                         <label>Nivel de Permisos *</label>
@@ -295,7 +348,8 @@
                                 <div class="option-content">
                                     <i class="bi bi-shield-check"></i>
                                     <span>Administrador</span>
-                                    <small style="display: block; font-size: 0.75rem; color: #666;">Gestiona estudiantes</small>
+                                    <small style="display: block; font-size: 0.75rem; color: #666;">Gestiona
+                                        estudiantes</small>
                                 </div>
                             </label>
                             <label class="radio-option" id="superuserOptionCreate">
@@ -303,53 +357,59 @@
                                 <div class="option-content">
                                     <i class="bi bi-shield-fill-exclamation"></i>
                                     <span>Superusuario</span>
-                                    <small style="display: block; font-size: 0.75rem; color: #666;">Acceso total al sistema</small>
+                                    <small style="display: block; font-size: 0.75rem; color: #666;">Acceso total al
+                                        sistema</small>
                                 </div>
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Basic Information -->
                     <div class="form-section">
                         <h4>Información Básica</h4>
-                    <div class="form-grid">
-                        <div class="input-group">
+                        <div class="form-grid">
+                            <div class="input-group">
                                 <label for="createNombre">Nombre Completo *</label>
                                 <input type="text" id="createNombre" required placeholder="Nombre completo">
-                        </div>
-                        
-                        <div class="input-group">
+                            </div>
+
+                            <div class="input-group">
                                 <label for="createUsuario" id="createUsuarioLabel">Nombre de Usuario *</label>
                                 <input type="text" id="createUsuario" required placeholder="nombre.usuario">
-                                <small id="createUsuarioHint" style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Se agregará automáticamente @seamosgenios.com</small>
-                        </div>
-                        
-                        <div class="input-group">
+                                <small id="createUsuarioHint"
+                                    style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Se agregará
+                                    automáticamente @seamosgenios.com</small>
+                            </div>
+
+                            <div class="input-group">
                                 <label for="createPassword">Contraseña *</label>
-                            <div class="password-input">
-                                    <input type="password" id="createPassword" required placeholder="Contraseña segura" minlength="6">
+                                <div class="password-input">
+                                    <input type="password" id="createPassword" required placeholder="Contraseña segura"
+                                        minlength="6">
                                     <button type="button" class="password-toggle" id="toggleCreatePassword">
-                                    <i class="bi bi-eye"></i>
-                                </button>
+                                        <i class="bi bi-eye"></i>
+                                    </button>
                                 </div>
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="createTelefono">Teléfono *</label>
                                 <input type="tel" id="createTelefono" required placeholder="Número de teléfono">
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="createEmailRecuperacion">Correo de Recuperación *</label>
-                                <input type="email" id="createEmailRecuperacion" required placeholder="correo@ejemplo.com">
+                                <input type="email" id="createEmailRecuperacion" required
+                                    placeholder="correo@ejemplo.com">
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Asignaturas para Administradores/Profesores -->
                     <div class="form-section admin-fields" style="display: none;">
                         <h4>Asignaturas que Enseña</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las asignaturas que este profesor puede enseñar</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las asignaturas que
+                            este profesor puede enseñar</p>
                         <div class="asignaturas-grid">
                             <label class="asignatura-checkbox">
                                 <input type="checkbox" name="asignaturaProfesor" value="matematicas">
@@ -388,7 +448,7 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Student-specific fields -->
                     <div class="form-section student-fields">
                         <h4>Información del Estudiante</h4>
@@ -397,7 +457,7 @@
                                 <label for="createInstitucion">Institución *</label>
                                 <input type="text" id="createInstitucion" placeholder="Nombre de la institución">
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="createGrado">Grado *</label>
                                 <select id="createGrado">
@@ -408,7 +468,7 @@
                                     <option value="SABER11">SABER11</option>
                                 </select>
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="createTipoDocumento">Tipo de Documento *</label>
                                 <select id="createTipoDocumento">
@@ -420,12 +480,12 @@
                                     <option value="NIT">NIT</option>
                                 </select>
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="createNumeroDocumento">Número de Documento *</label>
                                 <input type="text" id="createNumeroDocumento" placeholder="Número de documento">
                             </div>
-                            
+
                             <div class="input-group full-width">
                                 <label for="createDepartamento">Departamento *</label>
                                 <select id="createDepartamento">
@@ -466,7 +526,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="user-info">
                         <div class="info-item">
                             <i class="bi bi-info-circle"></i>
@@ -481,7 +541,7 @@
                             <span>La fecha de creación se establecerá automáticamente</span>
                         </div>
                     </div>
-                    
+
                     <div class="modal-actions">
                         <button type="button" class="cancel-btn" id="cancelCreateUser">Cancelar</button>
                         <button type="submit" class="create-btn">
@@ -513,7 +573,7 @@
                             <span id="editUserTypeText">Estudiante</span>
                         </div>
                     </div>
-                    
+
                     <!-- Role Selection for Edit (only for admins, visible to superusers) -->
                     <div class="role-selection" id="roleSelectionEdit" style="display: none;">
                         <label>Nivel de Permisos *</label>
@@ -523,7 +583,8 @@
                                 <div class="option-content">
                                     <i class="bi bi-shield-check"></i>
                                     <span>Administrador</span>
-                                    <small style="display: block; font-size: 0.75rem; color: #666;">Gestiona estudiantes</small>
+                                    <small style="display: block; font-size: 0.75rem; color: #666;">Gestiona
+                                        estudiantes</small>
                                 </div>
                             </label>
                             <label class="radio-option" id="superuserOptionEdit">
@@ -531,12 +592,13 @@
                                 <div class="option-content">
                                     <i class="bi bi-shield-fill-exclamation"></i>
                                     <span>Superusuario</span>
-                                    <small style="display: block; font-size: 0.75rem; color: #666;">Acceso total al sistema</small>
+                                    <small style="display: block; font-size: 0.75rem; color: #666;">Acceso total al
+                                        sistema</small>
                                 </div>
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Basic Information -->
                     <div class="form-section">
                         <h4>Información Básica</h4>
@@ -545,28 +607,30 @@
                                 <label for="editNombre">Nombre Completo *</label>
                                 <input type="text" id="editNombre" required placeholder="Nombre completo">
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="editUsuario">Usuario (Email) *</label>
                                 <input type="email" id="editUsuario" required placeholder="usuario@seamosgenios.com">
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="editTelefono">Teléfono *</label>
                                 <input type="tel" id="editTelefono" required placeholder="Número de teléfono">
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="editEmailRecuperacion">Correo de Recuperación *</label>
-                                <input type="email" id="editEmailRecuperacion" required placeholder="correo@ejemplo.com">
+                                <input type="email" id="editEmailRecuperacion" required
+                                    placeholder="correo@ejemplo.com">
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Asignaturas para Administradores/Profesores -->
                     <div class="form-section admin-edit-fields" style="display: none;">
                         <h4>Asignaturas que Enseña</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las asignaturas que este profesor puede enseñar</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las asignaturas que
+                            este profesor puede enseñar</p>
                         <div class="asignaturas-grid">
                             <label class="asignatura-checkbox">
                                 <input type="checkbox" name="asignaturaProfesorEdit" value="matematicas">
@@ -605,7 +669,7 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Gamification fields (for students) -->
                     <div class="form-section student-edit-fields">
                         <h4>Gamificación</h4>
@@ -615,9 +679,11 @@
                                 <input type="number" id="editPuntos" min="0" placeholder="0">
                             </div>
                         </div>
-                        
+
                         <div style="margin-top: 1rem;">
-                            <label style="display: block; margin-bottom: 0.75rem; font-weight: 600; color: #333;">Insignias Obtenidas</label>
+                            <label
+                                style="display: block; margin-bottom: 0.75rem; font-weight: 600; color: #333;">Insignias
+                                Obtenidas</label>
                             <div class="insignias-grid">
                                 <label class="insignia-checkbox">
                                     <input type="checkbox" name="insigniaEdit" value="🏆" data-nombre="Trofeo de Oro">
@@ -634,7 +700,8 @@
                                     </div>
                                 </label>
                                 <label class="insignia-checkbox">
-                                    <input type="checkbox" name="insigniaEdit" value="🎯" data-nombre="Objetivo Cumplido">
+                                    <input type="checkbox" name="insigniaEdit" value="🎯"
+                                        data-nombre="Objetivo Cumplido">
                                     <div class="insignia-checkbox-content">
                                         <span class="insignia-icon">🎯</span>
                                         <span class="insignia-name">Objetivo</span>
@@ -678,7 +745,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Student-specific fields -->
                     <div class="form-section student-edit-fields">
                         <h4>Información del Estudiante</h4>
@@ -687,7 +754,7 @@
                                 <label for="editInstitucion">Institución *</label>
                                 <input type="text" id="editInstitucion" placeholder="Nombre de la institución">
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="editGrado">Grado *</label>
                                 <select id="editGrado">
@@ -698,7 +765,7 @@
                                     <option value="SABER11">SABER11</option>
                                 </select>
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="editTipoDocumento">Tipo de Documento *</label>
                                 <select id="editTipoDocumento">
@@ -710,12 +777,12 @@
                                     <option value="NIT">NIT</option>
                                 </select>
                             </div>
-                            
+
                             <div class="input-group">
                                 <label for="editNumeroDocumento">Número de Documento *</label>
                                 <input type="text" id="editNumeroDocumento" placeholder="Número de documento">
                             </div>
-                            
+
                             <div class="input-group full-width">
                                 <label for="editDepartamento">Departamento *</label>
                                 <select id="editDepartamento">
@@ -760,7 +827,8 @@
                     <!-- Permisos de Clases -->
                     <div class="form-section student-edit-fields">
                         <h4>Acceso a Aulas Virtuales</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las materias a las que el estudiante tendrá acceso</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las materias a las
+                            que el estudiante tendrá acceso</p>
                         <div class="clases-permisos-grid">
                             <label class="clase-checkbox">
                                 <input type="checkbox" name="clasePermiso" value="matematicas">
@@ -799,7 +867,7 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="modal-actions">
                         <button type="button" class="delete-user-btn" id="deleteUserBtn">
                             <i class="bi bi-trash"></i>
@@ -840,7 +908,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="modal-actions">
                     <button type="button" class="cancel-btn" id="cancelConfirmation">Cancelar</button>
                     <button type="button" class="confirm-btn" id="confirmAction">
@@ -875,21 +943,17 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="security-code-section">
                     <label for="securityCodeInput">
                         <i class="bi bi-shield-lock"></i>
                         Código de Seguridad
                     </label>
-                    <input 
-                        type="text" 
-                        id="securityCodeInput" 
-                        placeholder="Ingresa el código de seguridad"
-                        autocomplete="off"
-                    >
+                    <input type="text" id="securityCodeInput" placeholder="Ingresa el código de seguridad"
+                        autocomplete="off">
                     <p class="security-hint">Este código es necesario para confirmar la eliminación definitiva</p>
                 </div>
-                
+
                 <div class="modal-actions">
                     <button type="button" class="cancel-btn" id="cancelDeleteUser">Cancelar</button>
                     <button type="button" class="confirm-delete-btn" id="confirmDeleteUser">
@@ -958,14 +1022,14 @@
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
+
     <!-- SheetJS for Excel export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/perfil-compartido.js"></script>
     <script src="../Elementos/js/usuarios.js"></script>
-    
+
 </body>
 
 </html>
