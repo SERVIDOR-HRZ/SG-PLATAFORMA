@@ -221,11 +221,11 @@ body {
 
 /* Main Content */
 .main-content {
-    padding: 2rem;
+    padding: 1rem 2rem 2rem 2rem;
     max-width: 100%;
     margin: 0 auto;
     width: 100%;
-    margin-top: 80px;
+    margin-top: 60px;
     /* Espacio para el header fijo */
 }
 
@@ -339,7 +339,7 @@ body {
     background: white;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 150px;
+    min-width: 170px;
 }
 
 .filter-select:focus {
@@ -412,12 +412,42 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .table-header h2 {
     font-size: 1.3rem;
     font-weight: 600;
     color: #333;
+    flex-shrink: 0;
+}
+
+.table-right-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.table-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.table-controls .search-container {
+    flex-shrink: 0;
+    min-width: 350px;
+    width: 350px;
+}
+
+.table-controls .filter-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
 }
 
 .refresh-btn {
@@ -1055,8 +1085,10 @@ body {
     width: 90%;
     max-width: 500px;
     max-height: 90vh;
-    overflow-y: auto;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .modal-header {
@@ -1065,6 +1097,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
+    background: white;
+    border-radius: 10px 10px 0 0;
 }
 
 .modal-header h3 {
@@ -1090,7 +1125,10 @@ body {
 }
 
 .modal-body {
-    padding: 2rem;
+    padding: 2rem 2rem 0 2rem;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .user-info-modal {
@@ -1205,6 +1243,11 @@ body {
     gap: 1rem;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e0e0e0;
+    background: white;
+    border-radius: 0 0 10px 10px;
 }
 
 .modal-actions .right-actions {
@@ -1826,8 +1869,8 @@ body {
     }
 
     .main-content {
-        padding: 1.5rem;
-        margin-top: 80px;
+        padding: 1rem 1.5rem 1.5rem 1.5rem;
+        margin-top: 60px;
     }
 
     .controls-section {
@@ -1888,8 +1931,8 @@ body {
     }
 
     .main-content {
-        padding: 1rem;
-        margin-top: 70px;
+        padding: 0.75rem 1rem 1rem 1rem;
+        margin-top: 55px;
     }
 
     .controls-section {
@@ -1997,12 +2040,13 @@ body {
     }
 
     .modal-body {
-        padding: 1rem;
+        padding: 1rem 1rem 0 1rem;
     }
 
     .modal-actions {
         flex-direction: column;
         gap: 0.5rem;
+        padding: 1rem;
     }
 
     .modal-actions button {
@@ -2095,8 +2139,8 @@ body {
     }
 
     .main-content {
-        padding: 0.75rem;
-        margin-top: 65px;
+        padding: 0.5rem 0.75rem 0.75rem 0.75rem;
+        margin-top: 50px;
     }
 
     .controls-section {
@@ -2202,7 +2246,7 @@ body {
     }
 
     .modal-body {
-        padding: 0.75rem;
+        padding: 0.75rem 0.75rem 0 0.75rem;
     }
 
     .form-section {
@@ -2258,7 +2302,7 @@ body {
     }
 
     .modal-actions {
-        padding-top: 0.75rem;
+        padding: 0.75rem;
         gap: 0.4rem;
     }
 
@@ -3057,12 +3101,12 @@ body {
 }
 
 .checkbox-content.ingles i {
-    color: #17a2b8;
+    color: #9c27b0;
 }
 
 .asignatura-checkbox input[type="checkbox"]:checked+.checkbox-content.ingles {
-    background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%);
-    border-color: #17a2b8;
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
+    border-color: #9c27b0;
 }
 
 .checkbox-content.lectura {
@@ -3207,10 +3251,10 @@ body {
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
-    min-width: 150px;
-    max-width: 200px;
+    min-width: 200px;
+    max-width: 300px;
     padding: 0.25rem;
 }
 
@@ -3360,6 +3404,20 @@ body {
     color: #333;
 }
 
+/* Simplified puntos cell styling */
+.puntos-cell-simple {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+}
+
+.puntos-cell-simple strong {
+    font-weight: 700;
+    color: #333;
+    font-size: 0.9rem;
+}
+
 /* Insignias cell styling */
 .insignias-cell {
     display: flex;
@@ -3367,6 +3425,28 @@ body {
     justify-content: center;
     gap: 0.25rem;
     flex-wrap: wrap;
+}
+
+/* Simplified insignias cell styling */
+.insignias-cell-simple {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    gap: 0.1rem;
+}
+
+.insignias-cell-simple strong {
+    font-weight: 700;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.insignias-cell-simple small {
+    font-size: 0.7rem;
+    color: #666;
+    cursor: help;
 }
 
 .insignia-badge {
@@ -3396,7 +3476,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.25rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .materia-badge {
@@ -3448,19 +3528,19 @@ ruser tab special styling */
 }
 
 .dashboard-tab[data-view="superusuarios"]:hover {
-    background: rgba(156, 39, 176, 0.05);
-    color: #9c27b0;
+    background: rgba(255, 0, 0, 0.05);
+    color: #ff0000;
 }
 
 .dashboard-tab[data-view="superusuarios"].active {
     background: white;
-    color: #9c27b0;
-    border-bottom-color: #9c27b0;
-    box-shadow: 0 -2px 8px rgba(156, 39, 176, 0.2);
+    color: #ff0000;
+    border-bottom-color: #ff0000;
+    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
 }
 
 .dashboard-tab[data-view="superusuarios"].active i {
-    color: #9c27b0;
+    color: #ff0000;
     animation: pulse-super-tab 2s infinite;
 }
 
@@ -3469,12 +3549,12 @@ ruser tab special styling */
     0%,
     100% {
         transform: scale(1.1);
-        text-shadow: 0 0 5px rgba(156, 39, 176, 0.3);
+        text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
     }
 
     50% {
         transform: scale(1.2);
-        text-shadow: 0 0 10px rgba(156, 39, 176, 0.6);
+        text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
     }
 }
 
@@ -3846,10 +3926,13 @@ tudent columns visibility for profesores view */
     .users-table.hide-gamification.hide-student-columns {
         min-width: 900px;
     }
-}/* Recovery
+}
+
+/* Recovery
  codes view styling */
 .users-table.recovery-view {
-    min-width: 800px; /* Much smaller width for recovery view */
+    min-width: 800px;
+    /* Much smaller width for recovery view */
 }
 
 /* Recovery codes tab special styling */
@@ -3858,30 +3941,33 @@ tudent columns visibility for profesores view */
 }
 
 .dashboard-tab[data-view="codigos"]:hover {
-    background: rgba(255, 193, 7, 0.05);
-    color: #ffc107;
+    background: rgba(255, 0, 0, 0.05);
+    color: #ff0000;
 }
 
 .dashboard-tab[data-view="codigos"].active {
     background: white;
-    color: #ffc107;
-    border-bottom-color: #ffc107;
-    box-shadow: 0 -2px 8px rgba(255, 193, 7, 0.2);
+    color: #ff0000;
+    border-bottom-color: #ff0000;
+    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
 }
 
 .dashboard-tab[data-view="codigos"].active i {
-    color: #ffc107;
+    color: #ff0000;
     animation: pulse-recovery-tab 2s infinite;
 }
 
 @keyframes pulse-recovery-tab {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1.1);
-        text-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
+        text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
     }
+
     50% {
         transform: scale(1.2);
-        text-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+        text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
     }
 }
 
@@ -3916,17 +4002,17 @@ tudent columns visibility for profesores view */
     .users-table.recovery-view {
         min-width: 600px;
     }
-    
+
     .dashboard-tab[data-view="codigos"] span {
         display: none;
     }
-    
+
     .dashboard-tab[data-view="codigos"] {
         flex-direction: column;
         padding: 0.6rem 0.5rem;
         gap: 0.25rem;
     }
-    
+
     .dashboard-tab[data-view="codigos"] i {
         font-size: 1.3rem;
     }
@@ -3936,12 +4022,14 @@ tudent columns visibility for profesores view */
     .users-table.recovery-view {
         min-width: 500px;
     }
-    
+
     .recovery-code {
         font-size: 0.8rem !important;
         padding: 0.3rem !important;
     }
-}/*
+}
+
+/*
  Copy buttons for recovery view */
 .copy-code-btn {
     background: #ffc107;
@@ -4039,16 +4127,17 @@ tudent columns visibility for profesores view */
         flex-direction: column;
         gap: 0.2rem;
     }
-    
+
     .recovery-view .action-btn {
         width: 24px;
         height: 24px;
         font-size: 0.7rem;
     }
-    
+
     .copy-code-btn::after,
     .copy-email-btn::after {
-        display: none; /* Hide tooltips on mobile */
+        display: none;
+        /* Hide tooltips on mobile */
     }
 }
 
@@ -4060,17 +4149,28 @@ tudent columns visibility for profesores view */
 
 /* Success feedback animation */
 @keyframes copySuccess {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .copy-success {
     animation: copySuccess 0.3s ease;
-}/* Recove
+}
+
+/* Recove
 ry codes view table styling */
 .users-table.recovery-view {
-    min-width: 950px; /* Width for recovery view with actions column */
+    min-width: 950px;
+    /* Width for recovery view with actions column */
 }
 
 @media (max-width: 1200px) {
@@ -4089,7 +4189,9 @@ ry codes view table styling */
     .users-table.recovery-view {
         min-width: 650px;
     }
-}/* Click-t
+}
+
+/* Click-t
 o-copy indicators */
 /* Removed emoji indicator */
 
@@ -4107,19 +4209,23 @@ o-copy indicators */
 
 /* Hide recovery columns in non-recovery views */
 .users-table:not(.recovery-view) {
-    min-width: 2000px; /* Default width when recovery columns are hidden */
+    min-width: 2000px;
+    /* Default width when recovery columns are hidden */
 }
 
 .users-table:not(.recovery-view).hide-gamification {
-    min-width: 1800px; /* Reduced when gamification columns are hidden */
+    min-width: 1800px;
+    /* Reduced when gamification columns are hidden */
 }
 
 .users-table:not(.recovery-view).hide-student-columns {
-    min-width: 1700px; /* Reduced when student columns are hidden */
+    min-width: 1700px;
+    /* Reduced when student columns are hidden */
 }
 
 .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
-    min-width: 1500px; /* Reduced when both gamification and student columns are hidden */
+    min-width: 1500px;
+    /* Reduced when both gamification and student columns are hidden */
 }
 
 /* Recovery columns should only be visible in recovery view */
@@ -4135,15 +4241,15 @@ o-copy indicators */
     .users-table:not(.recovery-view) {
         min-width: 1900px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification {
         min-width: 1700px;
     }
-    
+
     .users-table:not(.recovery-view).hide-student-columns {
         min-width: 1600px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
         min-width: 1400px;
     }
@@ -4153,15 +4259,15 @@ o-copy indicators */
     .users-table:not(.recovery-view) {
         min-width: 1800px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification {
         min-width: 1600px;
     }
-    
+
     .users-table:not(.recovery-view).hide-student-columns {
         min-width: 1500px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
         min-width: 1300px;
     }
@@ -4171,15 +4277,15 @@ o-copy indicators */
     .users-table:not(.recovery-view) {
         min-width: 1700px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification {
         min-width: 1500px;
     }
-    
+
     .users-table:not(.recovery-view).hide-student-columns {
         min-width: 1400px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
         min-width: 1200px;
     }
@@ -4189,15 +4295,15 @@ o-copy indicators */
     .users-table:not(.recovery-view) {
         min-width: 1600px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification {
         min-width: 1400px;
     }
-    
+
     .users-table:not(.recovery-view).hide-student-columns {
         min-width: 1300px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
         min-width: 1100px;
     }
@@ -4207,22 +4313,25 @@ o-copy indicators */
     .users-table:not(.recovery-view) {
         min-width: 1500px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification {
         min-width: 1300px;
     }
-    
+
     .users-table:not(.recovery-view).hide-student-columns {
         min-width: 1200px;
     }
-    
+
     .users-table:not(.recovery-view).hide-gamification.hide-student-columns {
         min-width: 1000px;
     }
-}/* 
+}
+
+/* 
 Recovery codes view table width adjustments */
 .users-table.recovery-view {
-    min-width: 1050px; /* Width for recovery view with Rol, recovery columns, and actions */
+    min-width: 1050px;
+    /* Width for recovery view with Rol, recovery columns, and actions */
 }
 
 @media (max-width: 1200px) {
@@ -4241,7 +4350,9 @@ Recovery codes view table width adjustments */
     .users-table.recovery-view {
         min-width: 750px;
     }
-}/* Enha
+}
+
+/* Enha
 nced Rol column styling in recovery view */
 .users-table.recovery-view .user-type-badge {
     font-size: 0.7rem;
@@ -4250,7 +4361,8 @@ nced Rol column styling in recovery view */
 }
 
 .users-table.recovery-view th:nth-child(3) {
-    width: 80px; /* Rol column width in recovery view */
+    width: 80px;
+    /* Rol column width in recovery view */
     text-align: center;
 }
 
@@ -4264,7 +4376,8 @@ nced Rol column styling in recovery view */
 /* Fixed/Sticky Dashboard Menu */
 .dashboard-menu {
     position: sticky;
-    top: 80px; /* Below the fixed header */
+    top: 80px;
+    /* Below the fixed header */
     z-index: 100;
     background: white;
     border-radius: 10px;
@@ -4298,22 +4411,23 @@ nced Rol column styling in recovery view */
 
 /* Special styling for superuser tab when active */
 .dashboard-tab[data-view="superusuarios"].active {
-    color: #9c27b0;
-    border-bottom-color: #9c27b0;
-    box-shadow: 0 -2px 8px rgba(156, 39, 176, 0.2);
+    color: #ff0000;
+    border-bottom-color: #ff0000;
+    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
 }
 
 /* Special styling for recovery codes tab when active */
 .dashboard-tab[data-view="codigos"].active {
-    color: #ffc107;
-    border-bottom-color: #ffc107;
-    box-shadow: 0 -2px 8px rgba(255, 193, 7, 0.2);
+    color: #ff0000;
+    border-bottom-color: #ff0000;
+    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
 }
 
 /* Responsive adjustments for fixed menu */
 @media (max-width: 768px) {
     .dashboard-menu {
-        top: 70px; /* Adjust for smaller header on mobile */
+        top: 70px;
+        /* Adjust for smaller header on mobile */
         margin-bottom: 1.5rem;
         border-radius: 8px;
     }
@@ -4321,43 +4435,46 @@ nced Rol column styling in recovery view */
 
 @media (max-width: 480px) {
     .dashboard-menu {
-        top: 65px; /* Adjust for even smaller header */
+        top: 65px;
+        /* Adjust for even smaller header */
         margin-bottom: 1rem;
         border-radius: 6px;
     }
-    
+
     .dashboard-tabs {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 0;
     }
-    
+
     .dashboard-tab {
         border-bottom: 1px solid #e0e0e0;
         border-right: 1px solid #e0e0e0;
     }
-    
+
     .dashboard-tab:nth-child(2n) {
         border-right: none;
     }
-    
+
     .dashboard-tab:nth-child(n+4) {
         border-bottom: none;
     }
-    
+
     .dashboard-tab.active {
         border-bottom: 1px solid #e0e0e0;
         border-left: 3px solid #ff0000;
     }
-    
+
     .dashboard-tab[data-view="superusuarios"].active {
         border-left: 3px solid #9c27b0;
     }
-    
+
     .dashboard-tab[data-view="codigos"].active {
         border-left: 3px solid #ffc107;
     }
-}/* Ens
+}
+
+/* Ens
 ure proper spacing with fixed dashboard menu */
 .controls-section {
     margin-top: 0;
@@ -4405,7 +4522,8 @@ ure proper spacing with fixed dashboard menu */
 
 /* Insignias view styling */
 .users-table.insignias-view {
-    min-width: 800px; /* Width for insignias view with gamification columns */
+    min-width: 800px;
+    /* Width for insignias view with gamification columns */
 }
 
 /* Insignias tab special styling */
@@ -4414,30 +4532,33 @@ ure proper spacing with fixed dashboard menu */
 }
 
 .dashboard-tab[data-view="insignias"]:hover {
-    background: rgba(102, 126, 234, 0.05);
-    color: #667eea;
+    background: rgba(255, 0, 0, 0.05);
+    color: #ff0000;
 }
 
 .dashboard-tab[data-view="insignias"].active {
     background: white;
-    color: #667eea;
-    border-bottom-color: #667eea;
-    box-shadow: 0 -2px 8px rgba(102, 126, 234, 0.2);
+    color: #ff0000;
+    border-bottom-color: #ff0000;
+    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
 }
 
 .dashboard-tab[data-view="insignias"].active i {
-    color: #667eea;
+    color: #ff0000;
     animation: pulse-insignias-tab 2s infinite;
 }
 
 @keyframes pulse-insignias-tab {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1.1);
-        text-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
     }
+
     50% {
         transform: scale(1.2);
-        text-shadow: 0 0 10px rgba(102, 126, 234, 0.6);
+        text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
     }
 }
 
@@ -4495,27 +4616,27 @@ ure proper spacing with fixed dashboard menu */
     .users-table.insignias-view {
         min-width: 600px;
     }
-    
+
     .dashboard-tab[data-view="insignias"] span {
         display: none;
     }
-    
+
     .dashboard-tab[data-view="insignias"] {
         flex-direction: column;
         padding: 0.6rem 0.5rem;
         gap: 0.25rem;
     }
-    
+
     .dashboard-tab[data-view="insignias"] i {
         font-size: 1.3rem;
     }
-    
+
     .users-table.insignias-view .puntos-cell,
     .users-table.insignias-view .insignias-cell {
         margin: 0.1rem;
         padding: 0.5rem;
     }
-    
+
     .users-table.insignias-view .insignia-badge {
         font-size: 1.2rem;
         padding: 0.3rem;
@@ -4526,22 +4647,24 @@ ure proper spacing with fixed dashboard menu */
     .users-table.insignias-view {
         min-width: 500px;
     }
-    
+
     .users-table.insignias-view .puntos-cell strong {
         font-size: 1rem;
     }
-    
+
     .users-table.insignias-view .puntos-cell i {
         font-size: 1.1rem;
     }
-}/*
+}
+
+/*
  Responsive adjustments for 6 tabs */
 @media (max-width: 1400px) {
     .dashboard-tab {
         padding: 0.6rem 0.7rem;
         font-size: 0.75rem;
     }
-    
+
     .dashboard-tab span {
         font-size: 0.7rem;
     }
@@ -4552,7 +4675,7 @@ ure proper spacing with fixed dashboard menu */
         padding: 0.5rem 0.6rem;
         font-size: 0.7rem;
     }
-    
+
     .dashboard-tab span {
         font-size: 0.65rem;
     }
@@ -4563,7 +4686,7 @@ ure proper spacing with fixed dashboard menu */
         padding: 0.4rem 0.5rem;
         font-size: 0.65rem;
     }
-    
+
     .dashboard-tab span {
         font-size: 0.6rem;
     }
@@ -4576,26 +4699,26 @@ ure proper spacing with fixed dashboard menu */
         grid-template-columns: repeat(3, 1fr);
         gap: 0;
     }
-    
+
     .dashboard-tab {
         border-bottom: 1px solid #e0e0e0;
         border-right: 1px solid #e0e0e0;
         padding: 0.6rem 0.4rem;
         font-size: 0.6rem;
     }
-    
+
     .dashboard-tab:nth-child(3n) {
         border-right: none;
     }
-    
+
     .dashboard-tab:nth-child(n+4) {
         border-bottom: none;
     }
-    
+
     .dashboard-tab span {
         display: none;
     }
-    
+
     .dashboard-tab i {
         font-size: 1.2rem;
     }
@@ -4608,23 +4731,148 @@ ure proper spacing with fixed dashboard menu */
         grid-template-columns: repeat(2, 1fr);
         gap: 0;
     }
-    
+
     .dashboard-tab {
         border-bottom: 1px solid #e0e0e0;
         border-right: 1px solid #e0e0e0;
         padding: 0.5rem 0.3rem;
         font-size: 0.55rem;
     }
-    
+
     .dashboard-tab:nth-child(2n) {
         border-right: none;
     }
-    
+
     .dashboard-tab:nth-child(n+5) {
         border-bottom: none;
     }
-    
+
     .dashboard-tab i {
         font-size: 1.1rem;
     }
+}/* Respon
+sive styles for table controls */
+@media (max-width: 1024px) {
+    .table-right-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .table-controls .search-container {
+        max-width: none;
+        min-width: auto;
+    }
+    
+    .table-controls .filter-container {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .table-right-section {
+        order: 1;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .table-controls {
+        order: 1;
+    }
+    
+    .table-actions {
+        order: 2;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .table-header h2 {
+        order: 0;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-controls .filter-container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .filter-select {
+        min-width: auto;
+    }
+}/* S
+ecurity Code Section */
+.security-code-section {
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid rgba(255, 193, 7, 0.3);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.security-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.security-warning i {
+    color: #ff6b35;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.warning-text h5 {
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.warning-text p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.security-code-section .input-group {
+    margin-bottom: 0;
+}
+
+.security-code-section input {
+    border: 2px solid rgba(255, 193, 7, 0.5);
+    background: white;
+}
+
+.security-code-section input:focus {
+    border-color: #ff6b35;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}/* En
+sure forms don't interfere with modal layout */
+.modal-body form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-body .form-section:last-child,
+.modal-body .user-info:last-child,
+.modal-body .security-code-section:last-child {
+    margin-bottom: 1rem;
 }

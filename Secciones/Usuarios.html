@@ -82,29 +82,7 @@
             </div>
         </div>
 
-        <!-- Controls Section -->
-        <div class="controls-section">
-            <div class="search-container">
-                <div class="search-box">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar usuarios...">
-                </div>
-            </div>
 
-            <div class="filter-container">
-                <select id="userTypeFilter" class="filter-select">
-                    <option value="">Todos los usuarios</option>
-                    <option value="admin">Administradores</option>
-                    <option value="estudiante">Estudiantes</option>
-                </select>
-
-                <select id="statusFilter" class="filter-select">
-                    <option value="">Todos los estados</option>
-                    <option value="true">Activos</option>
-                    <option value="false">Inactivos</option>
-                </select>
-            </div>
-        </div>
 
         <!-- Stats Cards -->
         <div class="stats-grid">
@@ -124,7 +102,7 @@
                 </div>
                 <div class="stat-content">
                     <h3 id="totalAdmins">0</h3>
-                    <p>Administradores</p>
+                    <p>Profesores</p>
                 </div>
             </div>
 
@@ -163,7 +141,31 @@
         <div class="table-container">
             <div class="table-header">
                 <h2>Lista de Usuarios</h2>
-                <div class="table-actions">
+                <div class="table-right-section">
+                    <div class="table-controls">
+                        <div class="search-container">
+                            <div class="search-box">
+                                <i class="bi bi-search"></i>
+                                <input type="text" id="searchInput" placeholder="Buscar usuarios...">
+                            </div>
+                        </div>
+
+                        <div class="filter-container">
+                            <select id="userTypeFilter" class="filter-select">
+                                <option value="">Todos los usuarios</option>
+                                <option value="admin">Profesores</option>
+                                <option value="estudiante">Estudiantes</option>
+                                <option value="superusuario">Super Usuarios</option>
+                            </select>
+
+                            <select id="statusFilter" class="filter-select">
+                                <option value="">Todos los estados</option>
+                                <option value="true">Activos</option>
+                                <option value="false">Inactivos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-actions">
                     <div class="export-dropdown">
                         <button class="export-btn" id="exportBtn">
                             <i class="bi bi-file-earmark-excel"></i>
@@ -181,7 +183,7 @@
                             </button>
                             <button class="export-option" data-type="admin">
                                 <i class="bi bi-person-badge-fill"></i>
-                                Solo Administradores
+                                Solo Profesores
                             </button>
                             <button class="export-option" data-type="superusuario">
                                 <i class="bi bi-shield-fill-exclamation"></i>
@@ -205,6 +207,7 @@
                         <i class="bi bi-arrow-clockwise"></i>
                         Actualizar
                     </button>
+                </div>
                 </div>
             </div>
 
@@ -295,14 +298,14 @@
                         <p>Se generará un nuevo código de recuperación automáticamente</p>
                     </div>
 
-                    <div class="modal-actions">
-                        <button type="button" class="cancel-btn" id="cancelReset">Cancelar</button>
-                        <button type="submit" class="reset-btn">
-                            <i class="bi bi-key"></i>
-                            Restablecer Contraseña
-                        </button>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" id="cancelReset">Cancelar</button>
+                <button type="submit" class="reset-btn" form="resetPasswordForm">
+                    <i class="bi bi-key"></i>
+                    Restablecer Contraseña
+                </button>
             </div>
         </div>
     </div>
@@ -333,7 +336,7 @@
                                 <input type="radio" name="tipoUsuario" value="admin">
                                 <div class="option-content">
                                     <i class="bi bi-person-badge-fill"></i>
-                                    <span>Administrador</span>
+                                    <span>Profesor</span>
                                 </div>
                             </label>
                         </div>
@@ -347,7 +350,7 @@
                                 <input type="radio" name="rolUsuario" value="admin" checked>
                                 <div class="option-content">
                                     <i class="bi bi-shield-check"></i>
-                                    <span>Administrador</span>
+                                    <span>Profesor</span>
                                     <small style="display: block; font-size: 0.75rem; color: #666;">Gestiona
                                         estudiantes</small>
                                 </div>
@@ -375,10 +378,9 @@
 
                             <div class="input-group">
                                 <label for="createUsuario" id="createUsuarioLabel">Nombre de Usuario *</label>
-                                <input type="text" id="createUsuario" required placeholder="nombre.usuario">
+                                <input type="text" id="createUsuario" required placeholder="Solo el nombre (ej: juan.perez)">
                                 <small id="createUsuarioHint"
-                                    style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Se agregará
-                                    automáticamente @seamosgenios.com</small>
+                                    style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Solo escribe el nombre de usuario. Se agregará automáticamente @seamosgenios.com</small>
                             </div>
 
                             <div class="input-group">
@@ -405,7 +407,7 @@
                         </div>
                     </div>
 
-                    <!-- Asignaturas para Administradores/Profesores -->
+                    <!-- Asignaturas para Profesores -->
                     <div class="form-section admin-fields" style="display: none;">
                         <h4>Asignaturas que Enseña</h4>
                         <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las asignaturas que
@@ -527,6 +529,22 @@
                         </div>
                     </div>
 
+                    <!-- Security Code for Superuser -->
+                    <div class="security-code-section" id="securityCodeSectionCreate" style="display: none;">
+                        <div class="security-warning">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <div class="warning-text">
+                                <h5>Código de Seguridad Requerido</h5>
+                                <p>Para crear un Superusuario necesitas ingresar el código de seguridad especial.</p>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="createSecurityCode">Código de Seguridad *</label>
+                            <input type="password" id="createSecurityCode" placeholder="Ingresa el código de seguridad">
+                            <small style="color: #666; font-size: 0.85rem;">Este código es necesario para crear superusuarios</small>
+                        </div>
+                    </div>
+
                     <div class="user-info">
                         <div class="info-item">
                             <i class="bi bi-info-circle"></i>
@@ -542,14 +560,14 @@
                         </div>
                     </div>
 
-                    <div class="modal-actions">
-                        <button type="button" class="cancel-btn" id="cancelCreateUser">Cancelar</button>
-                        <button type="submit" class="create-btn">
-                            <i class="bi bi-person-plus-fill"></i>
-                            <span id="createButtonText">Crear Usuario</span>
-                        </button>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" id="cancelCreateUser">Cancelar</button>
+                <button type="submit" class="create-btn" form="createUserForm">
+                    <i class="bi bi-person-plus-fill"></i>
+                    <span id="createButtonText">Crear Usuario</span>
+                </button>
             </div>
         </div>
     </div>
@@ -582,7 +600,7 @@
                                 <input type="radio" name="rolUsuarioEdit" value="admin" checked>
                                 <div class="option-content">
                                     <i class="bi bi-shield-check"></i>
-                                    <span>Administrador</span>
+                                    <span>Profesor</span>
                                     <small style="display: block; font-size: 0.75rem; color: #666;">Gestiona
                                         estudiantes</small>
                                 </div>
@@ -626,7 +644,7 @@
                         </div>
                     </div>
 
-                    <!-- Asignaturas para Administradores/Profesores -->
+                    <!-- Asignaturas para Profesores -->
                     <div class="form-section admin-edit-fields" style="display: none;">
                         <h4>Asignaturas que Enseña</h4>
                         <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las asignaturas que
@@ -868,20 +886,20 @@
                         </div>
                     </div>
 
-                    <div class="modal-actions">
-                        <button type="button" class="delete-user-btn" id="deleteUserBtn">
-                            <i class="bi bi-trash"></i>
-                            Eliminar Usuario
-                        </button>
-                        <div class="right-actions">
-                            <button type="button" class="cancel-btn" id="cancelEditUser">Cancelar</button>
-                            <button type="submit" class="save-btn">
-                                <i class="bi bi-save"></i>
-                                Guardar Cambios
-                            </button>
-                        </div>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="delete-user-btn" id="deleteUserBtn">
+                    <i class="bi bi-trash"></i>
+                    Eliminar Usuario
+                </button>
+                <div class="right-actions">
+                    <button type="button" class="cancel-btn" id="cancelEditUser">Cancelar</button>
+                    <button type="submit" class="save-btn" form="editUserForm">
+                        <i class="bi bi-save"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
             </div>
         </div>
     </div>

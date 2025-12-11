@@ -27,6 +27,9 @@ let currentUserForReset = null;
 let currentUserForEdit = null;
 let currentDashboardView = 'dashboard'; // dashboard, profesores, estudiantes
 
+// Security code for creating superusers
+const SUPERUSER_SECURITY_CODE = 'SG-PG-2025-OWH346OU6634OSDFS4YE431FSD325';
+
 // DOM Elements
 const elements = {
     searchInput: document.getElementById('searchInput'),
@@ -89,6 +92,8 @@ const elements = {
     createDepartamento: document.getElementById('createDepartamento'),
     toggleCreatePassword: document.getElementById('toggleCreatePassword'),
     createButtonText: document.getElementById('createButtonText'),
+    createSecurityCode: document.getElementById('createSecurityCode'),
+    securityCodeSectionCreate: document.getElementById('securityCodeSectionCreate'),
 
     // Edit User Modal
     editUserModal: document.getElementById('editUserModal'),
@@ -190,6 +195,42 @@ function initializePage() {
     elements.createUserForm.addEventListener('submit', handleCreateUser);
     elements.toggleCreatePassword.addEventListener('click', () => togglePasswordVisibility('createPassword', 'toggleCreatePassword'));
 
+    // Role selection change event for security code and subject visibility
+    document.addEventListener('change', function (e) {
+        if (e.target.name === 'rolUsuario') {
+            toggleSecurityCodeSection();
+        }
+        if (e.target.name === 'rolUsuarioEdit') {
+            toggleSubjectSectionEdit();
+        }
+    });
+
+    // Username field validation - prevent @ and .com
+    elements.createUsuario.addEventListener('input', function (e) {
+        cleanUsernameField(e.target);
+    });
+
+    elements.createUsuario.addEventListener('paste', function (e) {
+        // Allow paste but clean it after a short delay
+        setTimeout(() => {
+            cleanUsernameField(e.target);
+        }, 10);
+    });
+
+    // Also add validation for edit modal
+    const editUsuarioField = document.getElementById('editUsuario');
+    if (editUsuarioField) {
+        editUsuarioField.addEventListener('input', function (e) {
+            cleanUsernameField(e.target);
+        });
+
+        editUsuarioField.addEventListener('paste', function (e) {
+            setTimeout(() => {
+                cleanUsernameField(e.target);
+            }, 10);
+        });
+    }
+
     // Edit User Modal events
     elements.closeEditUserModal.addEventListener('click', closeEditUserModal);
     elements.cancelEditUser.addEventListener('click', closeEditUserModal);
@@ -286,17 +327,20 @@ function handleUserTypeChange() {
         // Solo mostrar selector de rol si el usuario actual es superusuario
         if (isSuperuser) {
             roleSelection.style.display = 'block';
-            createButton.textContent = 'Crear Administrador';
+            createButton.textContent = 'Crear Profesor';
         } else {
             roleSelection.style.display = 'none';
-            createButton.textContent = 'Crear Administrador';
+            createButton.textContent = 'Crear Profesor';
         }
-        // Cambiar placeholder para administradores
+        // Cambiar placeholder para profesores
         usuarioInput.placeholder = 'nombre.usuario';
         usuarioInput.type = 'text';
         if (usuarioLabel) usuarioLabel.textContent = 'Nombre de Usuario *';
         if (usuarioHint) usuarioHint.style.display = 'block';
     }
+
+    // Update security code section visibility
+    toggleSecurityCodeSection();
 }
 
 // Wait for Firebase
@@ -391,7 +435,10 @@ function filterUsersByDashboardView() {
             user.institucion?.toLowerCase().includes(searchTerm);
 
         // Type filter
-        const matchesType = !typeFilter || user.tipoUsuario === typeFilter;
+        const matchesType = !typeFilter || 
+            (typeFilter === 'superusuario' && user.rol === 'superusuario') ||
+            (typeFilter === 'admin' && user.tipoUsuario === 'admin' && user.rol !== 'superusuario') ||
+            (typeFilter === 'estudiante' && user.tipoUsuario === 'estudiante');
 
         // Status filter
         const matchesStatus = !statusFilter || user.activo.toString() === statusFilter;
@@ -406,26 +453,33 @@ function filterUsersByDashboardView() {
 // Update dashboard title and stats based on view
 function updateDashboardTitle(view) {
     const tableHeader = document.querySelector('.table-header h2');
+    const createUserBtn = document.getElementById('createUserBtn');
 
     switch (view) {
         case 'profesores':
             tableHeader.textContent = 'Lista de Profesores';
+            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Profesor';
             break;
         case 'estudiantes':
             tableHeader.textContent = 'Lista de Estudiantes';
+            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Estudiante';
             break;
         case 'superusuarios':
             tableHeader.textContent = 'Lista de Super Usuarios';
+            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Super Usuario';
             break;
         case 'codigos':
             tableHeader.textContent = 'Códigos de Recuperación';
+            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
             break;
         case 'insignias':
             tableHeader.textContent = 'Insignias y Gamificación';
+            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
             break;
         case 'dashboard':
         default:
             tableHeader.textContent = 'Lista de Usuarios';
+            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
             break;
     }
 
@@ -788,7 +842,7 @@ function renderUsers() {
                 userBadge = 'SUPER';
                 badgeClass = 'superusuario';
             } else {
-                userBadge = 'ADM';
+                userBadge = 'PROF';
                 badgeClass = 'admin';
             }
         }
@@ -818,7 +872,7 @@ function renderUsers() {
                 </div>
             </td>
             <td>
-                <span class="user-type-badge ${badgeClass}" title="${user.rol === 'superusuario' ? 'Superusuario - Acceso Total' : user.tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante'}">
+                <span class="user-type-badge ${badgeClass}" title="${user.rol === 'superusuario' ? 'Superusuario - Acceso Total' : user.tipoUsuario === 'admin' ? 'Profesor' : 'Estudiante'}">
                     ${userBadge}
                 </span>
             </td>
@@ -829,23 +883,17 @@ function renderUsers() {
             </td>
             <td>
                 ${user.tipoUsuario === 'estudiante' ?
-                `<div class="puntos-cell">
-                        <i class="bi bi-star-fill" style="color: #ffc107;"></i>
+                `<div class="puntos-cell-simple">
                         <strong>${user.puntos || user.puntosAcumulados || 0}</strong>
                     </div>` : 'N/A'}
             </td>
             <td>
                 ${user.tipoUsuario === 'estudiante' && user.insignias && user.insignias.length > 0 ?
-                `<div class="insignias-cell">
-                        ${user.insignias.slice(0, 3).map(ins => {
-                    // Soporte para ambos formatos: string simple o objeto
-                    const icono = typeof ins === 'string' ? ins : (ins.icono || '🏆');
-                    const nombre = typeof ins === 'string' ? icono : (ins.nombre || 'Insignia');
-                    return `<span class="insignia-badge" title="${nombre}">${icono}</span>`;
-                }).join('')}
-                        ${user.insignias.length > 3 ? `<span class="insignias-more">+${user.insignias.length - 3}</span>` : ''}
+                `<div class="insignias-cell-simple">
+                        <strong>${user.insignias.length}</strong>
+                        <small title="${user.insignias.map(ins => typeof ins === 'string' ? ins : (ins.nombre || 'Insignia')).join(', ')}">${user.insignias.slice(0, 3).map(ins => typeof ins === 'string' ? ins : (ins.icono || '🏆')).join('')}</small>
                     </div>` :
-                (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">Sin insignias</span>' : 'N/A')}
+                (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">0</span>' : 'N/A')}
             </td>
             <td>
                 ${user.tipoUsuario === 'estudiante' && user.clasesPermitidas && user.clasesPermitidas.length > 0 ?
@@ -855,8 +903,8 @@ function renderUsers() {
                         'matematicas': { inicial: 'MAT', color: '#667eea' },
                         'lectura': { inicial: 'LEC', color: '#dc3545' },
                         'sociales': { inicial: 'SOC', color: '#ffc107' },
-                        'naturales': { inicial: 'NAT', color: '#28a745' },
-                        'ingles': { inicial: 'ING', color: '#17a2b8' }
+                        'naturales': { inicial: 'CIE', color: '#28a745' },
+                        'ingles': { inicial: 'ING', color: '#9c27b0' }
                     };
                     const config = materiasConfig[materia] || { inicial: 'N/A', color: '#6c757d' };
                     return `<span class="materia-badge" style="background: ${config.color};" title="${materia.charAt(0).toUpperCase() + materia.slice(1)}">${config.inicial}</span>`;
@@ -871,7 +919,7 @@ function renderUsers() {
                                 'lectura': { inicial: 'LEC', color: '#dc3545' },
                                 'sociales': { inicial: 'SOC', color: '#ffc107' },
                                 'ciencias': { inicial: 'CIE', color: '#28a745' },
-                                'ingles': { inicial: 'ING', color: '#17a2b8' }
+                                'ingles': { inicial: 'ING', color: '#9c27b0' }
                             };
                             const config = materiasConfig[materia] || { inicial: 'N/A', color: '#6c757d' };
                             return `<span class="materia-badge" style="background: ${config.color};" title="${materia.charAt(0).toUpperCase() + materia.slice(1)}">${config.inicial}</span>`;
@@ -993,16 +1041,145 @@ function openCreateUserModal() {
     // Clear form
     elements.createUserForm.reset();
 
-    // Set default user type to student
-    document.querySelector('input[name="tipoUsuario"][value="estudiante"]').checked = true;
-    handleUserTypeChange();
+    // Set user type based on current dashboard view
+    const estudianteRadio = document.querySelector('input[name="tipoUsuario"][value="estudiante"]');
+    const adminRadio = document.querySelector('input[name="tipoUsuario"][value="admin"]');
+    const userTypeSelection = document.querySelector('.user-type-selection');
 
+    if (currentDashboardView === 'profesores' || currentDashboardView === 'superusuarios') {
+        // In professors/superusers section, only allow creating admins
+        adminRadio.checked = true;
+        estudianteRadio.disabled = true;
+        adminRadio.disabled = false;
+
+        // Update modal title
+        document.querySelector('#createUserModal .modal-header h3').textContent = 'Crear Nuevo Profesor';
+
+        // Hide user type selection since it's forced
+        userTypeSelection.style.display = 'none';
+
+    } else if (currentDashboardView === 'estudiantes') {
+        // In students section, only allow creating students
+        estudianteRadio.checked = true;
+        estudianteRadio.disabled = false;
+        adminRadio.disabled = true;
+
+        // Update modal title
+        document.querySelector('#createUserModal .modal-header h3').textContent = 'Crear Nuevo Estudiante';
+
+        // Hide user type selection since it's forced
+        userTypeSelection.style.display = 'none';
+
+    } else {
+        // In dashboard or other sections, allow both
+        estudianteRadio.checked = true;
+        estudianteRadio.disabled = false;
+        adminRadio.disabled = false;
+
+        // Update modal title
+        document.querySelector('#createUserModal .modal-header h3').textContent = 'Crear Nuevo Usuario';
+
+        // Show user type selection
+        userTypeSelection.style.display = 'block';
+    }
+
+    handleUserTypeChange();
     elements.createUserModal.classList.add('show');
 }
 
 // Close create user modal
 function closeCreateUserModal() {
     elements.createUserModal.classList.remove('show');
+}
+
+// Toggle security code section based on role selection
+function toggleSecurityCodeSection() {
+    const superuserRadio = document.querySelector('input[name="rolUsuario"][value="superusuario"]');
+    const securityCodeSection = elements.securityCodeSectionCreate;
+    const adminFields = document.querySelectorAll('.admin-fields');
+
+    if (superuserRadio && superuserRadio.checked) {
+        // Show security code section for superusers
+        securityCodeSection.style.display = 'block';
+        
+        // Hide subject selection for superusers (they have access to all)
+        adminFields.forEach(field => {
+            if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
+                field.style.display = 'none';
+            }
+        });
+    } else {
+        // Hide security code section for regular admins
+        securityCodeSection.style.display = 'none';
+        
+        // Show subject selection for regular admins/professors
+        adminFields.forEach(field => {
+            if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
+                field.style.display = 'block';
+            }
+        });
+        
+        // Clear the security code when hiding
+        if (elements.createSecurityCode) {
+            elements.createSecurityCode.value = '';
+        }
+    }
+}
+
+// Toggle subject section visibility in edit modal based on role
+function toggleSubjectSectionEdit() {
+    const superuserRadio = document.querySelector('input[name="rolUsuarioEdit"][value="superusuario"]');
+    const adminEditFields = document.querySelectorAll('.admin-edit-fields');
+
+    if (superuserRadio && superuserRadio.checked) {
+        // Hide subject selection for superusers (they have access to all)
+        adminEditFields.forEach(field => {
+            if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
+                field.style.display = 'none';
+            }
+        });
+    } else {
+        // Show subject selection for regular admins/professors
+        adminEditFields.forEach(field => {
+            if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
+                field.style.display = 'block';
+            }
+        });
+    }
+}
+
+// Clean username field - remove @ and domain parts
+function cleanUsernameField(field) {
+    let value = field.value;
+
+    // Remove @ and everything after it
+    if (value.includes('@')) {
+        value = value.split('@')[0];
+    }
+
+    // Remove common domain parts if they somehow got through
+    value = value.replace(/\.com$/i, '');
+    value = value.replace(/\.org$/i, '');
+    value = value.replace(/\.net$/i, '');
+    value = value.replace(/\.edu$/i, '');
+
+    // Remove any remaining @ symbols
+    value = value.replace(/@/g, '');
+
+    // Remove dots at the end
+    value = value.replace(/\.+$/, '');
+
+    // Only allow letters, numbers, dots, hyphens, and underscores
+    value = value.replace(/[^a-zA-Z0-9.\-_]/g, '');
+
+    // Update the field if the value changed
+    if (field.value !== value) {
+        const cursorPosition = field.selectionStart;
+        field.value = value;
+        // Restore cursor position (adjust if value got shorter)
+        const newPosition = Math.min(cursorPosition, value.length);
+        field.setSelectionRange(newPosition, newPosition);
+    }
 }
 
 // Open edit user modal
@@ -1042,7 +1219,7 @@ function openEditUserModal(userId) {
     } else if (isAdmin) {
         badgeClass = 'admin';
         iconClass = 'bi bi-person-badge-fill';
-        typeText = 'Administrador';
+        typeText = 'Profesor';
     }
 
     elements.editUserTypeBadge.className = `user-type-badge-display ${badgeClass}`;
@@ -1115,6 +1292,9 @@ function openEditUserModal(userId) {
         });
     }
 
+    // Update subject section visibility based on role
+    toggleSubjectSectionEdit();
+
     elements.editUserModal.classList.add('show');
 }
 
@@ -1133,7 +1313,7 @@ function openResetPasswordModal(userId) {
 
     elements.modalUserName.textContent = user.nombre || 'Usuario';
     elements.modalUserEmail.textContent = user.usuario || user.email;
-    elements.modalUserType.textContent = user.tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante';
+    elements.modalUserType.textContent = user.tipoUsuario === 'admin' ? 'Profesor' : 'Estudiante';
     elements.modalUserType.className = `user-type-badge ${user.tipoUsuario}`;
 
     // Clear form
@@ -1269,6 +1449,19 @@ async function handleCreateUser(e) {
             }
         }
 
+        // Validate security code for superuser creation
+        if (rol === 'superusuario') {
+            const securityCode = elements.createSecurityCode.value.trim();
+            if (!securityCode) {
+                showMessage('El código de seguridad es obligatorio para crear superusuarios', 'error');
+                return;
+            }
+            if (securityCode !== SUPERUSER_SECURITY_CODE) {
+                showMessage('Código de seguridad incorrecto', 'error');
+                return;
+            }
+        }
+
         // Create user data object
         const userData = {
             nombre: nombre,
@@ -1304,7 +1497,7 @@ async function handleCreateUser(e) {
         // Add to Firestore
         await window.firebaseDB.collection('usuarios').add(userData);
 
-        const rolText = rol === 'superusuario' ? 'Superusuario' : (tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante');
+        const rolText = rol === 'superusuario' ? 'Superusuario' : (tipoUsuario === 'admin' ? 'Profesor' : 'Estudiante');
         showMessage(`${rolText} creado exitosamente. Código de recuperación: ${recoveryCode}`, 'success');
         closeCreateUserModal();
         loadUsers(); // Refresh the list
@@ -1613,7 +1806,7 @@ function handleExport(type) {
             break;
         case 'admin':
             dataToExport = allUsers.filter(user => user.tipoUsuario === 'admin');
-            filename = 'administradores';
+            filename = 'profesores';
             break;
         default:
             dataToExport = allUsers;
@@ -1621,7 +1814,7 @@ function handleExport(type) {
     }
 
     if (dataToExport.length === 0) {
-        showMessage(`No hay ${type === 'all' ? 'usuarios' : type === 'admin' ? 'administradores' : 'estudiantes'} para exportar`, 'error');
+        showMessage(`No hay ${type === 'all' ? 'usuarios' : type === 'admin' ? 'profesores' : 'estudiantes'} para exportar`, 'error');
         return;
     }
 
@@ -1630,7 +1823,7 @@ function handleExport(type) {
         const baseData = {
             'Usuario': user.usuario || user.email || '',
             'Nombre': user.nombre || '',
-            'Tipo': user.tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante',
+            'Tipo': user.tipoUsuario === 'admin' ? 'Profesor' : 'Estudiante',
             'Estado': user.activo ? 'Activo' : 'Inactivo',
             'Teléfono': user.telefono || '',
             'Email Recuperación': user.emailRecuperacion || '',
@@ -1726,7 +1919,7 @@ async function openUserProfileModal(userId) {
 
         // Set user name and type
         document.getElementById('profileUserName').textContent = userData.nombre || 'Usuario';
-        document.getElementById('profileUserType').textContent = userData.tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante';
+        document.getElementById('profileUserType').textContent = userData.tipoUsuario === 'admin' ? 'Profesor' : 'Estudiante';
 
         // Personal Information
         const personalInfo = document.getElementById('profilePersonalInfo');
