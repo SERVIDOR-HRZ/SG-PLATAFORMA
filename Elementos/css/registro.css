@@ -99,8 +99,7 @@
     }
     
     /* Botones ocupan toda la fila */
-    .register-btn,
-    .form-links {
+    .button-group {
         grid-column: 1 / -1;
     }
 }
@@ -205,11 +204,49 @@
 
 .register-btn {
     background: linear-gradient(135deg, #ff0000, #cc0000);
-    margin-bottom: 25px;
 }
 
 .register-btn:hover {
     background: linear-gradient(135deg, #cc0000, #990000);
+}
+
+/* Botón de volver al login */
+.back-btn {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
+    line-height: normal;
+    padding: 14px;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+}
+
+/* Contenedor de botones */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.button-group .login-btn {
+    flex: 1;
+    margin-bottom: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
 }
 
 .message {
@@ -307,8 +344,8 @@
         margin-bottom: 40px;
     }
     
-    /* Mejorar botón */
-    .register-btn {
+    /* Mejorar botones - AMBOS con el mismo tamaño */
+    .button-group .login-btn {
         margin-top: 20px;
         padding: 16px;
         font-size: 18px;
@@ -398,8 +435,12 @@
         margin-bottom: 20px; /* Restaurar margin en móvil */
     }
     
-    .register-btn {
-        margin-top: 10px;
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .button-group .login-btn {
         padding: 14px;
         font-size: 16px;
     }
