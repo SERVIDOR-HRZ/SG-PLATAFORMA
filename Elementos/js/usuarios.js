@@ -166,6 +166,13 @@ function initializePage() {
     elements.refreshBtn.addEventListener('click', loadUsers);
     elements.createUserBtn.addEventListener('click', openCreateUserModal);
     elements.backBtn.addEventListener('click', () => window.location.href = 'Panel_Admin.html');
+    
+    // Manage insignias button
+    const manageInsigniasBtn = document.getElementById('manageInsigniasBtn');
+    if (manageInsigniasBtn) {
+        manageInsigniasBtn.addEventListener('click', openInsigniasManagement);
+    }
+    
     // Logout button manejado por perfil-compartido.js
 
     // Export dropdown events
@@ -369,25 +376,8 @@ function initializeDashboardMenu() {
     });
 }
 
-// Switch Dashboard View
-function switchDashboardView(view) {
-    currentDashboardView = view;
-
-    // Update active tab
-    const dashboardTabs = document.querySelectorAll('.dashboard-tab');
-    dashboardTabs.forEach(tab => {
-        tab.classList.remove('active');
-        if (tab.getAttribute('data-view') === view) {
-            tab.classList.add('active');
-        }
-    });
-
-    // Filter users based on view
-    filterUsersByDashboardView();
-
-    // Update page title and stats
-    updateDashboardTitle(view);
-}
+// Switch Dashboard View - Updated for insignias management
+// (Implementation moved to INSIGNIAS MANAGEMENT SYSTEM section below)
 
 // Filter users by dashboard view
 function filterUsersByDashboardView() {
@@ -454,32 +444,62 @@ function filterUsersByDashboardView() {
 function updateDashboardTitle(view) {
     const tableHeader = document.querySelector('.table-header h2');
     const createUserBtn = document.getElementById('createUserBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const manageInsigniasBtn = document.getElementById('manageInsigniasBtn');
+
+    // Control button visibility based on view
+    const isInsigniasView = view === 'insignias';
+
+    // Show/hide buttons
+    if (createUserBtn) {
+        if (isInsigniasView) {
+            createUserBtn.classList.add('hide-in-insignias');
+        } else {
+            createUserBtn.classList.remove('hide-in-insignias');
+        }
+    }
+
+    if (refreshBtn) {
+        if (isInsigniasView) {
+            refreshBtn.classList.add('hide-in-insignias');
+        } else {
+            refreshBtn.classList.remove('hide-in-insignias');
+        }
+    }
+
+    if (manageInsigniasBtn) {
+        if (isInsigniasView) {
+            manageInsigniasBtn.classList.add('show');
+        } else {
+            manageInsigniasBtn.classList.remove('show');
+        }
+    }
 
     switch (view) {
         case 'profesores':
             tableHeader.textContent = 'Lista de Profesores';
-            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Profesor';
+            if (createUserBtn) createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Profesor';
             break;
         case 'estudiantes':
             tableHeader.textContent = 'Lista de Estudiantes';
-            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Estudiante';
+            if (createUserBtn) createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Estudiante';
             break;
         case 'superusuarios':
             tableHeader.textContent = 'Lista de Super Usuarios';
-            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Super Usuario';
+            if (createUserBtn) createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Super Usuario';
             break;
         case 'codigos':
             tableHeader.textContent = 'Códigos de Recuperación';
-            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
+            if (createUserBtn) createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
             break;
         case 'insignias':
             tableHeader.textContent = 'Insignias y Gamificación';
-            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
+            if (createUserBtn) createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
             break;
         case 'dashboard':
         default:
             tableHeader.textContent = 'Lista de Usuarios';
-            createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
+            if (createUserBtn) createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
             break;
     }
 
@@ -891,7 +911,7 @@ function renderUsers() {
                 ${user.tipoUsuario === 'estudiante' && user.insignias && user.insignias.length > 0 ?
                 `<div class="insignias-cell-simple">
                         <strong>${user.insignias.length}</strong>
-                        <small title="${user.insignias.map(ins => typeof ins === 'string' ? ins : (ins.nombre || 'Insignia')).join(', ')}">${user.insignias.slice(0, 3).map(ins => typeof ins === 'string' ? ins : (ins.icono || '🏆')).join('')}</small>
+                        <small class="insignias-preview-icons" data-insignias='${JSON.stringify(user.insignias)}'></small>
                     </div>` :
                 (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">0</span>' : 'N/A')}
             </td>
@@ -1016,6 +1036,9 @@ function renderUsers() {
 
     // Update column visibility after rendering
     updateColumnVisibility(currentDashboardView);
+
+    // Load insignia icons from Firebase
+    loadInsigniaIconsInTable();
 }
 
 // Handle search
@@ -1256,22 +1279,26 @@ function openEditUserModal(userId) {
         // Load gamification data
         document.getElementById('editPuntos').value = user.puntos || user.puntosAcumulados || 0;
 
-        // Load insignias - soporte para ambos formatos
-        const insigniasArray = user.insignias || [];
-        const insigniasCheckboxes = document.querySelectorAll('input[name="insigniaEdit"]');
-        insigniasCheckboxes.forEach(checkbox => {
-            // Verificar si la insignia está en el array del usuario
-            const insigniaValue = checkbox.value;
-            const hasInsignia = insigniasArray.some(ins => {
-                // Soporte para string simple o objeto
-                if (typeof ins === 'string') {
-                    return ins === insigniaValue;
-                } else if (ins && ins.icono) {
-                    return ins.icono === insigniaValue;
-                }
-                return false;
+        // Load insignias dynamically from Firebase
+        loadInsigniasForEdit().then(() => {
+            // After loading insignias, select the ones the user has
+            const insigniasArray = user.insignias || [];
+            const insigniasCheckboxes = document.querySelectorAll('input[name="insigniaEdit"]');
+            
+            insigniasCheckboxes.forEach(checkbox => {
+                const insigniaId = checkbox.value;
+                // Check if user has this insignia by ID
+                const hasInsignia = insigniasArray.some(ins => {
+                    // Support both old format (string/object with icono) and new format (ID)
+                    if (typeof ins === 'string') {
+                        return ins === insigniaId;
+                    } else if (ins && ins.id) {
+                        return ins.id === insigniaId;
+                    }
+                    return false;
+                });
+                checkbox.checked = hasInsignia;
             });
-            checkbox.checked = hasInsignia;
         });
 
         // Load clases permisos
@@ -1594,10 +1621,10 @@ async function handleEditUser(e) {
             // Get gamification data
             const puntos = parseInt(document.getElementById('editPuntos').value) || 0;
 
-            // Get selected insignias
+            // Get selected insignias (now storing just IDs)
             const insigniasCheckboxes = document.querySelectorAll('input[name="insigniaEdit"]:checked');
             const insignias = Array.from(insigniasCheckboxes).map(checkbox => ({
-                icono: checkbox.value,
+                id: checkbox.value,
                 nombre: checkbox.getAttribute('data-nombre')
             }));
 
@@ -1808,6 +1835,18 @@ function handleExport(type) {
             dataToExport = allUsers.filter(user => user.tipoUsuario === 'admin');
             filename = 'profesores';
             break;
+        case 'superusuario':
+            dataToExport = allUsers.filter(user => user.rol === 'superusuario');
+            filename = 'superusuarios';
+            break;
+        case 'codigos':
+            // Export recovery codes
+            exportRecoveryCodes();
+            return;
+        case 'insignias':
+            // Export insignias data
+            exportInsigniasData();
+            return;
         default:
             dataToExport = allUsers;
             filename = 'usuarios';
@@ -1874,6 +1913,112 @@ function handleExport(type) {
     XLSX.writeFile(wb, finalFilename);
 
     showMessage(`Exportación completada: ${dataToExport.length} registros exportados`, 'success');
+}
+
+// Export recovery codes function
+function exportRecoveryCodes() {
+    if (allUsers.length === 0) {
+        showMessage('No hay usuarios para exportar', 'error');
+        return;
+    }
+
+    const excelData = allUsers.map(user => ({
+        'Usuario': user.usuario || user.email || '',
+        'Nombre': user.nombre || '',
+        'Rol': user.rol === 'superusuario' ? 'Superusuario' : user.tipoUsuario === 'admin' ? 'Profesor' : 'Estudiante',
+        'Email Recuperación': user.emailRecuperacion || '',
+        'Código Recuperación': user.codigoRecuperacion || '',
+        'Estado': user.activo ? 'Activo' : 'Inactivo',
+        'Fecha Registro': user.fechaCreacion ? user.fechaCreacion.toDate().toLocaleDateString('es-ES') : ''
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(excelData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Códigos de Recuperación');
+
+    const colWidths = [
+        { wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 25 }, { wch: 20 }, { wch: 10 }, { wch: 15 }
+    ];
+    ws['!cols'] = colWidths;
+
+    const currentDate = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
+    const filename = `codigos_recuperacion_${currentDate}.xlsx`;
+
+    XLSX.writeFile(wb, filename);
+    showMessage(`Códigos de recuperación exportados: ${allUsers.length} registros`, 'success');
+}
+
+// Export insignias data function
+async function exportInsigniasData() {
+    try {
+        await waitForFirebase();
+
+        // Get all insignias
+        const insigniasSnapshot = await window.firebaseDB.collection('insignias').get();
+        const insigniasMap = new Map();
+        
+        insigniasSnapshot.forEach(doc => {
+            insigniasMap.set(doc.id, doc.data());
+        });
+
+        if (insigniasMap.size === 0) {
+            showMessage('No hay insignias creadas para exportar', 'error');
+            return;
+        }
+
+        // Get all students with insignias
+        const students = allUsers.filter(user => user.tipoUsuario === 'estudiante' && user.insignias && user.insignias.length > 0);
+
+        if (students.length === 0) {
+            showMessage('No hay estudiantes con insignias para exportar', 'error');
+            return;
+        }
+
+        const excelData = students.map(student => {
+            // Get insignia names
+            const insigniaNames = (student.insignias || []).map(ins => {
+                if (typeof ins === 'string') {
+                    const insigniaData = insigniasMap.get(ins);
+                    return insigniaData ? insigniaData.nombre : ins;
+                } else if (ins && ins.id) {
+                    const insigniaData = insigniasMap.get(ins.id);
+                    return insigniaData ? insigniaData.nombre : ins.nombre || 'Desconocida';
+                } else if (ins && ins.nombre) {
+                    return ins.nombre;
+                }
+                return 'Desconocida';
+            }).join(', ');
+
+            return {
+                'Usuario': student.usuario || student.email || '',
+                'Nombre': student.nombre || '',
+                'Institución': student.institucion || '',
+                'Grado': student.grado || '',
+                'Puntos': student.puntos || student.puntosAcumulados || 0,
+                'Cantidad Insignias': (student.insignias || []).length,
+                'Insignias Obtenidas': insigniaNames
+            };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Insignias y Gamificación');
+
+        const colWidths = [
+            { wch: 25 }, { wch: 20 }, { wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 15 }, { wch: 50 }
+        ];
+        ws['!cols'] = colWidths;
+
+        const currentDate = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
+        const filename = `insignias_gamificacion_${currentDate}.xlsx`;
+
+        XLSX.writeFile(wb, filename);
+        showMessage(`Datos de insignias exportados: ${students.length} estudiantes`, 'success');
+
+    } catch (error) {
+        console.error('Error exporting insignias:', error);
+        showMessage('Error al exportar datos de insignias', 'error');
+    }
 }
 
 // Handle logout - Modal de confirmación
@@ -2282,4 +2427,678 @@ function initializeDashboardMenuScroll() {
 // Initialize dashboard menu scroll effect
 document.addEventListener('DOMContentLoaded', function () {
     initializeDashboardMenuScroll();
+});
+
+// ========================================
+// INSIGNIAS MANAGEMENT SYSTEM
+// ========================================
+
+// Bootstrap Icons for Insignias - Categorized
+const BOOTSTRAP_ICONS = {
+    all: [
+        'award', 'award-fill', 'trophy', 'trophy-fill', 'star', 'star-fill', 
+        'bookmark', 'bookmark-fill', 'gem',
+        'shield', 'shield-fill', 'shield-check',
+        'lightbulb', 'lightbulb-fill', 'rocket', 
+        'fire', 'lightning', 'lightning-fill', 
+        'heart', 'heart-fill', 'emoji-smile', 'emoji-smile-fill',
+        'gift', 'gift-fill', 'flag', 'flag-fill',
+        'patch-check', 'patch-check-fill', 'check-circle', 'check-circle-fill',
+        'hand-thumbs-up', 'hand-thumbs-up-fill',
+        'brightness-high', 'brightness-high-fill', 'sun', 'sun-fill', 'moon-stars', 'moon-stars-fill',
+        'balloon', 'balloon-fill', 'balloon-heart', 'balloon-heart-fill'
+    ],
+    education: [
+        'book', 'book-fill', 'journal', 'journal-bookmark',
+        'journal-text', 'pencil', 'pencil-fill',
+        'pencil-square', 'pen', 'pen-fill', 'clipboard', 'clipboard-check', 'clipboard-check-fill',
+        'clipboard-data', 'clipboard-fill',
+        'file-text', 'file-text-fill',
+        'easel', 'easel-fill',
+        'palette', 'palette-fill', 'brush', 'brush-fill',
+        'card-list', 'card-text', 'list-check', 'list-task'
+    ],
+    achievement: [
+        'trophy', 'trophy-fill', 'award', 'award-fill', 'gem', 'star', 'star-fill',
+        'patch-check', 'patch-check-fill', 'shield-check',
+        'check-circle', 'check-circle-fill',
+        'hand-thumbs-up', 'hand-thumbs-up-fill', 'flag', 'flag-fill', 'rocket',
+        'fire', 'lightning', 'lightning-fill', 'brightness-high-fill',
+        'balloon', 'balloon-fill', 'gift', 'gift-fill', 'emoji-smile-fill'
+    ],
+    subjects: [
+        'calculator', 'calculator-fill', 'graph-up', 'graph-up-arrow',
+        'globe', 'globe2',
+        'tree', 'tree-fill',
+        'translate',
+        'chat', 'chat-fill', 'chat-text', 'chat-text-fill',
+        'book', 'book-fill', 'journal-text', 'journal-bookmark', 'pencil', 'pencil-square'
+    ]
+};
+
+// Variables globales para insignias
+let allInsignias = [];
+let currentInsigniaForEdit = null;
+let currentInsigniaForDelete = null;
+
+// Initialize insignias management
+function initializeInsigniasManagement() {
+    const createInsigniaBtn = document.getElementById('createInsigniaBtn');
+    const closeInsigniaModal = document.getElementById('closeInsigniaModal');
+    const cancelInsignia = document.getElementById('cancelInsignia');
+    const insigniaForm = document.getElementById('insigniaForm');
+    const insigniaNombre = document.getElementById('insigniaNombre');
+
+    // Create insignia button
+    if (createInsigniaBtn) {
+        createInsigniaBtn.addEventListener('click', openCreateInsigniaModal);
+    }
+
+    // Close modal buttons
+    if (closeInsigniaModal) {
+        closeInsigniaModal.addEventListener('click', closeInsigniaModal_);
+    }
+    if (cancelInsignia) {
+        cancelInsignia.addEventListener('click', closeInsigniaModal_);
+    }
+
+    // Form submit
+    if (insigniaForm) {
+        insigniaForm.addEventListener('submit', handleInsigniaFormSubmit);
+    }
+
+    // Preview update
+    if (insigniaNombre) {
+        insigniaNombre.addEventListener('input', updateInsigniaPreview);
+    }
+
+    // Category change - auto assign color
+    const insigniaCategoria = document.getElementById('insigniaCategoria');
+    if (insigniaCategoria) {
+        insigniaCategoria.addEventListener('change', handleCategoriaChange);
+    }
+
+    // Icon category buttons
+    const categoryBtns = document.querySelectorAll('.icon-category-btn');
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', handleIconCategoryChange);
+    });
+
+    // Back to table button
+    const backToTableBtn = document.getElementById('backToTableBtn');
+    if (backToTableBtn) {
+        backToTableBtn.addEventListener('click', closeInsigniasManagement);
+    }
+
+    // Delete insignia modal
+    const closeDeleteInsigniaModal = document.getElementById('closeDeleteInsigniaModal');
+    const cancelDeleteInsignia = document.getElementById('cancelDeleteInsignia');
+    const confirmDeleteInsignia = document.getElementById('confirmDeleteInsignia');
+
+    if (closeDeleteInsigniaModal) {
+        closeDeleteInsigniaModal.addEventListener('click', closeDeleteInsigniaModal_);
+    }
+    if (cancelDeleteInsignia) {
+        cancelDeleteInsignia.addEventListener('click', closeDeleteInsigniaModal_);
+    }
+    if (confirmDeleteInsignia) {
+        confirmDeleteInsignia.addEventListener('click', handleDeleteInsignia);
+    }
+
+    // Populate icons grid
+    populateIconsGrid('all');
+}
+
+// Update dashboard view to handle insignias
+function switchDashboardView(view) {
+    currentDashboardView = view;
+
+    // Update active tab
+    const dashboardTabs = document.querySelectorAll('.dashboard-tab');
+    dashboardTabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('data-view') === view) {
+            tab.classList.add('active');
+        }
+    });
+
+    // Always hide insignias management when switching views
+    const usersTableContainer = document.getElementById('usersTableContainer');
+    const insigniasManagement = document.getElementById('insigniasManagement');
+    
+    if (usersTableContainer) usersTableContainer.style.display = 'block';
+    if (insigniasManagement) insigniasManagement.style.display = 'none';
+    
+    // Filter users based on view (existing functionality)
+    filterUsersByDashboardView();
+    updateDashboardTitle(view);
+}
+
+// Open insignias management view
+function openInsigniasManagement() {
+    // Hide users table, show insignias management
+    const usersTableContainer = document.getElementById('usersTableContainer');
+    const insigniasManagement = document.getElementById('insigniasManagement');
+    
+    if (usersTableContainer) usersTableContainer.style.display = 'none';
+    if (insigniasManagement) {
+        insigniasManagement.style.display = 'block';
+        loadInsignias();
+    }
+    
+    // Deactivate all dashboard tabs
+    const dashboardTabs = document.querySelectorAll('.dashboard-tab');
+    dashboardTabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Hide all action buttons when in management view
+    const createUserBtn = document.getElementById('createUserBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const manageInsigniasBtn = document.getElementById('manageInsigniasBtn');
+    
+    if (createUserBtn) createUserBtn.classList.add('hide-in-insignias');
+    if (refreshBtn) refreshBtn.classList.add('hide-in-insignias');
+    if (manageInsigniasBtn) manageInsigniasBtn.classList.remove('show');
+}
+
+// Close insignias management and return to table
+function closeInsigniasManagement() {
+    const usersTableContainer = document.getElementById('usersTableContainer');
+    const insigniasManagement = document.getElementById('insigniasManagement');
+    
+    if (usersTableContainer) usersTableContainer.style.display = 'block';
+    if (insigniasManagement) insigniasManagement.style.display = 'none';
+    
+    // Reactivate the current dashboard view
+    switchDashboardView(currentDashboardView || 'dashboard');
+    
+    // Update button visibility based on current view
+    updateDashboardTitle(currentDashboardView || 'dashboard');
+}
+
+// Load insignias from Firebase
+async function loadInsignias() {
+    try {
+        const insigniasManagement = document.getElementById('insigniasManagement');
+        const insigniasGridManager = document.getElementById('insigniasGridManager');
+        const insigniasLoadingSpinner = document.getElementById('insigniasLoadingSpinner');
+        const noInsignias = document.getElementById('noInsignias');
+
+        if (insigniasLoadingSpinner) insigniasLoadingSpinner.style.display = 'block';
+        if (insigniasGridManager) insigniasGridManager.style.display = 'none';
+        if (noInsignias) noInsignias.style.display = 'none';
+
+        await waitForFirebase();
+
+        const insigniasSnapshot = await window.firebaseDB.collection('insignias').orderBy('nombre').get();
+
+        allInsignias = [];
+        insigniasSnapshot.forEach(doc => {
+            allInsignias.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        renderInsignias();
+
+        if (insigniasLoadingSpinner) insigniasLoadingSpinner.style.display = 'none';
+
+    } catch (error) {
+        console.error('Error loading insignias:', error);
+        showMessage('Error al cargar insignias', 'error');
+        const insigniasLoadingSpinner = document.getElementById('insigniasLoadingSpinner');
+        if (insigniasLoadingSpinner) insigniasLoadingSpinner.style.display = 'none';
+    }
+}
+
+// Render insignias in management view
+function renderInsignias() {
+    const insigniasGridManager = document.getElementById('insigniasGridManager');
+    const noInsignias = document.getElementById('noInsignias');
+
+    if (!insigniasGridManager) return;
+
+    if (allInsignias.length === 0) {
+        insigniasGridManager.style.display = 'none';
+        if (noInsignias) noInsignias.style.display = 'block';
+        return;
+    }
+
+    insigniasGridManager.style.display = 'grid';
+    if (noInsignias) noInsignias.style.display = 'none';
+
+    insigniasGridManager.innerHTML = '';
+
+    allInsignias.forEach(insignia => {
+        const card = createInsigniaManagerCard(insignia);
+        insigniasGridManager.appendChild(card);
+    });
+}
+
+// Create insignia manager card
+function createInsigniaManagerCard(insignia) {
+    const card = document.createElement('div');
+    card.className = 'insignia-manager-card';
+    card.style.setProperty('--insignia-color', insignia.color || '#667eea');
+
+    const categoryNames = {
+        matematicas: 'Matemáticas',
+        lectura: 'Lectura Crítica',
+        sociales: 'Ciencias Sociales',
+        ciencias: 'Ciencias Naturales',
+        ingles: 'Inglés'
+    };
+
+    card.innerHTML = `
+        <div class="insignia-card-header">
+            <div class="insignia-card-icon">
+                <i class="bi bi-${insignia.icono}"></i>
+            </div>
+            <div class="insignia-card-info">
+                <div class="insignia-card-name">${insignia.nombre}</div>
+                <span class="insignia-card-category">${categoryNames[insignia.categoria] || insignia.categoria}</span>
+            </div>
+        </div>
+        <p class="insignia-card-description">${insignia.descripcion || 'Sin descripción'}</p>
+        <div class="insignia-card-actions">
+            <button class="insignia-action-btn insignia-edit-btn" onclick="openEditInsigniaModal('${insignia.id}')">
+                <i class="bi bi-pencil"></i> Editar
+            </button>
+            <button class="insignia-action-btn insignia-delete-btn" onclick="openDeleteInsigniaModal_('${insignia.id}')">
+                <i class="bi bi-trash"></i> Eliminar
+            </button>
+        </div>
+    `;
+
+    return card;
+}
+
+// Populate icons grid
+function populateIconsGrid(category = 'all') {
+    const iconsGrid = document.getElementById('iconsGrid');
+    if (!iconsGrid) return;
+
+    iconsGrid.innerHTML = '';
+
+    const icons = BOOTSTRAP_ICONS[category] || BOOTSTRAP_ICONS.all;
+
+    icons.forEach(icon => {
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'icon-option';
+        iconDiv.innerHTML = `<i class="bi bi-${icon}"></i>`;
+        iconDiv.dataset.icon = icon;
+        iconDiv.addEventListener('click', () => selectIcon(icon));
+        iconsGrid.appendChild(iconDiv);
+    });
+}
+
+// Handle icon category change
+function handleIconCategoryChange(e) {
+    const categoryBtns = document.querySelectorAll('.icon-category-btn');
+    categoryBtns.forEach(btn => btn.classList.remove('active'));
+    e.target.classList.add('active');
+
+    const category = e.target.dataset.category;
+    populateIconsGrid(category);
+}
+
+// Select icon
+function selectIcon(iconName) {
+    const iconOptions = document.querySelectorAll('.icon-option');
+    iconOptions.forEach(option => option.classList.remove('selected'));
+
+    const selectedOption = document.querySelector(`[data-icon="${iconName}"]`);
+    if (selectedOption) {
+        selectedOption.classList.add('selected');
+        // Scroll to selected icon
+        selectedOption.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    document.getElementById('selectedIcon').value = iconName;
+    
+    // Show selected icon display
+    const selectedIconDisplay = document.getElementById('selectedIconDisplay');
+    const selectedIconName = document.getElementById('selectedIconName');
+    if (selectedIconDisplay && selectedIconName) {
+        selectedIconDisplay.style.display = 'flex';
+        selectedIconName.textContent = iconName;
+    }
+    
+    updateInsigniaPreview();
+}
+
+// Handle categoria change - auto assign color
+function handleCategoriaChange() {
+    const categoria = document.getElementById('insigniaCategoria').value;
+    const colorMap = {
+        'matematicas': '#667eea',
+        'ciencias': '#28a745',
+        'sociales': '#ffc107',
+        'lectura': '#dc3545',
+        'ingles': '#9c27b0'
+    };
+
+    const color = colorMap[categoria] || '#667eea';
+    document.getElementById('insigniaColorHidden').value = color;
+
+    // Update preview
+    updateInsigniaPreview();
+}
+
+// Update insignia preview
+function updateInsigniaPreview() {
+    const nombre = document.getElementById('insigniaNombre').value || 'Nombre de la Insignia';
+    const selectedIcon = document.getElementById('selectedIcon').value || 'award-fill';
+    const selectedColor = document.getElementById('insigniaColorHidden')?.value || '#667eea';
+
+    const previewIcon = document.getElementById('previewIcon');
+    const previewName = document.getElementById('previewName');
+
+    if (previewIcon) {
+        previewIcon.className = `bi bi-${selectedIcon} preview-icon`;
+        previewIcon.style.color = selectedColor;
+    }
+
+    if (previewName) {
+        previewName.textContent = nombre;
+    }
+
+    // Update CSS variable for preview color
+    document.documentElement.style.setProperty('--preview-color', selectedColor);
+}
+
+// Open create insignia modal
+function openCreateInsigniaModal() {
+    currentInsigniaForEdit = null;
+
+    document.getElementById('insigniaModalTitle').textContent = 'Crear Nueva Insignia';
+    document.getElementById('insigniaButtonText').textContent = 'Guardar Insignia';
+
+    // Reset form
+    document.getElementById('insigniaForm').reset();
+    document.getElementById('selectedIcon').value = '';
+    document.getElementById('insigniaColorHidden').value = '#667eea'; // Default color
+
+    // Hide selected icon display
+    const selectedIconDisplay = document.getElementById('selectedIconDisplay');
+    if (selectedIconDisplay) {
+        selectedIconDisplay.style.display = 'none';
+    }
+
+    // Clear icon selection
+    const iconOptions = document.querySelectorAll('.icon-option');
+    iconOptions.forEach(option => option.classList.remove('selected'));
+
+    // Reset category buttons
+    const categoryBtns = document.querySelectorAll('.icon-category-btn');
+    categoryBtns.forEach(btn => btn.classList.remove('active'));
+    const allCategoryBtn = document.querySelector('.icon-category-btn[data-category="all"]');
+    if (allCategoryBtn) allCategoryBtn.classList.add('active');
+
+    // Reset preview
+    updateInsigniaPreview();
+
+    // Show modal
+    document.getElementById('insigniaModal').classList.add('show');
+
+    // Populate icons (wait a bit for modal to show)
+    setTimeout(() => {
+        populateIconsGrid('all');
+    }, 100);
+}
+
+// Open edit insignia modal
+function openEditInsigniaModal(insigniaId) {
+    const insignia = allInsignias.find(i => i.id === insigniaId);
+    if (!insignia) return;
+
+    currentInsigniaForEdit = insignia;
+
+    document.getElementById('insigniaModalTitle').textContent = 'Editar Insignia';
+    document.getElementById('insigniaButtonText').textContent = 'Actualizar Insignia';
+
+    // Fill form
+    document.getElementById('insigniaNombre').value = insignia.nombre;
+    document.getElementById('insigniaCategoria').value = insignia.categoria;
+    document.getElementById('insigniaDescripcion').value = insignia.descripcion || '';
+    document.getElementById('selectedIcon').value = insignia.icono;
+
+    // Set color in hidden field
+    document.getElementById('insigniaColorHidden').value = insignia.color || '#667eea';
+
+    // Select icon
+    selectIcon(insignia.icono);
+
+    // Update preview
+    updateInsigniaPreview();
+
+    // Show modal
+    document.getElementById('insigniaModal').classList.add('show');
+
+    // Populate icons
+    populateIconsGrid('all');
+}
+
+// Close insignia modal
+function closeInsigniaModal_() {
+    document.getElementById('insigniaModal').classList.remove('show');
+    currentInsigniaForEdit = null;
+}
+
+// Handle insignia form submit
+async function handleInsigniaFormSubmit(e) {
+    e.preventDefault();
+
+    const nombre = document.getElementById('insigniaNombre').value.trim();
+    const categoria = document.getElementById('insigniaCategoria').value;
+    const descripcion = document.getElementById('insigniaDescripcion').value.trim();
+    const icono = document.getElementById('selectedIcon').value;
+    const color = document.getElementById('insigniaColorHidden')?.value;
+
+    if (!nombre || !categoria || !icono) {
+        showMessage('Por favor completa todos los campos requeridos', 'error');
+        return;
+    }
+
+    try {
+        const submitBtn = document.querySelector('.save-insignia-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Guardando...';
+
+        await waitForFirebase();
+
+        const insigniaData = {
+            nombre,
+            categoria,
+            descripcion,
+            icono,
+            color: color || '#667eea',
+            fechaCreacion: currentInsigniaForEdit ? currentInsigniaForEdit.fechaCreacion : firebase.firestore.FieldValue.serverTimestamp(),
+            fechaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (currentInsigniaForEdit) {
+            // Update existing insignia
+            await window.firebaseDB.collection('insignias').doc(currentInsigniaForEdit.id).update(insigniaData);
+            showMessage('Insignia actualizada exitosamente', 'success');
+        } else {
+            // Create new insignia
+            await window.firebaseDB.collection('insignias').add(insigniaData);
+            showMessage('Insignia creada exitosamente', 'success');
+        }
+
+        closeInsigniaModal_();
+        loadInsignias();
+
+    } catch (error) {
+        console.error('Error saving insignia:', error);
+        showMessage('Error al guardar la insignia', 'error');
+    } finally {
+        const submitBtn = document.querySelector('.save-insignia-btn');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-save"></i> <span id="insigniaButtonText">Guardar Insignia</span>';
+    }
+}
+
+// Open delete insignia modal
+function openDeleteInsigniaModal_(insigniaId) {
+    const insignia = allInsignias.find(i => i.id === insigniaId);
+    if (!insignia) return;
+
+    currentInsigniaForDelete = insignia;
+
+    document.getElementById('deleteInsigniaName').textContent = insignia.nombre;
+    document.getElementById('deleteInsigniaModal').classList.add('show');
+}
+
+// Close delete insignia modal
+function closeDeleteInsigniaModal_() {
+    document.getElementById('deleteInsigniaModal').classList.remove('show');
+    currentInsigniaForDelete = null;
+}
+
+// Handle delete insignia
+async function handleDeleteInsignia() {
+    if (!currentInsigniaForDelete) return;
+
+    try {
+        const confirmBtn = document.getElementById('confirmDeleteInsignia');
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Eliminando...';
+
+        await waitForFirebase();
+
+        await window.firebaseDB.collection('insignias').doc(currentInsigniaForDelete.id).delete();
+
+        showMessage('Insignia eliminada exitosamente', 'success');
+        closeDeleteInsigniaModal_();
+        loadInsignias();
+
+    } catch (error) {
+        console.error('Error deleting insignia:', error);
+        showMessage('Error al eliminar la insignia', 'error');
+    } finally {
+        const confirmBtn = document.getElementById('confirmDeleteInsignia');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="bi bi-trash"></i> <span>Eliminar Insignia</span>';
+    }
+}
+
+// Load insignias for edit user modal
+async function loadInsigniasForEdit() {
+    const insigniasGridEdit = document.getElementById('insigniasGridEdit');
+    if (!insigniasGridEdit) return;
+
+    try {
+        insigniasGridEdit.innerHTML = '<div class="loading-insignias"><i class="bi bi-arrow-clockwise spin"></i><p>Cargando insignias...</p></div>';
+
+        await waitForFirebase();
+
+        const insigniasSnapshot = await window.firebaseDB.collection('insignias').orderBy('nombre').get();
+
+        const insignias = [];
+        insigniasSnapshot.forEach(doc => {
+            insignias.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        if (insignias.length === 0) {
+            insigniasGridEdit.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">No hay insignias disponibles. <a href="#" onclick="switchDashboardView(\'insignias\'); return false;" style="color: #667eea;">Crear insignia</a></p>';
+            return;
+        }
+
+        insigniasGridEdit.innerHTML = '';
+
+        insignias.forEach(insignia => {
+            const label = document.createElement('label');
+            label.className = 'insignia-checkbox-dynamic';
+
+            // Convert hex to RGB for CSS variable
+            const hexToRgb = (hex) => {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '102, 126, 234';
+            };
+
+            label.innerHTML = `
+                <input type="checkbox" name="insigniaEdit" value="${insignia.id}" data-nombre="${insignia.nombre}">
+                <div class="insignia-checkbox-content-dynamic" style="--insignia-color: ${insignia.color}; --insignia-rgb: ${hexToRgb(insignia.color)};">
+                    <i class="bi bi-${insignia.icono} insignia-icon-dynamic"></i>
+                    <span class="insignia-name-dynamic">${insignia.nombre}</span>
+                </div>
+            `;
+
+            insigniasGridEdit.appendChild(label);
+        });
+
+    } catch (error) {
+        console.error('Error loading insignias for edit:', error);
+        insigniasGridEdit.innerHTML = '<p style="text-align: center; color: #dc3545; padding: 1rem;">Error al cargar insignias</p>';
+    }
+}
+
+// Make functions globally available
+window.openEditInsigniaModal = openEditInsigniaModal;
+window.openDeleteInsigniaModal_ = openDeleteInsigniaModal_;
+
+// Load insignia icons in table
+async function loadInsigniaIconsInTable() {
+    const insigniasPreviews = document.querySelectorAll('.insignias-preview-icons');
+    if (insigniasPreviews.length === 0) return;
+
+    try {
+        await waitForFirebase();
+
+        // Get all insignias from Firebase once
+        const insigniasSnapshot = await window.firebaseDB.collection('insignias').get();
+        const insigniasMap = new Map();
+        
+        insigniasSnapshot.forEach(doc => {
+            insigniasMap.set(doc.id, doc.data());
+        });
+
+        // Update each preview with the actual icons
+        insigniasPreviews.forEach(preview => {
+            try {
+                const userInsignias = JSON.parse(preview.dataset.insignias || '[]');
+                const iconsHTML = userInsignias.slice(0, 3).map(ins => {
+                    // Support both old format and new format
+                    let insigniaData;
+                    if (typeof ins === 'string') {
+                        // Old format: just emoji or ID
+                        insigniaData = insigniasMap.get(ins);
+                        if (!insigniaData) {
+                            // Fallback to emoji if it's not an ID
+                            return ins;
+                        }
+                    } else if (ins && ins.id) {
+                        // New format: object with ID
+                        insigniaData = insigniasMap.get(ins.id);
+                    } else if (ins && ins.icono) {
+                        // Old format: object with emoji icon
+                        return ins.icono;
+                    }
+
+                    if (insigniaData) {
+                        return `<i class="bi bi-${insigniaData.icono}" style="color: ${insigniaData.color || '#667eea'}; font-size: 1rem; margin: 0 2px;" title="${insigniaData.nombre}"></i>`;
+                    }
+                    return '';
+                }).join('');
+
+                preview.innerHTML = iconsHTML || '<span class="text-muted">Sin insignias</span>';
+            } catch (error) {
+                console.error('Error parsing insignias:', error);
+                preview.innerHTML = '<span class="text-muted">Error</span>';
+            }
+        });
+
+    } catch (error) {
+        console.error('Error loading insignia icons:', error);
+    }
+}
+
+// Initialize insignias management on page load
+document.addEventListener('DOMContentLoaded', function () {
+    initializeInsigniasManagement();
 });

@@ -137,8 +137,35 @@
             </div>
         </div>
 
+        <!-- Insignias Management Section -->
+        <div class="insignias-management-section" id="insigniasManagement" style="display: none;">
+            <div class="insignias-header">
+                <div class="insignias-header-left">
+                    <button class="back-to-table-btn" id="backToTableBtn" title="Volver a la tabla">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                    <h2>Gestión de Insignias</h2>
+                </div>
+                <button class="create-insignia-btn" id="createInsigniaBtn">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    Crear Insignia
+                </button>
+            </div>
+            <div class="insignias-grid-manager" id="insigniasGridManager">
+                <!-- Insignias cards will be loaded here -->
+            </div>
+            <div class="loading-spinner" id="insigniasLoadingSpinner" style="display: none;">
+                <i class="bi bi-arrow-clockwise spin"></i>
+                <p>Cargando insignias...</p>
+            </div>
+            <div class="no-results" id="noInsignias" style="display: none;">
+                <i class="bi bi-award"></i>
+                <p>No hay insignias creadas</p>
+            </div>
+        </div>
+
         <!-- Users Table -->
-        <div class="table-container">
+        <div class="table-container" id="usersTableContainer">
             <div class="table-header">
                 <h2>Lista de Usuarios</h2>
                 <div class="table-right-section">
@@ -199,6 +226,10 @@
                             </button>
                         </div>
                     </div>
+                    <button class="manage-insignias-btn" id="manageInsigniasBtn" title="Gestionar Insignias">
+                        <i class="bi bi-award-fill"></i>
+                        <span>Gestionar Insignias</span>
+                    </button>
                     <button class="create-user-btn" id="createUserBtn">
                         <i class="bi bi-person-plus-fill"></i>
                         Crear Usuario
@@ -702,64 +733,12 @@
                             <label
                                 style="display: block; margin-bottom: 0.75rem; font-weight: 600; color: #333;">Insignias
                                 Obtenidas</label>
-                            <div class="insignias-grid">
-                                <label class="insignia-checkbox">
-                                    <input type="checkbox" name="insigniaEdit" value="🏆" data-nombre="Trofeo de Oro">
-                                    <div class="insignia-checkbox-content">
-                                        <span class="insignia-icon">🏆</span>
-                                        <span class="insignia-name">Trofeo de Oro</span>
-                                    </div>
-                                </label>
-                                <label class="insignia-checkbox">
-                                    <input type="checkbox" name="insigniaEdit" value="⭐" data-nombre="Estrella">
-                                    <div class="insignia-checkbox-content">
-                                        <span class="insignia-icon">⭐</span>
-                                        <span class="insignia-name">Estrella</span>
-                                    </div>
-                                </label>
-                                <label class="insignia-checkbox">
-                                    <input type="checkbox" name="insigniaEdit" value="🎯"
-                                        data-nombre="Objetivo Cumplido">
-                                    <div class="insignia-checkbox-content">
-                                        <span class="insignia-icon">🎯</span>
-                                        <span class="insignia-name">Objetivo</span>
-                                    </div>
-                                </label>
-                                <label class="insignia-checkbox">
-                                    <input type="checkbox" name="insigniaEdit" value="💎" data-nombre="Diamante">
-                                    <div class="insignia-checkbox-content">
-                                        <span class="insignia-icon">💎</span>
-                                        <span class="insignia-name">Diamante</span>
-                                    </div>
-                                </label>
-                                <label class="insignia-checkbox">
-                                    <input type="checkbox" name="insigniaEdit" value="🔥" data-nombre="Racha de Fuego">
-                                    <div class="insignia-checkbox-content">
-                                        <span class="insignia-icon">🔥</span>
-                                        <span class="insignia-name">Racha</span>
-                                    </div>
-                                </label>
-                                <label class="insignia-checkbox">
-                                    <input type="checkbox" name="insigniaEdit" value="🎓" data-nombre="Graduado">
-                                    <div class="insignia-checkbox-content">
-                                        <span class="insignia-icon">🎓</span>
-                                        <span class="insignia-name">Graduado</span>
-                                    </div>
-                                </label>
-                                <label class="insignia-checkbox">
-                                    <input type="checkbox" name="insigniaEdit" value="🚀" data-nombre="Cohete">
-                                    <div class="insignia-checkbox-content">
-                                        <span class="insignia-icon">🚀</span>
-                                        <span class="insignia-name">Cohete</span>
-                                    </div>
-                                </label>
-                                <label class="insignia-checkbox">
-                                    <input type="checkbox" name="insigniaEdit" value="👑" data-nombre="Corona">
-                                    <div class="insignia-checkbox-content">
-                                        <span class="insignia-icon">👑</span>
-                                        <span class="insignia-name">Corona</span>
-                                    </div>
-                                </label>
+                            <div class="insignias-grid-edit" id="insigniasGridEdit">
+                                <!-- Insignias will be loaded dynamically from Firebase -->
+                                <div class="loading-insignias" style="text-align: center; padding: 2rem; color: #666;">
+                                    <i class="bi bi-arrow-clockwise spin"></i>
+                                    <p>Cargando insignias...</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -985,6 +964,164 @@
 
     <!-- Message Container -->
     <div class="message-container" id="messageContainer"></div>
+
+    <!-- Create/Edit Insignia Modal -->
+    <div class="modal" id="insigniaModal">
+        <div class="modal-content insignia-modal">
+            <div class="modal-header">
+                <h3 id="insigniaModalTitle">Crear Nueva Insignia</h3>
+                <button class="close-btn" id="closeInsigniaModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="insigniaForm" class="insignia-form">
+                    <!-- Insignia Preview -->
+                    <div class="insignia-preview-section">
+                        <label>Vista Previa</label>
+                        <div class="insignia-preview-card" id="insigniaPreview">
+                            <i class="bi bi-award-fill preview-icon" id="previewIcon"></i>
+                            <span class="preview-name" id="previewName">Nombre de la Insignia</span>
+                        </div>
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h4>Información Básica</h4>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="insigniaNombre">Nombre de la Insignia *</label>
+                                <input type="text" id="insigniaNombre" required placeholder="Ej: Matemático Experto" maxlength="50">
+                            </div>
+
+                            <div class="input-group">
+                                <label for="insigniaCategoria">Categoría (Materia) *</label>
+                                <select id="insigniaCategoria" required>
+                                    <option value="">Seleccione Materia</option>
+                                    <option value="matematicas">Matemáticas</option>
+                                    <option value="lectura">Lectura Crítica</option>
+                                    <option value="sociales">Ciencias Sociales</option>
+                                    <option value="ciencias">Ciencias Naturales</option>
+                                    <option value="ingles">Inglés</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group full-width">
+                                <label for="insigniaDescripcion">Descripción</label>
+                                <textarea id="insigniaDescripcion" placeholder="Descripción de cómo se obtiene esta insignia" rows="3" maxlength="200"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Icon Selector -->
+                    <div class="form-section icon-selector-section">
+                        <h4>Seleccionar Ícono *</h4>
+                        <p class="section-subtitle">Elige un ícono de Bootstrap Icons para representar esta insignia</p>
+                        
+                        <!-- Icon Categories Filter -->
+                        <div class="icon-categories">
+                            <button type="button" class="icon-category-btn active" data-category="all">Todos</button>
+                            <button type="button" class="icon-category-btn" data-category="education">Educación</button>
+                            <button type="button" class="icon-category-btn" data-category="achievement">Logros</button>
+                            <button type="button" class="icon-category-btn" data-category="subjects">Materias</button>
+                        </div>
+
+                        <!-- Selected Icon Display -->
+                        <div class="selected-icon-display" id="selectedIconDisplay" style="display: none;">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Ícono seleccionado: <strong id="selectedIconName"></strong></span>
+                        </div>
+
+                        <!-- Icons Grid -->
+                        <div class="icons-grid" id="iconsGrid">
+                            <!-- Icons will be populated dynamically -->
+                        </div>
+
+                        <input type="hidden" id="selectedIcon" required>
+                    </div>
+
+                    <!-- Color Selector -->
+                    <div class="form-section">
+                        <h4>Color de la Insignia</h4>
+                        <p class="section-subtitle">El color se asignará automáticamente según la materia seleccionada</p>
+                        <div class="color-preview-section">
+                            <div class="auto-color-info">
+                                <div class="color-info-header">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span>Colores por Materia</span>
+                                </div>
+                                <div class="color-mappings">
+                                    <div class="color-mapping-item">
+                                        <span class="color-dot" style="background: #667eea;"></span>
+                                        <span class="materia-name">Matemáticas</span>
+                                    </div>
+                                    <div class="color-mapping-item">
+                                        <span class="color-dot" style="background: #28a745;"></span>
+                                        <span class="materia-name">Ciencias Naturales</span>
+                                    </div>
+                                    <div class="color-mapping-item">
+                                        <span class="color-dot" style="background: #ffc107;"></span>
+                                        <span class="materia-name">Ciencias Sociales</span>
+                                    </div>
+                                    <div class="color-mapping-item">
+                                        <span class="color-dot" style="background: #dc3545;"></span>
+                                        <span class="materia-name">Lectura Crítica</span>
+                                    </div>
+                                    <div class="color-mapping-item">
+                                        <span class="color-dot" style="background: #9c27b0;"></span>
+                                        <span class="materia-name">Inglés</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="insigniaColor" id="insigniaColorHidden" value="#667eea">
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" id="cancelInsignia">Cancelar</button>
+                <button type="submit" class="save-insignia-btn" form="insigniaForm">
+                    <i class="bi bi-save"></i>
+                    <span id="insigniaButtonText">Guardar Insignia</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Insignia Confirmation Modal -->
+    <div class="modal" id="deleteInsigniaModal">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <h3>Eliminar Insignia</h3>
+                <button class="close-btn" id="closeDeleteInsigniaModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon delete">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="confirmation-text">
+                        <p><strong>¿Estás seguro?</strong></p>
+                        <p>Esta insignia será eliminada permanentemente.</p>
+                        <div class="insignia-info-confirmation" id="deleteInsigniaInfo">
+                            <strong id="deleteInsigniaName">Nombre Insignia</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancelDeleteInsignia">Cancelar</button>
+                    <button type="button" class="confirm-delete-btn" id="confirmDeleteInsignia">
+                        <i class="bi bi-trash"></i>
+                        <span>Eliminar Insignia</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- User Profile Modal -->
     <div class="modal" id="userProfileModal">
