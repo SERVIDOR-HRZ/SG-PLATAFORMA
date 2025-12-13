@@ -12,8 +12,9 @@ body {
     align-items: center;
     justify-content: center;
     background-image:
-        radial-gradient(circle at 20% 80%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(255, 0, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 70%);
 }
 
 .login-container {
@@ -23,12 +24,16 @@ body {
 }
 
 .login-form {
-    background: #ffffff;
-    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
     padding: 40px 30px;
     box-shadow:
-        0 20px 40px rgba(255, 0, 0, 0.2),
-        0 0 0 1px rgba(255, 0, 0, 0.1);
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     position: relative;
     overflow: hidden;
 }
@@ -57,16 +62,18 @@ body {
 }
 
 .logo-container h1 {
-    color: #000000;
+    color: #ffffff;
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 5px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .logo-container p {
-    color: #666666;
+    color: #ff0000;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 600;
+    text-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
 }
 
 .form {
@@ -79,27 +86,35 @@ body {
 
 .input-group label {
     display: block;
-    color: #333333;
+    color: #ffffff;
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 8px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .input-group input {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
     font-size: 16px;
     transition: all 0.3s ease;
-    background: #ffffff;
-    color: #333333;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
 }
 
 .input-group input:focus {
     outline: none;
     border-color: #ff0000;
-    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2), 0 4px 12px rgba(255, 0, 0, 0.1);
+}
+
+.input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
 }
 
 
@@ -246,7 +261,7 @@ body {
     border: none;
     cursor: pointer;
     font-size: 18px;
-    color: #666666;
+    color: rgba(255, 255, 255, 0.7);
     padding: 4px;
     border-radius: 4px;
     transition: all 0.3s ease;
@@ -259,7 +274,7 @@ body {
 }
 
 .password-toggle:hover {
-    background: rgba(255, 0, 0, 0.1);
+    background: rgba(255, 0, 0, 0.2);
     color: #ff0000;
 }
 

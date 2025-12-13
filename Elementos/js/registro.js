@@ -22,7 +22,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update email field when username changes
     inputs.username.addEventListener('input', function() {
-        const username = this.value.trim();
+        let username = this.value.trim();
+        
+        // Si el usuario pega un correo completo, extraer solo la parte antes del @
+        if (username.includes('@')) {
+            username = username.split('@')[0];
+            this.value = username; // Actualizar el campo con solo el usuario
+        }
+        
         inputs.email.value = username ? username + '@seamosgenios.com' : '';
     });
 
@@ -72,6 +79,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Real-time validation
     inputs.username.addEventListener('blur', () => validateUsername());
+    inputs.username.addEventListener('input', () => {
+        // Remove validation on input to allow typing
+        if (inputs.username.classList.contains('invalid') || inputs.username.classList.contains('valid')) {
+            validateUsername();
+        }
+    });
     inputs.emailRecuperacion.addEventListener('blur', () => validateRecoveryEmail());
     inputs.password.addEventListener('blur', () => validatePassword());
     inputs.confirmPassword.addEventListener('blur', () => validateConfirmPassword());
@@ -96,11 +109,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function validateUsername() {
-        const username = inputs.username.value.trim();
+        let username = inputs.username.value.trim();
         const validationMsg = inputs.username.parentNode.querySelector('.validation-message');
+        
+        // Si el usuario contiene @, extraer solo la parte antes del @ (por si acaso)
+        if (username.includes('@')) {
+            username = username.split('@')[0];
+            inputs.username.value = username;
+        }
         
         // Username validation (alphanumeric, dots, underscores, hyphens)
         const usernameRegex = /^[a-zA-Z0-9._-]+$/;
+        
+        if (username.length === 0) {
+            inputs.username.classList.add('invalid');
+            inputs.username.classList.remove('valid');
+            validationMsg.textContent = 'El usuario es requerido';
+            validationMsg.classList.add('show');
+            return false;
+        }
         
         if (username.length < 3) {
             inputs.username.classList.add('invalid');

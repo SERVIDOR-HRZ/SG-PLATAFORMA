@@ -41,6 +41,7 @@
 .register-form .logo-container p {
     color: #ff0000;
     font-weight: 600;
+    text-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
 }
 
 /* Grid layout para campos en PC */
@@ -160,15 +161,17 @@
 .input-group select {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
     font-size: 16px;
     transition: all 0.3s ease;
-    background: #ffffff;
-    color: #333333;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 16px;
@@ -177,24 +180,27 @@
 .input-group select:focus {
     outline: none;
     border-color: #ff0000;
-    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2), 0 4px 12px rgba(255, 0, 0, 0.1);
 }
 
 .input-group select option {
     padding: 10px;
-    background: #ffffff;
-    color: #333333;
+    background: #1a1a1a;
+    color: #ffffff;
 }
 
 /* Validación para selects */
 .input-group select.invalid {
     border-color: #ff0000 !important;
-    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1) !important;
+    background: rgba(255, 0, 0, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;
 }
 
 .input-group select.valid {
-    border-color: #28a745 !important;
-    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1) !important;
+    border-color: #00ff00 !important;
+    background: rgba(0, 255, 0, 0.1) !important;
+    box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.2) !important;
 }
 
 .register-btn {
@@ -240,12 +246,14 @@
 /* Validación de campos */
 .input-group input.invalid {
     border-color: #ff0000 !important;
-    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1) !important;
+    background: rgba(255, 0, 0, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;
 }
 
 .input-group input.valid {
-    border-color: #28a745 !important;
-    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1) !important;
+    border-color: #00ff00 !important;
+    background: rgba(0, 255, 0, 0.1) !important;
+    box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.2) !important;
 }
 
 .input-group .validation-message {
@@ -253,6 +261,11 @@
     margin-top: 5px;
     color: #ff0000;
     display: none;
+    background: rgba(255, 0, 0, 0.1);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .input-group .validation-message.show {
@@ -262,6 +275,25 @@
 /* Mejoras adicionales para el diseño */
 .input-group {
     margin-bottom: 0; /* Removemos margin por defecto para grid */
+}
+
+/* Estilos glass para inputs en registro */
+.registro-page .input-group input {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+.registro-page .input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.registro-page .input-group input:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2), 0 4px 12px rgba(255, 0, 0, 0.1);
 }
 
 /* Estilos mejorados para PC */
@@ -304,8 +336,9 @@
 @media (min-width: 768px) {
     .register-form {
         box-shadow: 
-            0 25px 50px rgba(255, 0, 0, 0.15),
-            0 0 0 1px rgba(255, 0, 0, 0.05);
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     }
 }
 
@@ -319,7 +352,7 @@
     border: none;
     cursor: pointer;
     font-size: 18px;
-    color: #666666;
+    color: rgba(255, 255, 255, 0.7);
     padding: 4px;
     border-radius: 4px;
     transition: all 0.3s ease;
@@ -332,7 +365,7 @@
 }
 
 .password-toggle:hover {
-    background: rgba(255, 0, 0, 0.1);
+    background: rgba(255, 0, 0, 0.2);
     color: #ff0000;
 }
 
