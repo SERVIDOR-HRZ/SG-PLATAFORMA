@@ -38,7 +38,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (inputs[key].tagName !== 'SELECT' && inputs[key].type !== 'hidden') {
             const validationMsg = document.createElement('div');
             validationMsg.className = 'validation-message';
-            inputs[key].parentNode.appendChild(validationMsg);
+            // Buscar el .input-group más cercano para agregar el mensaje
+            const inputGroup = inputs[key].closest('.input-group');
+            if (inputGroup) {
+                inputGroup.appendChild(validationMsg);
+            } else {
+                inputs[key].parentNode.appendChild(validationMsg);
+            }
         }
     });
 
@@ -77,21 +83,55 @@ document.addEventListener('DOMContentLoaded', function() {
     addPasswordToggle('password');
     addPasswordToggle('confirmPassword');
 
+    // Track if user has interacted with fields
+    const touched = {};
+    
     // Real-time validation
-    inputs.username.addEventListener('blur', () => validateUsername());
     inputs.username.addEventListener('input', () => {
-        // Remove validation on input to allow typing
+        touched.username = true;
         if (inputs.username.classList.contains('invalid') || inputs.username.classList.contains('valid')) {
             validateUsername();
         }
     });
-    inputs.emailRecuperacion.addEventListener('blur', () => validateRecoveryEmail());
-    inputs.password.addEventListener('blur', () => validatePassword());
-    inputs.confirmPassword.addEventListener('blur', () => validateConfirmPassword());
-    inputs.nombre.addEventListener('blur', () => validateName());
-    inputs.telefono.addEventListener('blur', () => validatePhone());
-    inputs.institucion.addEventListener('blur', () => validateInstitution());
-    inputs.numeroDocumento.addEventListener('blur', () => validateDocumentNumber());
+    inputs.username.addEventListener('blur', () => {
+        if (touched.username) validateUsername();
+    });
+    
+    inputs.emailRecuperacion.addEventListener('input', () => touched.emailRecuperacion = true);
+    inputs.emailRecuperacion.addEventListener('blur', () => {
+        if (touched.emailRecuperacion) validateRecoveryEmail();
+    });
+    
+    inputs.password.addEventListener('input', () => touched.password = true);
+    inputs.password.addEventListener('blur', () => {
+        if (touched.password) validatePassword();
+    });
+    
+    inputs.confirmPassword.addEventListener('input', () => touched.confirmPassword = true);
+    inputs.confirmPassword.addEventListener('blur', () => {
+        if (touched.confirmPassword) validateConfirmPassword();
+    });
+    
+    inputs.nombre.addEventListener('input', () => touched.nombre = true);
+    inputs.nombre.addEventListener('blur', () => {
+        if (touched.nombre) validateName();
+    });
+    
+    inputs.telefono.addEventListener('input', () => touched.telefono = true);
+    inputs.telefono.addEventListener('blur', () => {
+        if (touched.telefono) validatePhone();
+    });
+    
+    inputs.institucion.addEventListener('input', () => touched.institucion = true);
+    inputs.institucion.addEventListener('blur', () => {
+        if (touched.institucion) validateInstitution();
+    });
+    
+    inputs.numeroDocumento.addEventListener('input', () => touched.numeroDocumento = true);
+    inputs.numeroDocumento.addEventListener('blur', () => {
+        if (touched.numeroDocumento) validateDocumentNumber();
+    });
+    
     inputs.grado.addEventListener('change', () => validateSelect('grado'));
     inputs.tipoDocumento.addEventListener('change', () => validateSelect('tipoDocumento'));
     inputs.departamento.addEventListener('change', () => validateSelect('departamento'));
@@ -110,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateUsername() {
         let username = inputs.username.value.trim();
-        const validationMsg = inputs.username.parentNode.querySelector('.validation-message');
+        const validationMsg = inputs.username.closest('.input-group').querySelector('.validation-message');
         
         // Si el usuario contiene @, extraer solo la parte antes del @ (por si acaso)
         if (username.includes('@')) {
@@ -154,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function validateRecoveryEmail() {
         const email = inputs.emailRecuperacion.value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const validationMsg = inputs.emailRecuperacion.parentNode.querySelector('.validation-message');
+        const validationMsg = inputs.emailRecuperacion.closest('.input-group').querySelector('.validation-message');
         
         if (!emailRegex.test(email)) {
             inputs.emailRecuperacion.classList.add('invalid');
@@ -172,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validatePassword() {
         const password = inputs.password.value;
-        const validationMsg = inputs.password.parentNode.querySelector('.validation-message');
+        const validationMsg = inputs.password.closest('.input-group').querySelector('.validation-message');
         
         if (password.length < 6) {
             inputs.password.classList.add('invalid');
@@ -191,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function validateConfirmPassword() {
         const password = inputs.password.value;
         const confirmPassword = inputs.confirmPassword.value;
-        const validationMsg = inputs.confirmPassword.parentNode.querySelector('.validation-message');
+        const validationMsg = inputs.confirmPassword.closest('.input-group').querySelector('.validation-message');
         
         if (password !== confirmPassword) {
             inputs.confirmPassword.classList.add('invalid');
@@ -209,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateName() {
         const name = inputs.nombre.value.trim();
-        const validationMsg = inputs.nombre.parentNode.querySelector('.validation-message');
+        const validationMsg = inputs.nombre.closest('.input-group').querySelector('.validation-message');
         
         if (name.length < 2) {
             inputs.nombre.classList.add('invalid');
@@ -228,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function validatePhone() {
         const phone = inputs.telefono.value.trim();
         const phoneRegex = /^[0-9]{10}$/;
-        const validationMsg = inputs.telefono.parentNode.querySelector('.validation-message');
+        const validationMsg = inputs.telefono.closest('.input-group').querySelector('.validation-message');
         
         if (!phoneRegex.test(phone)) {
             inputs.telefono.classList.add('invalid');
@@ -246,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateInstitution() {
         const institution = inputs.institucion.value.trim();
-        const validationMsg = inputs.institucion.parentNode.querySelector('.validation-message');
+        const validationMsg = inputs.institucion.closest('.input-group').querySelector('.validation-message');
         
         if (institution.length < 2) {
             inputs.institucion.classList.add('invalid');
@@ -264,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateDocumentNumber() {
         const docNumber = inputs.numeroDocumento.value.trim();
-        const validationMsg = inputs.numeroDocumento.parentNode.querySelector('.validation-message');
+        const validationMsg = inputs.numeroDocumento.closest('.input-group').querySelector('.validation-message');
         
         if (docNumber.length < 5) {
             inputs.numeroDocumento.classList.add('invalid');
