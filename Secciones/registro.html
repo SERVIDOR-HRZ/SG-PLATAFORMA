@@ -57,7 +57,25 @@
 
                 <div class="input-group">
                     <label for="telefono">Teléfono</label>
-                    <input type="tel" id="telefono" name="telefono" required>
+                    <div class="phone-input-container">
+                        <button type="button" class="country-selector" id="countrySelector">
+                            <span class="flag-emoji">
+                                <img src="https://flagcdn.com/w40/co.png" alt="Colombia" class="flag-img">
+                            </span>
+                            <span class="country-code">+57</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <input type="tel" id="telefono" name="telefono" placeholder="300 123 4567" required>
+                        <input type="hidden" id="codigoPais" name="codigoPais" value="+57">
+                        <input type="hidden" id="telefonoCompleto" name="telefonoCompleto">
+                    </div>
+                    <div class="country-dropdown" id="countryDropdown" style="display: none;">
+                        <div class="country-search">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="countrySearch" placeholder="Buscar país...">
+                        </div>
+                        <div class="country-list" id="countryList"></div>
+                    </div>
                 </div>
 
                 <div class="input-group">
@@ -96,41 +114,20 @@
 
                 <div class="input-group">
                     <label for="departamento">Seleccione Departamento</label>
-                    <select id="departamento" name="departamento" required>
-                        <option value="">Seleccione Departamento</option>
-                        <option value="Amazonas">Amazonas</option>
-                        <option value="Antioquia">Antioquia</option>
-                        <option value="Arauca">Arauca</option>
-                        <option value="Atlántico">Atlántico</option>
-                        <option value="Bolívar">Bolívar</option>
-                        <option value="Boyacá">Boyacá</option>
-                        <option value="Caldas">Caldas</option>
-                        <option value="Caquetá">Caquetá</option>
-                        <option value="Casanare">Casanare</option>
-                        <option value="Cauca">Cauca</option>
-                        <option value="Cesar">Cesar</option>
-                        <option value="Chocó">Chocó</option>
-                        <option value="Córdoba">Córdoba</option>
-                        <option value="Cundinamarca">Cundinamarca</option>
-                        <option value="Guainía">Guainía</option>
-                        <option value="Guaviare">Guaviare</option>
-                        <option value="Huila">Huila</option>
-                        <option value="La Guajira">La Guajira</option>
-                        <option value="Magdalena">Magdalena</option>
-                        <option value="Meta">Meta</option>
-                        <option value="Nariño">Nariño</option>
-                        <option value="Norte de Santander">Norte de Santander</option>
-                        <option value="Putumayo">Putumayo</option>
-                        <option value="Quindío">Quindío</option>
-                        <option value="Risaralda">Risaralda</option>
-                        <option value="San Andrés y Providencia">San Andrés y Providencia</option>
-                        <option value="Santander">Santander</option>
-                        <option value="Sucre">Sucre</option>
-                        <option value="Tolima">Tolima</option>
-                        <option value="Valle del Cauca">Valle del Cauca</option>
-                        <option value="Vaupés">Vaupés</option>
-                        <option value="Vichada">Vichada</option>
-                    </select>
+                    <div class="departamento-input-container">
+                        <button type="button" class="departamento-selector" id="departamentoSelector">
+                            <span class="departamento-text">Seleccione Departamento</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <input type="hidden" id="departamento" name="departamento" required>
+                    </div>
+                    <div class="departamento-dropdown" id="departamentoDropdown" style="display: none;">
+                        <div class="departamento-search">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="departamentoSearch" placeholder="Buscar departamento...">
+                        </div>
+                        <div class="departamento-list" id="departamentoList"></div>
+                    </div>
                 </div>
 
                 <div class="button-group">

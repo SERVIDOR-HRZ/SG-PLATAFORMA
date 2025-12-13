@@ -267,13 +267,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validatePhone() {
         const phone = inputs.telefono.value.trim();
-        const phoneRegex = /^[0-9]{10}$/;
+        const phoneRegex = /^[0-9]{7,15}$/; // Permitir entre 7 y 15 dígitos
         const validationMsg = inputs.telefono.closest('.input-group').querySelector('.validation-message');
         
         if (!phoneRegex.test(phone)) {
             inputs.telefono.classList.add('invalid');
             inputs.telefono.classList.remove('valid');
-            validationMsg.textContent = 'Ingresa un teléfono válido (10 dígitos)';
+            validationMsg.textContent = 'Ingresa un teléfono válido (7-15 dígitos)';
             validationMsg.classList.add('show');
             return false;
         }
@@ -324,6 +324,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const select = inputs[fieldName];
         const value = select.value;
         
+        // Para departamento, validar el selector personalizado
+        if (fieldName === 'departamento') {
+            const departamentoSelector = document.getElementById('departamentoSelector');
+            if (!value || value === '') {
+                if (departamentoSelector) {
+                    departamentoSelector.classList.add('invalid');
+                    departamentoSelector.classList.remove('valid');
+                }
+                return false;
+            }
+            if (departamentoSelector) {
+                departamentoSelector.classList.add('valid');
+                departamentoSelector.classList.remove('invalid');
+            }
+            return true;
+        }
+        
+        // Para otros selects normales
         if (!value || value === '') {
             select.classList.add('invalid');
             select.classList.remove('valid');
@@ -429,12 +447,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Wait for Firebase to be ready
             await waitForFirebase();
             
+            // Obtener teléfono completo con código de país
+            const telefonoCompletoInput = document.getElementById('telefonoCompleto');
+            const telefonoCompleto = telefonoCompletoInput ? telefonoCompletoInput.value : inputs.telefono.value.trim();
+            
             const formData = {
                 email: inputs.email.value.trim(),
                 emailRecuperacion: inputs.emailRecuperacion.value.trim(),
                 password: inputs.password.value,
                 nombre: inputs.nombre.value.trim(),
-                telefono: inputs.telefono.value.trim(),
+                telefono: telefonoCompleto, // Guardar teléfono con código de país
                 institucion: inputs.institucion.value.trim(),
                 grado: inputs.grado.value,
                 tipoDocumento: inputs.tipoDocumento.value,
@@ -497,3 +519,277 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
+// Country selector functionality
+const countries = [
+    { name: 'Colombia', code: '+57', flag: 'CO', emoji: '\uD83C\uDDE8\uD83C\uDDF4' },
+    { name: 'Mexico', code: '+52', flag: 'MX', emoji: '\uD83C\uDDF2\uD83C\uDDFD' },
+    { name: 'Peru', code: '+51', flag: 'PE', emoji: '\uD83C\uDDF5\uD83C\uDDEA' },
+    { name: 'Argentina', code: '+54', flag: 'AR', emoji: '\uD83C\uDDE6\uD83C\uDDF7' },
+    { name: 'Chile', code: '+56', flag: 'CL', emoji: '\uD83C\uDDE8\uD83C\uDDF1' },
+    { name: 'Ecuador', code: '+593', flag: 'EC', emoji: '\uD83C\uDDEA\uD83C\uDDE8' },
+    { name: 'Venezuela', code: '+58', flag: 'VE', emoji: '\uD83C\uDDFB\uD83C\uDDEA' },
+    { name: 'Bolivia', code: '+591', flag: 'BO', emoji: '\uD83C\uDDE7\uD83C\uDDF4' },
+    { name: 'Paraguay', code: '+595', flag: 'PY', emoji: '\uD83C\uDDF5\uD83C\uDDFE' },
+    { name: 'Uruguay', code: '+598', flag: 'UY', emoji: '\uD83C\uDDFA\uD83C\uDDFE' },
+    { name: 'Costa Rica', code: '+506', flag: 'CR', emoji: '\uD83C\uDDE8\uD83C\uDDF7' },
+    { name: 'Panama', code: '+507', flag: 'PA', emoji: '\uD83C\uDDF5\uD83C\uDDE6' },
+    { name: 'Guatemala', code: '+502', flag: 'GT', emoji: '\uD83C\uDDEC\uD83C\uDDF9' },
+    { name: 'Honduras', code: '+504', flag: 'HN', emoji: '\uD83C\uDDED\uD83C\uDDF3' },
+    { name: 'El Salvador', code: '+503', flag: 'SV', emoji: '\uD83C\uDDF8\uD83C\uDDFB' },
+    { name: 'Nicaragua', code: '+505', flag: 'NI', emoji: '\uD83C\uDDF3\uD83C\uDDEE' },
+    { name: 'Republica Dominicana', code: '+1', flag: 'DO', emoji: '\uD83C\uDDE9\uD83C\uDDF4' },
+    { name: 'Cuba', code: '+53', flag: 'CU', emoji: '\uD83C\uDDE8\uD83C\uDDFA' },
+    { name: 'Puerto Rico', code: '+1', flag: 'PR', emoji: '\uD83C\uDDF5\uD83C\uDDF7' },
+    { name: 'Espana', code: '+34', flag: 'ES', emoji: '\uD83C\uDDEA\uD83C\uDDF8' },
+    { name: 'Estados Unidos', code: '+1', flag: 'US', emoji: '\uD83C\uDDFA\uD83C\uDDF8' },
+    { name: 'Brasil', code: '+55', flag: 'BR', emoji: '\uD83C\uDDE7\uD83C\uDDF7' }
+];
+
+function initCountrySelector() {
+    const countrySelector = document.getElementById('countrySelector');
+    const countryDropdown = document.getElementById('countryDropdown');
+    const countryList = document.getElementById('countryList');
+    const countrySearch = document.getElementById('countrySearch');
+    const codigoPaisInput = document.getElementById('codigoPais');
+    const telefonoInput = document.getElementById('telefono');
+    const telefonoCompletoInput = document.getElementById('telefonoCompleto');
+    
+    // Renderizar lista de países
+    function renderCountries(filter = '') {
+        const filteredCountries = countries.filter(country => 
+            country.name.toLowerCase().includes(filter.toLowerCase()) ||
+            country.code.includes(filter)
+        );
+        
+        countryList.innerHTML = filteredCountries.map(country => `
+            <div class="country-item" data-code="${country.code}" data-flag="${country.flag}" data-emoji="${country.emoji}" data-name="${country.name}">
+                <img src="https://flagcdn.com/w40/${country.flag.toLowerCase()}.png" alt="${country.name}" class="flag-img">
+                <div class="country-info">
+                    <span class="country-name">${country.name}</span>
+                    <span class="country-code">${country.code}</span>
+                </div>
+            </div>
+        `).join('');
+        
+        // Agregar event listeners a los items
+        document.querySelectorAll('.country-item').forEach(item => {
+            item.addEventListener('click', function() {
+                selectCountry(
+                    this.dataset.code,
+                    this.dataset.emoji,
+                    this.dataset.name
+                );
+            });
+        });
+    }
+    
+    // Seleccionar país
+    function selectCountry(code, emoji, name) {
+        const flagElement = countrySelector.querySelector('.flag-emoji');
+        // Buscar el país para obtener su código de bandera
+        const country = countries.find(c => c.code === code);
+        if (country) {
+            flagElement.innerHTML = `<img src="https://flagcdn.com/w40/${country.flag.toLowerCase()}.png" alt="${country.name}" class="flag-img">`;
+        }
+        countrySelector.querySelector('.country-code').textContent = code;
+        codigoPaisInput.value = code;
+        
+        // Actualizar teléfono completo
+        updateFullPhone();
+        
+        // Cerrar dropdown
+        closeDropdown();
+    }
+    
+    // Actualizar teléfono completo
+    function updateFullPhone() {
+        const codigo = codigoPaisInput.value;
+        const numero = telefonoInput.value.trim();
+        telefonoCompletoInput.value = numero ? `${codigo}${numero}` : '';
+    }
+    
+    // Abrir/cerrar dropdown
+    function toggleDropdown() {
+        const isOpen = countryDropdown.style.display === 'block';
+        if (isOpen) {
+            closeDropdown();
+        } else {
+            openDropdown();
+        }
+    }
+    
+    function openDropdown() {
+        countryDropdown.style.display = 'block';
+        countrySelector.classList.add('active');
+        countrySearch.value = '';
+        renderCountries();
+        countrySearch.focus();
+    }
+    
+    function closeDropdown() {
+        countryDropdown.style.display = 'none';
+        countrySelector.classList.remove('active');
+    }
+    
+    // Event listeners
+    countrySelector.addEventListener('click', toggleDropdown);
+    
+    countrySearch.addEventListener('input', function() {
+        renderCountries(this.value);
+    });
+    
+    telefonoInput.addEventListener('input', updateFullPhone);
+    
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!countrySelector.contains(e.target) && !countryDropdown.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+    
+    // Inicializar
+    renderCountries();
+    updateFullPhone();
+}
+
+// Inicializar selector de país cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCountrySelector);
+} else {
+    initCountrySelector();
+}
+
+
+// Departamento selector functionality
+const departamentos = [
+    'Amazonas',
+    'Antioquia',
+    'Arauca',
+    'Atlántico',
+    'Bolívar',
+    'Boyacá',
+    'Caldas',
+    'Caquetá',
+    'Casanare',
+    'Cauca',
+    'Cesar',
+    'Chocó',
+    'Córdoba',
+    'Cundinamarca',
+    'Guainía',
+    'Guaviare',
+    'Huila',
+    'La Guajira',
+    'Magdalena',
+    'Meta',
+    'Nariño',
+    'Norte de Santander',
+    'Putumayo',
+    'Quindío',
+    'Risaralda',
+    'San Andrés y Providencia',
+    'Santander',
+    'Sucre',
+    'Tolima',
+    'Valle del Cauca',
+    'Vaupés',
+    'Vichada'
+];
+
+function initDepartamentoSelector() {
+    const departamentoSelector = document.getElementById('departamentoSelector');
+    const departamentoDropdown = document.getElementById('departamentoDropdown');
+    const departamentoList = document.getElementById('departamentoList');
+    const departamentoSearch = document.getElementById('departamentoSearch');
+    const departamentoInput = document.getElementById('departamento');
+    
+    if (!departamentoSelector) return;
+    
+    // Renderizar lista de departamentos
+    function renderDepartamentos(filter = '') {
+        const filteredDepartamentos = departamentos.filter(depto =>
+            depto.toLowerCase().includes(filter.toLowerCase())
+        );
+        
+        departamentoList.innerHTML = filteredDepartamentos.map(depto => `
+            <div class="departamento-item" data-value="${depto}">
+                ${depto}
+            </div>
+        `).join('');
+        
+        // Agregar event listeners a los items
+        document.querySelectorAll('.departamento-item').forEach(item => {
+            item.addEventListener('click', function() {
+                selectDepartamento(this.dataset.value);
+            });
+        });
+    }
+    
+    // Seleccionar departamento
+    function selectDepartamento(value) {
+        const textElement = departamentoSelector.querySelector('.departamento-text');
+        textElement.textContent = value;
+        textElement.classList.add('selected');
+        departamentoInput.value = value;
+        
+        // Disparar evento change para validación
+        const event = new Event('change', { bubbles: true });
+        departamentoInput.dispatchEvent(event);
+        
+        // Marcar como válido
+        departamentoSelector.classList.add('valid');
+        departamentoSelector.classList.remove('invalid');
+        
+        // Cerrar dropdown
+        closeDropdown();
+    }
+    
+    // Abrir/cerrar dropdown
+    function toggleDropdown() {
+        const isOpen = departamentoDropdown.style.display === 'block';
+        if (isOpen) {
+            closeDropdown();
+        } else {
+            openDropdown();
+        }
+    }
+    
+    function openDropdown() {
+        departamentoDropdown.style.display = 'block';
+        departamentoSelector.classList.add('active');
+        departamentoSearch.value = '';
+        renderDepartamentos();
+        departamentoSearch.focus();
+    }
+    
+    function closeDropdown() {
+        departamentoDropdown.style.display = 'none';
+        departamentoSelector.classList.remove('active');
+    }
+    
+    // Event listeners
+    departamentoSelector.addEventListener('click', toggleDropdown);
+    
+    departamentoSearch.addEventListener('input', function() {
+        renderDepartamentos(this.value);
+    });
+    
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!departamentoSelector.contains(e.target) && !departamentoDropdown.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+    
+    // Inicializar
+    renderDepartamentos();
+}
+
+// Inicializar selector de departamento cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDepartamentoSelector);
+} else {
+    initDepartamentoSelector();
+}
