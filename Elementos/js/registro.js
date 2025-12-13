@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 email: inputs.email.value.trim(),
                 emailRecuperacion: inputs.emailRecuperacion.value.trim(),
                 password: inputs.password.value,
-                nombre: inputs.nombre.value.trim(),
+                nombre: inputs.nombre.value.trim().toUpperCase(), // Convertir nombre a mayúsculas
                 telefono: telefonoCompleto, // Guardar teléfono con código de país
                 institucion: inputs.institucion.value.trim(),
                 grado: inputs.grado.value,
@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Redirect after successful registration
             setTimeout(() => {
-                window.location.href = '../index.html';
+                window.location.href = 'login.html';
             }, 3000);
             
         } catch (error) {
