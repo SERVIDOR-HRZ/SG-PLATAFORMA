@@ -80,8 +80,16 @@
 
                 <div class="input-group">
                     <label for="institucion">Tu institución educativa</label>
-                    <input type="text" id="institucion" name="institucion"
-                        placeholder="Si no estás en 11°, escribe: SeamosGenios" required>
+                    <div class="institucion-input-container">
+                        <button type="button" class="institucion-selector" id="institucionSelector">
+                            <span class="institucion-text">Seleccione Institución</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <input type="hidden" id="institucion" name="institucion" required>
+                    </div>
+                    <div class="institucion-dropdown" id="institucionDropdown" style="display: none;">
+                        <div class="institucion-list" id="institucionList"></div>
+                    </div>
                 </div>
 
                 <div class="input-group">

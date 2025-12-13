@@ -123,6 +123,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     inputs.institucion.addEventListener('input', () => touched.institucion = true);
+    inputs.institucion.addEventListener('change', () => {
+        touched.institucion = true;
+        validateInstitution();
+    });
     inputs.institucion.addEventListener('blur', () => {
         if (touched.institucion) validateInstitution();
     });
@@ -286,19 +290,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateInstitution() {
         const institution = inputs.institucion.value.trim();
-        const validationMsg = inputs.institucion.closest('.input-group').querySelector('.validation-message');
+        const institucionSelector = document.getElementById('institucionSelector');
         
-        if (institution.length < 2) {
-            inputs.institucion.classList.add('invalid');
-            inputs.institucion.classList.remove('valid');
-            validationMsg.textContent = 'La institución debe tener al menos 2 caracteres';
-            validationMsg.classList.add('show');
+        if (!institution || institution.length < 2) {
+            if (institucionSelector) {
+                institucionSelector.classList.add('invalid');
+                institucionSelector.classList.remove('valid');
+            }
             return false;
         }
         
-        inputs.institucion.classList.add('valid');
-        inputs.institucion.classList.remove('invalid');
-        validationMsg.classList.remove('show');
+        if (institucionSelector) {
+            institucionSelector.classList.add('valid');
+            institucionSelector.classList.remove('invalid');
+        }
         return true;
     }
 
@@ -792,4 +797,107 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initDepartamentoSelector);
 } else {
     initDepartamentoSelector();
+}
+
+
+// Institucion selector functionality
+const instituciones = [
+    {
+        name: 'IETAC',
+        fullName: 'Institución Educativa Técnico Agropecuario Claret Tierradentro Córdoba',
+        logo: '../data/LOGOINSTITUCION.png'
+    },
+    {
+        name: 'SEAMOSGENIOS',
+        fullName: 'Seamos Genios - Plataforma Educativa',
+        logo: '../Elementos/img/logo1.png'
+    }
+];
+
+function initInstitucionSelector() {
+    const institucionSelector = document.getElementById('institucionSelector');
+    const institucionDropdown = document.getElementById('institucionDropdown');
+    const institucionList = document.getElementById('institucionList');
+    const institucionInput = document.getElementById('institucion');
+    
+    if (!institucionSelector) return;
+    
+    // Renderizar lista de instituciones
+    function renderInstituciones() {
+        institucionList.innerHTML = instituciones.map(inst => `
+            <div class="institucion-item" data-value="${inst.name}">
+                <img src="${inst.logo}" alt="${inst.name}" class="institucion-logo">
+                <div class="institucion-info">
+                    <div class="institucion-name">${inst.name}</div>
+                    <div class="institucion-description">${inst.fullName}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Agregar event listeners a los items
+        document.querySelectorAll('.institucion-item').forEach(item => {
+            item.addEventListener('click', function() {
+                selectInstitucion(this.dataset.value);
+            });
+        });
+    }
+    
+    // Seleccionar institución
+    function selectInstitucion(value) {
+        const textElement = institucionSelector.querySelector('.institucion-text');
+        textElement.textContent = value;
+        textElement.classList.add('selected');
+        institucionInput.value = value;
+        
+        // Disparar evento change para validación
+        const event = new Event('change', { bubbles: true });
+        institucionInput.dispatchEvent(event);
+        
+        // Marcar como válido
+        institucionSelector.classList.add('valid');
+        institucionSelector.classList.remove('invalid');
+        
+        // Cerrar dropdown
+        closeDropdown();
+    }
+    
+    // Abrir/cerrar dropdown
+    function toggleDropdown() {
+        const isOpen = institucionDropdown.style.display === 'block';
+        if (isOpen) {
+            closeDropdown();
+        } else {
+            openDropdown();
+        }
+    }
+    
+    function openDropdown() {
+        institucionDropdown.style.display = 'block';
+        institucionSelector.classList.add('active');
+    }
+    
+    function closeDropdown() {
+        institucionDropdown.style.display = 'none';
+        institucionSelector.classList.remove('active');
+    }
+    
+    // Event listeners
+    institucionSelector.addEventListener('click', toggleDropdown);
+    
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!institucionSelector.contains(e.target) && !institucionDropdown.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+    
+    // Inicializar
+    renderInstituciones();
+}
+
+// Inicializar selector de institución cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initInstitucionSelector);
+} else {
+    initInstitucionSelector();
 }

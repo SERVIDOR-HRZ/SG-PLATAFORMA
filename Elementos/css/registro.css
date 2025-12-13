@@ -819,3 +819,155 @@
         max-height: 280px;
     }
 }
+
+/* Estilos para el selector de instituciones */
+.institucion-input-container {
+    position: relative;
+}
+
+.institucion-selector {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    text-align: left;
+}
+
+.institucion-selector:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.institucion-selector:focus {
+    outline: none;
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2);
+}
+
+.institucion-selector.active {
+    border-color: #ff0000;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.institucion-text {
+    flex: 1;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.institucion-text.selected {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.institucion-selector i {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    transition: transform 0.3s ease;
+}
+
+.institucion-selector.active i {
+    transform: rotate(180deg);
+}
+
+/* Dropdown de instituciones */
+.institucion-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: rgba(20, 20, 20, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.institucion-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.institucion-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.institucion-item:hover {
+    background: rgba(255, 0, 0, 0.15);
+}
+
+.institucion-item:last-child {
+    border-bottom: none;
+}
+
+.institucion-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px;
+}
+
+.institucion-info {
+    flex: 1;
+}
+
+.institucion-name {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.institucion-description {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+/* Validación para el selector de instituciones */
+.institucion-selector.invalid {
+    border-color: #ff0000 !important;
+    background: rgba(255, 0, 0, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;
+}
+
+.institucion-selector.valid {
+    border-color: #00ff00 !important;
+    background: rgba(0, 255, 0, 0.1) !important;
+    box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.2) !important;
+}
+
+/* Responsive para móvil */
+@media (max-width: 767px) {
+    .institucion-logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .institucion-name {
+        font-size: 14px;
+    }
+    
+    .institucion-description {
+        font-size: 12px;
+    }
+}
