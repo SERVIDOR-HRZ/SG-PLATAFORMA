@@ -160,6 +160,108 @@ document.addEventListener('DOMContentLoaded', function() {
         return result;
     }
 
+    // Generate credentials image with dark theme
+    async function generateCredentialsImage(email, newPassword, recoveryCode, nombre) {
+        return new Promise((resolve) => {
+            // Crear canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 650;
+            const ctx = canvas.getContext('2d');
+            
+            // Fondo oscuro con degradado sutil
+            const gradient = ctx.createLinearGradient(0, 0, 0, 650);
+            gradient.addColorStop(0, '#1a1a1a');
+            gradient.addColorStop(0.5, '#2d2d2d');
+            gradient.addColorStop(1, '#1a1a1a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 800, 650);
+            
+            // Borde rojo superior
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(0, 0, 800, 8);
+            
+            // Logo/Icono (simulado con texto)
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🎓', 400, 90);
+            
+            // Título principal
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 42px Arial';
+            ctx.fillText('Seamos Genios', 400, 150);
+            
+            // Subtítulo
+            ctx.fillStyle = '#ff0000';
+            ctx.font = 'bold 26px Arial';
+            ctx.fillText('Recuperar Contraseña', 400, 190);
+            
+            // Contenedor con borde rojo
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(60, 230, 680, 340);
+            
+            // Fondo semi-transparente para el contenedor
+            ctx.fillStyle = 'rgba(45, 45, 45, 0.8)';
+            ctx.fillRect(60, 230, 680, 340);
+            
+            // Información del usuario
+            ctx.textAlign = 'left';
+            
+            // Nombre
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px Arial';
+            ctx.fillText('Nombre:', 100, 280);
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#e0e0e0';
+            ctx.fillText(nombre.toUpperCase(), 100, 315);
+            
+            // Usuario
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px Arial';
+            ctx.fillText('Usuario:', 100, 365);
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#e0e0e0';
+            ctx.fillText(email, 100, 400);
+            
+            // Nueva Contraseña
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px Arial';
+            ctx.fillText('Nueva Contraseña:', 100, 450);
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillText(newPassword, 100, 485);
+            
+            // Nuevo Código de recuperación
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px Arial';
+            ctx.fillText('Nuevo Código de Recuperación:', 100, 535);
+            ctx.font = 'bold 20px Arial';
+            ctx.fillStyle = '#ff0000';
+            ctx.fillText(recoveryCode, 100, 570);
+            
+            // Nota importante
+            ctx.fillStyle = '#ffcccc';
+            ctx.font = 'italic 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('⚠️ Guarda esta imagen en un lugar seguro', 400, 620);
+            
+            // Convertir canvas a blob y descargar
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `recuperacion_${email.split('@')[0]}_${new Date().getTime()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                resolve();
+            });
+        });
+    }
+
     // Validate password
     function validatePassword(password) {
         return password.length >= 6;
@@ -237,10 +339,18 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const newRecoveryCode = await updatePassword(currentUserData.docId, newPassword);
             
-            showMessage(`¡Contraseña cambiada exitosamente! Tu nuevo código de recuperación es: ${newRecoveryCode}. Redirigiendo al login...`, 'success');
+            // Generar y descargar imagen con las credenciales
+            const email = currentUserData.userData.usuario || currentUserData.userData.email;
+            const nombre = currentUserData.userData.nombre || 'Usuario';
+            
+            showMessage('Generando imagen con tus nuevas credenciales...', 'info');
+            
+            await generateCredentialsImage(email, newPassword, newRecoveryCode, nombre);
+            
+            showMessage(`¡Contraseña cambiada exitosamente! Se ha descargado una imagen con tus nuevas credenciales. Redirigiendo al login...`, 'success');
             
             setTimeout(() => {
-                window.location.href = '../index.html';
+                window.location.href = 'login.html';
             }, 5000);
             
         } catch (error) {
