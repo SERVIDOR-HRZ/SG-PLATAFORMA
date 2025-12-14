@@ -112,7 +112,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (touched.confirmPassword) validateConfirmPassword();
     });
     
-    inputs.nombre.addEventListener('input', () => touched.nombre = true);
+    inputs.nombre.addEventListener('input', function() {
+        touched.nombre = true;
+        // Convertir automáticamente a mayúsculas mientras escribe
+        const cursorPosition = this.selectionStart;
+        this.value = this.value.toUpperCase();
+        this.setSelectionRange(cursorPosition, cursorPosition);
+    });
     inputs.nombre.addEventListener('blur', () => {
         if (touched.nombre) validateName();
     });
