@@ -754,9 +754,8 @@ async function loadUsers() {
             return dateB - dateA;
         });
 
-        filteredUsers = [...allUsers];
-        updateStats();
-        renderUsers();
+        // Apply current filters instead of resetting
+        filterUsersByDashboardView();
         // Set initial column visibility
         updateColumnVisibility(currentDashboardView);
         showLoading(false);
