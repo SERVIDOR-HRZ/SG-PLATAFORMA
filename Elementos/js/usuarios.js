@@ -947,7 +947,14 @@ function renderUsers() {
                         (user.tipoUsuario === 'admin' ? '<span class="text-muted">Sin asignaturas</span>' : 'N/A')))}
             </td>
             <td>
-                ${user.telefono || 'No especificado'}
+                ${user.telefono ? 
+                    `<div class="phone-cell">
+                        <span class="phone-number" onclick="copyPhone('${user.telefono}')" title="Click para copiar teléfono">${user.telefono}</span>
+                        <button class="whatsapp-btn" onclick="openWhatsApp('${user.telefono}')" title="Abrir WhatsApp">
+                            <i class="bi bi-whatsapp"></i>
+                        </button>
+                    </div>` : 
+                    'No especificado'}
             </td>
             <td>
                 ${user.tipoUsuario === 'estudiante' ?
@@ -965,18 +972,26 @@ function renderUsers() {
                 ${user.tipoUsuario === 'estudiante' ? (user.departamento || 'No especificado') : 'N/A'}
             </td>
             <td>
-                <div class="recovery-email" 
-                     onclick="copyRecoveryEmail('${user.emailRecuperacion || ''}')"
-                     title="Click para copiar email de recuperación">
-                    ${user.emailRecuperacion || 'No especificado'}
-                </div>
+                ${user.emailRecuperacion ? 
+                    `<div class="recovery-email-cell">
+                        <span class="recovery-email-text" onclick="copyRecoveryEmail('${user.emailRecuperacion}')" title="Click para copiar email">${user.emailRecuperacion}</span>
+                        <button class="gmail-btn" onclick="openGmail('${user.emailRecuperacion}', '${user.codigoRecuperacion || ''}')" title="Enviar por Gmail">
+                            <i class="bi bi-envelope-fill"></i>
+                        </button>
+                    </div>` : 
+                    'No especificado'}
             </td>
             <td>
-                <div class="recovery-code" 
-                     onclick="copyRecoveryCode('${user.codigoRecuperacion || ''}')"
-                     title="Click para copiar código de recuperación">
-                    <strong>${user.codigoRecuperacion || 'No disponible'}</strong>
-                </div>
+                ${user.codigoRecuperacion ? 
+                    `<div class="recovery-code-cell">
+                        <strong class="recovery-code-text" onclick="copyRecoveryCode('${user.codigoRecuperacion}')" title="Click para copiar código">${user.codigoRecuperacion}</strong>
+                        ${user.telefono ? 
+                            `<button class="whatsapp-code-btn" onclick="sendCodeWhatsApp('${user.telefono}', '${user.codigoRecuperacion}')" title="Enviar por WhatsApp">
+                                <i class="bi bi-whatsapp"></i>
+                            </button>` : 
+                            ''}
+                    </div>` : 
+                    'No disponible'}
             </td>
             <td>
                 ${creationDate}
@@ -2401,9 +2416,98 @@ function showMessage(message, type = 'info') {
     }, 3000);
 }
 
+// Copy phone number to clipboard
+function copyPhone(phone) {
+    if (!phone || phone === 'No especificado') {
+        showMessage('No hay teléfono disponible para copiar', 'error');
+        return;
+    }
+
+    navigator.clipboard.writeText(phone).then(() => {
+        showMessage('Teléfono copiado al portapapeles', 'success');
+
+        // Visual feedback
+        const phoneElements = document.querySelectorAll('.phone-number');
+        phoneElements.forEach(el => {
+            if (el.textContent.includes(phone)) {
+                el.style.background = 'rgba(40, 167, 69, 0.2)';
+                setTimeout(() => {
+                    el.style.background = '';
+                }, 1000);
+            }
+        });
+    }).catch(err => {
+        console.error('Error copying phone:', err);
+        showMessage('Error al copiar el teléfono', 'error');
+    });
+}
+
+// Open WhatsApp with phone number
+function openWhatsApp(phone) {
+    if (!phone || phone === 'No especificado') {
+        showMessage('No hay teléfono disponible', 'error');
+        return;
+    }
+
+    // Remove any non-numeric characters except +
+    const cleanPhone = phone.replace(/[^\d+]/g, '');
+    
+    // Open WhatsApp with the phone number
+    const whatsappUrl = `https://wa.me/${cleanPhone}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+// Send recovery code via WhatsApp
+function sendCodeWhatsApp(phone, code) {
+    if (!phone || phone === 'No especificado') {
+        showMessage('No hay teléfono disponible', 'error');
+        return;
+    }
+
+    if (!code || code === 'No disponible') {
+        showMessage('No hay código de recuperación disponible', 'error');
+        return;
+    }
+
+    // Remove any non-numeric characters except +
+    const cleanPhone = phone.replace(/[^\d+]/g, '');
+    
+    // Create message with recovery code
+    const message = `Hola! Tu código de recuperación de Seamos Genios es: ${code}`;
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Open WhatsApp with pre-filled message
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+// Open Gmail to send recovery code
+function openGmail(email, code) {
+    if (!email || email === 'No especificado') {
+        showMessage('No hay email disponible', 'error');
+        return;
+    }
+
+    // Create email subject and body
+    const subject = encodeURIComponent('Código de Recuperación - Seamos Genios');
+    const body = code && code !== 'No disponible' 
+        ? encodeURIComponent(`Hola,\n\nTu código de recuperación de Seamos Genios es: ${code}\n\nPor favor, guarda este código en un lugar seguro.\n\nSaludos,\nEquipo Seamos Genios`)
+        : encodeURIComponent(`Hola,\n\nEste es tu correo de recuperación registrado en Seamos Genios.\n\nSaludos,\nEquipo Seamos Genios`);
+    
+    // Open Gmail compose with pre-filled data
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+    window.open(gmailUrl, '_blank');
+}
+
 // Make copy functions globally available
 window.copyRecoveryCode = copyRecoveryCode;
-window.copyRecoveryEmail = copyRecoveryEmail;// Add scroll effect to dashboard menu
+window.copyRecoveryEmail = copyRecoveryEmail;
+window.copyPhone = copyPhone;
+window.openWhatsApp = openWhatsApp;
+window.sendCodeWhatsApp = sendCodeWhatsApp;
+window.openGmail = openGmail;
+
+// Add scroll effect to dashboard menu
 function initializeDashboardMenuScroll() {
     const dashboardMenu = document.querySelector('.dashboard-menu');
     if (!dashboardMenu) return;

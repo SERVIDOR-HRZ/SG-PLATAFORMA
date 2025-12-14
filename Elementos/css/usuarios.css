@@ -812,6 +812,169 @@ body {
     letter-spacing: 1px;
 }
 
+/* Phone Cell Styling */
+.phone-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.phone-number {
+    cursor: pointer;
+    color: #333;
+    transition: all 0.2s ease;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+}
+
+.phone-number:hover {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.whatsapp-btn {
+    padding: 0.35rem 0.45rem;
+    border: none;
+    border-radius: 5px;
+    background: #25D366;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.whatsapp-btn:hover {
+    background: #128C7E;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(37, 211, 102, 0.4);
+}
+
+.whatsapp-btn i {
+    font-size: 0.95rem;
+}
+
+/* Recovery Email Cell Styling */
+.recovery-email-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.recovery-email-text {
+    cursor: pointer;
+    color: #0066cc;
+    transition: all 0.2s ease;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    word-break: break-all;
+    flex: 1;
+    font-size: 0.85rem;
+}
+
+.recovery-email-text:hover {
+    background: rgba(0, 102, 204, 0.1);
+    color: #004999;
+}
+
+.gmail-btn {
+    padding: 0.35rem 0.45rem;
+    border: none;
+    border-radius: 5px;
+    background: #EA4335;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.gmail-btn:hover {
+    background: #C5221F;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(234, 67, 53, 0.4);
+}
+
+.gmail-btn i {
+    font-size: 0.95rem;
+}
+
+/* Recovery Code Cell Styling */
+.recovery-code-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.recovery-code-text {
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    background: rgba(255, 193, 7, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #856404;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    flex: 1;
+    white-space: nowrap;
+}
+
+.recovery-code-text:hover {
+    background: rgba(255, 193, 7, 0.2);
+    border-color: rgba(255, 193, 7, 0.5);
+}
+
+.whatsapp-code-btn {
+    padding: 0.35rem 0.45rem;
+    border: none;
+    border-radius: 5px;
+    background: #25D366;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.whatsapp-code-btn:hover {
+    background: #128C7E;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(37, 211, 102, 0.4);
+}
+
+.whatsapp-code-btn i {
+    font-size: 0.95rem;
+}
+
 /* User Email Styling */
 .users-table .user-email strong {
     color: #333;
@@ -932,7 +1095,8 @@ body {
 .users-table th:nth-child(8),
 /* Teléfono */
 .users-table td:nth-child(8) {
-    width: 130px;
+    width: 170px;
+    min-width: 170px;
 }
 
 .users-table th:nth-child(9),
@@ -962,13 +1126,15 @@ body {
 .users-table th:nth-child(13),
 /* Email Recuperación */
 .users-table td:nth-child(13) {
-    width: 200px;
+    width: 220px;
+    min-width: 220px;
 }
 
 .users-table th:nth-child(14),
 /* Código Recuperación */
 .users-table td:nth-child(14) {
-    width: 130px;
+    width: 180px;
+    min-width: 180px;
 }
 
 .users-table th:nth-child(15),
@@ -3974,6 +4140,36 @@ tudent columns visibility for profesores view */
     .users-table th:nth-child(12)::after {
         display: none;
     }
+
+    /* Responsive styles for phone cell */
+    .phone-cell {
+        flex-direction: column;
+        gap: 0.3rem;
+        align-items: flex-start;
+    }
+
+    .whatsapp-btn,
+    .gmail-btn,
+    .whatsapp-code-btn {
+        padding: 0.3rem 0.4rem;
+        min-width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+    }
+
+    /* Responsive styles for recovery cells */
+    .recovery-email-cell,
+    .recovery-code-cell {
+        flex-direction: column;
+        gap: 0.3rem;
+        align-items: flex-start;
+    }
+
+    .recovery-email-text,
+    .recovery-code-text {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -3983,6 +4179,29 @@ tudent columns visibility for profesores view */
 
     .users-table.hide-gamification.hide-student-columns {
         min-width: 900px;
+    }
+
+    /* Extra small screens - stack buttons vertically */
+    .phone-cell,
+    .recovery-email-cell,
+    .recovery-code-cell {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .whatsapp-btn,
+    .gmail-btn,
+    .whatsapp-code-btn {
+        width: 100%;
+        min-width: auto;
+        justify-content: center;
+    }
+
+    .phone-number,
+    .recovery-email-text,
+    .recovery-code-text {
+        width: 100%;
+        text-align: left;
     }
 }
 
