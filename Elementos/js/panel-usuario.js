@@ -121,10 +121,11 @@ async function cargarInformacionUsuario() {
 
         // Cargar datos personales en el formulario
         document.getElementById('nombre').value = datosUsuario.nombre || '';
-        document.getElementById('email').value = datosUsuario.email || '';
+        document.getElementById('email').value = datosUsuario.usuario || datosUsuario.email || '';
         document.getElementById('telefono').value = datosUsuario.telefono || '';
         document.getElementById('fechaNacimiento').value = datosUsuario.fechaNacimiento || '';
-        document.getElementById('documento').value = datosUsuario.documento || '';
+        document.getElementById('tipoDocumento').value = datosUsuario.tipoDocumento || '';
+        document.getElementById('numeroDocumento').value = datosUsuario.numeroDocumento || '';
         document.getElementById('tipoUsuario').value = datosUsuario.tipoUsuario === 'admin' ? 'Administrador' : 'Estudiante';
 
         // Formatear fecha de creación
@@ -360,45 +361,32 @@ async function guardarInformacion(event) {
         mostrarCargando('Guardando cambios...');
 
         const nombre = document.getElementById('nombre').value.trim();
-        const email = document.getElementById('email').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
         const fechaNacimiento = document.getElementById('fechaNacimiento').value;
+        const tipoDocumento = document.getElementById('tipoDocumento').value;
+        const numeroDocumento = document.getElementById('numeroDocumento').value.trim();
 
         // Validaciones
         if (!nombre) {
             throw new Error('El nombre es requerido');
         }
 
-        if (!email) {
-            throw new Error('El email es requerido');
-        }
-
-        // Verificar si el email ya existe en otro usuario
+        // Actualizar usuario (sin modificar el email/usuario)
         const db = window.firebaseDB;
-        const emailQuery = await db.collection('usuarios')
-            .where('email', '==', email)
-            .get();
-
-        if (!emailQuery.empty) {
-            const usuarioConEmail = emailQuery.docs[0];
-            if (usuarioConEmail.id !== usuarioActual.id) {
-                throw new Error('El email ya está en uso por otro usuario');
-            }
-        }
-
-        // Actualizar usuario
         await db.collection('usuarios').doc(usuarioActual.id).update({
             nombre: nombre,
-            email: email,
             telefono: telefono,
             fechaNacimiento: fechaNacimiento,
+            tipoDocumento: tipoDocumento,
+            numeroDocumento: numeroDocumento,
             fechaActualizacion: firebase.firestore.Timestamp.now()
         });
 
         // Actualizar sesión
         usuarioActual.nombre = nombre;
-        usuarioActual.email = email;
         usuarioActual.telefono = telefono;
+        usuarioActual.tipoDocumento = tipoDocumento;
+        usuarioActual.numeroDocumento = numeroDocumento;
         sessionStorage.setItem('currentUser', JSON.stringify(usuarioActual));
 
         // Actualizar header con el nuevo nombre
