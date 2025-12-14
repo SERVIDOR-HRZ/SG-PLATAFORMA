@@ -69,6 +69,29 @@ document.addEventListener('DOMContentLoaded', function() {
     addPasswordToggle('newPassword');
     addPasswordToggle('confirmNewPassword');
 
+    // Update email field when username changes
+    const usernameRecoveryInput = document.getElementById('usernameRecovery');
+    const emailRecoveryInput = document.getElementById('emailRecovery');
+    
+    if (usernameRecoveryInput && emailRecoveryInput) {
+        usernameRecoveryInput.addEventListener('input', function() {
+            let username = this.value.trim();
+            
+            // Convertir a minúsculas
+            username = username.toLowerCase();
+            
+            // Si el usuario pega un correo completo, extraer solo la parte antes del @
+            if (username.includes('@')) {
+                username = username.split('@')[0];
+            }
+            
+            // Actualizar el campo con el usuario en minúsculas
+            this.value = username;
+            
+            emailRecoveryInput.value = username ? username + '@seamosgenios.com' : '';
+        });
+    }
+
     // Switch between steps
     function showStep(stepNumber) {
         document.querySelectorAll('.recovery-step').forEach(step => {
@@ -117,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
             await window.firebaseDB.collection('usuarios').doc(docId).update({
                 password: newPassword,
                 codigoRecuperacion: newRecoveryCode, // Regenerate code after use
-                fechaUltimaRecuperacion: firebase.firestore.FieldValue.serverTimestamp()
+                fechaUltimaRecuperacion: window.firebase.firestore.FieldValue.serverTimestamp()
             });
             
             return newRecoveryCode;
