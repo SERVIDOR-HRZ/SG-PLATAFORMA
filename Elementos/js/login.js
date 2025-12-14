@@ -82,6 +82,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Update email field when username changes
+    const usernameInput = document.getElementById('username');
+    const usuarioInput = document.getElementById('usuario');
+    
+    if (usernameInput && usuarioInput) {
+        usernameInput.addEventListener('input', function() {
+            let username = this.value.trim();
+            
+            // Si el usuario pega un correo completo, extraer solo la parte antes del @
+            if (username.includes('@')) {
+                username = username.split('@')[0];
+                this.value = username;
+            }
+            
+            usuarioInput.value = username ? username + '@seamosgenios.com' : '';
+        });
+    }
+
     // Handle form submission
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -191,8 +209,11 @@ document.addEventListener('DOMContentLoaded', function() {
     addPasswordToggle('password');
 
     // Add input validation
-    const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
     inputs.forEach(input => {
+        // Skip hidden inputs
+        if (input.type === 'hidden') return;
+        
         input.addEventListener('blur', function() {
             if (this.value.trim() === '') {
                 this.style.borderColor = '#ff0000';
