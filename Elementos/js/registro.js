@@ -719,10 +719,15 @@ function initDepartamentoSelector() {
     
     if (!departamentoSelector) return;
     
+    // Función para quitar acentos
+    function removeAccents(str) {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    
     // Renderizar lista de departamentos
     function renderDepartamentos(filter = '') {
         const filteredDepartamentos = departamentos.filter(depto =>
-            depto.toLowerCase().includes(filter.toLowerCase())
+            removeAccents(depto.toLowerCase()).includes(removeAccents(filter.toLowerCase()))
         );
         
         departamentoList.innerHTML = filteredDepartamentos.map(depto => `
