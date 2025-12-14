@@ -679,6 +679,7 @@ const departamentos = [
     'Antioquia',
     'Arauca',
     'Atlántico',
+    'Bogotá D.C.',
     'Bolívar',
     'Boyacá',
     'Caldas',
