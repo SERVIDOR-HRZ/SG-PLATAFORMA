@@ -1500,8 +1500,8 @@ async function handleCreateUser(e) {
             rol: rol, // Nuevo campo rol
             activo: true,
             codigoRecuperacion: recoveryCode,
-            fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
-            fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+            fechaCreacion: window.firebase.firestore.FieldValue.serverTimestamp(),
+            fechaUltimaActualizacion: window.firebase.firestore.FieldValue.serverTimestamp()
         };
 
         // Add student-specific fields
@@ -1588,7 +1588,7 @@ async function handleEditUser(e) {
             usuario: usuario,
             telefono: telefono,
             emailRecuperacion: emailRecuperacion,
-            fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+            fechaUltimaActualizacion: window.firebase.firestore.FieldValue.serverTimestamp()
         };
 
         // Update role if user is admin and current user is superuser
@@ -1699,12 +1699,20 @@ async function handlePasswordReset(e) {
         return;
     }
 
+    const submitBtn = elements.resetPasswordForm.querySelector('.reset-btn');
+    
     try {
-        const submitBtn = elements.resetPasswordForm.querySelector('.reset-btn');
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
+        if (submitBtn) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        }
 
         await waitForFirebase();
+
+        // Verificar que Firebase esté disponible
+        if (!window.firebase || !window.firebase.firestore) {
+            throw new Error('Firebase no está disponible');
+        }
 
         // Generate new recovery code
         const newRecoveryCode = generateRecoveryCode();
@@ -1713,7 +1721,7 @@ async function handlePasswordReset(e) {
         await window.firebaseDB.collection('usuarios').doc(currentUserForReset.id).update({
             password: newPassword,
             codigoRecuperacion: newRecoveryCode,
-            fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+            fechaUltimaActualizacion: window.firebase.firestore.FieldValue.serverTimestamp()
         });
 
         showMessage(`Contraseña restablecida exitosamente. Nuevo código de recuperación: ${newRecoveryCode}`, 'success');
@@ -1722,11 +1730,12 @@ async function handlePasswordReset(e) {
 
     } catch (error) {
         console.error('Error resetting password:', error);
-        showMessage('Error al restablecer la contraseña', 'error');
+        showMessage(error.message || 'Error al restablecer la contraseña', 'error');
     } finally {
-        const submitBtn = elements.resetPasswordForm.querySelector('.reset-btn');
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
+        if (submitBtn) {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        }
     }
 }
 
@@ -1747,7 +1756,7 @@ async function toggleUserStatus(userId, currentStatus) {
 
             await window.firebaseDB.collection('usuarios').doc(userId).update({
                 activo: !currentStatus,
-                fechaUltimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                fechaUltimaActualizacion: window.firebase.firestore.FieldValue.serverTimestamp()
             });
 
             showMessage(`Usuario ${action}do exitosamente`, 'success');
@@ -2913,8 +2922,8 @@ async function handleInsigniaFormSubmit(e) {
             descripcion,
             icono,
             color: color || '#667eea',
-            fechaCreacion: currentInsigniaForEdit ? currentInsigniaForEdit.fechaCreacion : firebase.firestore.FieldValue.serverTimestamp(),
-            fechaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+            fechaCreacion: currentInsigniaForEdit ? currentInsigniaForEdit.fechaCreacion : window.firebase.firestore.FieldValue.serverTimestamp(),
+            fechaActualizacion: window.firebase.firestore.FieldValue.serverTimestamp()
         };
 
         if (currentInsigniaForEdit) {
