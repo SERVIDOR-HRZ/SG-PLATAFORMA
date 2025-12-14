@@ -24,11 +24,16 @@ document.addEventListener('DOMContentLoaded', function() {
     inputs.username.addEventListener('input', function() {
         let username = this.value.trim();
         
+        // Convertir a minúsculas
+        username = username.toLowerCase();
+        
         // Si el usuario pega un correo completo, extraer solo la parte antes del @
         if (username.includes('@')) {
             username = username.split('@')[0];
-            this.value = username; // Actualizar el campo con solo el usuario
         }
+        
+        // Actualizar el campo con el usuario en minúsculas
+        this.value = username;
         
         inputs.email.value = username ? username + '@seamosgenios.com' : '';
     });
@@ -511,12 +516,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
             await window.firebaseDB.collection('usuarios').add(userData);
             
-            showMessage(`¡Cuenta creada exitosamente! Tu código de recuperación es: ${recoveryCode}. Guárdalo en un lugar seguro. Tu cuenta está pendiente de activación. Redirigiendo...`, 'success');
+            // Generar y descargar imagen con credenciales
+            await generateCredentialsImage(formData.email, formData.password, recoveryCode, formData.nombre);
+            
+            showMessage(`¡Cuenta creada exitosamente! Se ha descargado una imagen con tus credenciales. Tu cuenta está pendiente de activación. Redirigiendo...`, 'success');
             
             // Redirect after successful registration
             setTimeout(() => {
                 window.location.href = 'login.html';
-            }, 3000);
+            }, 5000);
             
         } catch (error) {
             console.error('Error creating account:', error);
@@ -912,4 +920,91 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initInstitucionSelector);
 } else {
     initInstitucionSelector();
+}
+
+
+// Función para generar imagen con credenciales
+async function generateCredentialsImage(email, password, recoveryCode, nombre) {
+    return new Promise((resolve) => {
+        // Crear canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+        
+        // Fondo degradado
+        const gradient = ctx.createLinearGradient(0, 0, 0, 600);
+        gradient.addColorStop(0, '#667eea');
+        gradient.addColorStop(1, '#764ba2');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 800, 600);
+        
+        // Título
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Seamos Genios', 400, 80);
+        
+        ctx.font = '24px Arial';
+        ctx.fillText('Credenciales de Acceso', 400, 120);
+        
+        // Contenedor blanco
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.roundRect(50, 160, 700, 380, 15);
+        ctx.fill();
+        
+        // Información del usuario
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'left';
+        
+        // Nombre
+        ctx.fillText('Nombre:', 100, 220);
+        ctx.font = '18px Arial';
+        ctx.fillStyle = '#555555';
+        ctx.fillText(nombre.toUpperCase(), 100, 250);
+        
+        // Usuario
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText('Usuario:', 100, 300);
+        ctx.font = '18px Arial';
+        ctx.fillStyle = '#555555';
+        ctx.fillText(email, 100, 330);
+        
+        // Contraseña
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText('Contraseña:', 100, 380);
+        ctx.font = '18px Arial';
+        ctx.fillStyle = '#555555';
+        ctx.fillText(password, 100, 410);
+        
+        // Código de recuperación
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText('Código de Recuperación:', 100, 460);
+        ctx.font = '18px Arial';
+        ctx.fillStyle = '#d32f2f';
+        ctx.fillText(recoveryCode, 100, 490);
+        
+        // Nota importante
+        ctx.fillStyle = '#666666';
+        ctx.font = 'italic 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚠️ Guarda esta imagen en un lugar seguro', 400, 560);
+        
+        // Convertir canvas a blob y descargar
+        canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `credenciales_${email.split('@')[0]}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            resolve();
+        });
+    });
 }

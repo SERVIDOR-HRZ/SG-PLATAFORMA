@@ -90,11 +90,16 @@ document.addEventListener('DOMContentLoaded', function() {
         usernameInput.addEventListener('input', function() {
             let username = this.value.trim();
             
+            // Convertir a minúsculas
+            username = username.toLowerCase();
+            
             // Si el usuario pega un correo completo, extraer solo la parte antes del @
             if (username.includes('@')) {
                 username = username.split('@')[0];
-                this.value = username;
             }
+            
+            // Actualizar el campo con el usuario en minúsculas
+            this.value = username;
             
             usuarioInput.value = username ? username + '@seamosgenios.com' : '';
         });
