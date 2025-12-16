@@ -675,20 +675,51 @@ body {
     padding: 0.75rem 1rem;
     border-radius: 12px;
     word-wrap: break-word;
+    word-break: break-word;
     font-size: 0.95rem;
     line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.message-bubble strong {
+    font-weight: 700;
+}
+
+.message-bubble em {
+    font-style: italic;
+}
+
+.message-bubble del {
+    text-decoration: line-through;
+    opacity: 0.8;
+}
+
+.message-bubble code {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.message.sent .message-bubble code {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.message.received .message-bubble code {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .message.sent .message-bubble {
-    background: #ff0000;
-    color: white;
+    background: #d3d3d3;
+    color: #333;
     border-bottom-right-radius: 4px;
 }
 
 .message.received .message-bubble {
-    background: #ffffff;
-    color: #333;
-    border: 1px solid #e0e0e0;
+    background: #808080;
+    color: #ffffff;
+    border: 1px solid #666666;
     border-bottom-left-radius: 4px;
 }
 
@@ -704,8 +735,8 @@ body {
 
 .message-input-container {
     padding: 1rem 1.5rem;
-    background: #ffffff;
-    border-top: 2px solid #e0e0e0;
+    background: #1a1a1a;
+    border-top: 2px solid #ff0000;
     flex-shrink: 0;
 }
 
@@ -716,9 +747,9 @@ body {
 }
 
 .attach-btn {
-    background: transparent;
-    border: 2px solid #e0e0e0;
-    color: #666;
+    background: #2a2a2a;
+    border: 2px solid #444;
+    color: #999;
     width: 45px;
     height: 45px;
     border-radius: 8px;
@@ -732,7 +763,7 @@ body {
 }
 
 .attach-btn:hover {
-    background: #f5f5f5;
+    background: #333;
     border-color: #ff0000;
     color: #ff0000;
 }
@@ -745,7 +776,7 @@ body {
 .message-form textarea {
     flex: 1;
     padding: 0.75rem 1rem;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #444;
     border-radius: 8px;
     font-size: 0.95rem;
     font-family: inherit;
@@ -753,11 +784,18 @@ body {
     min-height: 45px;
     max-height: 150px;
     transition: all 0.3s ease;
+    background: #2a2a2a;
+    color: white;
 }
 
 .message-form textarea:focus {
     outline: none;
     border-color: #ff0000;
+    background: #333;
+}
+
+.message-form textarea::placeholder {
+    color: #999;
 }
 
 .send-btn {
@@ -790,6 +828,7 @@ body {
 /* Image Preview Container */
 .image-preview-container {
     padding: 0.75rem 1rem 0 1rem;
+    background: #1a1a1a;
 }
 
 .image-preview {
@@ -798,8 +837,8 @@ body {
     max-width: 200px;
     border-radius: 8px;
     overflow: hidden;
-    border: 2px solid #e0e0e0;
-    background: #f5f5f5;
+    border: 2px solid #444;
+    background: #2a2a2a;
 }
 
 .image-preview img {
@@ -860,14 +899,14 @@ body {
 }
 
 .message.sent .message-image-bubble {
-    background: #ff0000;
-    color: white;
+    background: #d3d3d3;
+    color: #333;
 }
 
 .message.received .message-image-bubble {
-    background: #ffffff;
-    color: #333;
-    border: 1px solid #e0e0e0;
+    background: #808080;
+    color: #ffffff;
+    border: 1px solid #666666;
 }
 
 /* Chat Image Modal */

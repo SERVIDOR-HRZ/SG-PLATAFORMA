@@ -168,13 +168,13 @@ function initializePage() {
     elements.refreshBtn.addEventListener('click', loadUsers);
     elements.createUserBtn.addEventListener('click', openCreateUserModal);
     elements.backBtn.addEventListener('click', () => window.location.href = 'Panel_Admin.html');
-    
+
     // Manage insignias button
     const manageInsigniasBtn = document.getElementById('manageInsigniasBtn');
     if (manageInsigniasBtn) {
         manageInsigniasBtn.addEventListener('click', openInsigniasManagement);
     }
-    
+
     // Logout button manejado por perfil-compartido.js
 
     // Export dropdown events
@@ -428,7 +428,7 @@ function filterUsersByDashboardView() {
             user.institucion?.toLowerCase().includes(searchTerm);
 
         // Type filter
-        const matchesType = !typeFilter || 
+        const matchesType = !typeFilter ||
             (typeFilter === 'superusuario' && user.rol === 'superusuario') ||
             (typeFilter === 'admin' && user.tipoUsuario === 'admin' && user.rol !== 'superusuario') ||
             (typeFilter === 'estudiante' && user.tipoUsuario === 'estudiante');
@@ -437,7 +437,7 @@ function filterUsersByDashboardView() {
         const matchesStatus = !statusFilter || user.activo.toString() === statusFilter;
 
         // Institucion filter (only for students)
-        const matchesInstitucion = !institucionFilter || 
+        const matchesInstitucion = !institucionFilter ||
             (user.tipoUsuario === 'estudiante' && user.institucion === institucionFilter);
 
         return matchesSearch && matchesType && matchesStatus && matchesInstitucion;
@@ -450,7 +450,7 @@ function filterUsersByDashboardView() {
 // Populate institucion filter
 function populateInstitucionFilter() {
     const instituciones = new Set();
-    
+
     // Get all unique instituciones from students
     allUsers.forEach(user => {
         if (user.tipoUsuario === 'estudiante' && user.institucion && user.institucion.trim()) {
@@ -463,7 +463,7 @@ function populateInstitucionFilter() {
 
     // Clear and populate the filter
     elements.institucionFilter.innerHTML = '<option value="">Todas las instituciones</option>';
-    
+
     sortedInstituciones.forEach(institucion => {
         const option = document.createElement('option');
         option.value = institucion;
@@ -477,9 +477,9 @@ function populateInstitucionFilter() {
 
 // Update institucion filter visibility based on dashboard view
 function updateInstitucionFilterVisibility() {
-    const shouldShowInstitucionFilter = currentDashboardView === 'estudiantes' || 
-                                        currentDashboardView === 'dashboard';
-    
+    const shouldShowInstitucionFilter = currentDashboardView === 'estudiantes' ||
+        currentDashboardView === 'dashboard';
+
     if (shouldShowInstitucionFilter && elements.institucionFilter) {
         elements.institucionFilter.style.display = '';
     } else if (elements.institucionFilter) {
@@ -804,7 +804,7 @@ async function loadUsers() {
 
         // Populate institucion filter
         populateInstitucionFilter();
-        
+
         // Apply current filters instead of resetting
         filterUsersByDashboardView();
         // Set initial column visibility
@@ -998,14 +998,14 @@ function renderUsers() {
                         (user.tipoUsuario === 'admin' ? '<span class="text-muted">Sin asignaturas</span>' : 'N/A')))}
             </td>
             <td>
-                ${user.telefono ? 
-                    `<div class="phone-cell">
+                ${user.telefono ?
+                `<div class="phone-cell">
                         <span class="phone-number" onclick="copyPhone('${user.telefono}')" title="Click para copiar teléfono">${user.telefono}</span>
                         <button class="whatsapp-btn" onclick="openWhatsApp('${user.telefono}')" title="Abrir WhatsApp">
                             <i class="bi bi-whatsapp"></i>
                         </button>
-                    </div>` : 
-                    'No especificado'}
+                    </div>` :
+                'No especificado'}
             </td>
             <td>
                 ${user.tipoUsuario === 'estudiante' ?
@@ -1023,26 +1023,26 @@ function renderUsers() {
                 ${user.tipoUsuario === 'estudiante' ? (user.departamento || 'No especificado') : 'N/A'}
             </td>
             <td>
-                ${user.emailRecuperacion ? 
-                    `<div class="recovery-email-cell">
+                ${user.emailRecuperacion ?
+                `<div class="recovery-email-cell">
                         <span class="recovery-email-text" onclick="copyRecoveryEmail('${user.emailRecuperacion}')" title="Click para copiar email">${user.emailRecuperacion}</span>
                         <button class="gmail-btn" onclick="openGmail('${user.emailRecuperacion}', '${user.codigoRecuperacion || ''}')" title="Enviar por Gmail">
                             <i class="bi bi-envelope-fill"></i>
                         </button>
-                    </div>` : 
-                    'No especificado'}
+                    </div>` :
+                'No especificado'}
             </td>
             <td>
-                ${user.codigoRecuperacion ? 
-                    `<div class="recovery-code-cell">
+                ${user.codigoRecuperacion ?
+                `<div class="recovery-code-cell">
                         <strong class="recovery-code-text" onclick="copyRecoveryCode('${user.codigoRecuperacion}')" title="Click para copiar código">${user.codigoRecuperacion}</strong>
-                        ${user.telefono ? 
-                            `<button class="whatsapp-code-btn" onclick="sendCodeWhatsApp('${user.telefono}', '${user.codigoRecuperacion}')" title="Enviar por WhatsApp">
+                        ${user.telefono ?
+                    `<button class="whatsapp-code-btn" onclick="sendCodeWhatsApp('${user.telefono}', '${user.codigoRecuperacion}')" title="Enviar por WhatsApp">
                                 <i class="bi bi-whatsapp"></i>
-                            </button>` : 
-                            ''}
-                    </div>` : 
-                    'No disponible'}
+                            </button>` :
+                    ''}
+                    </div>` :
+                'No disponible'}
             </td>
             <td>
                 ${creationDate}
@@ -1189,7 +1189,7 @@ function toggleSecurityCodeSection() {
     if (superuserRadio && superuserRadio.checked) {
         // Show security code section for superusers
         securityCodeSection.style.display = 'block';
-        
+
         // Hide subject selection for superusers (they have access to all)
         adminFields.forEach(field => {
             if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
@@ -1199,14 +1199,14 @@ function toggleSecurityCodeSection() {
     } else {
         // Hide security code section for regular admins
         securityCodeSection.style.display = 'none';
-        
+
         // Show subject selection for regular admins/professors
         adminFields.forEach(field => {
             if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
                 field.style.display = 'block';
             }
         });
-        
+
         // Clear the security code when hiding
         if (elements.createSecurityCode) {
             elements.createSecurityCode.value = '';
@@ -1349,7 +1349,7 @@ function openEditUserModal(userId) {
             // After loading insignias, select the ones the user has
             const insigniasArray = user.insignias || [];
             const insigniasCheckboxes = document.querySelectorAll('input[name="insigniaEdit"]');
-            
+
             insigniasCheckboxes.forEach(checkbox => {
                 const insigniaId = checkbox.value;
                 // Check if user has this insignia by ID
@@ -1765,7 +1765,7 @@ async function handlePasswordReset(e) {
     }
 
     const submitBtn = elements.resetPasswordForm.querySelector('.reset-btn');
-    
+
     try {
         if (submitBtn) {
             submitBtn.classList.add('loading');
@@ -1894,7 +1894,7 @@ function closeExportMenuOutside(e) {
 function handleExport(type) {
     let dataToExport = [];
     let filename = '';
-    
+
     // Get current institucion filter value
     const institucionFilter = elements.institucionFilter ? elements.institucionFilter.value : '';
 
@@ -1936,7 +1936,7 @@ function handleExport(type) {
     }
 
     if (dataToExport.length === 0) {
-        const message = institucionFilter && type === 'estudiante' 
+        const message = institucionFilter && type === 'estudiante'
             ? `No hay estudiantes de ${institucionFilter} para exportar`
             : `No hay ${type === 'all' ? 'usuarios' : type === 'admin' ? 'profesores' : 'estudiantes'} para exportar`;
         showMessage(message, 'error');
@@ -2001,7 +2001,7 @@ function handleExport(type) {
     const exportMessage = institucionFilter && type === 'estudiante'
         ? `Exportación completada: ${dataToExport.length} estudiantes de ${institucionFilter} exportados`
         : `Exportación completada: ${dataToExport.length} registros exportados`;
-    
+
     showMessage(exportMessage, 'success');
 }
 
@@ -2046,7 +2046,7 @@ async function exportInsigniasData() {
         // Get all insignias
         const insigniasSnapshot = await window.firebaseDB.collection('insignias').get();
         const insigniasMap = new Map();
-        
+
         insigniasSnapshot.forEach(doc => {
             insigniasMap.set(doc.id, doc.data());
         });
@@ -2518,7 +2518,7 @@ function openWhatsApp(phone) {
 
     // Remove any non-numeric characters except +
     const cleanPhone = phone.replace(/[^\d+]/g, '');
-    
+
     // Open WhatsApp with the phone number
     const whatsappUrl = `https://wa.me/${cleanPhone}`;
     window.open(whatsappUrl, '_blank');
@@ -2538,11 +2538,11 @@ function sendCodeWhatsApp(phone, code) {
 
     // Remove any non-numeric characters except +
     const cleanPhone = phone.replace(/[^\d+]/g, '');
-    
+
     // Create message with recovery code
     const message = `Hola! Tu código de recuperación de Seamos Genios es: ${code}`;
     const encodedMessage = encodeURIComponent(message);
-    
+
     // Open WhatsApp with pre-filled message
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
@@ -2557,10 +2557,10 @@ function openGmail(email, code) {
 
     // Create email subject and body
     const subject = encodeURIComponent('Código de Recuperación - Seamos Genios');
-    const body = code && code !== 'No disponible' 
+    const body = code && code !== 'No disponible'
         ? encodeURIComponent(`Hola,\n\nTu código de recuperación de Seamos Genios es: ${code}\n\nPor favor, guarda este código en un lugar seguro.\n\nSaludos,\nEquipo Seamos Genios`)
         : encodeURIComponent(`Hola,\n\nEste es tu correo de recuperación registrado en Seamos Genios.\n\nSaludos,\nEquipo Seamos Genios`);
-    
+
     // Open Gmail compose with pre-filled data
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
     window.open(gmailUrl, '_blank');
@@ -2615,11 +2615,11 @@ document.addEventListener('DOMContentLoaded', function () {
 // Bootstrap Icons for Insignias - Categorized
 const BOOTSTRAP_ICONS = {
     all: [
-        'award', 'award-fill', 'trophy', 'trophy-fill', 'star', 'star-fill', 
+        'award', 'award-fill', 'trophy', 'trophy-fill', 'star', 'star-fill',
         'bookmark', 'bookmark-fill', 'gem',
         'shield', 'shield-fill', 'shield-check',
-        'lightbulb', 'lightbulb-fill', 'rocket', 
-        'fire', 'lightning', 'lightning-fill', 
+        'lightbulb', 'lightbulb-fill', 'rocket',
+        'fire', 'lightning', 'lightning-fill',
         'heart', 'heart-fill', 'emoji-smile', 'emoji-smile-fill',
         'gift', 'gift-fill', 'flag', 'flag-fill',
         'patch-check', 'patch-check-fill', 'check-circle', 'check-circle-fill',
@@ -2744,13 +2744,13 @@ function switchDashboardView(view) {
     // Always hide insignias management when switching views
     const usersTableContainer = document.getElementById('usersTableContainer');
     const insigniasManagement = document.getElementById('insigniasManagement');
-    
+
     if (usersTableContainer) usersTableContainer.style.display = 'block';
     if (insigniasManagement) insigniasManagement.style.display = 'none';
-    
+
     // Update institucion filter visibility
     updateInstitucionFilterVisibility();
-    
+
     // Filter users based on view (existing functionality)
     filterUsersByDashboardView();
     updateDashboardTitle(view);
@@ -2761,22 +2761,22 @@ function openInsigniasManagement() {
     // Hide users table, show insignias management
     const usersTableContainer = document.getElementById('usersTableContainer');
     const insigniasManagement = document.getElementById('insigniasManagement');
-    
+
     if (usersTableContainer) usersTableContainer.style.display = 'none';
     if (insigniasManagement) {
         insigniasManagement.style.display = 'block';
         loadInsignias();
     }
-    
+
     // Deactivate all dashboard tabs
     const dashboardTabs = document.querySelectorAll('.dashboard-tab');
     dashboardTabs.forEach(tab => tab.classList.remove('active'));
-    
+
     // Hide all action buttons when in management view
     const createUserBtn = document.getElementById('createUserBtn');
     const refreshBtn = document.getElementById('refreshBtn');
     const manageInsigniasBtn = document.getElementById('manageInsigniasBtn');
-    
+
     if (createUserBtn) createUserBtn.classList.add('hide-in-insignias');
     if (refreshBtn) refreshBtn.classList.add('hide-in-insignias');
     if (manageInsigniasBtn) manageInsigniasBtn.classList.remove('show');
@@ -2786,13 +2786,13 @@ function openInsigniasManagement() {
 function closeInsigniasManagement() {
     const usersTableContainer = document.getElementById('usersTableContainer');
     const insigniasManagement = document.getElementById('insigniasManagement');
-    
+
     if (usersTableContainer) usersTableContainer.style.display = 'block';
     if (insigniasManagement) insigniasManagement.style.display = 'none';
-    
+
     // Reactivate the current dashboard view
     switchDashboardView(currentDashboardView || 'dashboard');
-    
+
     // Update button visibility based on current view
     updateDashboardTitle(currentDashboardView || 'dashboard');
 }
@@ -2937,7 +2937,7 @@ function selectIcon(iconName) {
     }
 
     document.getElementById('selectedIcon').value = iconName;
-    
+
     // Show selected icon display
     const selectedIconDisplay = document.getElementById('selectedIconDisplay');
     const selectedIconName = document.getElementById('selectedIconName');
@@ -2945,7 +2945,7 @@ function selectIcon(iconName) {
         selectedIconDisplay.style.display = 'flex';
         selectedIconName.textContent = iconName;
     }
-    
+
     updateInsigniaPreview();
 }
 
@@ -3235,7 +3235,7 @@ async function loadInsigniaIconsInTable() {
         // Get all insignias from Firebase once
         const insigniasSnapshot = await window.firebaseDB.collection('insignias').get();
         const insigniasMap = new Map();
-        
+
         insigniasSnapshot.forEach(doc => {
             insigniasMap.set(doc.id, doc.data());
         });
