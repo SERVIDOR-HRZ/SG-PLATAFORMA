@@ -35,6 +35,7 @@ const elements = {
     searchInput: document.getElementById('searchInput'),
     userTypeFilter: document.getElementById('userTypeFilter'),
     statusFilter: document.getElementById('statusFilter'),
+    institucionFilter: document.getElementById('institucionFilter'),
     usersTableBody: document.getElementById('usersTableBody'),
     loadingSpinner: document.getElementById('loadingSpinner'),
     noResults: document.getElementById('noResults'),
@@ -163,6 +164,7 @@ function initializePage() {
     elements.searchInput.addEventListener('input', handleSearch);
     elements.userTypeFilter.addEventListener('change', handleFilter);
     elements.statusFilter.addEventListener('change', handleFilter);
+    elements.institucionFilter.addEventListener('change', handleFilter);
     elements.refreshBtn.addEventListener('click', loadUsers);
     elements.createUserBtn.addEventListener('click', openCreateUserModal);
     elements.backBtn.addEventListener('click', () => window.location.href = 'Panel_Admin.html');
@@ -410,11 +412,12 @@ function filterUsersByDashboardView() {
             break;
     }
 
-    // Apply existing filters (search, type, status)
+    // Apply existing filters (search, type, status, institucion)
     filteredUsers = baseUsers.filter(user => {
         const searchTerm = elements.searchInput.value.toLowerCase();
         const typeFilter = elements.userTypeFilter.value;
         const statusFilter = elements.statusFilter.value;
+        const institucionFilter = elements.institucionFilter.value;
 
         // Search filter
         const matchesSearch = !searchTerm ||
@@ -433,11 +436,56 @@ function filterUsersByDashboardView() {
         // Status filter
         const matchesStatus = !statusFilter || user.activo.toString() === statusFilter;
 
-        return matchesSearch && matchesType && matchesStatus;
+        // Institucion filter (only for students)
+        const matchesInstitucion = !institucionFilter || 
+            (user.tipoUsuario === 'estudiante' && user.institucion === institucionFilter);
+
+        return matchesSearch && matchesType && matchesStatus && matchesInstitucion;
     });
 
     updateStats();
     renderUsers();
+}
+
+// Populate institucion filter
+function populateInstitucionFilter() {
+    const instituciones = new Set();
+    
+    // Get all unique instituciones from students
+    allUsers.forEach(user => {
+        if (user.tipoUsuario === 'estudiante' && user.institucion && user.institucion.trim()) {
+            instituciones.add(user.institucion.trim());
+        }
+    });
+
+    // Sort instituciones alphabetically
+    const sortedInstituciones = Array.from(instituciones).sort();
+
+    // Clear and populate the filter
+    elements.institucionFilter.innerHTML = '<option value="">Todas las instituciones</option>';
+    
+    sortedInstituciones.forEach(institucion => {
+        const option = document.createElement('option');
+        option.value = institucion;
+        option.textContent = institucion;
+        elements.institucionFilter.appendChild(option);
+    });
+
+    // Show/hide institucion filter based on current view
+    updateInstitucionFilterVisibility();
+}
+
+// Update institucion filter visibility based on dashboard view
+function updateInstitucionFilterVisibility() {
+    const shouldShowInstitucionFilter = currentDashboardView === 'estudiantes' || 
+                                        currentDashboardView === 'dashboard';
+    
+    if (shouldShowInstitucionFilter && elements.institucionFilter) {
+        elements.institucionFilter.style.display = '';
+    } else if (elements.institucionFilter) {
+        elements.institucionFilter.style.display = 'none';
+        elements.institucionFilter.value = ''; // Reset filter when hidden
+    }
 }
 
 // Update dashboard title and stats based on view
@@ -754,6 +802,9 @@ async function loadUsers() {
             return dateB - dateA;
         });
 
+        // Populate institucion filter
+        populateInstitucionFilter();
+        
         // Apply current filters instead of resetting
         filterUsersByDashboardView();
         // Set initial column visibility
@@ -1843,6 +1894,9 @@ function closeExportMenuOutside(e) {
 function handleExport(type) {
     let dataToExport = [];
     let filename = '';
+    
+    // Get current institucion filter value
+    const institucionFilter = elements.institucionFilter ? elements.institucionFilter.value : '';
 
     // Filter data based on type
     switch (type) {
@@ -1852,7 +1906,13 @@ function handleExport(type) {
             break;
         case 'estudiante':
             dataToExport = allUsers.filter(user => user.tipoUsuario === 'estudiante');
-            filename = 'estudiantes';
+            // Apply institucion filter if active
+            if (institucionFilter) {
+                dataToExport = dataToExport.filter(user => user.institucion === institucionFilter);
+                filename = `estudiantes_${institucionFilter.replace(/\s+/g, '_')}`;
+            } else {
+                filename = 'estudiantes';
+            }
             break;
         case 'admin':
             dataToExport = allUsers.filter(user => user.tipoUsuario === 'admin');
@@ -1876,7 +1936,10 @@ function handleExport(type) {
     }
 
     if (dataToExport.length === 0) {
-        showMessage(`No hay ${type === 'all' ? 'usuarios' : type === 'admin' ? 'profesores' : 'estudiantes'} para exportar`, 'error');
+        const message = institucionFilter && type === 'estudiante' 
+            ? `No hay estudiantes de ${institucionFilter} para exportar`
+            : `No hay ${type === 'all' ? 'usuarios' : type === 'admin' ? 'profesores' : 'estudiantes'} para exportar`;
+        showMessage(message, 'error');
         return;
     }
 
@@ -1935,7 +1998,11 @@ function handleExport(type) {
     // Save file
     XLSX.writeFile(wb, finalFilename);
 
-    showMessage(`Exportación completada: ${dataToExport.length} registros exportados`, 'success');
+    const exportMessage = institucionFilter && type === 'estudiante'
+        ? `Exportación completada: ${dataToExport.length} estudiantes de ${institucionFilter} exportados`
+        : `Exportación completada: ${dataToExport.length} registros exportados`;
+    
+    showMessage(exportMessage, 'success');
 }
 
 // Export recovery codes function
@@ -2680,6 +2747,9 @@ function switchDashboardView(view) {
     
     if (usersTableContainer) usersTableContainer.style.display = 'block';
     if (insigniasManagement) insigniasManagement.style.display = 'none';
+    
+    // Update institucion filter visibility
+    updateInstitucionFilterVisibility();
     
     // Filter users based on view (existing functionality)
     filterUsersByDashboardView();
