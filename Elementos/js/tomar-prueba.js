@@ -1536,25 +1536,39 @@ function showSubmitModal() {
     Object.keys(userAnswers).forEach(subject => {
         const config = subjectConfig[subject];
         const subjectAnswers = userAnswers[subject];
-        const totalQuestions = Object.keys(subjectAnswers).length;
+        const subjectQuestions = testQuestions.find(q => q[subject])?.[subject] || [];
+        
+        // Count only real questions (not reading texts, paragraphs, titles)
+        let totalQuestions = 0;
         let answeredCount = 0;
 
         Object.keys(subjectAnswers).forEach(questionIndex => {
+            const question = subjectQuestions[parseInt(questionIndex)];
+            
+            // Skip non-question items
+            if (!question || question.type === 'reading' || question.type === 'paragraph' || question.type === 'title') {
+                return;
+            }
+            
+            totalQuestions++;
             const answer = subjectAnswers[questionIndex];
             if (answer !== null && answer !== undefined && answer !== '') {
                 answeredCount++;
             }
         });
 
-        summaryHTML += `
-            <div class="summary-item">
-                <div class="summary-subject">
-                    <i class="${config.icon}"></i>
-                    ${config.name}
+        // Only show subjects that have questions
+        if (totalQuestions > 0) {
+            summaryHTML += `
+                <div class="summary-item">
+                    <div class="summary-subject">
+                        <i class="${config.icon}"></i>
+                        ${config.name}
+                    </div>
+                    <div class="summary-count">${answeredCount}/${totalQuestions} respondidas</div>
                 </div>
-                <div class="summary-count">${answeredCount}/${totalQuestions} respondidas</div>
-            </div>
-        `;
+            `;
+        }
     });
 
     summaryContainer.innerHTML = summaryHTML;
@@ -1651,6 +1665,11 @@ function evaluateAnswers() {
             const userAnswer = userAnswers[subject][questionIndex];
             const question = subjectQuestions[parseInt(questionIndex)];
 
+            // Skip non-question items (reading texts, paragraphs, titles)
+            if (!question || question.type === 'reading' || question.type === 'paragraph' || question.type === 'title') {
+                return;
+            }
+
             let isCorrect = false;
             let correctAnswer = null;
 
@@ -1661,7 +1680,7 @@ function evaluateAnswers() {
 
                 // Check if user answer matches correct answer
                 isCorrect = parseInt(userAnswer) === correctOptionIndex;
-            } else {
+            } else if (question.type === 'short' || question.type === 'open') {
                 // For open questions, we can't automatically evaluate
                 // Mark as correct for now (teacher will review manually)
                 isCorrect = userAnswer && userAnswer.trim().length > 0;

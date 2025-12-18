@@ -75,7 +75,7 @@
 
             <!-- Tests List -->
             <div class="tests-container">
-                <h2>Pruebas Creadas</h2>
+                <h2><i class="bi bi-clipboard-check"></i> Pruebas Creadas</h2>
                 <div class="tests-list" id="testsList">
                     <!-- Tests will be loaded here -->
                 </div>
@@ -85,7 +85,7 @@
         <!-- Student View -->
         <div id="studentView" class="student-view" style="display: none;">
             <div class="assigned-tests">
-                <h2>Mis Pruebas Asignadas</h2>
+                <h2><i class="bi bi-journal-check"></i> Mis Pruebas Asignadas</h2>
                 <div class="student-tests-list" id="studentTestsList">
                     <!-- Student tests will be loaded here -->
                 </div>
@@ -97,7 +97,7 @@
     <div class="modal-overlay" id="createTestModal">
         <div class="modal">
             <div class="modal-header">
-                <h3>Crear Nueva Prueba</h3>
+                <h3><i class="bi bi-plus-square"></i> Crear Nueva Prueba</h3>
                 <button class="close-btn" id="closeCreateModal">
                     <i class="bi bi-x"></i>
                 </button>
@@ -106,21 +106,45 @@
                 <form id="createTestForm">
                     <div class="form-group">
                         <label for="testName">Nombre de la Prueba</label>
-                        <input type="text" id="testName" name="testName" required>
+                        <input type="text" id="testName" name="testName" placeholder="Ej: Evaluación Matemáticas" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="testStartDate"><i class="bi bi-calendar-event"></i> Fecha de Inicio</label>
+                            <input type="date" id="testStartDate" name="testStartDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="testEndDate"><i class="bi bi-calendar-check"></i> Fecha de Fin</label>
+                            <input type="date" id="testEndDate" name="testEndDate" required>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="testDate">Fecha de la Prueba</label>
-                        <input type="date" id="testDate" name="testDate" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="assignedStudents">Estudiantes Asignados</label>
+                        <label>Estudiantes Asignados</label>
+                        
+                        <!-- Institution Filter -->
+                        <div class="institution-filter">
+                            <label><i class="bi bi-building"></i> Filtrar por Institución</label>
+                            <div class="institution-quick-select" id="institutionQuickSelect">
+                                <!-- Institution buttons will be loaded here -->
+                            </div>
+                            <select id="institutionFilter">
+                                <option value="">Todas las instituciones</option>
+                                <!-- Options will be loaded dynamically -->
+                            </select>
+                        </div>
+                        
+                        <div class="selector-divider">
+                            <span>o selecciona individualmente</span>
+                        </div>
+                        
                         <div class="students-selector" id="studentsSelector">
                             <div class="students-selector-header">
                                 <div class="select-all-container">
                                     <input type="checkbox" id="selectAllStudents">
-                                    <label for="selectAllStudents">Seleccionar Todos</label>
+                                    <label for="selectAllStudents">Seleccionar Todos (filtrados)</label>
                                 </div>
                                 <div class="students-search">
                                     <i class="bi bi-search"></i>
@@ -137,12 +161,12 @@
                     </div>
 
                     <div class="blocks-container">
-                        <h4>Configuración de Bloques <span style="color: #dc3545; font-size: 0.9rem;">(Al menos 1 bloque requerido)</span></h4>
+                        <h4><i class="bi bi-clock-history"></i> Configuración de Bloques <span style="color: #ff6b6b; font-size: 0.85rem; font-weight: 500;">(Al menos 1 bloque requerido)</span></h4>
 
                         <!-- Bloque 1 -->
                         <div class="block-config">
                             <div class="block-header-with-toggle">
-                                <h5>Bloque 1</h5>
+                                <h5><i class="bi bi-1-circle"></i> Bloque 1</h5>
                                 <label class="toggle-switch">
                                     <input type="checkbox" id="enableBlock1" checked>
                                     <span class="toggle-slider"></span>
@@ -170,7 +194,7 @@
                         <!-- Bloque 2 -->
                         <div class="block-config">
                             <div class="block-header-with-toggle">
-                                <h5>Bloque 2</h5>
+                                <h5><i class="bi bi-2-circle"></i> Bloque 2</h5>
                                 <label class="toggle-switch">
                                     <input type="checkbox" id="enableBlock2">
                                     <span class="toggle-slider"></span>
@@ -196,11 +220,11 @@
                         </div>
                     </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" id="cancelCreateTest">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Crear Prueba</button>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelCreateTest">Cancelar</button>
+                <button type="submit" form="createTestForm" class="btn btn-primary"><i class="bi bi-check-lg"></i> Crear Prueba</button>
             </div>
         </div>
     </div>
@@ -209,7 +233,7 @@
     <div class="modal-overlay" id="editTestModal">
         <div class="modal">
             <div class="modal-header">
-                <h3>Editar Prueba</h3>
+                <h3><i class="bi bi-pencil-square"></i> Editar Prueba</h3>
                 <button class="close-btn" id="closeEditModal">
                     <i class="bi bi-x"></i>
                 </button>
@@ -220,21 +244,45 @@
 
                     <div class="form-group">
                         <label for="editTestName">Nombre de la Prueba</label>
-                        <input type="text" id="editTestName" name="editTestName" required>
+                        <input type="text" id="editTestName" name="editTestName" placeholder="Ej: Evaluación Matemáticas" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editTestStartDate"><i class="bi bi-calendar-event"></i> Fecha de Inicio</label>
+                            <input type="date" id="editTestStartDate" name="editTestStartDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editTestEndDate"><i class="bi bi-calendar-check"></i> Fecha de Fin</label>
+                            <input type="date" id="editTestEndDate" name="editTestEndDate" required>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="editTestDate">Fecha de la Prueba</label>
-                        <input type="date" id="editTestDate" name="editTestDate" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editAssignedStudents">Estudiantes Asignados</label>
+                        <label>Estudiantes Asignados</label>
+                        
+                        <!-- Institution Filter -->
+                        <div class="institution-filter">
+                            <label><i class="bi bi-building"></i> Filtrar por Institución</label>
+                            <div class="institution-quick-select" id="editInstitutionQuickSelect">
+                                <!-- Institution buttons will be loaded here -->
+                            </div>
+                            <select id="editInstitutionFilter">
+                                <option value="">Todas las instituciones</option>
+                                <!-- Options will be loaded dynamically -->
+                            </select>
+                        </div>
+                        
+                        <div class="selector-divider">
+                            <span>o selecciona individualmente</span>
+                        </div>
+                        
                         <div class="students-selector" id="editStudentsSelector">
                             <div class="students-selector-header">
                                 <div class="select-all-container">
                                     <input type="checkbox" id="editSelectAllStudents">
-                                    <label for="editSelectAllStudents">Seleccionar Todos</label>
+                                    <label for="editSelectAllStudents">Seleccionar Todos (filtrados)</label>
                                 </div>
                                 <div class="students-search">
                                     <i class="bi bi-search"></i>
@@ -251,12 +299,12 @@
                     </div>
 
                     <div class="blocks-container">
-                        <h4>Configuración de Bloques <span style="color: #dc3545; font-size: 0.9rem;">(Al menos 1 bloque requerido)</span></h4>
+                        <h4><i class="bi bi-clock-history"></i> Configuración de Bloques <span style="color: #ff6b6b; font-size: 0.85rem; font-weight: 500;">(Al menos 1 bloque requerido)</span></h4>
 
                         <!-- Bloque 1 -->
                         <div class="block-config">
                             <div class="block-header-with-toggle">
-                                <h5>Bloque 1</h5>
+                                <h5><i class="bi bi-1-circle"></i> Bloque 1</h5>
                                 <label class="toggle-switch">
                                     <input type="checkbox" id="editEnableBlock1" checked>
                                     <span class="toggle-slider"></span>
@@ -284,7 +332,7 @@
                         <!-- Bloque 2 -->
                         <div class="block-config">
                             <div class="block-header-with-toggle">
-                                <h5>Bloque 2</h5>
+                                <h5><i class="bi bi-2-circle"></i> Bloque 2</h5>
                                 <label class="toggle-switch">
                                     <input type="checkbox" id="editEnableBlock2">
                                     <span class="toggle-slider"></span>
@@ -310,11 +358,11 @@
                         </div>
                     </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" id="cancelEditTest">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Actualizar Prueba</button>
-                    </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelEditTest">Cancelar</button>
+                <button type="submit" form="editTestForm" class="btn btn-primary"><i class="bi bi-check-lg"></i> Actualizar Prueba</button>
             </div>
         </div>
     </div>
@@ -327,6 +375,7 @@
     <script src="../Elementos/js/perfil-compartido.js"></script>
     <script src="../Elementos/js/time-picker.js"></script>
     <script src="../Elementos/js/pruebas-admin.js"></script>
+    <script src="../Elementos/js/pruebas-institution-filter.js"></script>
 
 </body>
 

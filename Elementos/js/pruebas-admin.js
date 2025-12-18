@@ -747,13 +747,16 @@ function hideCreateTestModal() {
 async function handleCreateTest(e) {
     e.preventDefault();
 
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
+    // El botón está fuera del form (en el footer fijo), buscarlo por el atributo form
+    const submitBtn = document.querySelector('button[form="createTestForm"][type="submit"]');
+    const originalText = submitBtn ? submitBtn.innerHTML : '';
 
     try {
         // Disable submit button
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creando...';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creando...';
+        }
 
         const formData = new FormData(e.target);
         const selectedStudents = [];
@@ -768,8 +771,19 @@ async function handleCreateTest(e) {
             throw new Error('El nombre de la prueba es requerido');
         }
 
-        if (!formData.get('testDate')) {
-            throw new Error('La fecha de la prueba es requerida');
+        if (!formData.get('testStartDate')) {
+            throw new Error('La fecha de inicio es requerida');
+        }
+
+        if (!formData.get('testEndDate')) {
+            throw new Error('La fecha de fin es requerida');
+        }
+
+        // Validar que fecha fin sea mayor o igual a fecha inicio
+        const startDate = formData.get('testStartDate');
+        const endDate = formData.get('testEndDate');
+        if (endDate < startDate) {
+            throw new Error('La fecha de fin debe ser igual o posterior a la fecha de inicio');
         }
 
         if (selectedStudents.length === 0) {
@@ -784,17 +798,30 @@ async function handleCreateTest(e) {
             throw new Error('Debes habilitar al menos un bloque');
         }
 
-        // Crear fechas completas combinando fecha y hora (evitando problemas de zona horaria)
-        const testDate = formData.get('testDate');
-        const [year, month, day] = testDate.split('-').map(Number);
-        
         const testData = {
             nombre: formData.get('testName').trim(),
-            fechaDisponible: testDate,
+            fechaInicio: startDate,
+            fechaFin: endDate,
+            fechaDisponible: startDate, // Mantener compatibilidad
             estudiantesAsignados: selectedStudents,
             fechaCreacion: firebase.firestore.Timestamp.now(),
             creadoPor: currentUser.numeroIdentidad || currentUser.id,
             estado: 'activa'
+        };
+
+        // Función para convertir hora 12h a 24h
+        const convertTo24Hour = (timeStr) => {
+            const [time, period] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        };
+
+        // Función para comparar horas (retorna minutos desde medianoche)
+        const timeToMinutes = (time24) => {
+            const [hours, minutes] = time24.split(':').map(Number);
+            return hours * 60 + minutes;
         };
 
         // Agregar Bloque 1 solo si está habilitado
@@ -808,34 +835,17 @@ async function handleCreateTest(e) {
                 throw new Error('Debes completar las horas de inicio y fin del Bloque 1');
             }
             
-            // Convert 12-hour format to 24-hour format for processing
-            const convertTo24Hour = (timeStr) => {
-                const [time, period] = timeStr.split(' ');
-                let [hours, minutes] = time.split(':').map(Number);
-                if (period === 'PM' && hours !== 12) hours += 12;
-                if (period === 'AM' && hours === 12) hours = 0;
-                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            };
-            
             const block1StartTime24 = convertTo24Hour(block1StartTimeStr);
             const block1EndTime24 = convertTo24Hour(block1EndTimeStr);
-            
-            const block1StartTime = block1StartTime24.split(':');
-            const block1EndTime = block1EndTime24.split(':');
-            
-            const block1Start = new Date(year, month - 1, day, parseInt(block1StartTime[0]), parseInt(block1StartTime[1]));
-            const block1End = new Date(year, month - 1, day, parseInt(block1EndTime[0]), parseInt(block1EndTime[1]));
 
             // Validar que las horas del Bloque 1 sean lógicas
-            if (block1Start >= block1End) {
+            if (timeToMinutes(block1StartTime24) >= timeToMinutes(block1EndTime24)) {
                 throw new Error('La hora de fin del Bloque 1 debe ser posterior a la hora de inicio');
             }
 
             testData.bloque1 = {
                 horaInicio: block1StartTime24,
-                horaFin: block1EndTime24,
-                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block1Start),
-                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block1End)
+                horaFin: block1EndTime24
             };
         }
 
@@ -850,42 +860,24 @@ async function handleCreateTest(e) {
                 throw new Error('Debes completar las horas de inicio y fin del Bloque 2');
             }
             
-            // Convert 12-hour format to 24-hour format for processing
-            const convertTo24Hour = (timeStr) => {
-                const [time, period] = timeStr.split(' ');
-                let [hours, minutes] = time.split(':').map(Number);
-                if (period === 'PM' && hours !== 12) hours += 12;
-                if (period === 'AM' && hours === 12) hours = 0;
-                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            };
-            
             const block2StartTime24 = convertTo24Hour(block2StartTimeStr);
             const block2EndTime24 = convertTo24Hour(block2EndTimeStr);
-            
-            const block2StartTime = block2StartTime24.split(':');
-            const block2EndTime = block2EndTime24.split(':');
-            
-            const block2Start = new Date(year, month - 1, day, parseInt(block2StartTime[0]), parseInt(block2StartTime[1]));
-            const block2End = new Date(year, month - 1, day, parseInt(block2EndTime[0]), parseInt(block2EndTime[1]));
 
             // Validar que las horas del Bloque 2 sean lógicas
-            if (block2Start >= block2End) {
+            if (timeToMinutes(block2StartTime24) >= timeToMinutes(block2EndTime24)) {
                 throw new Error('La hora de fin del Bloque 2 debe ser posterior a la hora de inicio');
             }
             
             // Si ambos bloques están habilitados, validar que no se traslapen
             if (enableBlock1 && testData.bloque1) {
-                const block1End = new Date(year, month - 1, day, parseInt(testData.bloque1.horaFin.split(':')[0]), parseInt(testData.bloque1.horaFin.split(':')[1]));
-                if (block1End > block2Start) {
+                if (timeToMinutes(testData.bloque1.horaFin) > timeToMinutes(block2StartTime24)) {
                     throw new Error('El Bloque 2 debe iniciar después de que termine el Bloque 1');
                 }
             }
 
             testData.bloque2 = {
                 horaInicio: block2StartTime24,
-                horaFin: block2EndTime24,
-                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block2Start),
-                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block2End)
+                horaFin: block2EndTime24
             };
         }
 
@@ -915,8 +907,10 @@ async function handleCreateTest(e) {
         showNotification(error.message || 'Error al crear la prueba', 'error');
     } finally {
         // Re-enable submit button
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
     }
 }
 
@@ -953,15 +947,24 @@ function createTestCard(test) {
         .filter(student => test.estudiantesAsignados && test.estudiantesAsignados.includes(student.id))
         .map(student => student.nombre);
 
-    // Format date (evitando problemas de zona horaria)
-    const [year, month, day] = test.fechaDisponible.split('-').map(Number);
-    const testDate = new Date(year, month - 1, day);
-    const formattedDate = testDate.toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    // Format dates (evitando problemas de zona horaria)
+    const startDateStr = test.fechaInicio || test.fechaDisponible;
+    const endDateStr = test.fechaFin || test.fechaDisponible;
+    
+    const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    
+    const startDate = new Date(startYear, startMonth - 1, startDay);
+    const endDate = new Date(endYear, endMonth - 1, endDay);
+    
+    const formatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+    const formattedStartDate = startDate.toLocaleDateString('es-ES', formatOptions);
+    const formattedEndDate = endDate.toLocaleDateString('es-ES', formatOptions);
+    
+    // Mostrar rango o fecha única
+    const formattedDate = startDateStr === endDateStr 
+        ? formattedStartDate 
+        : `${formattedStartDate} - ${formattedEndDate}`;
 
     // Construir HTML de bloques dinámicamente
     let blocksHTML = `
@@ -1006,14 +1009,8 @@ function createTestCard(test) {
         <div class="assigned-students">
             <h4>
                 <i class="bi bi-people"></i> 
-                Estudiantes Asignados (${assignedStudentsNames.length})
+                ${assignedStudentsNames.length} Estudiantes Asignados
             </h4>
-            <div class="students-tags">
-                ${assignedStudentsNames.length > 0
-            ? assignedStudentsNames.map(name => `<span class="student-tag">${name}</span>`).join('')
-            : '<span style="color: #666; font-style: italic;">No hay estudiantes asignados</span>'
-        }
-            </div>
         </div>
         
         <div class="test-actions">
@@ -1065,25 +1062,40 @@ function createStudentTestCard(test) {
 
     // Determine test status (evitando problemas de zona horaria)
     const now = new Date();
-    const [year, month, day] = test.fechaDisponible.split('-').map(Number);
-    const testDate = new Date(year, month - 1, day);
+    now.setHours(0, 0, 0, 0); // Normalizar a inicio del día
+    
+    const startDateStr = test.fechaInicio || test.fechaDisponible;
+    const endDateStr = test.fechaFin || test.fechaDisponible;
+    
+    const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    
+    const startDate = new Date(startYear, startMonth - 1, startDay);
+    const endDate = new Date(endYear, endMonth - 1, endDay);
+    endDate.setHours(23, 59, 59, 999); // Fin del día
+    
     let status = 'available';
     let statusText = 'Disponible';
     let statusClass = 'status-available';
 
-    if (testDate > now) {
+    if (now < startDate) {
         status = 'pending';
         statusText = 'Próximamente';
         statusClass = 'status-pending';
+    } else if (now > endDate) {
+        status = 'expired';
+        statusText = 'Finalizada';
+        statusClass = 'status-expired';
     }
 
-    // Format date
-    const formattedDate = testDate.toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    // Format dates
+    const formatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+    const formattedStartDate = startDate.toLocaleDateString('es-ES', formatOptions);
+    const formattedEndDate = endDate.toLocaleDateString('es-ES', formatOptions);
+    
+    const formattedDate = startDateStr === endDateStr 
+        ? formattedStartDate 
+        : `${formattedStartDate} - ${formattedEndDate}`;
 
     // Construir HTML de bloques dinámicamente
     let blocksHTML = `
@@ -1154,7 +1166,8 @@ async function editTest(testId) {
         // Fill form with current test data
         document.getElementById('editTestId').value = testId;
         document.getElementById('editTestName').value = test.nombre;
-        document.getElementById('editTestDate').value = test.fechaDisponible;
+        document.getElementById('editTestStartDate').value = test.fechaInicio || test.fechaDisponible;
+        document.getElementById('editTestEndDate').value = test.fechaFin || test.fechaDisponible;
         
         // Configure Block 1 toggle and fields
         const hasBlock1 = test.bloque1 && test.bloque1.horaInicio && test.bloque1.horaFin;
@@ -1486,13 +1499,16 @@ function hideEditTestModal() {
 async function handleEditTest(e) {
     e.preventDefault();
 
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
+    // El botón está fuera del form (en el footer fijo), buscarlo por el atributo form
+    const submitBtn = document.querySelector('button[form="editTestForm"][type="submit"]');
+    const originalText = submitBtn ? submitBtn.innerHTML : '';
 
     try {
         // Disable submit button
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Actualizando...';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Actualizando...';
+        }
 
         const formData = new FormData(e.target);
         const selectedStudents = [];
@@ -1508,8 +1524,19 @@ async function handleEditTest(e) {
             throw new Error('El nombre de la prueba es requerido');
         }
 
-        if (!formData.get('editTestDate')) {
-            throw new Error('La fecha de la prueba es requerida');
+        if (!formData.get('editTestStartDate')) {
+            throw new Error('La fecha de inicio es requerida');
+        }
+
+        if (!formData.get('editTestEndDate')) {
+            throw new Error('La fecha de fin es requerida');
+        }
+
+        // Validar que fecha fin sea mayor o igual a fecha inicio
+        const startDate = formData.get('editTestStartDate');
+        const endDate = formData.get('editTestEndDate');
+        if (endDate < startDate) {
+            throw new Error('La fecha de fin debe ser igual o posterior a la fecha de inicio');
         }
 
         if (selectedStudents.length === 0) {
@@ -1524,15 +1551,28 @@ async function handleEditTest(e) {
             throw new Error('Debes habilitar al menos un bloque');
         }
 
-        // Crear fechas completas combinando fecha y hora (evitando problemas de zona horaria)
-        const testDate = formData.get('editTestDate');
-        const [year, month, day] = testDate.split('-').map(Number);
-        
         const updateData = {
             nombre: formData.get('editTestName').trim(),
-            fechaDisponible: testDate,
+            fechaInicio: startDate,
+            fechaFin: endDate,
+            fechaDisponible: startDate, // Mantener compatibilidad
             estudiantesAsignados: selectedStudents,
             fechaModificacion: firebase.firestore.Timestamp.now()
+        };
+
+        // Función para convertir hora 12h a 24h
+        const convertTo24Hour = (timeStr) => {
+            const [time, period] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        };
+
+        // Función para comparar horas (retorna minutos desde medianoche)
+        const timeToMinutes = (time24) => {
+            const [hours, minutes] = time24.split(':').map(Number);
+            return hours * 60 + minutes;
         };
 
         // Agregar Bloque 1 solo si está habilitado
@@ -1546,34 +1586,17 @@ async function handleEditTest(e) {
                 throw new Error('Debes completar las horas de inicio y fin del Bloque 1');
             }
             
-            // Convert 12-hour format to 24-hour format for processing
-            const convertTo24Hour = (timeStr) => {
-                const [time, period] = timeStr.split(' ');
-                let [hours, minutes] = time.split(':').map(Number);
-                if (period === 'PM' && hours !== 12) hours += 12;
-                if (period === 'AM' && hours === 12) hours = 0;
-                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            };
-            
             const block1StartTime24 = convertTo24Hour(block1StartTimeStr);
             const block1EndTime24 = convertTo24Hour(block1EndTimeStr);
-            
-            const block1StartTime = block1StartTime24.split(':');
-            const block1EndTime = block1EndTime24.split(':');
-            
-            const block1Start = new Date(year, month - 1, day, parseInt(block1StartTime[0]), parseInt(block1StartTime[1]));
-            const block1End = new Date(year, month - 1, day, parseInt(block1EndTime[0]), parseInt(block1EndTime[1]));
 
             // Validar que las horas del Bloque 1 sean lógicas
-            if (block1Start >= block1End) {
+            if (timeToMinutes(block1StartTime24) >= timeToMinutes(block1EndTime24)) {
                 throw new Error('La hora de fin del Bloque 1 debe ser posterior a la hora de inicio');
             }
 
             updateData.bloque1 = {
                 horaInicio: block1StartTime24,
-                horaFin: block1EndTime24,
-                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block1Start),
-                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block1End)
+                horaFin: block1EndTime24
             };
         } else {
             // Si el Bloque 1 está deshabilitado, eliminar el campo si existía
@@ -1591,42 +1614,24 @@ async function handleEditTest(e) {
                 throw new Error('Debes completar las horas de inicio y fin del Bloque 2');
             }
             
-            // Convert 12-hour format to 24-hour format for processing
-            const convertTo24Hour = (timeStr) => {
-                const [time, period] = timeStr.split(' ');
-                let [hours, minutes] = time.split(':').map(Number);
-                if (period === 'PM' && hours !== 12) hours += 12;
-                if (period === 'AM' && hours === 12) hours = 0;
-                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            };
-            
             const block2StartTime24 = convertTo24Hour(block2StartTimeStr);
             const block2EndTime24 = convertTo24Hour(block2EndTimeStr);
-            
-            const block2StartTime = block2StartTime24.split(':');
-            const block2EndTime = block2EndTime24.split(':');
-            
-            const block2Start = new Date(year, month - 1, day, parseInt(block2StartTime[0]), parseInt(block2StartTime[1]));
-            const block2End = new Date(year, month - 1, day, parseInt(block2EndTime[0]), parseInt(block2EndTime[1]));
 
             // Validar que las horas del Bloque 2 sean lógicas
-            if (block2Start >= block2End) {
+            if (timeToMinutes(block2StartTime24) >= timeToMinutes(block2EndTime24)) {
                 throw new Error('La hora de fin del Bloque 2 debe ser posterior a la hora de inicio');
             }
             
             // Si ambos bloques están habilitados, validar que no se traslapen
-            if (enableBlock1 && updateData.bloque1) {
-                const block1End = new Date(year, month - 1, day, parseInt(updateData.bloque1.horaFin.split(':')[0]), parseInt(updateData.bloque1.horaFin.split(':')[1]));
-                if (block1End > block2Start) {
+            if (enableBlock1 && updateData.bloque1 && updateData.bloque1.horaFin) {
+                if (timeToMinutes(updateData.bloque1.horaFin) > timeToMinutes(block2StartTime24)) {
                     throw new Error('El Bloque 2 debe iniciar después de que termine el Bloque 1');
                 }
             }
 
             updateData.bloque2 = {
                 horaInicio: block2StartTime24,
-                horaFin: block2EndTime24,
-                fechaHoraInicio: firebase.firestore.Timestamp.fromDate(block2Start),
-                fechaHoraFin: firebase.firestore.Timestamp.fromDate(block2End)
+                horaFin: block2EndTime24
             };
         } else {
             // Si el Bloque 2 está deshabilitado, eliminar el campo si existía
@@ -1659,8 +1664,10 @@ async function handleEditTest(e) {
         showNotification(error.message || 'Error al actualizar la prueba', 'error');
     } finally {
         // Re-enable submit button
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
     }
 }
 
