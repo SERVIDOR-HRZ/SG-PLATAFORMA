@@ -1327,11 +1327,12 @@ function openEditUserModal(userId) {
         roleSelectionEdit.style.display = 'none';
     }
 
-    // Show/hide student fields
+    // Show/hide student fields and admin fields based on user type
     const studentFields = document.querySelectorAll('.student-edit-fields');
     const adminEditFields = document.querySelectorAll('.admin-edit-fields');
 
     if (user.tipoUsuario === 'estudiante') {
+        // ESTUDIANTE: Mostrar campos de estudiante, OCULTAR campos de admin
         studentFields.forEach(field => field.style.display = 'block');
         adminEditFields.forEach(field => field.style.display = 'none');
 
@@ -1372,7 +1373,15 @@ function openEditUserModal(userId) {
         checkboxes.forEach(checkbox => {
             checkbox.checked = clasesPermitidas.includes(checkbox.value);
         });
+
+        // Clear asignaturas checkboxes for students (they shouldn't have any)
+        const asignaturasCheckboxes = document.querySelectorAll('input[name="asignaturaProfesorEdit"]');
+        asignaturasCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
     } else {
+        // ADMIN/PROFESOR: Ocultar campos de estudiante, mostrar campos de admin
         studentFields.forEach(field => field.style.display = 'none');
         adminEditFields.forEach(field => field.style.display = 'block');
 
@@ -1382,10 +1391,10 @@ function openEditUserModal(userId) {
         asignaturasCheckboxes.forEach(checkbox => {
             checkbox.checked = asignaturas.includes(checkbox.value);
         });
-    }
 
-    // Update subject section visibility based on role
-    toggleSubjectSectionEdit();
+        // Update subject section visibility based on role (hide for superusers)
+        toggleSubjectSectionEdit();
+    }
 
     elements.editUserModal.classList.add('show');
 }
@@ -1576,7 +1585,16 @@ async function handleCreateUser(e) {
             userData.tipoDocumento = elements.createTipoDocumento.value;
             userData.numeroDocumento = elements.createNumeroDocumento.value.trim();
             userData.departamento = elements.createDepartamento.value;
-            userData.clasesPermitidas = []; // Initialize empty, admin can edit later
+
+            // Get selected clases permisos (materias a las que tendrá acceso)
+            const clasesPermisosCheckboxes = document.querySelectorAll('input[name="clasePermisoCreate"]:checked');
+            const clasesPermitidas = Array.from(clasesPermisosCheckboxes).map(cb => cb.value);
+            userData.clasesPermitidas = clasesPermitidas;
+
+            // Initialize gamification fields
+            userData.puntos = 0;
+            userData.puntosAcumulados = 0;
+            userData.insignias = [];
         }
 
         // Add admin-specific fields (asignaturas)
@@ -1628,10 +1646,13 @@ async function handleEditUser(e) {
         return;
     }
 
+    const submitBtn = document.querySelector('#editUserModal .save-btn');
+
     try {
-        const submitBtn = elements.editUserForm.querySelector('.save-btn');
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
+        if (submitBtn) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        }
 
         await waitForFirebase();
 
@@ -1643,6 +1664,10 @@ async function handleEditUser(e) {
 
             if (!existingUserQuery.empty) {
                 showMessage('Ya existe un usuario con este email', 'error');
+                if (submitBtn) {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
                 return;
             }
         }
@@ -1674,6 +1699,10 @@ async function handleEditUser(e) {
 
             if (!institucion || !grado || !tipoDocumento || !numeroDocumento || !departamento) {
                 showMessage('Todos los campos del estudiante son obligatorios', 'error');
+                if (submitBtn) {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
                 return;
             }
 
@@ -1705,7 +1734,7 @@ async function handleEditUser(e) {
             updateData.clasesPermitidas = clasesPermitidas;
         }
 
-        // Update admin-specific fields (asignaturas)
+        // Update admin-specific fields (asignaturas) - ONLY for admins, not students
         if (currentUserForEdit.tipoUsuario === 'admin') {
             const asignaturasCheckboxes = document.querySelectorAll('input[name="asignaturaProfesorEdit"]:checked');
             const asignaturas = Array.from(asignaturasCheckboxes).map(cb => cb.value);
@@ -1723,9 +1752,10 @@ async function handleEditUser(e) {
         console.error('Error updating user:', error);
         showMessage('Error al actualizar el usuario', 'error');
     } finally {
-        const submitBtn = elements.editUserForm.querySelector('.save-btn');
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
+        if (submitBtn) {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        }
     }
 }
 
@@ -1850,20 +1880,10 @@ function showLoading(show) {
     elements.usersTableBody.style.display = show ? 'none' : '';
 }
 
-// Show message
+// Show message - Disabled
 function showMessage(message, type) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.textContent = message;
-
-    elements.messageContainer.appendChild(messageDiv);
-
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (messageDiv.parentNode) {
-            messageDiv.parentNode.removeChild(messageDiv);
-        }
-    }, 5000);
+    // Notificaciones desactivadas
+    console.log(`[${type}] ${message}`);
 }
 
 // Handle logout
@@ -2728,7 +2748,7 @@ function initializeInsigniasManagement() {
     populateIconsGrid('all');
 }
 
-// Update dashboard view to handle insignias
+// Update dashboard view to handle insignias and instituciones
 function switchDashboardView(view) {
     currentDashboardView = view;
 
@@ -2741,12 +2761,31 @@ function switchDashboardView(view) {
         }
     });
 
-    // Always hide insignias management when switching views
+    // Get all sections
     const usersTableContainer = document.getElementById('usersTableContainer');
     const insigniasManagement = document.getElementById('insigniasManagement');
+    const institucionesManagement = document.getElementById('institucionesManagement');
+    const statsGrid = document.querySelector('.stats-grid');
 
-    if (usersTableContainer) usersTableContainer.style.display = 'block';
-    if (insigniasManagement) insigniasManagement.style.display = 'none';
+    // Handle different views
+    if (view === 'insignias') {
+        if (usersTableContainer) usersTableContainer.style.display = 'none';
+        if (insigniasManagement) insigniasManagement.style.display = 'block';
+        if (institucionesManagement) institucionesManagement.style.display = 'none';
+        if (statsGrid) statsGrid.style.display = 'none';
+        loadInsignias();
+    } else if (view === 'instituciones') {
+        if (usersTableContainer) usersTableContainer.style.display = 'none';
+        if (insigniasManagement) insigniasManagement.style.display = 'none';
+        if (institucionesManagement) institucionesManagement.style.display = 'block';
+        if (statsGrid) statsGrid.style.display = 'none';
+        loadInstitucionesForManagement();
+    } else {
+        if (usersTableContainer) usersTableContainer.style.display = 'block';
+        if (insigniasManagement) insigniasManagement.style.display = 'none';
+        if (institucionesManagement) institucionesManagement.style.display = 'none';
+        if (statsGrid) statsGrid.style.display = 'grid';
+    }
 
     // Update institucion filter visibility
     updateInstitucionFilterVisibility();
@@ -3284,3 +3323,499 @@ async function loadInsigniaIconsInTable() {
 document.addEventListener('DOMContentLoaded', function () {
     initializeInsigniasManagement();
 });
+
+
+// ==========================================
+// INSTITUCIONES MANAGEMENT SYSTEM
+// ==========================================
+
+// ImgBB API Configuration for Instituciones
+const IMGBB_API_KEY_INST = '0d447185d3dc7cba69ee1c6df144f146';
+const IMGBB_API_URL_INST = 'https://api.imgbb.com/1/upload';
+
+let allInstituciones = [];
+let currentInstitucionForEdit = null;
+let currentInstitucionForDelete = null;
+
+// Initialize Instituciones Management
+function initializeInstitucionesManagement() {
+    // Create Institucion button
+    const createInstitucionBtn = document.getElementById('createInstitucionBtn');
+    if (createInstitucionBtn) {
+        createInstitucionBtn.addEventListener('click', openCreateInstitucionModal);
+    }
+
+    // Back button from instituciones
+    const backToTableFromInstituciones = document.getElementById('backToTableFromInstituciones');
+    if (backToTableFromInstituciones) {
+        backToTableFromInstituciones.addEventListener('click', () => {
+            switchDashboardView('dashboard');
+        });
+    }
+
+    // Modal events
+    const closeInstitucionModal = document.getElementById('closeInstitucionModal');
+    const cancelInstitucion = document.getElementById('cancelInstitucion');
+    const institucionForm = document.getElementById('institucionForm');
+    const institucionModal = document.getElementById('institucionModal');
+
+    if (closeInstitucionModal) {
+        closeInstitucionModal.addEventListener('click', closeInstitucionModalFn);
+    }
+    if (cancelInstitucion) {
+        cancelInstitucion.addEventListener('click', closeInstitucionModalFn);
+    }
+    if (institucionForm) {
+        institucionForm.addEventListener('submit', handleSaveInstitucion);
+    }
+    if (institucionModal) {
+        institucionModal.addEventListener('click', function (e) {
+            if (e.target === institucionModal) {
+                closeInstitucionModalFn();
+            }
+        });
+    }
+
+    // Delete modal events
+    const closeDeleteInstitucionModal = document.getElementById('closeDeleteInstitucionModal');
+    const cancelDeleteInstitucion = document.getElementById('cancelDeleteInstitucion');
+    const confirmDeleteInstitucion = document.getElementById('confirmDeleteInstitucion');
+    const deleteInstitucionModal = document.getElementById('deleteInstitucionModal');
+
+    if (closeDeleteInstitucionModal) {
+        closeDeleteInstitucionModal.addEventListener('click', closeDeleteInstitucionModalFn);
+    }
+    if (cancelDeleteInstitucion) {
+        cancelDeleteInstitucion.addEventListener('click', closeDeleteInstitucionModalFn);
+    }
+    if (confirmDeleteInstitucion) {
+        confirmDeleteInstitucion.addEventListener('click', handleDeleteInstitucion);
+    }
+    if (deleteInstitucionModal) {
+        deleteInstitucionModal.addEventListener('click', function (e) {
+            if (e.target === deleteInstitucionModal) {
+                closeDeleteInstitucionModalFn();
+            }
+        });
+    }
+
+    // Logo upload events
+    const institucionLogoInput = document.getElementById('institucionLogoInput');
+    const removeLogoBtn = document.getElementById('removeLogoBtn');
+
+    if (institucionLogoInput) {
+        institucionLogoInput.addEventListener('change', handleLogoUpload);
+    }
+    if (removeLogoBtn) {
+        removeLogoBtn.addEventListener('click', handleRemoveLogo);
+    }
+}
+
+// Load Instituciones for Management
+async function loadInstitucionesForManagement() {
+    const gridManager = document.getElementById('institucionesGridManager');
+    const loadingSpinner = document.getElementById('institucionesLoadingSpinner');
+    const noInstituciones = document.getElementById('noInstituciones');
+
+    if (!gridManager) return;
+
+    gridManager.innerHTML = '';
+    if (loadingSpinner) loadingSpinner.style.display = 'flex';
+    if (noInstituciones) noInstituciones.style.display = 'none';
+
+    try {
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('instituciones').orderBy('nombre').get();
+        allInstituciones = [];
+
+        snapshot.forEach(doc => {
+            allInstituciones.push({ id: doc.id, ...doc.data() });
+        });
+
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+
+        if (allInstituciones.length === 0) {
+            if (noInstituciones) noInstituciones.style.display = 'flex';
+            return;
+        }
+
+        // Count students per institution
+        const studentsSnapshot = await window.firebaseDB.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        const studentCounts = {};
+        studentsSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.institucion) {
+                studentCounts[data.institucion] = (studentCounts[data.institucion] || 0) + 1;
+            }
+        });
+
+        // Render instituciones
+        allInstituciones.forEach(institucion => {
+            const studentCount = studentCounts[institucion.nombre] || 0;
+            const card = createInstitucionCard(institucion, studentCount);
+            gridManager.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error('Error loading instituciones:', error);
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        showMessage('Error al cargar instituciones', 'error');
+    }
+}
+
+// Create Institucion Card
+function createInstitucionCard(institucion, studentCount) {
+    const card = document.createElement('div');
+    card.className = 'institucion-card';
+    card.dataset.id = institucion.id;
+
+    const location = [institucion.ciudad, institucion.departamento].filter(Boolean).join(', ');
+
+    card.innerHTML = `
+        <div class="institucion-card-header">
+            <div class="institucion-logo">
+                ${institucion.logoUrl
+            ? `<img src="${institucion.logoUrl}" alt="${institucion.nombre}">`
+            : `<div class="institucion-logo-placeholder"><i class="bi bi-building"></i></div>`
+        }
+            </div>
+            <div class="institucion-card-title">
+                <h3>${institucion.nombre}</h3>
+                ${location ? `<span class="location"><i class="bi bi-geo-alt"></i> ${location}</span>` : ''}
+            </div>
+        </div>
+        <div class="institucion-card-body">
+            ${institucion.descripcion
+            ? `<p class="institucion-description">${institucion.descripcion}</p>`
+            : '<p class="institucion-description" style="color: #999; font-style: italic;">Sin descripción</p>'
+        }
+            <div class="institucion-stats">
+                <div class="institucion-stat">
+                    <i class="bi bi-people-fill"></i>
+                    <span><strong>${studentCount}</strong> estudiantes</span>
+                </div>
+            </div>
+            <div class="institucion-card-actions">
+                <button class="edit-institucion-btn" onclick="openEditInstitucionModal('${institucion.id}')">
+                    <i class="bi bi-pencil"></i> Editar
+                </button>
+                <button class="delete-institucion-btn" onclick="openDeleteInstitucionModalFn('${institucion.id}')">
+                    <i class="bi bi-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    `;
+
+    return card;
+}
+
+// Open Create Institucion Modal
+function openCreateInstitucionModal() {
+    currentInstitucionForEdit = null;
+
+    const modal = document.getElementById('institucionModal');
+    const title = document.getElementById('institucionModalTitle');
+    const buttonText = document.getElementById('institucionButtonText');
+    const form = document.getElementById('institucionForm');
+
+    if (title) title.textContent = 'Crear Nueva Institución';
+    if (buttonText) buttonText.textContent = 'Guardar Institución';
+    if (form) form.reset();
+
+    // Reset logo preview
+    resetLogoPreview();
+
+    // Clear hidden fields
+    document.getElementById('institucionLogoUrl').value = '';
+    document.getElementById('institucionId').value = '';
+
+    if (modal) modal.classList.add('show');
+}
+
+// Open Edit Institucion Modal
+function openEditInstitucionModal(institucionId) {
+    const institucion = allInstituciones.find(i => i.id === institucionId);
+    if (!institucion) return;
+
+    currentInstitucionForEdit = institucion;
+
+    const modal = document.getElementById('institucionModal');
+    const title = document.getElementById('institucionModalTitle');
+    const buttonText = document.getElementById('institucionButtonText');
+
+    if (title) title.textContent = 'Editar Institución';
+    if (buttonText) buttonText.textContent = 'Actualizar Institución';
+
+    // Fill form fields
+    document.getElementById('institucionNombre').value = institucion.nombre || '';
+    document.getElementById('institucionDescripcion').value = institucion.descripcion || '';
+    document.getElementById('institucionDepartamento').value = institucion.departamento || '';
+    document.getElementById('institucionCiudad').value = institucion.ciudad || '';
+    document.getElementById('institucionLogoUrl').value = institucion.logoUrl || '';
+    document.getElementById('institucionId').value = institucion.id;
+
+    // Update logo preview
+    if (institucion.logoUrl) {
+        const logoPreviewImage = document.getElementById('logoPreviewImage');
+        const logoPlaceholder = document.getElementById('logoPlaceholder');
+        const removeLogoBtn = document.getElementById('removeLogoBtn');
+
+        if (logoPreviewImage) {
+            logoPreviewImage.src = institucion.logoUrl;
+            logoPreviewImage.style.display = 'block';
+        }
+        if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+        if (removeLogoBtn) removeLogoBtn.style.display = 'flex';
+    } else {
+        resetLogoPreview();
+    }
+
+    if (modal) modal.classList.add('show');
+}
+
+// Close Institucion Modal
+function closeInstitucionModalFn() {
+    const modal = document.getElementById('institucionModal');
+    if (modal) modal.classList.remove('show');
+    currentInstitucionForEdit = null;
+}
+
+// Reset Logo Preview
+function resetLogoPreview() {
+    const logoPreviewImage = document.getElementById('logoPreviewImage');
+    const logoPlaceholder = document.getElementById('logoPlaceholder');
+    const removeLogoBtn = document.getElementById('removeLogoBtn');
+    const logoInput = document.getElementById('institucionLogoInput');
+
+    if (logoPreviewImage) {
+        logoPreviewImage.src = '';
+        logoPreviewImage.style.display = 'none';
+    }
+    if (logoPlaceholder) logoPlaceholder.style.display = 'block';
+    if (removeLogoBtn) removeLogoBtn.style.display = 'none';
+    if (logoInput) logoInput.value = '';
+
+    document.getElementById('institucionLogoUrl').value = '';
+}
+
+// Handle Logo Upload
+async function handleLogoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showMessage('Por favor selecciona una imagen válida', 'error');
+        return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        showMessage('La imagen no debe superar los 5MB', 'error');
+        return;
+    }
+
+    try {
+        showMessage('Subiendo imagen...', 'info');
+
+        const logoUrl = await uploadImageToImgBBInst(file);
+
+        if (logoUrl) {
+            const logoPreviewImage = document.getElementById('logoPreviewImage');
+            const logoPlaceholder = document.getElementById('logoPlaceholder');
+            const removeLogoBtn = document.getElementById('removeLogoBtn');
+
+            if (logoPreviewImage) {
+                logoPreviewImage.src = logoUrl;
+                logoPreviewImage.style.display = 'block';
+            }
+            if (logoPlaceholder) logoPlaceholder.style.display = 'none';
+            if (removeLogoBtn) removeLogoBtn.style.display = 'flex';
+
+            document.getElementById('institucionLogoUrl').value = logoUrl;
+            showMessage('Imagen subida correctamente', 'success');
+        }
+    } catch (error) {
+        console.error('Error uploading logo:', error);
+        showMessage('Error al subir la imagen', 'error');
+    }
+}
+
+// Upload Image to ImgBB
+async function uploadImageToImgBBInst(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch(`${IMGBB_API_URL_INST}?key=${IMGBB_API_KEY_INST}`, {
+        method: 'POST',
+        body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+        return data.data.url;
+    } else {
+        throw new Error('Error al subir imagen a ImgBB');
+    }
+}
+
+// Handle Remove Logo
+function handleRemoveLogo() {
+    resetLogoPreview();
+    showMessage('Logo eliminado', 'info');
+}
+
+// Handle Save Institucion
+async function handleSaveInstitucion(e) {
+    e.preventDefault();
+
+    const nombre = document.getElementById('institucionNombre').value.trim();
+    const descripcion = document.getElementById('institucionDescripcion').value.trim();
+    const departamento = document.getElementById('institucionDepartamento').value;
+    const ciudad = document.getElementById('institucionCiudad').value.trim();
+    const logoUrl = document.getElementById('institucionLogoUrl').value;
+    const institucionId = document.getElementById('institucionId').value;
+
+    if (!nombre) {
+        showMessage('El nombre de la institución es requerido', 'error');
+        return;
+    }
+
+    const saveBtn = document.querySelector('.save-institucion-btn');
+    if (saveBtn) saveBtn.disabled = true;
+
+    try {
+        await waitForFirebase();
+
+        const institucionData = {
+            nombre,
+            descripcion,
+            departamento,
+            ciudad,
+            logoUrl,
+            updatedAt: new Date().toISOString()
+        };
+
+        if (institucionId) {
+            // Update existing
+            await window.firebaseDB.collection('instituciones').doc(institucionId).update(institucionData);
+            showMessage('Institución actualizada correctamente', 'success');
+        } else {
+            // Create new
+            institucionData.createdAt = new Date().toISOString();
+            await window.firebaseDB.collection('instituciones').add(institucionData);
+            showMessage('Institución creada correctamente', 'success');
+        }
+
+        closeInstitucionModalFn();
+        loadInstitucionesForManagement();
+
+    } catch (error) {
+        console.error('Error saving institucion:', error);
+        showMessage('Error al guardar la institución', 'error');
+    } finally {
+        if (saveBtn) saveBtn.disabled = false;
+    }
+}
+
+// Open Delete Institucion Modal
+function openDeleteInstitucionModalFn(institucionId) {
+    const institucion = allInstituciones.find(i => i.id === institucionId);
+    if (!institucion) return;
+
+    currentInstitucionForDelete = institucion;
+
+    const modal = document.getElementById('deleteInstitucionModal');
+    const nameEl = document.getElementById('deleteInstitucionName');
+
+    if (nameEl) nameEl.textContent = institucion.nombre;
+    if (modal) modal.classList.add('show');
+}
+
+// Close Delete Institucion Modal
+function closeDeleteInstitucionModalFn() {
+    const modal = document.getElementById('deleteInstitucionModal');
+    if (modal) modal.classList.remove('show');
+    currentInstitucionForDelete = null;
+}
+
+// Handle Delete Institucion
+async function handleDeleteInstitucion() {
+    if (!currentInstitucionForDelete) return;
+
+    const confirmBtn = document.getElementById('confirmDeleteInstitucion');
+    if (confirmBtn) confirmBtn.disabled = true;
+
+    try {
+        await waitForFirebase();
+
+        await window.firebaseDB.collection('instituciones').doc(currentInstitucionForDelete.id).delete();
+
+        showMessage('Institución eliminada correctamente', 'success');
+        closeDeleteInstitucionModalFn();
+        loadInstitucionesForManagement();
+
+    } catch (error) {
+        console.error('Error deleting institucion:', error);
+        showMessage('Error al eliminar la institución', 'error');
+    } finally {
+        if (confirmBtn) confirmBtn.disabled = false;
+    }
+}
+
+// Make functions globally available
+window.openEditInstitucionModal = openEditInstitucionModal;
+window.openDeleteInstitucionModalFn = openDeleteInstitucionModalFn;
+
+// Initialize instituciones management on page load
+document.addEventListener('DOMContentLoaded', function () {
+    initializeInstitucionesManagement();
+    // Create default instituciones if none exist
+    createDefaultInstituciones();
+});
+
+// Create default instituciones
+async function createDefaultInstituciones() {
+    try {
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('instituciones').limit(1).get();
+
+        if (snapshot.empty) {
+            // Create default instituciones
+            const defaultInstituciones = [
+                {
+                    nombre: 'IETAC',
+                    descripcion: 'Institución Educativa Técnico Agropecuario Claret Tierradentro Córdoba',
+                    departamento: 'Córdoba',
+                    ciudad: 'Tierradentro',
+                    logoUrl: '',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    nombre: 'SEAMOSGENIOS',
+                    descripcion: 'Seamos Genios - Plataforma Educativa para preparación de pruebas Saber 11',
+                    departamento: '',
+                    ciudad: '',
+                    logoUrl: '',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                }
+            ];
+
+            for (const inst of defaultInstituciones) {
+                await window.firebaseDB.collection('instituciones').add(inst);
+            }
+
+            console.log('Default instituciones created');
+        }
+    } catch (error) {
+        console.error('Error creating default instituciones:', error);
+    }
+}

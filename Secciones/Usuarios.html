@@ -2,7 +2,7 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios - Seamos Genios</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
@@ -79,6 +79,10 @@
                     <i class="bi bi-award-fill"></i>
                     <span>Insignias</span>
                 </button>
+                <button class="dashboard-tab" data-view="instituciones" id="institucionesTab">
+                    <i class="bi bi-building"></i>
+                    <span>Instituciones</span>
+                </button>
             </div>
         </div>
 
@@ -137,13 +141,34 @@
             </div>
         </div>
 
+        <!-- Instituciones Management Section -->
+        <div class="instituciones-management-section" id="institucionesManagement" style="display: none;">
+            <div class="instituciones-header">
+                <div class="instituciones-header-left">
+                    <h2>Gestión de Instituciones</h2>
+                </div>
+                <button class="create-institucion-btn" id="createInstitucionBtn">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    Crear Institución
+                </button>
+            </div>
+            <div class="instituciones-grid-manager" id="institucionesGridManager">
+                <!-- Instituciones cards will be loaded here -->
+            </div>
+            <div class="loading-spinner" id="institucionesLoadingSpinner" style="display: none;">
+                <i class="bi bi-arrow-clockwise spin"></i>
+                <p>Cargando instituciones...</p>
+            </div>
+            <div class="no-results" id="noInstituciones" style="display: none;">
+                <i class="bi bi-building"></i>
+                <p>No hay instituciones creadas</p>
+            </div>
+        </div>
+
         <!-- Insignias Management Section -->
         <div class="insignias-management-section" id="insigniasManagement" style="display: none;">
             <div class="insignias-header">
                 <div class="insignias-header-left">
-                    <button class="back-to-table-btn" id="backToTableBtn" title="Volver a la tabla">
-                        <i class="bi bi-arrow-left"></i>
-                    </button>
                     <h2>Gestión de Insignias</h2>
                 </div>
                 <button class="create-insignia-btn" id="createInsigniaBtn">
@@ -481,6 +506,49 @@
                                 <div class="checkbox-content lectura">
                                     <i class="bi bi-book"></i>
                                     <span>Lectura Crítica</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Acceso a Materias para Estudiantes -->
+                    <div class="form-section student-fields">
+                        <h4>Acceso a Aulas Virtuales</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las materias a las que el estudiante tendrá acceso</p>
+                        <div class="clases-permisos-grid">
+                            <label class="clase-checkbox">
+                                <input type="checkbox" name="clasePermisoCreate" value="matematicas">
+                                <div class="checkbox-content">
+                                    <i class="bi bi-calculator"></i>
+                                    <span>Matemáticas</span>
+                                </div>
+                            </label>
+                            <label class="clase-checkbox">
+                                <input type="checkbox" name="clasePermisoCreate" value="lectura">
+                                <div class="checkbox-content">
+                                    <i class="bi bi-book"></i>
+                                    <span>Lectura Crítica</span>
+                                </div>
+                            </label>
+                            <label class="clase-checkbox">
+                                <input type="checkbox" name="clasePermisoCreate" value="sociales">
+                                <div class="checkbox-content">
+                                    <i class="bi bi-globe"></i>
+                                    <span>Ciencias Sociales</span>
+                                </div>
+                            </label>
+                            <label class="clase-checkbox">
+                                <input type="checkbox" name="clasePermisoCreate" value="naturales">
+                                <div class="checkbox-content">
+                                    <i class="bi bi-tree"></i>
+                                    <span>Ciencias Naturales</span>
+                                </div>
+                            </label>
+                            <label class="clase-checkbox">
+                                <input type="checkbox" name="clasePermisoCreate" value="ingles">
+                                <div class="checkbox-content">
+                                    <i class="bi bi-translate"></i>
+                                    <span>Inglés</span>
                                 </div>
                             </label>
                         </div>
@@ -1089,6 +1157,148 @@
                     <i class="bi bi-save"></i>
                     <span id="insigniaButtonText">Guardar Insignia</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Institucion Modal -->
+    <div class="modal" id="institucionModal">
+        <div class="modal-content institucion-modal">
+            <div class="modal-header">
+                <h3 id="institucionModalTitle">Crear Nueva Institución</h3>
+                <button class="close-btn" id="closeInstitucionModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="institucionForm" class="institucion-form">
+                    <!-- Logo Preview -->
+                    <div class="institucion-logo-section">
+                        <label>Logo de la Institución</label>
+                        <div class="logo-upload-container">
+                            <div class="logo-preview" id="logoPreview">
+                                <i class="bi bi-building" id="logoPlaceholder"></i>
+                                <img id="logoPreviewImage" src="" alt="Logo preview" style="display: none;">
+                            </div>
+                            <div class="logo-upload-actions">
+                                <label class="upload-logo-btn" for="institucionLogoInput">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    Subir Logo
+                                </label>
+                                <input type="file" id="institucionLogoInput" accept="image/*" style="display: none;">
+                                <button type="button" class="remove-logo-btn" id="removeLogoBtn" style="display: none;">
+                                    <i class="bi bi-trash"></i>
+                                    Eliminar
+                                </button>
+                            </div>
+                            <small class="logo-hint">Formatos: JPG, PNG, GIF. Máx: 5MB</small>
+                        </div>
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h4>Información de la Institución</h4>
+                        <div class="form-grid">
+                            <div class="input-group full-width">
+                                <label for="institucionNombre">Nombre de la Institución *</label>
+                                <input type="text" id="institucionNombre" required placeholder="Ej: Colegio San José" maxlength="100">
+                            </div>
+
+                            <div class="input-group full-width">
+                                <label for="institucionDescripcion">Descripción</label>
+                                <textarea id="institucionDescripcion" placeholder="Descripción breve de la institución" rows="4" maxlength="500"></textarea>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="institucionDepartamento">Departamento</label>
+                                <select id="institucionDepartamento">
+                                    <option value="">Seleccione Departamento</option>
+                                    <option value="Amazonas">Amazonas</option>
+                                    <option value="Antioquia">Antioquia</option>
+                                    <option value="Arauca">Arauca</option>
+                                    <option value="Atlántico">Atlántico</option>
+                                    <option value="Bolívar">Bolívar</option>
+                                    <option value="Boyacá">Boyacá</option>
+                                    <option value="Caldas">Caldas</option>
+                                    <option value="Caquetá">Caquetá</option>
+                                    <option value="Casanare">Casanare</option>
+                                    <option value="Cauca">Cauca</option>
+                                    <option value="Cesar">Cesar</option>
+                                    <option value="Chocó">Chocó</option>
+                                    <option value="Córdoba">Córdoba</option>
+                                    <option value="Cundinamarca">Cundinamarca</option>
+                                    <option value="Guainía">Guainía</option>
+                                    <option value="Guaviare">Guaviare</option>
+                                    <option value="Huila">Huila</option>
+                                    <option value="La Guajira">La Guajira</option>
+                                    <option value="Magdalena">Magdalena</option>
+                                    <option value="Meta">Meta</option>
+                                    <option value="Nariño">Nariño</option>
+                                    <option value="Norte de Santander">Norte de Santander</option>
+                                    <option value="Putumayo">Putumayo</option>
+                                    <option value="Quindío">Quindío</option>
+                                    <option value="Risaralda">Risaralda</option>
+                                    <option value="San Andrés y Providencia">San Andrés y Providencia</option>
+                                    <option value="Santander">Santander</option>
+                                    <option value="Sucre">Sucre</option>
+                                    <option value="Tolima">Tolima</option>
+                                    <option value="Valle del Cauca">Valle del Cauca</option>
+                                    <option value="Vaupés">Vaupés</option>
+                                    <option value="Vichada">Vichada</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="institucionCiudad">Ciudad</label>
+                                <input type="text" id="institucionCiudad" placeholder="Ej: Bogotá" maxlength="50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="institucionLogoUrl" value="">
+                    <input type="hidden" id="institucionId" value="">
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" id="cancelInstitucion">Cancelar</button>
+                <button type="submit" class="save-institucion-btn" form="institucionForm">
+                    <i class="bi bi-save"></i>
+                    <span id="institucionButtonText">Guardar Institución</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Institucion Confirmation Modal -->
+    <div class="modal" id="deleteInstitucionModal">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <h3>Eliminar Institución</h3>
+                <button class="close-btn" id="closeDeleteInstitucionModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon delete">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="confirmation-text">
+                        <p><strong>¿Estás seguro?</strong></p>
+                        <p>Esta institución será eliminada permanentemente.</p>
+                        <div class="institucion-info-confirmation" id="deleteInstitucionInfo">
+                            <strong id="deleteInstitucionName">Nombre Institución</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancelDeleteInstitucion">Cancelar</button>
+                    <button type="button" class="confirm-delete-btn" id="confirmDeleteInstitucion">
+                        <i class="bi bi-trash"></i>
+                        <span>Eliminar Institución</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
