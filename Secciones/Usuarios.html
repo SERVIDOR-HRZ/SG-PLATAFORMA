@@ -73,7 +73,7 @@
                 </button>
                 <button class="dashboard-tab" data-view="codigos" id="codigosTab">
                     <i class="bi bi-key-fill"></i>
-                    <span>Códigos de Recuperación</span>
+                    <span>Códigos</span>
                 </button>
                 <button class="dashboard-tab" data-view="insignias" id="insigniasTab">
                     <i class="bi bi-award-fill"></i>
@@ -560,7 +560,10 @@
                         <div class="form-grid">
                             <div class="input-group">
                                 <label for="createInstitucion">Institución *</label>
-                                <input type="text" id="createInstitucion" placeholder="Nombre de la institución">
+                                <select id="createInstitucion">
+                                    <option value="">Seleccione Institución</option>
+                                    <!-- Instituciones se cargarán desde Firebase -->
+                                </select>
                             </div>
 
                             <div class="input-group">
@@ -821,7 +824,10 @@
                         <div class="form-grid">
                             <div class="input-group">
                                 <label for="editInstitucion">Institución *</label>
-                                <input type="text" id="editInstitucion" placeholder="Nombre de la institución">
+                                <select id="editInstitucion">
+                                    <option value="">Seleccione Institución</option>
+                                    <!-- Instituciones se cargarán desde Firebase -->
+                                </select>
                             </div>
 
                             <div class="input-group">
@@ -1027,7 +1033,7 @@
                     <button type="button" class="cancel-btn" id="cancelDeleteUser">Cancelar</button>
                     <button type="button" class="confirm-delete-btn" id="confirmDeleteUser">
                         <i class="bi bi-trash"></i>
-                        <span>Eliminar Definitivamente</span>
+                        <span>Eliminar</span>
                     </button>
                 </div>
             </div>

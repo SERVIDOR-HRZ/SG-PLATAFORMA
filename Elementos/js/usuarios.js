@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load users
     loadUsers();
 
+    // Cargar instituciones para los selectores
+    loadInstitucionesForSelectors();
+
     // Inicializar foto de perfil
     if (typeof inicializarPerfilCompartido === 'function') {
         inicializarPerfilCompartido();
@@ -29,6 +32,9 @@ let currentDashboardView = 'dashboard'; // dashboard, profesores, estudiantes
 
 // Security code for creating superusers
 const SUPERUSER_SECURITY_CODE = 'SG-PG-2025-OWH346OU6634OSDFS4YE431FSD325';
+
+// Array para almacenar las instituciones cargadas
+let institucionesDisponibles = [];
 
 // DOM Elements
 const elements = {
@@ -311,8 +317,8 @@ function initializePage() {
 // Handle user type change in create modal
 function handleUserTypeChange() {
     const selectedType = document.querySelector('input[name="tipoUsuario"]:checked').value;
-    const studentFields = document.querySelector('.student-fields');
-    const adminFields = document.querySelectorAll('.admin-fields');
+    const studentFields = document.querySelectorAll('#createUserModal .student-fields');
+    const adminFields = document.querySelectorAll('#createUserModal .admin-fields');
     const roleSelection = document.getElementById('roleSelectionCreate');
     const createButton = elements.createButtonText;
     const isSuperuser = window.currentUserRole === 'superusuario';
@@ -321,7 +327,7 @@ function handleUserTypeChange() {
     const usuarioHint = document.getElementById('createUsuarioHint');
 
     if (selectedType === 'estudiante') {
-        studentFields.style.display = 'block';
+        studentFields.forEach(field => field.style.display = 'block');
         adminFields.forEach(field => field.style.display = 'none');
         roleSelection.style.display = 'none';
         createButton.textContent = 'Crear Estudiante';
@@ -331,7 +337,7 @@ function handleUserTypeChange() {
         if (usuarioLabel) usuarioLabel.textContent = 'Nombre de Usuario *';
         if (usuarioHint) usuarioHint.style.display = 'block';
     } else {
-        studentFields.style.display = 'none';
+        studentFields.forEach(field => field.style.display = 'none');
         adminFields.forEach(field => field.style.display = 'block');
         // Solo mostrar selector de rol si el usuario actual es superusuario
         if (isSuperuser) {
@@ -364,6 +370,63 @@ function waitForFirebase() {
         };
         checkFirebase();
     });
+}
+
+// Cargar instituciones desde Firebase para los selectores
+async function loadInstitucionesForSelectors() {
+    try {
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('instituciones').orderBy('nombre').get();
+        institucionesDisponibles = [];
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            institucionesDisponibles.push({
+                id: doc.id,
+                nombre: data.nombre,
+                descripcion: data.descripcion || ''
+            });
+        });
+
+        // Si no hay instituciones, usar valores por defecto
+        if (institucionesDisponibles.length === 0) {
+            institucionesDisponibles = [
+                { id: 'default1', nombre: 'IETAC', descripcion: 'Institución Educativa Técnico Agropecuario Claret' },
+                { id: 'default2', nombre: 'SEAMOSGENIOS', descripcion: 'Seamos Genios - Plataforma Educativa' }
+            ];
+        }
+
+        // Poblar los selectores
+        populateInstitucionSelectors();
+
+    } catch (error) {
+        console.error('Error loading instituciones for selectors:', error);
+        // Usar valores por defecto en caso de error
+        institucionesDisponibles = [
+            { id: 'default1', nombre: 'IETAC', descripcion: 'Institución Educativa Técnico Agropecuario Claret' },
+            { id: 'default2', nombre: 'SEAMOSGENIOS', descripcion: 'Seamos Genios - Plataforma Educativa' }
+        ];
+        populateInstitucionSelectors();
+    }
+}
+
+// Poblar los selectores de institución
+function populateInstitucionSelectors() {
+    const createInstitucionSelect = document.getElementById('createInstitucion');
+    const editInstitucionSelect = document.getElementById('editInstitucion');
+
+    const optionsHTML = institucionesDisponibles.map(inst => 
+        `<option value="${inst.nombre}">${inst.nombre}</option>`
+    ).join('');
+
+    if (createInstitucionSelect) {
+        createInstitucionSelect.innerHTML = '<option value="">Seleccione Institución</option>' + optionsHTML;
+    }
+
+    if (editInstitucionSelect) {
+        editInstitucionSelect.innerHTML = '<option value="">Seleccione Institución</option>' + optionsHTML;
+    }
 }
 
 // Initialize Dashboard Menu
@@ -1182,9 +1245,18 @@ function closeCreateUserModal() {
 
 // Toggle security code section based on role selection
 function toggleSecurityCodeSection() {
+    const selectedType = document.querySelector('input[name="tipoUsuario"]:checked');
     const superuserRadio = document.querySelector('input[name="rolUsuario"][value="superusuario"]');
     const securityCodeSection = elements.securityCodeSectionCreate;
-    const adminFields = document.querySelectorAll('.admin-fields');
+    const adminFields = document.querySelectorAll('#createUserModal .admin-fields');
+
+    // Solo procesar si el tipo de usuario es admin/profesor
+    if (!selectedType || selectedType.value !== 'admin') {
+        // Si es estudiante, ocultar todo lo relacionado con admin
+        if (securityCodeSection) securityCodeSection.style.display = 'none';
+        if (elements.createSecurityCode) elements.createSecurityCode.value = '';
+        return;
+    }
 
     if (superuserRadio && superuserRadio.checked) {
         // Show security code section for superusers
@@ -1520,9 +1592,11 @@ async function handleCreateUser(e) {
     }
 
     try {
-        const submitBtn = elements.createUserForm.querySelector('.create-btn');
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
+        const submitBtn = document.querySelector('#createUserModal .create-btn');
+        if (submitBtn) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        }
 
         await waitForFirebase();
 
@@ -1533,6 +1607,8 @@ async function handleCreateUser(e) {
 
         if (!existingUserQuery.empty) {
             showMessage('Ya existe un usuario con este email', 'error');
+            const btn = document.querySelector('#createUserModal .create-btn');
+            if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
             return;
         }
 
@@ -1555,10 +1631,14 @@ async function handleCreateUser(e) {
             const securityCode = elements.createSecurityCode.value.trim();
             if (!securityCode) {
                 showMessage('El código de seguridad es obligatorio para crear superusuarios', 'error');
+                const btn = document.querySelector('#createUserModal .create-btn');
+                if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
                 return;
             }
             if (securityCode !== SUPERUSER_SECURITY_CODE) {
                 showMessage('Código de seguridad incorrecto', 'error');
+                const btn = document.querySelector('#createUserModal .create-btn');
+                if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
                 return;
             }
         }
@@ -1616,9 +1696,11 @@ async function handleCreateUser(e) {
         console.error('Error creating user:', error);
         showMessage('Error al crear el usuario', 'error');
     } finally {
-        const submitBtn = elements.createUserForm.querySelector('.create-btn');
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
+        const submitBtn = document.querySelector('#createUserModal .create-btn');
+        if (submitBtn) {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        }
     }
 }
 
@@ -2418,7 +2500,7 @@ async function handleDeleteUser() {
     } finally {
         const confirmBtn = document.getElementById('confirmDeleteUser');
         confirmBtn.disabled = false;
-        confirmBtn.innerHTML = '<i class="bi bi-trash"></i><span>Eliminar Definitivamente</span>';
+        confirmBtn.innerHTML = '<i class="bi bi-trash"></i><span>Eliminar</span>';
     }
 }
 
