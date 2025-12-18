@@ -6360,3 +6360,314 @@ sure forms don't interfere with modal layout */
         max-width: 95%;
     }
 }
+
+/* ============================================
+   COORDINADORES MANAGEMENT STYLES
+   ============================================ */
+
+/* Coordinadores Section */
+.coordinadores-management-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.coordinadores-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.coordinadores-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.coordinadores-header h2::before {
+    content: '';
+    width: 4px;
+    height: 28px;
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    border-radius: 2px;
+}
+
+.create-coordinador-btn {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.create-coordinador-btn:hover {
+    background: linear-gradient(135deg, #138496, #117a8b);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+}
+
+/* Coordinadores Table */
+.coordinadores-table-wrapper {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.coordinadores-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.coordinadores-table th {
+    background: #f8f9fa;
+    color: #333;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    border-bottom: 2px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+}
+
+.coordinadores-table th:first-child {
+    border-radius: 0;
+}
+
+.coordinadores-table th:last-child {
+    border-radius: 0;
+    text-align: center;
+    border-right: none;
+}
+
+.coordinadores-table td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+    vertical-align: middle;
+    font-size: 0.85rem;
+}
+
+.coordinadores-table td:last-child {
+    border-right: none;
+}
+
+.coordinadores-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.coordinadores-table tbody tr:last-child td:first-child {
+    border-radius: 0;
+}
+
+.coordinadores-table tbody tr:last-child td:last-child {
+    border-radius: 0;
+}
+
+/* Coordinador Badge */
+.user-type-badge.coordinador {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    border: 1px solid #17a2b8;
+}
+
+/* Coordinador Modal */
+.coordinador-modal {
+    max-width: 600px;
+}
+
+.coordinador-form .form-section {
+    margin-bottom: 1.5rem;
+}
+
+.coordinador-form .form-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #17a2b8;
+}
+
+.coordinador-form .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.coordinador-form .input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.coordinador-form .input-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.coordinador-form .input-group label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.coordinador-form .input-group input,
+.coordinador-form .input-group select {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.coordinador-form .input-group input:focus,
+.coordinador-form .input-group select:focus {
+    outline: none;
+    border-color: #17a2b8;
+    box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.1);
+}
+
+.save-coordinador-btn {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.save-coordinador-btn:hover {
+    background: linear-gradient(135deg, #138496, #117a8b);
+    transform: translateY(-2px);
+}
+
+.save-coordinador-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Delete Coordinador Modal */
+.coordinador-info-confirmation {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.coordinador-info-confirmation strong {
+    display: block;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+/* Coordinador action buttons in table */
+.coordinadores-table .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.coordinadores-table .action-btn {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.coordinadores-table .edit-coordinador-btn {
+    background: #17a2b8;
+    color: white;
+}
+
+.coordinadores-table .edit-coordinador-btn:hover {
+    background: #138496;
+    transform: translateY(-1px);
+}
+
+.coordinadores-table .delete-coordinador-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.coordinadores-table .delete-coordinador-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+.coordinadores-table .toggle-coordinador-btn {
+    background: #28a745;
+    color: white;
+}
+
+.coordinadores-table .toggle-coordinador-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.coordinadores-table .toggle-coordinador-btn.deactivate {
+    background: #dc3545;
+}
+
+.coordinadores-table .toggle-coordinador-btn.deactivate:hover {
+    background: #c82333;
+}
+
+/* Responsive adjustments for coordinadores */
+@media (max-width: 768px) {
+    .coordinadores-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .coordinador-form .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .coordinador-modal {
+        max-width: 95%;
+    }
+}
+
+
+/* Coordinadores table inactive row */
+.coordinadores-table tbody tr.inactive {
+    background: #ffcccc;
+    color: #721c24;
+}
+
+.coordinadores-table tbody tr.inactive:hover {
+    background: #ffb3b3;
+}

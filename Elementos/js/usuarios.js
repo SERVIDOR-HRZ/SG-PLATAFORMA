@@ -56,6 +56,8 @@ const elements = {
     superusuariosTab: document.getElementById('superusuariosTab'),
     codigosTab: document.getElementById('codigosTab'),
     insigniasTab: document.getElementById('insigniasTab'),
+    institucionesTab: document.getElementById('institucionesTab'),
+    coordinadoresTab: document.getElementById('coordinadoresTab'),
 
     // Export elements
     exportBtn: document.getElementById('exportBtn'),
@@ -416,7 +418,7 @@ function populateInstitucionSelectors() {
     const createInstitucionSelect = document.getElementById('createInstitucion');
     const editInstitucionSelect = document.getElementById('editInstitucion');
 
-    const optionsHTML = institucionesDisponibles.map(inst => 
+    const optionsHTML = institucionesDisponibles.map(inst =>
         `<option value="${inst.nombre}">${inst.nombre}</option>`
     ).join('');
 
@@ -448,12 +450,17 @@ function initializeDashboardMenu() {
 function filterUsersByDashboardView() {
     let baseUsers = [...allUsers];
 
+    // Check if user is filtering by coordinador type in the dropdown
+    const typeFilter = elements.userTypeFilter ? elements.userTypeFilter.value : '';
+    const isFilteringCoordinadores = typeFilter === 'coordinador';
+
     // Apply dashboard view filter
     switch (currentDashboardView) {
         case 'profesores':
             baseUsers = baseUsers.filter(user =>
                 (user.tipoUsuario === 'admin' || user.rol === 'admin') &&
-                user.rol !== 'superusuario'
+                user.rol !== 'superusuario' &&
+                user.rol !== 'coordinador'
             );
             break;
         case 'estudiantes':
@@ -461,6 +468,10 @@ function filterUsersByDashboardView() {
             break;
         case 'superusuarios':
             baseUsers = baseUsers.filter(user => user.rol === 'superusuario');
+            break;
+        case 'coordinadores':
+            // Coordinadores are handled in their own section, return empty for table
+            baseUsers = [];
             break;
         case 'codigos':
             // Show all users for recovery codes view
@@ -471,7 +482,10 @@ function filterUsersByDashboardView() {
             break;
         case 'dashboard':
         default:
-            // Show all users
+            // Show all users - if filtering by coordinador, include them; otherwise exclude
+            if (!isFilteringCoordinadores) {
+                baseUsers = baseUsers.filter(user => user.rol !== 'coordinador');
+            }
             break;
     }
 
@@ -493,8 +507,9 @@ function filterUsersByDashboardView() {
         // Type filter
         const matchesType = !typeFilter ||
             (typeFilter === 'superusuario' && user.rol === 'superusuario') ||
-            (typeFilter === 'admin' && user.tipoUsuario === 'admin' && user.rol !== 'superusuario') ||
-            (typeFilter === 'estudiante' && user.tipoUsuario === 'estudiante');
+            (typeFilter === 'admin' && user.tipoUsuario === 'admin' && user.rol !== 'superusuario' && user.rol !== 'coordinador') ||
+            (typeFilter === 'estudiante' && user.tipoUsuario === 'estudiante') ||
+            (typeFilter === 'coordinador' && user.rol === 'coordinador');
 
         // Status filter
         const matchesStatus = !statusFilter || user.activo.toString() === statusFilter;
@@ -607,6 +622,12 @@ function updateDashboardTitle(view) {
             tableHeader.textContent = 'Insignias y Gamificación';
             if (createUserBtn) createUserBtn.innerHTML = '<i class="bi bi-person-plus-fill"></i> Crear Usuario';
             break;
+        case 'coordinadores':
+            // Coordinadores have their own section, no need to update main table header
+            break;
+        case 'instituciones':
+            // Instituciones have their own section, no need to update main table header
+            break;
         case 'dashboard':
         default:
             tableHeader.textContent = 'Lista de Usuarios';
@@ -614,28 +635,37 @@ function updateDashboardTitle(view) {
             break;
     }
 
-    // Update column visibility based on view
-    updateColumnVisibility(view);
+    // Update column visibility based on view (skip for views with their own sections)
+    if (view !== 'coordinadores' && view !== 'instituciones') {
+        updateColumnVisibility(view);
+    }
 }
 
 // Update column visibility based on dashboard view
 function updateColumnVisibility(view) {
+    // Skip column visibility update for views that don't use the main users table
+    if (view === 'coordinadores' || view === 'instituciones') {
+        return;
+    }
+
     const table = document.getElementById('usersTable');
-    // All column selectors
-    const rolColumn = document.querySelector('th:nth-child(3)'); // Rol column
-    const estadoColumn = document.querySelector('th:nth-child(4)'); // Estado column
-    const puntosColumn = document.querySelector('th:nth-child(5)'); // Puntos column
-    const insigniasColumn = document.querySelector('th:nth-child(6)'); // Insignias column
-    const materiasColumn = document.querySelector('th:nth-child(7)'); // Materias Acceso column
-    const telefonoColumn = document.querySelector('th:nth-child(8)'); // Teléfono column
-    const documentoColumn = document.querySelector('th:nth-child(9)'); // Documento column
-    const institucionColumn = document.querySelector('th:nth-child(10)'); // Institución column
-    const gradoColumn = document.querySelector('th:nth-child(11)'); // Grado column
-    const departamentoColumn = document.querySelector('th:nth-child(12)'); // Departamento column
-    const emailRecuperacionColumn = document.querySelector('th:nth-child(13)'); // Email Recuperación column
-    const codigoRecuperacionColumn = document.querySelector('th:nth-child(14)'); // Código Recuperación column
-    const fechaColumn = document.querySelector('th:nth-child(15)'); // Fecha Registro column
-    const accionesColumn = document.querySelector('th:nth-child(16)'); // Acciones column
+    if (!table) return;
+
+    // All column selectors - use more specific selectors
+    const rolColumn = table.querySelector('thead th:nth-child(3)'); // Rol column
+    const estadoColumn = table.querySelector('thead th:nth-child(4)'); // Estado column
+    const puntosColumn = table.querySelector('thead th:nth-child(5)'); // Puntos column
+    const insigniasColumn = table.querySelector('thead th:nth-child(6)'); // Insignias column
+    const materiasColumn = table.querySelector('thead th:nth-child(7)'); // Materias Acceso column
+    const telefonoColumn = table.querySelector('thead th:nth-child(8)'); // Teléfono column
+    const documentoColumn = table.querySelector('thead th:nth-child(9)'); // Documento column
+    const institucionColumn = table.querySelector('thead th:nth-child(10)'); // Institución column
+    const gradoColumn = table.querySelector('thead th:nth-child(11)'); // Grado column
+    const departamentoColumn = table.querySelector('thead th:nth-child(12)'); // Departamento column
+    const emailRecuperacionColumn = table.querySelector('thead th:nth-child(13)'); // Email Recuperación column
+    const codigoRecuperacionColumn = table.querySelector('thead th:nth-child(14)'); // Código Recuperación column
+    const fechaColumn = table.querySelector('thead th:nth-child(15)'); // Fecha Registro column
+    const accionesColumn = table.querySelector('thead th:nth-child(16)'); // Acciones column
 
     // Hide gamification columns for profesores, superusuarios, and estudiantes (since we have dedicated insignias view)
     const shouldHideGamification = view === 'profesores' || view === 'superusuarios' || view === 'estudiantes';
@@ -750,24 +780,27 @@ function updateColumnVisibility(view) {
         }
     }
 
-    // Update all table rows
-    const tableRows = document.querySelectorAll('#usersTable tbody tr');
+    // Update all table rows in the users table specifically
+    const tableRows = table.querySelectorAll('tbody tr');
     tableRows.forEach(row => {
         // All cell selectors
-        const rolCell = row.querySelector('td:nth-child(3)');
-        const estadoCell = row.querySelector('td:nth-child(4)');
-        const puntosCell = row.querySelector('td:nth-child(5)');
-        const insigniasCell = row.querySelector('td:nth-child(6)');
-        const materiasCell = row.querySelector('td:nth-child(7)');
-        const telefonoCell = row.querySelector('td:nth-child(8)');
-        const documentoCell = row.querySelector('td:nth-child(9)');
-        const institucionCell = row.querySelector('td:nth-child(10)');
-        const gradoCell = row.querySelector('td:nth-child(11)');
-        const departamentoCell = row.querySelector('td:nth-child(12)');
-        const emailRecuperacionCell = row.querySelector('td:nth-child(13)');
-        const codigoRecuperacionCell = row.querySelector('td:nth-child(14)');
-        const fechaCell = row.querySelector('td:nth-child(15)');
-        const accionesCell = row.querySelector('td:nth-child(16)');
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 16) return; // Skip if row doesn't have all cells
+
+        const rolCell = cells[2]; // 3rd column (index 2)
+        const estadoCell = cells[3]; // 4th column
+        const puntosCell = cells[4]; // 5th column
+        const insigniasCell = cells[5]; // 6th column
+        const materiasCell = cells[6]; // 7th column
+        const telefonoCell = cells[7]; // 8th column
+        const documentoCell = cells[8]; // 9th column
+        const institucionCell = cells[9]; // 10th column
+        const gradoCell = cells[10]; // 11th column
+        const departamentoCell = cells[11]; // 12th column
+        const emailRecuperacionCell = cells[12]; // 13th column
+        const codigoRecuperacionCell = cells[13]; // 14th column
+        const fechaCell = cells[14]; // 15th column
+        const accionesCell = cells[15]; // 16th column
 
         if (isRecoveryView) {
             // Hide most cells for recovery view, but keep Rol visible
@@ -889,11 +922,16 @@ function updateStats() {
     const totalUsersCount = currentUsers.length;
     const totalAdminsCount = currentUsers.filter(user =>
         (user.tipoUsuario === 'admin' || user.rol === 'admin') &&
-        user.rol !== 'superusuario'
+        user.rol !== 'superusuario' &&
+        user.rol !== 'coordinador'
     ).length;
     const totalStudentsCount = currentUsers.filter(user => user.tipoUsuario === 'estudiante').length;
     const totalSuperusersCount = currentUsers.filter(user => user.rol === 'superusuario').length;
+    const totalCoordinadoresCount = allUsers.filter(user => user.rol === 'coordinador').length;
     const activeUsersCount = currentUsers.filter(user => user.activo === true).length;
+
+    // Get coordinadores element
+    const totalCoordinadoresEl = document.getElementById('totalCoordinadores');
 
     // Update stats based on current dashboard view
     switch (currentDashboardView) {
@@ -903,6 +941,7 @@ function updateStats() {
             elements.totalSuperusers.textContent = '0';
             elements.totalStudents.textContent = '0';
             elements.activeUsers.textContent = currentUsers.filter(user => user.activo === true).length;
+            if (totalCoordinadoresEl) totalCoordinadoresEl.textContent = '0';
             break;
         case 'estudiantes':
             elements.totalUsers.textContent = totalStudentsCount;
@@ -910,6 +949,7 @@ function updateStats() {
             elements.totalSuperusers.textContent = '0';
             elements.totalStudents.textContent = totalStudentsCount;
             elements.activeUsers.textContent = currentUsers.filter(user => user.activo === true).length;
+            if (totalCoordinadoresEl) totalCoordinadoresEl.textContent = '0';
             break;
         case 'superusuarios':
             elements.totalUsers.textContent = totalSuperusersCount;
@@ -917,16 +957,27 @@ function updateStats() {
             elements.totalSuperusers.textContent = totalSuperusersCount;
             elements.totalStudents.textContent = '0';
             elements.activeUsers.textContent = currentUsers.filter(user => user.activo === true).length;
+            if (totalCoordinadoresEl) totalCoordinadoresEl.textContent = '0';
+            break;
+        case 'coordinadores':
+            elements.totalUsers.textContent = totalCoordinadoresCount;
+            elements.totalAdmins.textContent = '0';
+            elements.totalSuperusers.textContent = '0';
+            elements.totalStudents.textContent = '0';
+            elements.activeUsers.textContent = allUsers.filter(user => user.rol === 'coordinador' && user.activo === true).length;
+            if (totalCoordinadoresEl) totalCoordinadoresEl.textContent = totalCoordinadoresCount;
             break;
         case 'dashboard':
         default:
             // Show global statistics
             const globalTotalAdmins = allUsers.filter(user =>
                 (user.tipoUsuario === 'admin' || user.rol === 'admin') &&
-                user.rol !== 'superusuario'
+                user.rol !== 'superusuario' &&
+                user.rol !== 'coordinador'
             ).length;
             const globalTotalSuperusers = allUsers.filter(user => user.rol === 'superusuario').length;
             const globalTotalStudents = allUsers.filter(user => user.tipoUsuario === 'estudiante').length;
+            const globalTotalCoordinadores = allUsers.filter(user => user.rol === 'coordinador').length;
             const globalActiveUsers = allUsers.filter(user => user.activo === true).length;
 
             elements.totalUsers.textContent = allUsers.length;
@@ -934,6 +985,7 @@ function updateStats() {
             elements.totalSuperusers.textContent = globalTotalSuperusers;
             elements.totalStudents.textContent = globalTotalStudents;
             elements.activeUsers.textContent = globalActiveUsers;
+            if (totalCoordinadoresEl) totalCoordinadoresEl.textContent = globalTotalCoordinadores;
             break;
     }
 }
@@ -970,10 +1022,13 @@ function renderUsers() {
         // Determinar el badge del usuario
         let userBadge = 'EST';
         let badgeClass = 'estudiante';
-        if (user.tipoUsuario === 'admin' || user.rol === 'admin' || user.rol === 'superusuario') {
+        if (user.tipoUsuario === 'admin' || user.rol === 'admin' || user.rol === 'superusuario' || user.rol === 'coordinador') {
             if (user.rol === 'superusuario') {
                 userBadge = 'SUPER';
                 badgeClass = 'superusuario';
+            } else if (user.rol === 'coordinador') {
+                userBadge = 'COORD';
+                badgeClass = 'coordinador';
             } else {
                 userBadge = 'PROF';
                 badgeClass = 'admin';
@@ -1077,13 +1132,13 @@ function renderUsers() {
                     </div>` : 'N/A'}
             </td>
             <td>
-                ${user.tipoUsuario === 'estudiante' ? (user.institucion || 'No especificada') : 'N/A'}
+                ${(user.tipoUsuario === 'estudiante' || user.rol === 'coordinador') ? (user.institucion || 'No especificada') : 'N/A'}
             </td>
             <td>
                 ${user.tipoUsuario === 'estudiante' ? (user.grado || 'No especificado') : 'N/A'}
             </td>
             <td>
-                ${user.tipoUsuario === 'estudiante' ? (user.departamento || 'No especificado') : 'N/A'}
+                ${(user.tipoUsuario === 'estudiante' || user.rol === 'coordinador') ? (user.departamento || 'No especificado') : 'N/A'}
             </td>
             <td>
                 ${user.emailRecuperacion ?
@@ -2830,7 +2885,7 @@ function initializeInsigniasManagement() {
     populateIconsGrid('all');
 }
 
-// Update dashboard view to handle insignias and instituciones
+// Update dashboard view to handle insignias, instituciones and coordinadores
 function switchDashboardView(view) {
     currentDashboardView = view;
 
@@ -2847,6 +2902,7 @@ function switchDashboardView(view) {
     const usersTableContainer = document.getElementById('usersTableContainer');
     const insigniasManagement = document.getElementById('insigniasManagement');
     const institucionesManagement = document.getElementById('institucionesManagement');
+    const coordinadoresManagement = document.getElementById('coordinadoresManagement');
     const statsGrid = document.querySelector('.stats-grid');
 
     // Handle different views
@@ -2854,18 +2910,28 @@ function switchDashboardView(view) {
         if (usersTableContainer) usersTableContainer.style.display = 'none';
         if (insigniasManagement) insigniasManagement.style.display = 'block';
         if (institucionesManagement) institucionesManagement.style.display = 'none';
+        if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'none';
         loadInsignias();
     } else if (view === 'instituciones') {
         if (usersTableContainer) usersTableContainer.style.display = 'none';
         if (insigniasManagement) insigniasManagement.style.display = 'none';
         if (institucionesManagement) institucionesManagement.style.display = 'block';
+        if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'none';
         loadInstitucionesForManagement();
+    } else if (view === 'coordinadores') {
+        if (usersTableContainer) usersTableContainer.style.display = 'none';
+        if (insigniasManagement) insigniasManagement.style.display = 'none';
+        if (institucionesManagement) institucionesManagement.style.display = 'none';
+        if (coordinadoresManagement) coordinadoresManagement.style.display = 'block';
+        if (statsGrid) statsGrid.style.display = 'none';
+        loadCoordinadores();
     } else {
         if (usersTableContainer) usersTableContainer.style.display = 'block';
         if (insigniasManagement) insigniasManagement.style.display = 'none';
         if (institucionesManagement) institucionesManagement.style.display = 'none';
+        if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'grid';
     }
 
@@ -3901,3 +3967,483 @@ async function createDefaultInstituciones() {
         console.error('Error creating default instituciones:', error);
     }
 }
+
+// ============================================
+// COORDINADORES MANAGEMENT SYSTEM
+// ============================================
+
+let allCoordinadores = [];
+let currentCoordinadorForEdit = null;
+let currentCoordinadorForDelete = null;
+
+// Initialize coordinadores management
+function initializeCoordinadoresManagement() {
+    const createCoordinadorBtn = document.getElementById('createCoordinadorBtn');
+    const closeCoordinadorModal = document.getElementById('closeCoordinadorModal');
+    const cancelCoordinador = document.getElementById('cancelCoordinador');
+    const coordinadorForm = document.getElementById('coordinadorForm');
+    const toggleCoordinadorPassword = document.getElementById('toggleCoordinadorPassword');
+
+    // Delete modal elements
+    const closeDeleteCoordinadorModal = document.getElementById('closeDeleteCoordinadorModal');
+    const cancelDeleteCoordinador = document.getElementById('cancelDeleteCoordinador');
+    const confirmDeleteCoordinador = document.getElementById('confirmDeleteCoordinador');
+    const deleteCoordinadorModal = document.getElementById('deleteCoordinadorModal');
+
+    if (createCoordinadorBtn) {
+        createCoordinadorBtn.addEventListener('click', openCreateCoordinadorModal);
+    }
+
+    if (closeCoordinadorModal) {
+        closeCoordinadorModal.addEventListener('click', closeCoordinadorModalFn);
+    }
+
+    if (cancelCoordinador) {
+        cancelCoordinador.addEventListener('click', closeCoordinadorModalFn);
+    }
+
+    if (coordinadorForm) {
+        coordinadorForm.addEventListener('submit', handleCoordinadorSubmit);
+    }
+
+    if (toggleCoordinadorPassword) {
+        toggleCoordinadorPassword.addEventListener('click', () => {
+            togglePasswordVisibility('coordinadorPassword', 'toggleCoordinadorPassword');
+        });
+    }
+
+    // Delete modal events
+    if (closeDeleteCoordinadorModal) {
+        closeDeleteCoordinadorModal.addEventListener('click', closeDeleteCoordinadorModalFn);
+    }
+
+    if (cancelDeleteCoordinador) {
+        cancelDeleteCoordinador.addEventListener('click', closeDeleteCoordinadorModalFn);
+    }
+
+    if (confirmDeleteCoordinador) {
+        confirmDeleteCoordinador.addEventListener('click', handleDeleteCoordinador);
+    }
+
+    if (deleteCoordinadorModal) {
+        deleteCoordinadorModal.addEventListener('click', function (e) {
+            if (e.target === deleteCoordinadorModal) {
+                closeDeleteCoordinadorModalFn();
+            }
+        });
+    }
+
+    // Modal outside click
+    const coordinadorModal = document.getElementById('coordinadorModal');
+    if (coordinadorModal) {
+        coordinadorModal.addEventListener('click', function (e) {
+            if (e.target === coordinadorModal) {
+                closeCoordinadorModalFn();
+            }
+        });
+    }
+
+    // Clean username field for coordinadores
+    const coordinadorUsuario = document.getElementById('coordinadorUsuario');
+    if (coordinadorUsuario) {
+        coordinadorUsuario.addEventListener('input', function (e) {
+            cleanUsernameField(e.target);
+        });
+    }
+}
+
+// Load coordinadores from Firebase
+async function loadCoordinadores() {
+    const loadingSpinner = document.getElementById('coordinadoresLoadingSpinner');
+    const noCoordinadores = document.getElementById('noCoordinadores');
+    const tableBody = document.getElementById('coordinadoresTableBody');
+
+    try {
+        if (loadingSpinner) loadingSpinner.style.display = 'block';
+        if (noCoordinadores) noCoordinadores.style.display = 'none';
+        if (tableBody) tableBody.innerHTML = '';
+
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('usuarios')
+            .where('rol', '==', 'coordinador')
+            .get();
+
+        allCoordinadores = [];
+        snapshot.forEach(doc => {
+            allCoordinadores.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        // Sort by creation date (newest first)
+        allCoordinadores.sort((a, b) => {
+            const dateA = a.fechaCreacion ? a.fechaCreacion.toDate() : new Date(0);
+            const dateB = b.fechaCreacion ? b.fechaCreacion.toDate() : new Date(0);
+            return dateB - dateA;
+        });
+
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+
+        if (allCoordinadores.length === 0) {
+            if (noCoordinadores) noCoordinadores.style.display = 'block';
+        } else {
+            renderCoordinadores();
+        }
+
+    } catch (error) {
+        console.error('Error loading coordinadores:', error);
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        showMessage('Error al cargar coordinadores', 'error');
+    }
+}
+
+// Render coordinadores table
+function renderCoordinadores() {
+    const tableBody = document.getElementById('coordinadoresTableBody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+
+    allCoordinadores.forEach(coordinador => {
+        const row = document.createElement('tr');
+
+        // Add inactive class if coordinator is not active
+        if (!coordinador.activo) {
+            row.classList.add('inactive');
+        }
+
+        const creationDate = coordinador.fechaCreacion ?
+            coordinador.fechaCreacion.toDate().toLocaleDateString('es-ES') :
+            'No disponible';
+
+        row.innerHTML = `
+            <td>
+                <div class="user-name-with-photo">
+                    <div class="table-user-avatar">
+                        ${coordinador.fotoPerfil ?
+                `<img src="${coordinador.fotoPerfil}" alt="${coordinador.nombre}" class="table-avatar-image">` :
+                `<div class="table-avatar-default" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                                <i class="bi bi-person-workspace"></i>
+                            </div>`
+            }
+                    </div>
+                    <span class="user-name-text">${coordinador.nombre || 'No especificado'}</span>
+                </div>
+            </td>
+            <td>
+                <div class="user-email">
+                    <strong>${coordinador.usuario || 'No especificado'}</strong>
+                </div>
+            </td>
+            <td>${coordinador.institucion || 'No asignada'}</td>
+            <td>
+                <span class="status-badge ${coordinador.activo ? 'active' : 'inactive'}">
+                    ${coordinador.activo ? 'Activo' : 'Inactivo'}
+                </span>
+            </td>
+            <td>${creationDate}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="action-btn edit-coordinador-btn" 
+                            onclick="openEditCoordinadorModal('${coordinador.id}')"
+                            title="Editar coordinador">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="action-btn toggle-coordinador-btn ${coordinador.activo ? 'deactivate' : ''}" 
+                            onclick="toggleCoordinadorStatus('${coordinador.id}', ${coordinador.activo})"
+                            title="${coordinador.activo ? 'Desactivar' : 'Activar'}">
+                        <i class="bi bi-${coordinador.activo ? 'person-x' : 'person-check'}"></i>
+                    </button>
+                    <button class="action-btn delete-coordinador-btn" 
+                            onclick="openDeleteCoordinadorModal('${coordinador.id}')"
+                            title="Eliminar coordinador">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+
+        tableBody.appendChild(row);
+    });
+}
+
+// Open create coordinador modal
+function openCreateCoordinadorModal() {
+    const modal = document.getElementById('coordinadorModal');
+    const form = document.getElementById('coordinadorForm');
+    const title = document.getElementById('coordinadorModalTitle');
+    const buttonText = document.getElementById('coordinadorButtonText');
+    const passwordField = document.getElementById('coordinadorPassword');
+
+    if (form) form.reset();
+    if (title) title.textContent = 'Crear Nuevo Coordinador';
+    if (buttonText) buttonText.textContent = 'Crear Coordinador';
+    if (passwordField) {
+        passwordField.required = true;
+        passwordField.parentElement.parentElement.style.display = 'flex';
+    }
+
+    document.getElementById('coordinadorId').value = '';
+    currentCoordinadorForEdit = null;
+
+    // Load instituciones for selector
+    loadInstitucionesForCoordinadorSelector();
+
+    if (modal) modal.classList.add('show');
+}
+
+// Open edit coordinador modal
+async function openEditCoordinadorModal(coordinadorId) {
+    const coordinador = allCoordinadores.find(c => c.id === coordinadorId);
+    if (!coordinador) {
+        showMessage('Coordinador no encontrado', 'error');
+        return;
+    }
+
+    currentCoordinadorForEdit = coordinador;
+
+    const modal = document.getElementById('coordinadorModal');
+    const title = document.getElementById('coordinadorModalTitle');
+    const buttonText = document.getElementById('coordinadorButtonText');
+    const passwordField = document.getElementById('coordinadorPassword');
+
+    if (title) title.textContent = 'Editar Coordinador';
+    if (buttonText) buttonText.textContent = 'Guardar Cambios';
+
+    // Password not required for edit
+    if (passwordField) {
+        passwordField.required = false;
+        passwordField.value = '';
+        passwordField.placeholder = 'Dejar vacío';
+    }
+
+    document.getElementById('coordinadorId').value = coordinador.id;
+    document.getElementById('coordinadorNombre').value = coordinador.nombre || '';
+
+    // Extract username without domain
+    let username = coordinador.usuario || '';
+    if (username.includes('@')) {
+        username = username.split('@')[0];
+    }
+    document.getElementById('coordinadorUsuario').value = username;
+
+    document.getElementById('coordinadorTelefono').value = coordinador.telefono || '';
+    document.getElementById('coordinadorEmailRecuperacion').value = coordinador.emailRecuperacion || '';
+
+    // Load instituciones and set selected
+    await loadInstitucionesForCoordinadorSelector();
+    document.getElementById('coordinadorInstitucion').value = coordinador.institucion || '';
+
+    if (modal) modal.classList.add('show');
+}
+
+// Load instituciones for coordinador selector
+async function loadInstitucionesForCoordinadorSelector() {
+    const select = document.getElementById('coordinadorInstitucion');
+    if (!select) return;
+
+    try {
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('instituciones').orderBy('nombre').get();
+
+        select.innerHTML = '<option value="">Seleccione una Institución</option>';
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const option = document.createElement('option');
+            option.value = data.nombre;
+            option.textContent = data.nombre;
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error('Error loading instituciones for coordinador:', error);
+    }
+}
+
+// Close coordinador modal
+function closeCoordinadorModalFn() {
+    const modal = document.getElementById('coordinadorModal');
+    if (modal) modal.classList.remove('show');
+    currentCoordinadorForEdit = null;
+}
+
+// Handle coordinador form submit
+async function handleCoordinadorSubmit(e) {
+    e.preventDefault();
+
+    const coordinadorId = document.getElementById('coordinadorId').value;
+    const nombre = document.getElementById('coordinadorNombre').value.trim();
+    let usuario = document.getElementById('coordinadorUsuario').value.trim();
+    const password = document.getElementById('coordinadorPassword').value;
+    const institucion = document.getElementById('coordinadorInstitucion').value;
+    const telefono = document.getElementById('coordinadorTelefono').value.trim();
+    const emailRecuperacion = document.getElementById('coordinadorEmailRecuperacion').value.trim();
+
+    // Validation
+    if (!nombre || !usuario || !institucion) {
+        showMessage('Por favor complete todos los campos requeridos', 'error');
+        return;
+    }
+
+    if (!coordinadorId && !password) {
+        showMessage('La contraseña es requerida para crear un coordinador', 'error');
+        return;
+    }
+
+    if (password && password.length < 6) {
+        showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+    }
+
+    // Add domain to username if not present
+    if (!usuario.includes('@')) {
+        usuario = usuario + '@seamosgenios.com';
+    }
+
+    try {
+        await waitForFirebase();
+
+        // Check if username already exists (for new coordinadores or if username changed)
+        if (!coordinadorId || (currentCoordinadorForEdit && currentCoordinadorForEdit.usuario !== usuario)) {
+            const existingUser = await window.firebaseDB.collection('usuarios')
+                .where('usuario', '==', usuario)
+                .get();
+
+            if (!existingUser.empty) {
+                showMessage('Este nombre de usuario ya está en uso', 'error');
+                return;
+            }
+        }
+
+        // Get departamento from the selected institucion
+        let departamento = '';
+        try {
+            const instSnapshot = await window.firebaseDB.collection('instituciones')
+                .where('nombre', '==', institucion)
+                .limit(1)
+                .get();
+
+            if (!instSnapshot.empty) {
+                departamento = instSnapshot.docs[0].data().departamento || '';
+            }
+        } catch (err) {
+            console.error('Error getting institucion departamento:', err);
+        }
+
+        const coordinadorData = {
+            nombre: nombre,
+            usuario: usuario,
+            institucion: institucion,
+            departamento: departamento,
+            telefono: telefono,
+            emailRecuperacion: emailRecuperacion,
+            tipoUsuario: 'admin',
+            rol: 'coordinador',
+            activo: true,
+            updatedAt: new Date().toISOString()
+        };
+
+        if (password) {
+            coordinadorData.password = password;
+            coordinadorData.codigoRecuperacion = generateRecoveryCode();
+        }
+
+        if (coordinadorId) {
+            // Update existing coordinador
+            await window.firebaseDB.collection('usuarios').doc(coordinadorId).update(coordinadorData);
+            showMessage('Coordinador actualizado exitosamente', 'success');
+        } else {
+            // Create new coordinador
+            coordinadorData.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+            coordinadorData.createdAt = new Date().toISOString();
+            await window.firebaseDB.collection('usuarios').add(coordinadorData);
+            showMessage('Coordinador creado exitosamente', 'success');
+        }
+
+        closeCoordinadorModalFn();
+        loadCoordinadores();
+        loadUsers(); // Refresh main users list too
+
+    } catch (error) {
+        console.error('Error saving coordinador:', error);
+        showMessage('Error al guardar el coordinador', 'error');
+    }
+}
+
+// Toggle coordinador status
+async function toggleCoordinadorStatus(coordinadorId, currentStatus) {
+    try {
+        await waitForFirebase();
+
+        await window.firebaseDB.collection('usuarios').doc(coordinadorId).update({
+            activo: !currentStatus,
+            updatedAt: new Date().toISOString()
+        });
+
+        showMessage(`Coordinador ${!currentStatus ? 'activado' : 'desactivado'} exitosamente`, 'success');
+        loadCoordinadores();
+        loadUsers();
+
+    } catch (error) {
+        console.error('Error toggling coordinador status:', error);
+        showMessage('Error al cambiar el estado del coordinador', 'error');
+    }
+}
+
+// Open delete coordinador modal
+function openDeleteCoordinadorModal(coordinadorId) {
+    const coordinador = allCoordinadores.find(c => c.id === coordinadorId);
+    if (!coordinador) {
+        showMessage('Coordinador no encontrado', 'error');
+        return;
+    }
+
+    currentCoordinadorForDelete = coordinador;
+
+    const modal = document.getElementById('deleteCoordinadorModal');
+    const nameElement = document.getElementById('deleteCoordinadorName');
+
+    if (nameElement) nameElement.textContent = coordinador.nombre;
+    if (modal) modal.classList.add('show');
+}
+
+// Close delete coordinador modal
+function closeDeleteCoordinadorModalFn() {
+    const modal = document.getElementById('deleteCoordinadorModal');
+    if (modal) modal.classList.remove('show');
+    currentCoordinadorForDelete = null;
+}
+
+// Handle delete coordinador
+async function handleDeleteCoordinador() {
+    if (!currentCoordinadorForDelete) return;
+
+    try {
+        await waitForFirebase();
+
+        await window.firebaseDB.collection('usuarios').doc(currentCoordinadorForDelete.id).delete();
+
+        showMessage('Coordinador eliminado exitosamente', 'success');
+        closeDeleteCoordinadorModalFn();
+        loadCoordinadores();
+        loadUsers();
+
+    } catch (error) {
+        console.error('Error deleting coordinador:', error);
+        showMessage('Error al eliminar el coordinador', 'error');
+    }
+}
+
+// Make coordinador functions globally available
+window.openEditCoordinadorModal = openEditCoordinadorModal;
+window.openDeleteCoordinadorModal = openDeleteCoordinadorModal;
+window.toggleCoordinadorStatus = toggleCoordinadorStatus;
+
+// Initialize coordinadores management on page load
+document.addEventListener('DOMContentLoaded', function () {
+    initializeCoordinadoresManagement();
+});

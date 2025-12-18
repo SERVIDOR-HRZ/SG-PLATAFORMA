@@ -131,8 +131,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Check if we're in the Secciones folder
                 const isInSecciones = window.location.pathname.includes('/Secciones/');
                 
+                // Coordinador va al panel de coordinadores
+                if (userData.rol === 'coordinador') {
+                    window.location.href = isInSecciones ? 'Panel_Coordinador.html' : 'Secciones/Panel_Coordinador.html';
+                }
                 // Superusuario y admin van al panel de administración
-                if (userData.tipoUsuario === 'admin' || userData.rol === 'superusuario' || userData.rol === 'admin') {
+                else if (userData.tipoUsuario === 'admin' || userData.rol === 'superusuario' || userData.rol === 'admin') {
                     window.location.href = isInSecciones ? 'Panel_Admin.html' : 'Secciones/Panel_Admin.html';
                 } else {
                     window.location.href = isInSecciones ? 'Panel_Estudiantes.html' : 'Secciones/Panel_Estudiantes.html';
