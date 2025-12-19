@@ -1,5 +1,7 @@
 // Aula JavaScript
 let currentMateria = '';
+let currentAulaId = '';
+let currentAulaData = null;
 let currentUser = {};
 
 // ImgBB API configuration
@@ -9,7 +11,7 @@ const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
 document.addEventListener('DOMContentLoaded', function () {
     checkAuthentication();
     loadUserInfo();
-    getCurrentMateria();
+    getCurrentMateriaOrAula();
     setupEventListeners();
     setupTabs();
 });
@@ -24,11 +26,19 @@ function checkAuthentication() {
     }
 }
 
-// Get current materia from URL
-function getCurrentMateria() {
+// Get current materia or aula from URL
+async function getCurrentMateriaOrAula() {
     const urlParams = new URLSearchParams(window.location.search);
     currentMateria = urlParams.get('materia');
+    currentAulaId = urlParams.get('aula');
 
+    // Si viene de un aula, cargar datos del aula
+    if (currentAulaId) {
+        await loadAulaData();
+        return;
+    }
+
+    // Si viene de una materia directa (comportamiento anterior)
     if (!currentMateria) {
         window.location.href = 'Clases.html';
         return;
@@ -55,6 +65,208 @@ function getCurrentMateria() {
 
     // Load content
     loadAnuncios();
+}
+
+// Load aula data from Firebase or sessionStorage
+async function loadAulaData() {
+    try {
+        // Intentar obtener del sessionStorage primero
+        const storedAula = sessionStorage.getItem('selectedAula');
+        if (storedAula) {
+            currentAulaData = JSON.parse(storedAula);
+        }
+
+        // Si no hay datos en sessionStorage o el ID no coincide, cargar de Firebase
+        if (!currentAulaData || currentAulaData.id !== currentAulaId) {
+            await esperarFirebase();
+            const aulaDoc = await window.firebaseDB.collection('aulas').doc(currentAulaId).get();
+            
+            if (!aulaDoc.exists) {
+                window.location.href = 'Clases.html';
+                return;
+            }
+
+            currentAulaData = {
+                id: aulaDoc.id,
+                ...aulaDoc.data()
+            };
+        }
+
+        // Establecer el título del aula
+        document.getElementById('aulaTitle').textContent = currentAulaData.nombre || 'Aula';
+
+        // Si el aula tiene materias, mostrar las tarjetas de materias
+        if (currentAulaData.materias && currentAulaData.materias.length > 0) {
+            // Mostrar las materias como tarjetas (ocultar tabs y contenido)
+            showMateriasCards(currentAulaData.materias);
+        } else {
+            window.location.href = 'Clases.html';
+            return;
+        }
+
+    } catch (error) {
+        console.error('Error loading aula data:', error);
+        window.location.href = 'Clases.html';
+    }
+}
+
+// Show materias as cards (initial view when entering an aula)
+function showMateriasCards(materias) {
+    const materiasConfig = {
+        'matematicas': { nombre: 'Matemáticas', descripcion: 'Álgebra, geometría, cálculo y más', icon: 'bi-calculator', color: '#2196F3' },
+        'lectura': { nombre: 'Lectura Crítica', descripcion: 'Comprensión lectora y análisis de textos', icon: 'bi-book', color: '#F44336' },
+        'sociales': { nombre: 'Ciencias Sociales', descripcion: 'Historia, geografía y ciudadanía', icon: 'bi-globe', color: '#FF9800' },
+        'naturales': { nombre: 'Ciencias Naturales', descripcion: 'Biología, química y física', icon: 'bi-tree', color: '#4CAF50' },
+        'ingles': { nombre: 'Inglés', descripcion: 'Gramática, vocabulario y comprensión', icon: 'bi-translate', color: '#9C27B0' }
+    };
+
+    // Ocultar tabs y contenido
+    const tabsContainer = document.querySelector('.tabs-container');
+    const tabContent = document.querySelector('.tab-content');
+    if (tabsContainer) tabsContainer.style.display = 'none';
+    if (tabContent) tabContent.style.display = 'none';
+
+    // Crear el contenedor de tarjetas de materias
+    const cardsHTML = `
+        <div class="materias-cards-container" id="materiasCardsContainer">
+            <div class="materias-cards-header">
+                <h2>Selecciona una materia</h2>
+                <p>Elige la materia a la que deseas acceder</p>
+            </div>
+            <div class="materias-cards-grid">
+                ${materias.map(materiaId => {
+                    const config = materiasConfig[materiaId] || { nombre: materiaId, descripcion: '', icon: 'bi-book', color: '#667eea' };
+                    return `
+                        <div class="materia-card" data-materia="${materiaId}" style="--materia-color: ${config.color}">
+                            <div class="materia-card-header" style="background: linear-gradient(135deg, ${config.color}, ${adjustColorBrightness(config.color, -30)})">
+                                <i class="bi ${config.icon}"></i>
+                            </div>
+                            <div class="materia-card-body">
+                                <h3>${config.nombre}</h3>
+                                <p>${config.descripcion}</p>
+                            </div>
+                            <div class="materia-card-footer">
+                                <span class="materia-card-btn">
+                                    <i class="bi bi-arrow-right-circle"></i>
+                                    Entrar
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+
+    // Insertar en el main content
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.insertAdjacentHTML('beforeend', cardsHTML);
+
+        // Agregar event listeners a las tarjetas
+        document.querySelectorAll('.materia-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const materiaId = card.getAttribute('data-materia');
+                enterMateria(materiaId);
+            });
+        });
+    }
+}
+
+// Adjust color brightness helper
+function adjustColorBrightness(color, amount) {
+    const hex = color.replace('#', '');
+    const num = parseInt(hex, 16);
+    const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+    const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+    const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+    return '#' + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Enter a specific materia (show tabs and content)
+function enterMateria(materiaId) {
+    currentMateria = materiaId;
+    
+    const materiasConfig = {
+        'matematicas': { nombre: 'Matemáticas', color: '#2196F3' },
+        'lectura': { nombre: 'Lectura Crítica', color: '#F44336' },
+        'sociales': { nombre: 'Ciencias Sociales', color: '#FF9800' },
+        'naturales': { nombre: 'Ciencias Naturales', color: '#4CAF50' },
+        'ingles': { nombre: 'Inglés', color: '#9C27B0' }
+    };
+    
+    const config = materiasConfig[materiaId] || { nombre: materiaId, color: '#667eea' };
+    
+    // Actualizar título
+    document.getElementById('aulaTitle').textContent = `${currentAulaData.nombre} - ${config.nombre}`;
+    
+    // Ocultar tarjetas de materias
+    const cardsContainer = document.getElementById('materiasCardsContainer');
+    if (cardsContainer) cardsContainer.style.display = 'none';
+    
+    // Mostrar tabs y contenido
+    const tabsContainer = document.querySelector('.tabs-container');
+    const tabContent = document.querySelector('.tab-content');
+    if (tabsContainer) tabsContainer.style.display = 'flex';
+    if (tabContent) tabContent.style.display = 'block';
+    
+    // Agregar botón para volver a las materias
+    addBackToMateriasButton();
+    
+    // Show create buttons for admin
+    if (currentUser.tipoUsuario === 'admin') {
+        document.getElementById('createPostContainer').style.display = 'block';
+        document.getElementById('createTaskContainer').style.display = 'block';
+        document.getElementById('createMaterialContainer').style.display = 'block';
+        document.getElementById('estudiantesTab').style.display = 'flex';
+    }
+    
+    // Cargar contenido
+    loadAnuncios();
+}
+
+// Add button to go back to materias selection
+function addBackToMateriasButton() {
+    // Remover botón existente si hay
+    const existingBtn = document.getElementById('backToMateriasBtn');
+    if (existingBtn) existingBtn.remove();
+    
+    // Solo agregar si hay más de una materia
+    if (currentAulaData.materias && currentAulaData.materias.length > 1) {
+        const tabsContainer = document.querySelector('.tabs-container');
+        if (tabsContainer) {
+            const btnHTML = `
+                <button class="back-to-materias-btn" id="backToMateriasBtn" title="Volver atrás">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Atrás</span>
+                </button>
+            `;
+            tabsContainer.insertAdjacentHTML('afterbegin', btnHTML);
+            
+            document.getElementById('backToMateriasBtn').addEventListener('click', backToMateriasSelection);
+        }
+    }
+}
+
+// Go back to materias selection
+function backToMateriasSelection() {
+    // Actualizar título
+    document.getElementById('aulaTitle').textContent = currentAulaData.nombre || 'Aula';
+    
+    // Ocultar tabs y contenido
+    const tabsContainer = document.querySelector('.tabs-container');
+    const tabContent = document.querySelector('.tab-content');
+    if (tabsContainer) tabsContainer.style.display = 'none';
+    if (tabContent) tabContent.style.display = 'none';
+    
+    // Mostrar tarjetas de materias
+    const cardsContainer = document.getElementById('materiasCardsContainer');
+    if (cardsContainer) {
+        cardsContainer.style.display = 'block';
+    }
+    
+    // Limpiar materia actual
+    currentMateria = '';
 }
 
 // Load user info

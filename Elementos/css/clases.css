@@ -540,3 +540,187 @@ body {
         font-size: 0.95rem;
     }
 }
+
+/* =
+=========================================
+   AULAS SELECTOR STYLES
+   ========================================== */
+
+/* Aula Selector Card */
+.aula-selector-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.aula-selector-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.aula-selector-header {
+    padding: 1.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 100px;
+}
+
+.aula-selector-icon {
+    font-size: 2.5rem;
+    opacity: 0.95;
+    flex-shrink: 0;
+}
+
+.aula-selector-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.aula-selector-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.aula-selector-description {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.aula-selector-materias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.aula-materia-tag {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: white;
+}
+
+.aula-materia-tag.matematicas {
+    background: #2196F3;
+}
+
+.aula-materia-tag.lectura {
+    background: #F44336;
+}
+
+.aula-materia-tag.sociales {
+    background: #FF9800;
+}
+
+.aula-materia-tag.naturales {
+    background: #4CAF50;
+}
+
+.aula-materia-tag.ingles {
+    background: #9C27B0;
+}
+
+.aula-selector-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.aula-selector-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.aula-selector-info i {
+    color: #999;
+}
+
+/* Text muted */
+.text-muted {
+    color: #999;
+    font-style: italic;
+}
+
+/* Responsive for aula selector */
+@media (max-width: 768px) {
+    .aula-selector-header {
+        padding: 1.25rem;
+        min-height: 80px;
+    }
+    
+    .aula-selector-icon {
+        font-size: 2rem;
+    }
+    
+    .aula-selector-title {
+        font-size: 1.1rem;
+    }
+    
+    .aula-selector-body {
+        padding: 1.25rem;
+    }
+    
+    .aula-materia-tag {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .aula-selector-header {
+        padding: 1rem;
+        min-height: 70px;
+    }
+    
+    .aula-selector-icon {
+        font-size: 1.8rem;
+    }
+    
+    .aula-selector-title {
+        font-size: 1rem;
+    }
+    
+    .aula-selector-body {
+        padding: 1rem;
+    }
+    
+    .aula-selector-description {
+        font-size: 0.85rem;
+    }
+    
+    .aula-materia-tag {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .aula-selector-info {
+        gap: 0.75rem;
+    }
+    
+    .aula-selector-info span {
+        font-size: 0.8rem;
+    }
+}

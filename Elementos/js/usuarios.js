@@ -1084,21 +1084,11 @@ function renderUsers() {
                 (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">0</span>' : 'N/A')}
             </td>
             <td>
-                ${user.tipoUsuario === 'estudiante' && user.clasesPermitidas && user.clasesPermitidas.length > 0 ?
-                `<div class="materias-cell">
-                        ${user.clasesPermitidas.map(materia => {
-                    const materiasConfig = {
-                        'matematicas': { inicial: 'MAT', color: '#667eea' },
-                        'lectura': { inicial: 'LEC', color: '#dc3545' },
-                        'sociales': { inicial: 'SOC', color: '#ffc107' },
-                        'naturales': { inicial: 'CIE', color: '#28a745' },
-                        'ingles': { inicial: 'ING', color: '#9c27b0' }
-                    };
-                    const config = materiasConfig[materia] || { inicial: 'N/A', color: '#6c757d' };
-                    return `<span class="materia-badge" style="background: ${config.color};" title="${materia.charAt(0).toUpperCase() + materia.slice(1)}">${config.inicial}</span>`;
-                }).join('')}
+                ${user.tipoUsuario === 'estudiante' && user.aulasAsignadas && user.aulasAsignadas.length > 0 ?
+                `<div class="aulas-cell" data-aulas='${JSON.stringify(user.aulasAsignadas)}'>
+                        <span class="aulas-count-badge"><i class="bi bi-door-open"></i> ${user.aulasAsignadas.length} aula${user.aulasAsignadas.length > 1 ? 's' : ''}</span>
                     </div>` :
-                (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">Sin acceso</span>' :
+                (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">Sin aulas</span>' :
                     (user.tipoUsuario === 'admin' && user.asignaturas && user.asignaturas.length > 0 ?
                         `<div class="materias-cell">
                             ${user.asignaturas.map(materia => {
@@ -1288,6 +1278,9 @@ function openCreateUserModal() {
         // Show user type selection
         userTypeSelection.style.display = 'block';
     }
+
+    // Load aulas for the create form
+    loadAulasForCreateForm();
 
     handleUserTypeChange();
     elements.createUserModal.classList.add('show');
@@ -1494,12 +1487,8 @@ function openEditUserModal(userId) {
             });
         });
 
-        // Load clases permisos
-        const clasesPermitidas = user.clasesPermitidas || [];
-        const checkboxes = document.querySelectorAll('input[name="clasePermiso"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = clasesPermitidas.includes(checkbox.value);
-        });
+        // Load aulas asignadas
+        loadAulasForEditForm(user.aulasAsignadas || []);
 
         // Clear asignaturas checkboxes for students (they shouldn't have any)
         const asignaturasCheckboxes = document.querySelectorAll('input[name="asignaturaProfesorEdit"]');
@@ -1721,10 +1710,10 @@ async function handleCreateUser(e) {
             userData.numeroDocumento = elements.createNumeroDocumento.value.trim();
             userData.departamento = elements.createDepartamento.value;
 
-            // Get selected clases permisos (materias a las que tendrá acceso)
-            const clasesPermisosCheckboxes = document.querySelectorAll('input[name="clasePermisoCreate"]:checked');
-            const clasesPermitidas = Array.from(clasesPermisosCheckboxes).map(cb => cb.value);
-            userData.clasesPermitidas = clasesPermitidas;
+            // Get selected aulas (aulas a las que tendrá acceso)
+            const aulasCheckboxes = document.querySelectorAll('input[name="aulaPermisoCreate"]:checked');
+            const aulasAsignadas = Array.from(aulasCheckboxes).map(cb => cb.value);
+            userData.aulasAsignadas = aulasAsignadas;
 
             // Initialize gamification fields
             userData.puntos = 0;
@@ -1862,13 +1851,13 @@ async function handleEditUser(e) {
             updateData.puntos = puntos;
             updateData.insignias = insignias;
 
-            // Get selected clases permisos
-            const clasesPermitidas = [];
-            const checkboxes = document.querySelectorAll('input[name="clasePermiso"]:checked');
-            checkboxes.forEach(checkbox => {
-                clasesPermitidas.push(checkbox.value);
+            // Get selected aulas
+            const aulasAsignadas = [];
+            const aulasCheckboxes = document.querySelectorAll('input[name="aulaPermisoEdit"]:checked');
+            aulasCheckboxes.forEach(checkbox => {
+                aulasAsignadas.push(checkbox.value);
             });
-            updateData.clasesPermitidas = clasesPermitidas;
+            updateData.aulasAsignadas = aulasAsignadas;
         }
 
         // Update admin-specific fields (asignaturas) - ONLY for admins, not students
@@ -2885,7 +2874,7 @@ function initializeInsigniasManagement() {
     populateIconsGrid('all');
 }
 
-// Update dashboard view to handle insignias, instituciones and coordinadores
+// Update dashboard view to handle insignias, instituciones, coordinadores and aulas
 function switchDashboardView(view) {
     currentDashboardView = view;
 
@@ -2903,6 +2892,7 @@ function switchDashboardView(view) {
     const insigniasManagement = document.getElementById('insigniasManagement');
     const institucionesManagement = document.getElementById('institucionesManagement');
     const coordinadoresManagement = document.getElementById('coordinadoresManagement');
+    const aulasManagement = document.getElementById('aulasManagement');
     const statsGrid = document.querySelector('.stats-grid');
 
     // Handle different views
@@ -2911,6 +2901,7 @@ function switchDashboardView(view) {
         if (insigniasManagement) insigniasManagement.style.display = 'block';
         if (institucionesManagement) institucionesManagement.style.display = 'none';
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
+        if (aulasManagement) aulasManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'none';
         loadInsignias();
     } else if (view === 'instituciones') {
@@ -2918,6 +2909,7 @@ function switchDashboardView(view) {
         if (insigniasManagement) insigniasManagement.style.display = 'none';
         if (institucionesManagement) institucionesManagement.style.display = 'block';
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
+        if (aulasManagement) aulasManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'none';
         loadInstitucionesForManagement();
     } else if (view === 'coordinadores') {
@@ -2925,13 +2917,23 @@ function switchDashboardView(view) {
         if (insigniasManagement) insigniasManagement.style.display = 'none';
         if (institucionesManagement) institucionesManagement.style.display = 'none';
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'block';
+        if (aulasManagement) aulasManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'none';
         loadCoordinadores();
+    } else if (view === 'aulas') {
+        if (usersTableContainer) usersTableContainer.style.display = 'none';
+        if (insigniasManagement) insigniasManagement.style.display = 'none';
+        if (institucionesManagement) institucionesManagement.style.display = 'none';
+        if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
+        if (aulasManagement) aulasManagement.style.display = 'block';
+        if (statsGrid) statsGrid.style.display = 'none';
+        loadAulas();
     } else {
         if (usersTableContainer) usersTableContainer.style.display = 'block';
         if (insigniasManagement) insigniasManagement.style.display = 'none';
         if (institucionesManagement) institucionesManagement.style.display = 'none';
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
+        if (aulasManagement) aulasManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'grid';
     }
 
@@ -4447,3 +4449,825 @@ window.toggleCoordinadorStatus = toggleCoordinadorStatus;
 document.addEventListener('DOMContentLoaded', function () {
     initializeCoordinadoresManagement();
 });
+
+
+// ==========================================
+// AULAS MANAGEMENT SYSTEM
+// ==========================================
+
+let allAulas = [];
+let currentAulaForEdit = null;
+let currentAulaForDelete = null;
+
+// Initialize Aulas Management
+function initializeAulasManagement() {
+    const createAulaBtn = document.getElementById('createAulaBtn');
+    const closeAulaModal = document.getElementById('closeAulaModal');
+    const cancelAula = document.getElementById('cancelAula');
+    const aulaForm = document.getElementById('aulaForm');
+    const closeDeleteAulaModal = document.getElementById('closeDeleteAulaModal');
+    const cancelDeleteAula = document.getElementById('cancelDeleteAula');
+    const confirmDeleteAula = document.getElementById('confirmDeleteAula');
+
+    if (createAulaBtn) {
+        createAulaBtn.addEventListener('click', openCreateAulaModal);
+    }
+
+    if (closeAulaModal) {
+        closeAulaModal.addEventListener('click', closeAulaModalFn);
+    }
+
+    if (cancelAula) {
+        cancelAula.addEventListener('click', closeAulaModalFn);
+    }
+
+    if (aulaForm) {
+        aulaForm.addEventListener('submit', handleSaveAula);
+    }
+
+    if (closeDeleteAulaModal) {
+        closeDeleteAulaModal.addEventListener('click', closeDeleteAulaModalFn);
+    }
+
+    if (cancelDeleteAula) {
+        cancelDeleteAula.addEventListener('click', closeDeleteAulaModalFn);
+    }
+
+    if (confirmDeleteAula) {
+        confirmDeleteAula.addEventListener('click', handleDeleteAula);
+    }
+
+    // Close modals on outside click
+    const aulaModal = document.getElementById('aulaModal');
+    const deleteAulaModal = document.getElementById('deleteAulaModal');
+
+    if (aulaModal) {
+        aulaModal.addEventListener('click', function (e) {
+            if (e.target === aulaModal) closeAulaModalFn();
+        });
+    }
+
+    if (deleteAulaModal) {
+        deleteAulaModal.addEventListener('click', function (e) {
+            if (e.target === deleteAulaModal) closeDeleteAulaModalFn();
+        });
+    }
+
+    // Populate institucion selector for aulas
+    populateAulaInstitucionSelector();
+}
+
+// Populate institucion selector in aula modal
+function populateAulaInstitucionSelector() {
+    const aulaInstitucionSelect = document.getElementById('aulaInstitucion');
+    if (!aulaInstitucionSelect) return;
+
+    const optionsHTML = institucionesDisponibles.map(inst =>
+        `<option value="${inst.nombre}">${inst.nombre}</option>`
+    ).join('');
+
+    aulaInstitucionSelect.innerHTML = '<option value="">Todas las instituciones</option>' + optionsHTML;
+}
+
+// Load Aulas from Firebase
+async function loadAulas() {
+    try {
+        const loadingSpinner = document.getElementById('aulasLoadingSpinner');
+        const noAulas = document.getElementById('noAulas');
+        const aulasGrid = document.getElementById('aulasGridManager');
+
+        if (loadingSpinner) loadingSpinner.style.display = 'block';
+        if (noAulas) noAulas.style.display = 'none';
+        if (aulasGrid) aulasGrid.innerHTML = '';
+
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('aulas').orderBy('nombre').get();
+        allAulas = [];
+
+        snapshot.forEach(doc => {
+            allAulas.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+
+        if (allAulas.length === 0) {
+            if (noAulas) noAulas.style.display = 'block';
+        } else {
+            renderAulas();
+        }
+
+    } catch (error) {
+        console.error('Error loading aulas:', error);
+        const loadingSpinner = document.getElementById('aulasLoadingSpinner');
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        showMessage('Error al cargar las aulas', 'error');
+    }
+}
+
+// Render Aulas Grid
+function renderAulas() {
+    const aulasGrid = document.getElementById('aulasGridManager');
+    if (!aulasGrid) return;
+
+    aulasGrid.innerHTML = '';
+
+    const materiasConfig = {
+        'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator' },
+        'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book' },
+        'sociales': { nombre: 'C. Sociales', icon: 'bi-globe' },
+        'naturales': { nombre: 'C. Naturales', icon: 'bi-tree' },
+        'ingles': { nombre: 'Inglés', icon: 'bi-translate' }
+    };
+
+    allAulas.forEach(aula => {
+        const card = document.createElement('div');
+        card.className = 'aula-card';
+
+        const color = aula.color || '#667eea';
+        const materias = aula.materias || [];
+
+        const materiasHTML = materias.map(materia => {
+            const config = materiasConfig[materia] || { nombre: materia, icon: 'bi-book' };
+            return `<span class="aula-materia-badge ${materia}">
+                <i class="bi ${config.icon}"></i>
+                ${config.nombre}
+            </span>`;
+        }).join('');
+
+        card.innerHTML = `
+            <div class="aula-card-header" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -30)});">
+                <h3><i class="bi bi-door-open-fill"></i> ${aula.nombre}</h3>
+                ${aula.descripcion ? `<p>${aula.descripcion}</p>` : ''}
+            </div>
+            <div class="aula-card-body">
+                <div class="aula-materias">
+                    ${materiasHTML || '<span class="text-muted">Sin materias asignadas</span>'}
+                </div>
+                <div class="aula-info">
+                    ${aula.institucion ? `<div class="aula-info-item"><i class="bi bi-building"></i> ${aula.institucion}</div>` : ''}
+                    ${aula.grado ? `<div class="aula-info-item"><i class="bi bi-mortarboard"></i> ${aula.grado}</div>` : ''}
+                    <div class="aula-info-item"><i class="bi bi-collection"></i> ${materias.length} materia${materias.length !== 1 ? 's' : ''}</div>
+                </div>
+                <div class="aula-card-actions">
+                    <button class="aula-action-btn aula-edit-btn" onclick="openEditAulaModal('${aula.id}')">
+                        <i class="bi bi-pencil"></i> Editar
+                    </button>
+                    <button class="aula-action-btn aula-delete-btn" onclick="openDeleteAulaModal('${aula.id}')">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        aulasGrid.appendChild(card);
+    });
+}
+
+// Adjust color brightness
+function adjustColor(color, amount) {
+    const hex = color.replace('#', '');
+    const num = parseInt(hex, 16);
+    const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+    const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+    const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+    return '#' + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Open Create Aula Modal
+function openCreateAulaModal() {
+    currentAulaForEdit = null;
+
+    const modal = document.getElementById('aulaModal');
+    const title = document.getElementById('aulaModalTitle');
+    const buttonText = document.getElementById('aulaButtonText');
+    const form = document.getElementById('aulaForm');
+
+    if (title) title.textContent = 'Crear Nueva Aula';
+    if (buttonText) buttonText.textContent = 'Crear Aula';
+    if (form) form.reset();
+
+    // Reset checkboxes
+    document.querySelectorAll('input[name="materiaAula"]').forEach(cb => cb.checked = false);
+    document.querySelector('input[name="colorAula"][value="#667eea"]').checked = true;
+
+    document.getElementById('aulaId').value = '';
+
+    // Refresh institucion selector
+    populateAulaInstitucionSelector();
+
+    // Load estudiantes for assignment
+    loadEstudiantesForAulaModal([]);
+
+    if (modal) modal.classList.add('show');
+}
+
+// Open Edit Aula Modal
+async function openEditAulaModal(aulaId) {
+    const aula = allAulas.find(a => a.id === aulaId);
+    if (!aula) {
+        showMessage('Aula no encontrada', 'error');
+        return;
+    }
+
+    currentAulaForEdit = aula;
+
+    const modal = document.getElementById('aulaModal');
+    const title = document.getElementById('aulaModalTitle');
+    const buttonText = document.getElementById('aulaButtonText');
+
+    if (title) title.textContent = 'Editar Aula';
+    if (buttonText) buttonText.textContent = 'Guardar Cambios';
+
+    // Fill form with null checks
+    const aulaNombre = document.getElementById('aulaNombre');
+    const aulaDescripcion = document.getElementById('aulaDescripcion');
+    const aulaInstitucion = document.getElementById('aulaInstitucion');
+    const aulaGrado = document.getElementById('aulaGrado');
+    const aulaIdField = document.getElementById('aulaId');
+
+    if (aulaNombre) aulaNombre.value = aula.nombre || '';
+    if (aulaDescripcion) aulaDescripcion.value = aula.descripcion || '';
+    if (aulaInstitucion) aulaInstitucion.value = aula.institucion || '';
+    if (aulaGrado) aulaGrado.value = aula.grado || '';
+    if (aulaIdField) aulaIdField.value = aula.id;
+
+    // Set materias
+    const materias = aula.materias || [];
+    document.querySelectorAll('input[name="materiaAula"]').forEach(cb => {
+        cb.checked = materias.includes(cb.value);
+    });
+
+    // Set color
+    const colorRadio = document.querySelector(`input[name="colorAula"][value="${aula.color || '#667eea'}"]`);
+    if (colorRadio) {
+        colorRadio.checked = true;
+    } else {
+        const defaultColor = document.querySelector('input[name="colorAula"][value="#667eea"]');
+        if (defaultColor) defaultColor.checked = true;
+    }
+
+    // Refresh institucion selector
+    populateAulaInstitucionSelector();
+    if (aulaInstitucion) aulaInstitucion.value = aula.institucion || '';
+
+    // Load estudiantes and get those assigned to this aula
+    await loadEstudiantesForAulaModal([], aulaId);
+
+    if (modal) modal.classList.add('show');
+}
+
+// Close Aula Modal
+function closeAulaModalFn() {
+    const modal = document.getElementById('aulaModal');
+    if (modal) modal.classList.remove('show');
+    currentAulaForEdit = null;
+}
+
+// Handle Save Aula
+async function handleSaveAula(e) {
+    e.preventDefault();
+
+    const aulaNombreEl = document.getElementById('aulaNombre');
+    const aulaDescripcionEl = document.getElementById('aulaDescripcion');
+    const aulaInstitucionEl = document.getElementById('aulaInstitucion');
+    const aulaGradoEl = document.getElementById('aulaGrado');
+    const aulaIdEl = document.getElementById('aulaId');
+
+    const nombre = aulaNombreEl ? aulaNombreEl.value.trim() : '';
+    const descripcion = aulaDescripcionEl ? aulaDescripcionEl.value.trim() : '';
+    const institucion = aulaInstitucionEl ? aulaInstitucionEl.value : '';
+    const grado = aulaGradoEl ? aulaGradoEl.value : '';
+    const aulaId = aulaIdEl ? aulaIdEl.value : '';
+    const color = document.querySelector('input[name="colorAula"]:checked')?.value || '#667eea';
+
+    // Get selected materias
+    const materias = [];
+    document.querySelectorAll('input[name="materiaAula"]:checked').forEach(cb => {
+        materias.push(cb.value);
+    });
+
+    // Get selected estudiantes
+    const estudiantesSeleccionados = [];
+    document.querySelectorAll('input[name="estudianteAula"]:checked').forEach(cb => {
+        estudiantesSeleccionados.push(cb.value);
+    });
+
+    // Validation
+    if (!nombre) {
+        showMessage('El nombre del aula es obligatorio', 'error');
+        return;
+    }
+
+    if (materias.length === 0) {
+        showMessage('Debes seleccionar al menos una materia', 'error');
+        return;
+    }
+
+    try {
+        await waitForFirebase();
+
+        const aulaData = {
+            nombre,
+            descripcion,
+            institucion,
+            grado,
+            materias,
+            color,
+            updatedAt: new Date().toISOString()
+        };
+
+        let finalAulaId = aulaId;
+
+        if (aulaId) {
+            // Update existing aula
+            await window.firebaseDB.collection('aulas').doc(aulaId).update(aulaData);
+        } else {
+            // Create new aula
+            aulaData.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+            aulaData.createdAt = new Date().toISOString();
+            const newAulaRef = await window.firebaseDB.collection('aulas').add(aulaData);
+            finalAulaId = newAulaRef.id;
+        }
+
+        // Update estudiantes assignments
+        await updateEstudiantesAulaAssignments(finalAulaId, estudiantesSeleccionados);
+
+        showMessage(aulaId ? 'Aula actualizada exitosamente' : 'Aula creada exitosamente', 'success');
+        closeAulaModalFn();
+        loadAulas();
+        loadUsers(); // Refresh users to show updated aula assignments
+
+    } catch (error) {
+        console.error('Error saving aula:', error);
+        showMessage('Error al guardar el aula', 'error');
+    }
+}
+
+// Update estudiantes aula assignments
+async function updateEstudiantesAulaAssignments(aulaId, estudiantesSeleccionados) {
+    try {
+        // Get all estudiantes
+        const estudiantesSnapshot = await window.firebaseDB.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        const batch = window.firebaseDB.batch();
+
+        estudiantesSnapshot.forEach(doc => {
+            const estudianteId = doc.id;
+            const estudianteData = doc.data();
+            const aulasActuales = estudianteData.aulasAsignadas || [];
+
+            const debeEstarAsignado = estudiantesSeleccionados.includes(estudianteId);
+            const estaAsignado = aulasActuales.includes(aulaId);
+
+            if (debeEstarAsignado && !estaAsignado) {
+                // Add aula to estudiante
+                batch.update(doc.ref, {
+                    aulasAsignadas: [...aulasActuales, aulaId]
+                });
+            } else if (!debeEstarAsignado && estaAsignado) {
+                // Remove aula from estudiante
+                batch.update(doc.ref, {
+                    aulasAsignadas: aulasActuales.filter(id => id !== aulaId)
+                });
+            }
+        });
+
+        await batch.commit();
+    } catch (error) {
+        console.error('Error updating estudiantes assignments:', error);
+        throw error;
+    }
+}
+
+// Open Delete Aula Modal
+function openDeleteAulaModal(aulaId) {
+    const aula = allAulas.find(a => a.id === aulaId);
+    if (!aula) {
+        showMessage('Aula no encontrada', 'error');
+        return;
+    }
+
+    currentAulaForDelete = aula;
+
+    const modal = document.getElementById('deleteAulaModal');
+    const nameElement = document.getElementById('deleteAulaName');
+
+    if (nameElement) nameElement.textContent = aula.nombre;
+    if (modal) modal.classList.add('show');
+}
+
+// Close Delete Aula Modal
+function closeDeleteAulaModalFn() {
+    const modal = document.getElementById('deleteAulaModal');
+    if (modal) modal.classList.remove('show');
+    currentAulaForDelete = null;
+}
+
+// Handle Delete Aula
+async function handleDeleteAula() {
+    if (!currentAulaForDelete) return;
+
+    try {
+        await waitForFirebase();
+
+        await window.firebaseDB.collection('aulas').doc(currentAulaForDelete.id).delete();
+
+        showMessage('Aula eliminada exitosamente', 'success');
+        closeDeleteAulaModalFn();
+        loadAulas();
+
+    } catch (error) {
+        console.error('Error deleting aula:', error);
+        showMessage('Error al eliminar el aula', 'error');
+    }
+}
+
+// Make aula functions globally available
+window.openEditAulaModal = openEditAulaModal;
+window.openDeleteAulaModal = openDeleteAulaModal;
+
+// Initialize aulas management on page load
+document.addEventListener('DOMContentLoaded', function () {
+    initializeAulasManagement();
+});
+
+
+// ==========================================
+// AULAS PERMISOS FUNCTIONS (for student forms)
+// ==========================================
+
+// Load aulas for create user form
+async function loadAulasForCreateForm() {
+    const grid = document.getElementById('aulasPermisosCreateGrid');
+    const noAulasMsg = document.getElementById('noAulasCreateMsg');
+
+    if (!grid) return;
+
+    // Show loading
+    grid.innerHTML = `
+        <div class="loading-aulas-msg">
+            <i class="bi bi-arrow-clockwise spin"></i>
+            <span>Cargando aulas disponibles...</span>
+        </div>
+    `;
+    if (noAulasMsg) noAulasMsg.style.display = 'none';
+
+    try {
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('aulas').orderBy('nombre').get();
+        const aulas = [];
+
+        snapshot.forEach(doc => {
+            aulas.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        if (aulas.length === 0) {
+            grid.innerHTML = '';
+            if (noAulasMsg) noAulasMsg.style.display = 'flex';
+            return;
+        }
+
+        renderAulasCheckboxes(grid, aulas, 'aulaPermisoCreate', []);
+
+    } catch (error) {
+        console.error('Error loading aulas for create form:', error);
+        grid.innerHTML = '<div class="loading-aulas-msg"><i class="bi bi-exclamation-triangle"></i><span>Error al cargar aulas</span></div>';
+    }
+}
+
+// Load aulas for edit user form
+async function loadAulasForEditForm(selectedAulas = []) {
+    const grid = document.getElementById('aulasPermisosEditGrid');
+    const noAulasMsg = document.getElementById('noAulasEditMsg');
+
+    if (!grid) return;
+
+    // Show loading
+    grid.innerHTML = `
+        <div class="loading-aulas-msg">
+            <i class="bi bi-arrow-clockwise spin"></i>
+            <span>Cargando aulas disponibles...</span>
+        </div>
+    `;
+    if (noAulasMsg) noAulasMsg.style.display = 'none';
+
+    try {
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('aulas').orderBy('nombre').get();
+        const aulas = [];
+
+        snapshot.forEach(doc => {
+            aulas.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        if (aulas.length === 0) {
+            grid.innerHTML = '';
+            if (noAulasMsg) noAulasMsg.style.display = 'flex';
+            return;
+        }
+
+        renderAulasCheckboxes(grid, aulas, 'aulaPermisoEdit', selectedAulas);
+
+    } catch (error) {
+        console.error('Error loading aulas for edit form:', error);
+        grid.innerHTML = '<div class="loading-aulas-msg"><i class="bi bi-exclamation-triangle"></i><span>Error al cargar aulas</span></div>';
+    }
+}
+
+// Render aulas checkboxes
+function renderAulasCheckboxes(container, aulas, inputName, selectedAulas = []) {
+    const materiasConfig = {
+        'matematicas': { nombre: 'MAT', color: '#2196F3' },
+        'lectura': { nombre: 'LEC', color: '#F44336' },
+        'sociales': { nombre: 'SOC', color: '#FF9800' },
+        'naturales': { nombre: 'NAT', color: '#4CAF50' },
+        'ingles': { nombre: 'ING', color: '#9C27B0' }
+    };
+
+    container.innerHTML = '';
+
+    aulas.forEach(aula => {
+        const isChecked = selectedAulas.includes(aula.id);
+        const color = aula.color || '#667eea';
+        const materias = aula.materias || [];
+
+        const materiasHTML = materias.map(materiaId => {
+            const config = materiasConfig[materiaId] || { nombre: '?', color: '#666' };
+            return `<span class="aula-mini-badge" style="background: ${config.color};">${config.nombre}</span>`;
+        }).join('');
+
+        const checkboxHTML = `
+            <label class="aula-permiso-checkbox">
+                <input type="checkbox" name="${inputName}" value="${aula.id}" ${isChecked ? 'checked' : ''}>
+                <div class="aula-checkbox-content" style="--aula-color: ${color};">
+                    <div class="aula-checkbox-header">
+                        <i class="bi bi-door-open-fill" style="color: ${color};"></i>
+                        <span>${aula.nombre}</span>
+                    </div>
+                    <div class="aula-checkbox-materias">
+                        ${materiasHTML || '<span style="color: #999; font-size: 0.7rem;">Sin materias</span>'}
+                    </div>
+                </div>
+            </label>
+        `;
+
+        container.insertAdjacentHTML('beforeend', checkboxHTML);
+    });
+}
+
+
+// ==========================================
+// ESTUDIANTES ASSIGNMENT IN AULA MODAL
+// ==========================================
+
+let allEstudiantesForAula = [];
+
+// Load estudiantes for aula modal
+async function loadEstudiantesForAulaModal(preselectedIds = [], aulaId = null) {
+    const grid = document.getElementById('estudiantesAulaGrid');
+    const institucionSelect = document.getElementById('aulaAsignarInstitucion');
+
+    if (!grid) return;
+
+    // Show loading
+    grid.innerHTML = `
+        <div class="loading-estudiantes-msg">
+            <i class="bi bi-arrow-clockwise spin"></i>
+            <span>Cargando estudiantes...</span>
+        </div>
+    `;
+
+    try {
+        await waitForFirebase();
+
+        // Get all estudiantes (without orderBy to avoid index requirement)
+        const snapshot = await window.firebaseDB.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        allEstudiantesForAula = [];
+        const instituciones = new Set();
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            allEstudiantesForAula.push({
+                id: doc.id,
+                ...data
+            });
+            if (data.institucion) {
+                instituciones.add(data.institucion);
+            }
+        });
+
+        // Sort estudiantes by name in JavaScript
+        allEstudiantesForAula.sort((a, b) => {
+            const nameA = (a.nombre || '').toLowerCase();
+            const nameB = (b.nombre || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        // Populate institucion filter
+        if (institucionSelect) {
+            institucionSelect.innerHTML = '<option value="">Seleccionar institución...</option>';
+            Array.from(instituciones).sort().forEach(inst => {
+                institucionSelect.innerHTML += `<option value="${inst}">${inst}</option>`;
+            });
+        }
+
+        // If editing, get estudiantes assigned to this aula
+        let estudiantesAsignados = [];
+        if (aulaId) {
+            allEstudiantesForAula.forEach(est => {
+                if (est.aulasAsignadas && est.aulasAsignadas.includes(aulaId)) {
+                    estudiantesAsignados.push(est.id);
+                }
+            });
+        }
+
+        // Render estudiantes
+        renderEstudiantesForAula(allEstudiantesForAula, estudiantesAsignados);
+
+        // Setup event listeners
+        setupEstudiantesAulaEventListeners();
+
+    } catch (error) {
+        console.error('Error loading estudiantes for aula:', error);
+        grid.innerHTML = '<div class="no-estudiantes-msg"><i class="bi bi-exclamation-triangle"></i><span>Error al cargar estudiantes</span></div>';
+    }
+}
+
+// Render estudiantes checkboxes
+function renderEstudiantesForAula(estudiantes, selectedIds = []) {
+    const grid = document.getElementById('estudiantesAulaGrid');
+    if (!grid) return;
+
+    if (estudiantes.length === 0) {
+        grid.innerHTML = '<div class="no-estudiantes-msg"><i class="bi bi-people"></i><span>No hay estudiantes registrados</span></div>';
+        updateEstudiantesCounter();
+        return;
+    }
+
+    grid.innerHTML = '';
+
+    estudiantes.forEach(est => {
+        const isChecked = selectedIds.includes(est.id);
+        const initials = getInitials(est.nombre || 'NN');
+
+        const checkboxHTML = `
+            <label class="estudiante-aula-checkbox">
+                <input type="checkbox" name="estudianteAula" value="${est.id}" ${isChecked ? 'checked' : ''} data-institucion="${est.institucion || ''}">
+                <div class="estudiante-checkbox-content">
+                    <div class="estudiante-avatar">${initials}</div>
+                    <div class="estudiante-info">
+                        <div class="estudiante-nombre">${est.nombre || 'Sin nombre'}</div>
+                        <div class="estudiante-institucion">${est.institucion || 'Sin institución'}</div>
+                    </div>
+                    <div class="check-icon">
+                        <i class="bi bi-check"></i>
+                    </div>
+                </div>
+            </label>
+        `;
+
+        grid.insertAdjacentHTML('beforeend', checkboxHTML);
+    });
+
+    // Add change listeners to update counter
+    grid.querySelectorAll('input[name="estudianteAula"]').forEach(cb => {
+        cb.addEventListener('change', updateEstudiantesCounter);
+    });
+
+    updateEstudiantesCounter();
+}
+
+// Get initials from name
+function getInitials(name) {
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+}
+
+// Update estudiantes counter
+function updateEstudiantesCounter() {
+    const counter = document.getElementById('estudiantesSeleccionadosCount');
+    if (!counter) return;
+
+    const selectedCount = document.querySelectorAll('input[name="estudianteAula"]:checked').length;
+    counter.textContent = selectedCount;
+}
+
+// Setup event listeners for estudiantes in aula modal
+function setupEstudiantesAulaEventListeners() {
+    // Search input
+    const searchInput = document.getElementById('searchEstudiantesAula');
+    if (searchInput) {
+        // Remove old listener if exists
+        searchInput.removeEventListener('input', filterEstudiantesAula);
+        searchInput.addEventListener('input', filterEstudiantesAula);
+    }
+
+    // Institution filter
+    const institucionSelect = document.getElementById('aulaAsignarInstitucion');
+    if (institucionSelect) {
+        // Remove old listener if exists
+        institucionSelect.removeEventListener('change', filterEstudiantesAula);
+        institucionSelect.addEventListener('change', filterEstudiantesAula);
+    }
+
+    // Assign all from institution button
+    const btnAsignar = document.getElementById('btnAsignarInstitucion');
+    if (btnAsignar) {
+        btnAsignar.removeEventListener('click', asignarTodosInstitucion);
+        btnAsignar.addEventListener('click', asignarTodosInstitucion);
+    }
+
+    // Remove all from institution button
+    const btnQuitar = document.getElementById('btnQuitarInstitucion');
+    if (btnQuitar) {
+        btnQuitar.removeEventListener('click', quitarTodosInstitucion);
+        btnQuitar.addEventListener('click', quitarTodosInstitucion);
+    }
+}
+
+// Filter estudiantes by search term and institution
+function filterEstudiantesAula() {
+    const searchTerm = document.getElementById('searchEstudiantesAula')?.value.toLowerCase() || '';
+    const institucionFiltro = document.getElementById('aulaAsignarInstitucion')?.value || '';
+    const checkboxes = document.querySelectorAll('.estudiante-aula-checkbox');
+
+    checkboxes.forEach(cb => {
+        const nombre = cb.querySelector('.estudiante-nombre')?.textContent.toLowerCase() || '';
+        const institucion = cb.querySelector('.estudiante-institucion')?.textContent || '';
+        const institucionData = cb.querySelector('input')?.dataset.institucion || '';
+
+        // Check search term match
+        const matchesSearch = !searchTerm || nombre.includes(searchTerm) || institucion.toLowerCase().includes(searchTerm);
+
+        // Check institution filter match
+        const matchesInstitucion = !institucionFiltro || institucionData === institucionFiltro;
+
+        if (matchesSearch && matchesInstitucion) {
+            cb.style.display = '';
+        } else {
+            cb.style.display = 'none';
+        }
+    });
+}
+
+// Assign all estudiantes from selected institution
+function asignarTodosInstitucion() {
+    const institucion = document.getElementById('aulaAsignarInstitucion')?.value;
+
+    if (!institucion) {
+        showMessage('Selecciona una institución primero', 'warning');
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll('input[name="estudianteAula"]');
+    let count = 0;
+
+    checkboxes.forEach(cb => {
+        if (cb.dataset.institucion === institucion) {
+            cb.checked = true;
+            count++;
+        }
+    });
+
+    updateEstudiantesCounter();
+    showMessage(`${count} estudiantes de ${institucion} asignados`, 'success');
+}
+
+// Remove all estudiantes from selected institution
+function quitarTodosInstitucion() {
+    const institucion = document.getElementById('aulaAsignarInstitucion')?.value;
+
+    if (!institucion) {
+        showMessage('Selecciona una institución primero', 'warning');
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll('input[name="estudianteAula"]');
+    let count = 0;
+
+    checkboxes.forEach(cb => {
+        if (cb.dataset.institucion === institucion) {
+            cb.checked = false;
+            count++;
+        }
+    });
+
+    updateEstudiantesCounter();
+    showMessage(`${count} estudiantes de ${institucion} removidos`, 'success');
+}

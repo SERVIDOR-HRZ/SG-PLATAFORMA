@@ -87,6 +87,10 @@
                     <i class="bi bi-person-workspace"></i>
                     <span>Coordinadores</span>
                 </button>
+                <button class="dashboard-tab" data-view="aulas" id="aulasTab">
+                    <i class="bi bi-door-open-fill"></i>
+                    <span>Aulas</span>
+                </button>
             </div>
         </div>
 
@@ -176,6 +180,31 @@
             <div class="no-results" id="noInstituciones" style="display: none;">
                 <i class="bi bi-building"></i>
                 <p>No hay instituciones creadas</p>
+            </div>
+        </div>
+
+        <!-- Aulas Management Section -->
+        <div class="aulas-management-section" id="aulasManagement" style="display: none;">
+            <div class="aulas-header">
+                <div class="aulas-header-left">
+                    <h2>Gestión de Aulas Virtuales</h2>
+                    <p class="aulas-subtitle">Crea y administra aulas personalizadas con las materias que necesites</p>
+                </div>
+                <button class="create-aula-btn" id="createAulaBtn">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    Crear Aula
+                </button>
+            </div>
+            <div class="aulas-grid-manager" id="aulasGridManager">
+                <!-- Aulas cards will be loaded here -->
+            </div>
+            <div class="loading-spinner" id="aulasLoadingSpinner" style="display: none;">
+                <i class="bi bi-arrow-clockwise spin"></i>
+                <p>Cargando aulas...</p>
+            </div>
+            <div class="no-results" id="noAulas" style="display: none;">
+                <i class="bi bi-door-open"></i>
+                <p>No hay aulas creadas</p>
             </div>
         </div>
 
@@ -334,7 +363,7 @@
                             <th>Estado</th>
                             <th>Puntos</th>
                             <th>Insignias</th>
-                            <th>Materias Acceso</th>
+                            <th>Aulas Asignadas</th>
                             <th>Teléfono</th>
                             <th>Documento</th>
                             <th>Institución</th>
@@ -564,46 +593,20 @@
                         </div>
                     </div>
 
-                    <!-- Acceso a Materias para Estudiantes -->
+                    <!-- Acceso a Aulas para Estudiantes -->
                     <div class="form-section student-fields">
                         <h4>Acceso a Aulas Virtuales</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las materias a las que el estudiante tendrá acceso</p>
-                        <div class="clases-permisos-grid">
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermisoCreate" value="matematicas">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-calculator"></i>
-                                    <span>Matemáticas</span>
-                                </div>
-                            </label>
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermisoCreate" value="lectura">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-book"></i>
-                                    <span>Lectura Crítica</span>
-                                </div>
-                            </label>
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermisoCreate" value="sociales">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-globe"></i>
-                                    <span>Ciencias Sociales</span>
-                                </div>
-                            </label>
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermisoCreate" value="naturales">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-tree"></i>
-                                    <span>Ciencias Naturales</span>
-                                </div>
-                            </label>
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermisoCreate" value="ingles">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-translate"></i>
-                                    <span>Inglés</span>
-                                </div>
-                            </label>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas a las que el estudiante tendrá acceso</p>
+                        <div class="aulas-permisos-grid" id="aulasPermisosCreateGrid">
+                            <!-- Las aulas se cargarán dinámicamente desde Firebase -->
+                            <div class="loading-aulas-msg">
+                                <i class="bi bi-arrow-clockwise spin"></i>
+                                <span>Cargando aulas disponibles...</span>
+                            </div>
+                        </div>
+                        <div class="no-aulas-msg" id="noAulasCreateMsg" style="display: none;">
+                            <i class="bi bi-info-circle"></i>
+                            <span>No hay aulas creadas. <a href="#" onclick="switchDashboardView('aulas'); closeCreateUserModal();">Crear aulas primero</a></span>
                         </div>
                     </div>
 
@@ -952,47 +955,20 @@
                         </div>
                     </div>
 
-                    <!-- Permisos de Clases -->
+                    <!-- Acceso a Aulas -->
                     <div class="form-section student-edit-fields">
                         <h4>Acceso a Aulas Virtuales</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las materias a las
-                            que el estudiante tendrá acceso</p>
-                        <div class="clases-permisos-grid">
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermiso" value="matematicas">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-calculator"></i>
-                                    <span>Matemáticas</span>
-                                </div>
-                            </label>
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermiso" value="lectura">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-book"></i>
-                                    <span>Lectura Crítica</span>
-                                </div>
-                            </label>
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermiso" value="sociales">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-globe"></i>
-                                    <span>Ciencias Sociales</span>
-                                </div>
-                            </label>
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermiso" value="naturales">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-tree"></i>
-                                    <span>Ciencias Naturales</span>
-                                </div>
-                            </label>
-                            <label class="clase-checkbox">
-                                <input type="checkbox" name="clasePermiso" value="ingles">
-                                <div class="checkbox-content">
-                                    <i class="bi bi-translate"></i>
-                                    <span>Inglés</span>
-                                </div>
-                            </label>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas a las que el estudiante tendrá acceso</p>
+                        <div class="aulas-permisos-grid" id="aulasPermisosEditGrid">
+                            <!-- Las aulas se cargarán dinámicamente desde Firebase -->
+                            <div class="loading-aulas-msg">
+                                <i class="bi bi-arrow-clockwise spin"></i>
+                                <span>Cargando aulas disponibles...</span>
+                            </div>
+                        </div>
+                        <div class="no-aulas-msg" id="noAulasEditMsg" style="display: none;">
+                            <i class="bi bi-info-circle"></i>
+                            <span>No hay aulas creadas.</span>
                         </div>
                     </div>
 
@@ -1493,6 +1469,200 @@
                     <button type="button" class="confirm-delete-btn" id="confirmDeleteCoordinador">
                         <i class="bi bi-trash"></i>
                         <span>Eliminar Coordinador</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Aula Modal -->
+    <div class="modal" id="aulaModal">
+        <div class="modal-content aula-modal">
+            <div class="modal-header">
+                <h3 id="aulaModalTitle">Crear Nueva Aula</h3>
+                <button class="close-btn" id="closeAulaModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="aulaForm" class="aula-form">
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h4>Información del Aula</h4>
+                        <div class="form-grid">
+                            <div class="input-group full-width">
+                                <label for="aulaNombre">Nombre del Aula *</label>
+                                <input type="text" id="aulaNombre" required placeholder="Ej: Aula 11-A, Grupo Avanzado, etc." maxlength="100">
+                            </div>
+
+                            <div class="input-group full-width">
+                                <label for="aulaDescripcion">Descripción</label>
+                                <textarea id="aulaDescripcion" placeholder="Descripción breve del aula" rows="3" maxlength="300"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Materias Selection -->
+                    <div class="form-section">
+                        <h4>Materias del Aula *</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las materias que estarán disponibles en esta aula</p>
+                        <div class="materias-aula-grid">
+                            <label class="materia-aula-checkbox">
+                                <input type="checkbox" name="materiaAula" value="matematicas">
+                                <div class="checkbox-content matematicas">
+                                    <i class="bi bi-calculator"></i>
+                                    <span>Matemáticas</span>
+                                </div>
+                            </label>
+                            <label class="materia-aula-checkbox">
+                                <input type="checkbox" name="materiaAula" value="lectura">
+                                <div class="checkbox-content lectura">
+                                    <i class="bi bi-book"></i>
+                                    <span>Lectura Crítica</span>
+                                </div>
+                            </label>
+                            <label class="materia-aula-checkbox">
+                                <input type="checkbox" name="materiaAula" value="sociales">
+                                <div class="checkbox-content sociales">
+                                    <i class="bi bi-globe"></i>
+                                    <span>Ciencias Sociales</span>
+                                </div>
+                            </label>
+                            <label class="materia-aula-checkbox">
+                                <input type="checkbox" name="materiaAula" value="naturales">
+                                <div class="checkbox-content naturales">
+                                    <i class="bi bi-tree"></i>
+                                    <span>Ciencias Naturales</span>
+                                </div>
+                            </label>
+                            <label class="materia-aula-checkbox">
+                                <input type="checkbox" name="materiaAula" value="ingles">
+                                <div class="checkbox-content ingles">
+                                    <i class="bi bi-translate"></i>
+                                    <span>Inglés</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Color Selection -->
+                    <div class="form-section">
+                        <h4>Color del Aula</h4>
+                        <div class="color-aula-grid">
+                            <label class="color-aula-option">
+                                <input type="radio" name="colorAula" value="#667eea" checked>
+                                <span class="color-preview" style="background: linear-gradient(135deg, #667eea, #764ba2);"></span>
+                            </label>
+                            <label class="color-aula-option">
+                                <input type="radio" name="colorAula" value="#ff0000">
+                                <span class="color-preview" style="background: linear-gradient(135deg, #ff0000, #cc0000);"></span>
+                            </label>
+                            <label class="color-aula-option">
+                                <input type="radio" name="colorAula" value="#28a745">
+                                <span class="color-preview" style="background: linear-gradient(135deg, #28a745, #20c997);"></span>
+                            </label>
+                            <label class="color-aula-option">
+                                <input type="radio" name="colorAula" value="#ffc107">
+                                <span class="color-preview" style="background: linear-gradient(135deg, #ffc107, #fd7e14);"></span>
+                            </label>
+                            <label class="color-aula-option">
+                                <input type="radio" name="colorAula" value="#17a2b8">
+                                <span class="color-preview" style="background: linear-gradient(135deg, #17a2b8, #138496);"></span>
+                            </label>
+                            <label class="color-aula-option">
+                                <input type="radio" name="colorAula" value="#9c27b0">
+                                <span class="color-preview" style="background: linear-gradient(135deg, #9c27b0, #7b1fa2);"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Asignar Estudiantes -->
+                    <div class="form-section">
+                        <h4>Asignar Estudiantes</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona los estudiantes que tendrán acceso a esta aula</p>
+                        
+                        <!-- Asignación rápida por institución -->
+                        <div class="asignacion-rapida-section">
+                            <label>Asignación rápida por institución:</label>
+                            <div class="asignacion-rapida-controls">
+                                <select id="aulaAsignarInstitucion" class="filter-select">
+                                    <option value="">Seleccionar institución...</option>
+                                </select>
+                                <button type="button" class="btn-asignar-institucion" id="btnAsignarInstitucion">
+                                    <i class="bi bi-people-fill"></i>
+                                    Asignar todos
+                                </button>
+                                <button type="button" class="btn-quitar-institucion" id="btnQuitarInstitucion">
+                                    <i class="bi bi-person-x"></i>
+                                    Quitar todos
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Búsqueda de estudiantes -->
+                        <div class="estudiantes-search-section">
+                            <div class="search-box">
+                                <i class="bi bi-search"></i>
+                                <input type="text" id="searchEstudiantesAula" placeholder="Buscar estudiantes por nombre...">
+                            </div>
+                        </div>
+
+                        <!-- Lista de estudiantes -->
+                        <div class="estudiantes-aula-grid" id="estudiantesAulaGrid">
+                            <div class="loading-estudiantes-msg">
+                                <i class="bi bi-arrow-clockwise spin"></i>
+                                <span>Cargando estudiantes...</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Contador de seleccionados -->
+                        <div class="estudiantes-counter" id="estudiantesCounter">
+                            <i class="bi bi-people"></i>
+                            <span><strong id="estudiantesSeleccionadosCount">0</strong> estudiantes seleccionados</span>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="aulaId" value="">
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" id="cancelAula">Cancelar</button>
+                <button type="submit" class="save-aula-btn" form="aulaForm">
+                    <i class="bi bi-save"></i>
+                    <span id="aulaButtonText">Crear Aula</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Aula Confirmation Modal -->
+    <div class="modal" id="deleteAulaModal">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <h3>Eliminar Aula</h3>
+                <button class="close-btn" id="closeDeleteAulaModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon delete">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="confirmation-text">
+                        <p><strong>¿Estás seguro?</strong></p>
+                        <p>Esta aula será eliminada permanentemente.</p>
+                        <div class="aula-info-confirmation" id="deleteAulaInfo">
+                            <strong id="deleteAulaName">Nombre Aula</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancelDeleteAula">Cancelar</button>
+                    <button type="button" class="confirm-delete-btn" id="confirmDeleteAula">
+                        <i class="bi bi-trash"></i>
+                        <span>Eliminar Aula</span>
                     </button>
                 </div>
             </div>
