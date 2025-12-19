@@ -549,47 +549,19 @@
                         </div>
                     </div>
 
-                    <!-- Asignaturas para Profesores -->
+                    <!-- Asignación de Aulas y Materias para Profesores -->
                     <div class="form-section admin-fields" style="display: none;">
-                        <h4>Asignaturas que Enseña</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las asignaturas que
-                            este profesor puede enseñar</p>
-                        <div class="asignaturas-grid">
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesor" value="matematicas">
-                                <div class="checkbox-content matematicas">
-                                    <i class="bi bi-calculator"></i>
-                                    <span>Matemáticas</span>
-                                </div>
-                            </label>
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesor" value="ciencias">
-                                <div class="checkbox-content ciencias">
-                                    <i class="bi bi-tree"></i>
-                                    <span>Ciencias Naturales</span>
-                                </div>
-                            </label>
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesor" value="sociales">
-                                <div class="checkbox-content sociales">
-                                    <i class="bi bi-globe"></i>
-                                    <span>Ciencias Sociales</span>
-                                </div>
-                            </label>
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesor" value="ingles">
-                                <div class="checkbox-content ingles">
-                                    <i class="bi bi-translate"></i>
-                                    <span>Inglés</span>
-                                </div>
-                            </label>
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesor" value="lectura">
-                                <div class="checkbox-content lectura">
-                                    <i class="bi bi-book"></i>
-                                    <span>Lectura Crítica</span>
-                                </div>
-                            </label>
+                        <h4>Aulas y Materias Asignadas</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas donde enseñará este profesor y las materias que impartirá en cada una</p>
+                        <div class="aulas-profesor-grid" id="aulasProfesorCreateGrid">
+                            <div class="loading-aulas-msg">
+                                <i class="bi bi-arrow-clockwise spin"></i>
+                                <span>Cargando aulas disponibles...</span>
+                            </div>
+                        </div>
+                        <div class="no-aulas-msg" id="noAulasProfesorCreateMsg" style="display: none;">
+                            <i class="bi bi-info-circle"></i>
+                            <span>No hay aulas creadas. <a href="#" onclick="switchDashboardView('aulas'); closeCreateUserModal();">Crear aulas primero</a></span>
                         </div>
                     </div>
 
@@ -806,47 +778,19 @@
                         </div>
                     </div>
 
-                    <!-- Asignaturas para Profesores -->
+                    <!-- Asignación de Aulas y Materias para Profesores -->
                     <div class="form-section admin-edit-fields" style="display: none;">
-                        <h4>Asignaturas que Enseña</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las asignaturas que
-                            este profesor puede enseñar</p>
-                        <div class="asignaturas-grid">
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesorEdit" value="matematicas">
-                                <div class="checkbox-content matematicas">
-                                    <i class="bi bi-calculator"></i>
-                                    <span>Matemáticas</span>
-                                </div>
-                            </label>
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesorEdit" value="ciencias">
-                                <div class="checkbox-content ciencias">
-                                    <i class="bi bi-tree"></i>
-                                    <span>Ciencias Naturales</span>
-                                </div>
-                            </label>
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesorEdit" value="sociales">
-                                <div class="checkbox-content sociales">
-                                    <i class="bi bi-globe"></i>
-                                    <span>Ciencias Sociales</span>
-                                </div>
-                            </label>
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesorEdit" value="ingles">
-                                <div class="checkbox-content ingles">
-                                    <i class="bi bi-translate"></i>
-                                    <span>Inglés</span>
-                                </div>
-                            </label>
-                            <label class="asignatura-checkbox">
-                                <input type="checkbox" name="asignaturaProfesorEdit" value="lectura">
-                                <div class="checkbox-content lectura">
-                                    <i class="bi bi-book"></i>
-                                    <span>Lectura Crítica</span>
-                                </div>
-                            </label>
+                        <h4>Aulas y Materias Asignadas</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas donde enseña este profesor y las materias que imparte en cada una</p>
+                        <div class="aulas-profesor-grid" id="aulasProfesorEditGrid">
+                            <div class="loading-aulas-msg">
+                                <i class="bi bi-arrow-clockwise spin"></i>
+                                <span>Cargando aulas disponibles...</span>
+                            </div>
+                        </div>
+                        <div class="no-aulas-msg" id="noAulasProfesorEditMsg" style="display: none;">
+                            <i class="bi bi-info-circle"></i>
+                            <span>No hay aulas creadas.</span>
                         </div>
                     </div>
 

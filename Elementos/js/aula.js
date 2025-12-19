@@ -95,10 +95,39 @@ async function loadAulaData() {
         // Establecer el título del aula
         document.getElementById('aulaTitle').textContent = currentAulaData.nombre || 'Aula';
 
-        // Si el aula tiene materias, mostrar las tarjetas de materias
-        if (currentAulaData.materias && currentAulaData.materias.length > 0) {
+        // Obtener las materias visibles según el tipo de usuario
+        let materiasVisibles = currentAulaData.materias || [];
+        
+        // Si es profesor (no superusuario), filtrar por las materias que tiene asignadas en esta aula
+        if (currentUser.tipoUsuario === 'admin') {
+            const db = window.firebaseDB;
+            const usuarioDoc = await db.collection('usuarios').doc(currentUser.id).get();
+            const userData = usuarioDoc.data();
+            const rol = userData.rol || currentUser.rol;
+            
+            if (rol !== 'superusuario') {
+                // Nuevo sistema: aulasAsignadas es un array de objetos {aulaId, materias}
+                const aulasAsignadas = userData.aulasAsignadas || [];
+                const aulaAsignada = aulasAsignadas.find(a => {
+                    if (typeof a === 'object' && a.aulaId) {
+                        return a.aulaId === currentAulaId;
+                    }
+                    return a === currentAulaId;
+                });
+                
+                if (aulaAsignada && typeof aulaAsignada === 'object' && aulaAsignada.materias) {
+                    // Filtrar solo las materias que el profesor tiene asignadas en esta aula
+                    materiasVisibles = currentAulaData.materias.filter(m => aulaAsignada.materias.includes(m));
+                }
+            }
+        }
+
+        // Si el aula tiene materias visibles, mostrar las tarjetas de materias
+        if (materiasVisibles && materiasVisibles.length > 0) {
+            // Guardar las materias visibles en currentAulaData para uso posterior
+            currentAulaData.materiasVisibles = materiasVisibles;
             // Mostrar las materias como tarjetas (ocultar tabs y contenido)
-            showMateriasCards(currentAulaData.materias);
+            showMateriasCards(materiasVisibles);
         } else {
             window.location.href = 'Clases.html';
             return;
@@ -231,8 +260,9 @@ function addBackToMateriasButton() {
     const existingBtn = document.getElementById('backToMateriasBtn');
     if (existingBtn) existingBtn.remove();
     
-    // Solo agregar si hay más de una materia
-    if (currentAulaData.materias && currentAulaData.materias.length > 1) {
+    // Solo agregar si hay más de una materia visible
+    const materiasVisibles = currentAulaData.materiasVisibles || currentAulaData.materias || [];
+    if (materiasVisibles.length > 1) {
         const tabsContainer = document.querySelector('.tabs-container');
         if (tabsContainer) {
             const btnHTML = `

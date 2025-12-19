@@ -154,6 +154,7 @@ async function renderAulasSelector(aulas, userData, currentUser) {
     
     // Filtrar aulas según permisos del usuario
     let aulasPermitidas = aulas;
+    let materiasProfesorPorAula = {}; // Para guardar qué materias puede enseñar el profesor en cada aula
     
     if (currentUser.tipoUsuario === 'estudiante') {
         // Usar aulasAsignadas para filtrar (nuevo sistema)
@@ -177,24 +178,33 @@ async function renderAulasSelector(aulas, userData, currentUser) {
         
         // Superusuarios ven todas las aulas
         if (rol !== 'superusuario') {
-            const asignaturas = userData.asignaturas || [];
+            // Nuevo sistema: aulasAsignadas es un array de objetos {aulaId, materias}
+            const aulasAsignadas = userData.aulasAsignadas || [];
             
-            if (asignaturas.length === 0) {
+            if (aulasAsignadas.length === 0) {
                 clasesGrid.innerHTML = `
                     <div class="no-access-message">
                         <i class="bi bi-info-circle"></i>
-                        <h2>Sin asignaturas asignadas</h2>
-                        <p>Contacta con un superusuario para que te asigne las asignaturas que enseñas</p>
+                        <h2>Sin aulas asignadas</h2>
+                        <p>Contacta con un superusuario para que te asigne las aulas y materias que enseñas</p>
                     </div>
                 `;
                 return;
             }
             
-            // Filtrar aulas que tengan al menos una asignatura del profesor
-            aulasPermitidas = aulas.filter(aula => {
-                const materiasAula = aula.materias || [];
-                return materiasAula.some(m => asignaturas.includes(m));
+            // Crear mapa de materias por aula para el profesor
+            aulasAsignadas.forEach(asignacion => {
+                if (typeof asignacion === 'object' && asignacion.aulaId) {
+                    materiasProfesorPorAula[asignacion.aulaId] = asignacion.materias || [];
+                } else if (typeof asignacion === 'string') {
+                    // Compatibilidad con formato antiguo (solo ID de aula)
+                    materiasProfesorPorAula[asignacion] = [];
+                }
             });
+            
+            // Filtrar solo las aulas asignadas al profesor
+            const aulasIdsAsignadas = Object.keys(materiasProfesorPorAula);
+            aulasPermitidas = aulas.filter(aula => aulasIdsAsignadas.includes(aula.id));
         }
     }
     
@@ -202,13 +212,13 @@ async function renderAulasSelector(aulas, userData, currentUser) {
     
     // Renderizar las aulas como cards
     aulasPermitidas.forEach(aula => {
-        const aulaCard = createAulaCard(aula, userData, currentUser);
+        const aulaCard = createAulaCard(aula, userData, currentUser, materiasProfesorPorAula);
         clasesGrid.appendChild(aulaCard);
     });
 }
 
 // Create aula card
-function createAulaCard(aula, userData, currentUser) {
+function createAulaCard(aula, userData, currentUser, materiasProfesorPorAula = {}) {
     const card = document.createElement('div');
     card.className = 'aula-selector-card';
     
@@ -216,11 +226,18 @@ function createAulaCard(aula, userData, currentUser) {
     const materias = aula.materias || [];
     
     // Para estudiantes: mostrar todas las materias del aula (ya tienen acceso completo al aula)
-    // Para profesores: filtrar por sus asignaturas
+    // Para profesores: mostrar solo las materias que tienen asignadas en esta aula
     let materiasVisibles = materias;
     if (currentUser.tipoUsuario === 'admin' && userData.rol !== 'superusuario') {
-        const asignaturas = userData.asignaturas || [];
-        materiasVisibles = materias.filter(m => asignaturas.includes(m));
+        // Usar el nuevo sistema de materias por aula
+        const materiasAsignadas = materiasProfesorPorAula[aula.id] || [];
+        if (materiasAsignadas.length > 0) {
+            // Filtrar solo las materias que el profesor tiene asignadas en esta aula
+            materiasVisibles = materias.filter(m => materiasAsignadas.includes(m));
+        } else {
+            // Si no hay materias específicas, mostrar todas las del aula (compatibilidad)
+            materiasVisibles = materias;
+        }
     }
     
     const materiasHTML = materiasVisibles.map(materiaId => {
@@ -296,7 +313,7 @@ async function loadClasesDirectas(userData, currentUser) {
         const materiasPermitidas = materiasDisponibles.filter(m => clasesPermitidas.includes(m.id));
         renderClases(materiasPermitidas);
     }
-    // Si es admin/profesor, verificar si es superusuario o tiene asignaturas asignadas
+    // Si es admin/profesor, verificar si es superusuario o tiene aulas asignadas
     else if (currentUser.tipoUsuario === 'admin') {
         const rol = userData.rol || currentUser.rol;
 
@@ -304,23 +321,32 @@ async function loadClasesDirectas(userData, currentUser) {
         if (rol === 'superusuario') {
             renderClases(materiasDisponibles);
         }
-        // Profesores solo ven sus asignaturas
+        // Profesores solo ven las materias de sus aulas asignadas
         else {
-            const asignaturas = userData.asignaturas || [];
+            // Nuevo sistema: aulasAsignadas es un array de objetos {aulaId, materias}
+            const aulasAsignadas = userData.aulasAsignadas || [];
+            
+            // Extraer todas las materias únicas de las aulas asignadas
+            const materiasUnicas = new Set();
+            aulasAsignadas.forEach(asignacion => {
+                if (typeof asignacion === 'object' && asignacion.materias) {
+                    asignacion.materias.forEach(m => materiasUnicas.add(m));
+                }
+            });
 
-            if (asignaturas.length === 0) {
+            if (materiasUnicas.size === 0) {
                 clasesGrid.innerHTML = `
                     <div class="no-access-message">
                         <i class="bi bi-info-circle"></i>
-                        <h2>Sin asignaturas asignadas</h2>
-                        <p>Contacta con un superusuario para que te asigne las asignaturas que enseñas</p>
+                        <h2>Sin aulas asignadas</h2>
+                        <p>Contacta con un superusuario para que te asigne las aulas y materias que enseñas</p>
                     </div>
                 `;
                 return;
             }
 
-            // Filtrar solo las asignaturas del profesor
-            const materiasProfesor = materiasDisponibles.filter(m => asignaturas.includes(m.id));
+            // Filtrar solo las materias del profesor
+            const materiasProfesor = materiasDisponibles.filter(m => materiasUnicas.has(m.id));
             renderClases(materiasProfesor);
         }
     }

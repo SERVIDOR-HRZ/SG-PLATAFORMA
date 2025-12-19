@@ -354,6 +354,9 @@ function handleUserTypeChange() {
         usuarioInput.type = 'text';
         if (usuarioLabel) usuarioLabel.textContent = 'Nombre de Usuario *';
         if (usuarioHint) usuarioHint.style.display = 'block';
+        
+        // Cargar aulas para profesores
+        loadAulasForProfesorCreateForm();
     }
 
     // Update security code section visibility
@@ -1089,21 +1092,13 @@ function renderUsers() {
                         <span class="aulas-count-badge"><i class="bi bi-door-open"></i> ${user.aulasAsignadas.length} aula${user.aulasAsignadas.length > 1 ? 's' : ''}</span>
                     </div>` :
                 (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">Sin aulas</span>' :
-                    (user.tipoUsuario === 'admin' && user.asignaturas && user.asignaturas.length > 0 ?
-                        `<div class="materias-cell">
-                            ${user.asignaturas.map(materia => {
-                            const materiasConfig = {
-                                'matematicas': { inicial: 'MAT', color: '#667eea' },
-                                'lectura': { inicial: 'LEC', color: '#dc3545' },
-                                'sociales': { inicial: 'SOC', color: '#ffc107' },
-                                'ciencias': { inicial: 'CIE', color: '#28a745' },
-                                'ingles': { inicial: 'ING', color: '#9c27b0' }
-                            };
-                            const config = materiasConfig[materia] || { inicial: 'N/A', color: '#6c757d' };
-                            return `<span class="materia-badge" style="background: ${config.color};" title="${materia.charAt(0).toUpperCase() + materia.slice(1)}">${config.inicial}</span>`;
-                        }).join('')}
+                    (user.tipoUsuario === 'admin' && user.aulasAsignadas && user.aulasAsignadas.length > 0 ?
+                        `<div class="aulas-cell">
+                            <span class="aulas-count-badge" title="${user.aulasAsignadas.map(a => typeof a === 'object' ? a.aulaId : a).join(', ')}">
+                                <i class="bi bi-door-open"></i> ${user.aulasAsignadas.length} aula${user.aulasAsignadas.length > 1 ? 's' : ''}
+                            </span>
                         </div>` :
-                        (user.tipoUsuario === 'admin' ? '<span class="text-muted">Sin asignaturas</span>' : 'N/A')))}
+                        (user.tipoUsuario === 'admin' ? '<span class="text-muted">Sin aulas</span>' : 'N/A')))}
             </td>
             <td>
                 ${user.telefono ?
@@ -1310,9 +1305,10 @@ function toggleSecurityCodeSection() {
         // Show security code section for superusers
         securityCodeSection.style.display = 'block';
 
-        // Hide subject selection for superusers (they have access to all)
+        // Hide aulas/materias selection for superusers (they have access to all)
         adminFields.forEach(field => {
-            if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
+            const h4 = field.querySelector('h4');
+            if (h4 && (h4.textContent.includes('Aulas') || h4.textContent.includes('Asignaturas'))) {
                 field.style.display = 'none';
             }
         });
@@ -1320,9 +1316,10 @@ function toggleSecurityCodeSection() {
         // Hide security code section for regular admins
         securityCodeSection.style.display = 'none';
 
-        // Show subject selection for regular admins/professors
+        // Show aulas/materias selection for regular admins/professors
         adminFields.forEach(field => {
-            if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
+            const h4 = field.querySelector('h4');
+            if (h4 && (h4.textContent.includes('Aulas') || h4.textContent.includes('Asignaturas'))) {
                 field.style.display = 'block';
             }
         });
@@ -1340,16 +1337,18 @@ function toggleSubjectSectionEdit() {
     const adminEditFields = document.querySelectorAll('.admin-edit-fields');
 
     if (superuserRadio && superuserRadio.checked) {
-        // Hide subject selection for superusers (they have access to all)
+        // Hide aulas/materias selection for superusers (they have access to all)
         adminEditFields.forEach(field => {
-            if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
+            const h4 = field.querySelector('h4');
+            if (h4 && (h4.textContent.includes('Aulas') || h4.textContent.includes('Asignaturas'))) {
                 field.style.display = 'none';
             }
         });
     } else {
-        // Show subject selection for regular admins/professors
+        // Show aulas/materias selection for regular admins/professors
         adminEditFields.forEach(field => {
-            if (field.querySelector('h4') && field.querySelector('h4').textContent.includes('Asignaturas')) {
+            const h4 = field.querySelector('h4');
+            if (h4 && (h4.textContent.includes('Aulas') || h4.textContent.includes('Asignaturas'))) {
                 field.style.display = 'block';
             }
         });
@@ -1501,12 +1500,8 @@ function openEditUserModal(userId) {
         studentFields.forEach(field => field.style.display = 'none');
         adminEditFields.forEach(field => field.style.display = 'block');
 
-        // Load asignaturas del profesor
-        const asignaturas = user.asignaturas || [];
-        const asignaturasCheckboxes = document.querySelectorAll('input[name="asignaturaProfesorEdit"]');
-        asignaturasCheckboxes.forEach(checkbox => {
-            checkbox.checked = asignaturas.includes(checkbox.value);
-        });
+        // Load aulas y materias del profesor
+        loadAulasForProfesorEditForm(user.aulasAsignadas || []);
 
         // Update subject section visibility based on role (hide for superusers)
         toggleSubjectSectionEdit();
@@ -1721,11 +1716,11 @@ async function handleCreateUser(e) {
             userData.insignias = [];
         }
 
-        // Add admin-specific fields (asignaturas)
+        // Add admin-specific fields (aulas y materias por aula)
         if (tipoUsuario === 'admin') {
-            const asignaturasCheckboxes = document.querySelectorAll('input[name="asignaturaProfesor"]:checked');
-            const asignaturas = Array.from(asignaturasCheckboxes).map(cb => cb.value);
-            userData.asignaturas = asignaturas; // Array de asignaturas que puede enseñar
+            // Get aulas asignadas con sus materias
+            const aulasAsignadas = getAulasProfesorFromForm('Create');
+            userData.aulasAsignadas = aulasAsignadas; // Array de objetos {aulaId, materias: [...]}
         }
 
         // Add to Firestore
@@ -1860,11 +1855,11 @@ async function handleEditUser(e) {
             updateData.aulasAsignadas = aulasAsignadas;
         }
 
-        // Update admin-specific fields (asignaturas) - ONLY for admins, not students
+        // Update admin-specific fields (aulas y materias por aula) - ONLY for admins, not students
         if (currentUserForEdit.tipoUsuario === 'admin') {
-            const asignaturasCheckboxes = document.querySelectorAll('input[name="asignaturaProfesorEdit"]:checked');
-            const asignaturas = Array.from(asignaturasCheckboxes).map(cb => cb.value);
-            updateData.asignaturas = asignaturas; // Array de asignaturas que puede enseñar
+            // Get aulas asignadas con sus materias
+            const aulasAsignadas = getAulasProfesorFromForm('Edit');
+            updateData.aulasAsignadas = aulasAsignadas; // Array de objetos {aulaId, materias: [...]}
         }
 
         // Update in Firestore
@@ -5271,3 +5266,232 @@ function quitarTodosInstitucion() {
     updateEstudiantesCounter();
     showMessage(`${count} estudiantes de ${institucion} removidos`, 'success');
 }
+
+
+// ==========================================
+// AULAS Y MATERIAS PARA PROFESORES
+// ==========================================
+
+// Configuración de materias
+const materiasConfigProfesor = {
+    'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator', color: '#667eea' },
+    'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book', color: '#dc3545' },
+    'sociales': { nombre: 'C. Sociales', icon: 'bi-globe', color: '#ffc107' },
+    'naturales': { nombre: 'C. Naturales', icon: 'bi-tree', color: '#28a745' },
+    'ciencias': { nombre: 'C. Naturales', icon: 'bi-tree', color: '#28a745' },
+    'ingles': { nombre: 'Inglés', icon: 'bi-translate', color: '#9c27b0' }
+};
+
+// Cargar aulas para el formulario de crear profesor
+async function loadAulasForProfesorCreateForm() {
+    const grid = document.getElementById('aulasProfesorCreateGrid');
+    const noAulasMsg = document.getElementById('noAulasProfesorCreateMsg');
+
+    if (!grid) return;
+
+    // Show loading
+    grid.innerHTML = `
+        <div class="loading-aulas-msg">
+            <i class="bi bi-arrow-clockwise spin"></i>
+            <span>Cargando aulas disponibles...</span>
+        </div>
+    `;
+    if (noAulasMsg) noAulasMsg.style.display = 'none';
+
+    try {
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('aulas').orderBy('nombre').get();
+        const aulas = [];
+
+        snapshot.forEach(doc => {
+            aulas.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        if (aulas.length === 0) {
+            grid.innerHTML = '';
+            if (noAulasMsg) noAulasMsg.style.display = 'flex';
+            return;
+        }
+
+        renderAulasProfesorGrid(grid, aulas, 'Create', []);
+
+    } catch (error) {
+        console.error('Error loading aulas for profesor create form:', error);
+        grid.innerHTML = '<div class="loading-aulas-msg"><i class="bi bi-exclamation-triangle"></i><span>Error al cargar aulas</span></div>';
+    }
+}
+
+// Cargar aulas para el formulario de editar profesor
+async function loadAulasForProfesorEditForm(aulasAsignadas = []) {
+    const grid = document.getElementById('aulasProfesorEditGrid');
+    const noAulasMsg = document.getElementById('noAulasProfesorEditMsg');
+
+    if (!grid) return;
+
+    // Show loading
+    grid.innerHTML = `
+        <div class="loading-aulas-msg">
+            <i class="bi bi-arrow-clockwise spin"></i>
+            <span>Cargando aulas disponibles...</span>
+        </div>
+    `;
+    if (noAulasMsg) noAulasMsg.style.display = 'none';
+
+    try {
+        await waitForFirebase();
+
+        const snapshot = await window.firebaseDB.collection('aulas').orderBy('nombre').get();
+        const aulas = [];
+
+        snapshot.forEach(doc => {
+            aulas.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        if (aulas.length === 0) {
+            grid.innerHTML = '';
+            if (noAulasMsg) noAulasMsg.style.display = 'flex';
+            return;
+        }
+
+        renderAulasProfesorGrid(grid, aulas, 'Edit', aulasAsignadas);
+
+    } catch (error) {
+        console.error('Error loading aulas for profesor edit form:', error);
+        grid.innerHTML = '<div class="loading-aulas-msg"><i class="bi bi-exclamation-triangle"></i><span>Error al cargar aulas</span></div>';
+    }
+}
+
+// Renderizar grid de aulas para profesores
+function renderAulasProfesorGrid(container, aulas, formType, aulasAsignadas = []) {
+    container.innerHTML = '';
+
+    aulas.forEach(aula => {
+        // Verificar si el aula está asignada y obtener las materias seleccionadas
+        let isSelected = false;
+        let materiasSeleccionadas = [];
+        
+        if (Array.isArray(aulasAsignadas)) {
+            const aulaAsignada = aulasAsignadas.find(a => {
+                if (typeof a === 'string') return a === aula.id;
+                return a.aulaId === aula.id;
+            });
+            
+            if (aulaAsignada) {
+                isSelected = true;
+                materiasSeleccionadas = typeof aulaAsignada === 'string' ? [] : (aulaAsignada.materias || []);
+            }
+        }
+
+        const color = aula.color || '#667eea';
+        const materias = aula.materias || [];
+
+        // Crear badges de materias disponibles
+        const materiasDisponiblesHTML = materias.map(materiaId => {
+            const config = materiasConfigProfesor[materiaId] || { nombre: '?', color: '#666' };
+            return `<span class="mini-badge" style="background: ${config.color};">${config.nombre.substring(0, 3)}</span>`;
+        }).join('');
+
+        // Crear checkboxes de materias para seleccionar
+        const materiasCheckboxesHTML = materias.map(materiaId => {
+            const config = materiasConfigProfesor[materiaId] || { nombre: materiaId, icon: 'bi-book', color: '#666' };
+            const isChecked = materiasSeleccionadas.includes(materiaId);
+            return `
+                <label class="materia-profesor-checkbox">
+                    <input type="checkbox" name="materiaProfesor${formType}_${aula.id}" value="${materiaId}" ${isChecked ? 'checked' : ''}>
+                    <span class="materia-chip ${materiaId}">
+                        <i class="bi ${config.icon}"></i>
+                        ${config.nombre}
+                    </span>
+                </label>
+            `;
+        }).join('');
+
+        const itemHTML = `
+            <div class="aula-profesor-item ${isSelected ? 'selected' : ''}" data-aula-id="${aula.id}">
+                <div class="aula-profesor-header" onclick="toggleAulaProfesor(this, '${formType}')">
+                    <div class="aula-profesor-checkbox">
+                        <i class="bi bi-check"></i>
+                    </div>
+                    <div class="aula-profesor-icon" style="background: ${color};">
+                        <i class="bi bi-door-open-fill"></i>
+                    </div>
+                    <div class="aula-profesor-info">
+                        <div class="aula-profesor-nombre">${aula.nombre}</div>
+                        ${aula.descripcion ? `<div class="aula-profesor-descripcion">${aula.descripcion}</div>` : ''}
+                    </div>
+                    <div class="aula-profesor-materias-disponibles">
+                        ${materiasDisponiblesHTML || '<span style="color: #999; font-size: 0.7rem;">Sin materias</span>'}
+                    </div>
+                </div>
+                <div class="aula-profesor-materias-section">
+                    <label>Materias que enseñará en esta aula:</label>
+                    <div class="materias-profesor-grid">
+                        ${materiasCheckboxesHTML || '<span style="color: #999; font-size: 0.8rem;">Esta aula no tiene materias configuradas</span>'}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', itemHTML);
+    });
+}
+
+// Toggle selección de aula para profesor
+function toggleAulaProfesor(headerElement, formType) {
+    const item = headerElement.closest('.aula-profesor-item');
+    const isSelected = item.classList.contains('selected');
+    
+    if (isSelected) {
+        item.classList.remove('selected');
+        // Desmarcar todas las materias de esta aula
+        const checkboxes = item.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = false);
+    } else {
+        item.classList.add('selected');
+        // Marcar todas las materias por defecto
+        const checkboxes = item.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = true);
+    }
+}
+
+// Obtener aulas y materias seleccionadas del formulario
+function getAulasProfesorFromForm(formType) {
+    const gridId = formType === 'Create' ? 'aulasProfesorCreateGrid' : 'aulasProfesorEditGrid';
+    const grid = document.getElementById(gridId);
+    
+    if (!grid) return [];
+
+    const aulasAsignadas = [];
+    const selectedItems = grid.querySelectorAll('.aula-profesor-item.selected');
+
+    selectedItems.forEach(item => {
+        const aulaId = item.dataset.aulaId;
+        const materias = [];
+        
+        const checkboxes = item.querySelectorAll(`input[name="materiaProfesor${formType}_${aulaId}"]:checked`);
+        checkboxes.forEach(cb => {
+            materias.push(cb.value);
+        });
+
+        if (materias.length > 0) {
+            aulasAsignadas.push({
+                aulaId: aulaId,
+                materias: materias
+            });
+        }
+    });
+
+    return aulasAsignadas;
+}
+
+// Hacer funciones globales
+window.toggleAulaProfesor = toggleAulaProfesor;
+window.loadAulasForProfesorCreateForm = loadAulasForProfesorCreateForm;
+window.loadAulasForProfesorEditForm = loadAulasForProfesorEditForm;
