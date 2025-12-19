@@ -256,26 +256,10 @@ function enterMateria(materiaId) {
 
 // Add button to go back to materias selection
 function addBackToMateriasButton() {
+    // Botón deshabilitado - ya no se muestra
     // Remover botón existente si hay
     const existingBtn = document.getElementById('backToMateriasBtn');
     if (existingBtn) existingBtn.remove();
-    
-    // Solo agregar si hay más de una materia visible
-    const materiasVisibles = currentAulaData.materiasVisibles || currentAulaData.materias || [];
-    if (materiasVisibles.length > 1) {
-        const tabsContainer = document.querySelector('.tabs-container');
-        if (tabsContainer) {
-            const btnHTML = `
-                <button class="back-to-materias-btn" id="backToMateriasBtn" title="Volver atrás">
-                    <i class="bi bi-arrow-left"></i>
-                    <span>Atrás</span>
-                </button>
-            `;
-            tabsContainer.insertAdjacentHTML('afterbegin', btnHTML);
-            
-            document.getElementById('backToMateriasBtn').addEventListener('click', backToMateriasSelection);
-        }
-    }
 }
 
 // Go back to materias selection
@@ -395,9 +379,15 @@ async function loadAnuncios() {
         const postsContainer = document.getElementById('postsContainer');
         postsContainer.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>';
 
-        const snapshot = await db.collection('anuncios')
-            .where('materia', '==', currentMateria)
-            .get();
+        // Construir query base
+        let query = db.collection('anuncios').where('materia', '==', currentMateria);
+        
+        // Si hay un aula seleccionada, filtrar también por aulaId
+        if (currentAulaId) {
+            query = query.where('aulaId', '==', currentAulaId);
+        }
+
+        const snapshot = await query.get();
 
         if (snapshot.empty) {
             postsContainer.innerHTML = `
@@ -577,9 +567,15 @@ async function loadTareas() {
         const tasksContainer = document.getElementById('tasksContainer');
         tasksContainer.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>';
 
-        const snapshot = await db.collection('tareas')
-            .where('materia', '==', currentMateria)
-            .get();
+        // Construir query base
+        let query = db.collection('tareas').where('materia', '==', currentMateria);
+        
+        // Si hay un aula seleccionada, filtrar también por aulaId
+        if (currentAulaId) {
+            query = query.where('aulaId', '==', currentAulaId);
+        }
+
+        const snapshot = await query.get();
 
         if (snapshot.empty) {
             tasksContainer.innerHTML = `
@@ -826,9 +822,15 @@ async function loadMateriales() {
         const materialsContainer = document.getElementById('materialsContainer');
         materialsContainer.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>';
 
-        const snapshot = await db.collection('materiales')
-            .where('materia', '==', currentMateria)
-            .get();
+        // Construir query base
+        let query = db.collection('materiales').where('materia', '==', currentMateria);
+        
+        // Si hay un aula seleccionada, filtrar también por aulaId
+        if (currentAulaId) {
+            query = query.where('aulaId', '==', currentAulaId);
+        }
+
+        const snapshot = await query.get();
 
         if (snapshot.empty) {
             materialsContainer.innerHTML = `
@@ -1067,16 +1069,27 @@ async function loadEstudiantes() {
         const studentsContainer = document.getElementById('studentsContainer');
         studentsContainer.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>';
 
-        const snapshot = await db.collection('usuarios')
-            .where('tipoUsuario', '==', 'estudiante')
-            .where('clasesPermitidas', 'array-contains', currentMateria)
-            .get();
+        let snapshot;
+        
+        // Si hay un aula seleccionada, buscar estudiantes con esa aula asignada
+        if (currentAulaId) {
+            snapshot = await db.collection('usuarios')
+                .where('tipoUsuario', '==', 'estudiante')
+                .where('aulasAsignadas', 'array-contains', currentAulaId)
+                .get();
+        } else {
+            // Fallback al sistema antiguo (por materia)
+            snapshot = await db.collection('usuarios')
+                .where('tipoUsuario', '==', 'estudiante')
+                .where('clasesPermitidas', 'array-contains', currentMateria)
+                .get();
+        }
 
         if (snapshot.empty) {
             studentsContainer.innerHTML = `
                 <div class="empty-state">
                     <i class="bi bi-people"></i>
-                    <p>No hay estudiantes inscritos</p>
+                    <p>No hay estudiantes inscritos en esta aula</p>
                 </div>
             `;
             return;
@@ -1084,14 +1097,27 @@ async function loadEstudiantes() {
 
         studentsContainer.innerHTML = '';
 
+        // Ordenar estudiantes por nombre
+        const estudiantes = [];
         snapshot.forEach(doc => {
-            const estudiante = doc.data();
+            estudiantes.push({ id: doc.id, ...doc.data() });
+        });
+        
+        estudiantes.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+
+        estudiantes.forEach(estudiante => {
             const studentItem = createStudentItem(estudiante);
             studentsContainer.appendChild(studentItem);
         });
 
     } catch (error) {
         console.error('Error al cargar estudiantes:', error);
+        document.getElementById('studentsContainer').innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>Error al cargar estudiantes</p>
+            </div>
+        `;
     }
 }
 
@@ -1639,6 +1665,7 @@ async function crearAnuncio() {
 
         const anuncioData = {
             materia: currentMateria,
+            aulaId: currentAulaId || null, // Agregar ID del aula
             titulo: titulo,
             contenido: contenido,
             autorId: currentUser.id,
@@ -1696,6 +1723,7 @@ async function crearTarea() {
 
         const tareaData = {
             materia: currentMateria,
+            aulaId: currentAulaId || null, // Agregar ID del aula
             titulo: titulo,
             descripcion: descripcion,
             fechaEntrega: firebase.firestore.Timestamp.fromDate(fechaEntrega),
@@ -2597,6 +2625,7 @@ async function crearMaterial() {
 
         await db.collection('materiales').add({
             materia: currentMateria,
+            aulaId: currentAulaId || null, // Agregar ID del aula
             titulo: titulo,
             descripcion: descripcion,
             imageUrls: imageUrls,
