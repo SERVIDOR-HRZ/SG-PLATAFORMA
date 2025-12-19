@@ -2738,3 +2738,123 @@ body {
         width: 100%;
     }
 }
+
+
+/* ============================================
+   DRAG AND DROP PARA TARJETAS DE MATERIAS
+   ============================================ */
+
+.drag-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: #888;
+    margin-left: 0.5rem;
+    opacity: 0.8;
+}
+
+.drag-hint i {
+    font-size: 1rem;
+}
+
+.materia-card {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.materia-card .drag-handle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.materia-card:hover .drag-handle {
+    opacity: 1;
+}
+
+.materia-card .drag-handle:hover {
+    background: rgba(255, 255, 255, 1);
+    color: #333;
+}
+
+.materia-card .drag-handle:active {
+    cursor: grabbing;
+}
+
+.materia-card.dragging {
+    opacity: 0.5;
+    transform: scale(1.02);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+}
+
+.materia-card.drag-over-left {
+    transform: translateX(10px);
+}
+
+.materia-card.drag-over-left::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--materia-color, #667eea);
+    border-radius: 2px;
+    animation: pulse-indicator 0.5s ease infinite;
+}
+
+.materia-card.drag-over-right {
+    transform: translateX(-10px);
+}
+
+.materia-card.drag-over-right::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--materia-color, #667eea);
+    border-radius: 2px;
+    animation: pulse-indicator 0.5s ease infinite;
+}
+
+@keyframes pulse-indicator {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Responsive: ocultar drag en móviles pequeños */
+@media (max-width: 480px) {
+    .drag-hint {
+        display: none;
+    }
+    
+    .materia-card .drag-handle {
+        display: none;
+    }
+    
+    .materia-card {
+        cursor: pointer;
+    }
+}

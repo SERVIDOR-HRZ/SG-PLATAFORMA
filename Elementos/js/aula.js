@@ -155,18 +155,36 @@ function showMateriasCards(materias) {
     if (tabsContainer) tabsContainer.style.display = 'none';
     if (tabContent) tabContent.style.display = 'none';
 
+    // Obtener orden guardado del usuario para esta aula
+    const savedOrder = getSavedMateriasOrder(currentAulaId);
+    let orderedMaterias = materias;
+    
+    if (savedOrder && savedOrder.length > 0) {
+        // Ordenar según el orden guardado
+        orderedMaterias = savedOrder.filter(m => materias.includes(m));
+        // Agregar materias nuevas que no estaban en el orden guardado
+        materias.forEach(m => {
+            if (!orderedMaterias.includes(m)) {
+                orderedMaterias.push(m);
+            }
+        });
+    }
+
     // Crear el contenedor de tarjetas de materias
     const cardsHTML = `
         <div class="materias-cards-container" id="materiasCardsContainer">
             <div class="materias-cards-header">
                 <h2>Selecciona una materia</h2>
-                <p>Elige la materia a la que deseas acceder</p>
+                <p>Elige la materia a la que deseas acceder <span class="drag-hint"><i class="bi bi-arrows-move"></i> Arrastra para reordenar</span></p>
             </div>
-            <div class="materias-cards-grid">
-                ${materias.map(materiaId => {
+            <div class="materias-cards-grid" id="materiasCardsGrid">
+                ${orderedMaterias.map(materiaId => {
                     const config = materiasConfig[materiaId] || { nombre: materiaId, descripcion: '', icon: 'bi-book', color: '#667eea' };
                     return `
-                        <div class="materia-card" data-materia="${materiaId}" style="--materia-color: ${config.color}">
+                        <div class="materia-card" data-materia="${materiaId}" draggable="true" style="--materia-color: ${config.color}">
+                            <div class="drag-handle">
+                                <i class="bi bi-grip-vertical"></i>
+                            </div>
                             <div class="materia-card-header" style="background: linear-gradient(135deg, ${config.color}, ${adjustColorBrightness(config.color, -30)})">
                                 <i class="bi ${config.icon}"></i>
                             </div>
@@ -194,12 +212,135 @@ function showMateriasCards(materias) {
 
         // Agregar event listeners a las tarjetas
         document.querySelectorAll('.materia-card').forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
+                // No entrar si se está arrastrando
+                if (card.classList.contains('dragging')) return;
                 const materiaId = card.getAttribute('data-materia');
                 enterMateria(materiaId);
             });
         });
+
+        // Inicializar drag and drop
+        initMateriasDragAndDrop();
     }
+}
+
+// Obtener orden guardado de materias
+function getSavedMateriasOrder(aulaId) {
+    try {
+        const key = `materiasOrder_${currentUser.id}_${aulaId}`;
+        const saved = localStorage.getItem(key);
+        return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+// Guardar orden de materias
+function saveMateriasOrder(aulaId, order) {
+    try {
+        const key = `materiasOrder_${currentUser.id}_${aulaId}`;
+        localStorage.setItem(key, JSON.stringify(order));
+    } catch (e) {
+        console.error('Error guardando orden de materias:', e);
+    }
+}
+
+// Inicializar drag and drop para las tarjetas de materias
+function initMateriasDragAndDrop() {
+    const grid = document.getElementById('materiasCardsGrid');
+    if (!grid) return;
+
+    let draggedCard = null;
+    let draggedOverCard = null;
+
+    const cards = grid.querySelectorAll('.materia-card');
+
+    cards.forEach(card => {
+        // Drag start
+        card.addEventListener('dragstart', (e) => {
+            draggedCard = card;
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', card.dataset.materia);
+            
+            // Pequeño delay para que se vea el efecto
+            setTimeout(() => {
+                card.style.opacity = '0.5';
+            }, 0);
+        });
+
+        // Drag end
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            card.style.opacity = '1';
+            draggedCard = null;
+            
+            // Remover clases de todos los cards
+            cards.forEach(c => {
+                c.classList.remove('drag-over', 'drag-over-left', 'drag-over-right');
+            });
+
+            // Guardar el nuevo orden
+            const newOrder = Array.from(grid.querySelectorAll('.materia-card')).map(c => c.dataset.materia);
+            saveMateriasOrder(currentAulaId, newOrder);
+        });
+
+        // Drag over
+        card.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            if (card !== draggedCard) {
+                const rect = card.getBoundingClientRect();
+                const midX = rect.left + rect.width / 2;
+                
+                card.classList.remove('drag-over-left', 'drag-over-right');
+                
+                if (e.clientX < midX) {
+                    card.classList.add('drag-over-left');
+                } else {
+                    card.classList.add('drag-over-right');
+                }
+                
+                draggedOverCard = card;
+            }
+        });
+
+        // Drag leave
+        card.addEventListener('dragleave', () => {
+            card.classList.remove('drag-over', 'drag-over-left', 'drag-over-right');
+        });
+
+        // Drop
+        card.addEventListener('drop', (e) => {
+            e.preventDefault();
+            
+            if (draggedCard && card !== draggedCard) {
+                const rect = card.getBoundingClientRect();
+                const midX = rect.left + rect.width / 2;
+                
+                if (e.clientX < midX) {
+                    // Insertar antes
+                    grid.insertBefore(draggedCard, card);
+                } else {
+                    // Insertar después
+                    grid.insertBefore(draggedCard, card.nextSibling);
+                }
+            }
+            
+            card.classList.remove('drag-over', 'drag-over-left', 'drag-over-right');
+        });
+    });
+
+    // También permitir drop en el grid vacío
+    grid.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+
+    grid.addEventListener('drop', (e) => {
+        e.preventDefault();
+    });
 }
 
 // Adjust color brightness helper
