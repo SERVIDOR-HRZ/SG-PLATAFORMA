@@ -236,11 +236,18 @@ function enterMateria(materiaId) {
     // Mostrar tabs y contenido
     const tabsContainer = document.querySelector('.tabs-container');
     const tabContent = document.querySelector('.tab-content');
-    if (tabsContainer) tabsContainer.style.display = 'flex';
+    if (tabsContainer) {
+        tabsContainer.style.display = 'flex';
+        // Aplicar color de la materia a los tabs
+        tabsContainer.style.setProperty('--materia-color', config.color);
+    }
     if (tabContent) tabContent.style.display = 'block';
     
     // Agregar botón para volver a las materias
     addBackToMateriasButton();
+    
+    // Mostrar tarjeta de estadísticas de la materia
+    showMateriaStatsCard(materiaId, config);
     
     // Show create buttons for admin
     if (currentUser.tipoUsuario === 'admin') {
@@ -252,6 +259,88 @@ function enterMateria(materiaId) {
     
     // Cargar contenido
     loadAnuncios();
+}
+
+// Mostrar tarjeta de estadísticas de la materia
+async function showMateriaStatsCard(materiaId, config) {
+    // Remover tarjeta existente si hay
+    const existingCard = document.getElementById('materiaStatsCard');
+    if (existingCard) existingCard.remove();
+    
+    // Obtener foto de perfil del usuario
+    let userPhoto = '';
+    try {
+        if (window.firebaseDB) {
+            const userDoc = await window.firebaseDB.collection('usuarios').doc(currentUser.id).get();
+            if (userDoc.exists) {
+                userPhoto = userDoc.data().fotoPerfil || '';
+            }
+        }
+    } catch (error) {
+        console.error('Error al obtener foto de perfil:', error);
+    }
+    
+    // Contar tareas completadas para esta materia y aula
+    let tareasCompletadas = 0;
+    try {
+        if (window.firebaseDB && currentUser.tipoUsuario === 'estudiante') {
+            // Obtener todas las tareas de esta materia y aula
+            let tareasQuery = window.firebaseDB.collection('tareas').where('materia', '==', materiaId);
+            if (currentAulaId) {
+                tareasQuery = tareasQuery.where('aulaId', '==', currentAulaId);
+            }
+            const tareasSnapshot = await tareasQuery.get();
+            
+            // Contar entregas del estudiante
+            for (const tareaDoc of tareasSnapshot.docs) {
+                const entregaSnapshot = await window.firebaseDB.collection('entregas')
+                    .where('tareaId', '==', tareaDoc.id)
+                    .where('estudianteId', '==', currentUser.id)
+                    .get();
+                
+                if (!entregaSnapshot.empty) {
+                    tareasCompletadas++;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error al contar tareas completadas:', error);
+    }
+    
+    // Crear color más oscuro para el gradiente
+    const darkerColor = adjustColorBrightness(config.color, -40);
+    
+    // Crear la tarjeta de estadísticas
+    const statsCardHTML = `
+        <div class="materia-stats-card" id="materiaStatsCard" style="background: linear-gradient(135deg, ${config.color}, ${darkerColor});">
+            <div class="materia-stats-header">
+                <div class="materia-stats-avatar">
+                    ${userPhoto ? `<img src="${userPhoto}" alt="Foto de perfil">` : '<i class="bi bi-person-fill"></i>'}
+                </div>
+                <div class="materia-stats-info">
+                    <h2>¡Hola, ${currentUser.nombre || 'Usuario'}!</h2>
+                    <p><i class="bi bi-book"></i> ${config.nombre} - ${currentAulaData?.nombre || 'Aula'}</p>
+                </div>
+            </div>
+            <div class="materia-stats-boxes">
+                <div class="materia-stat-box">
+                    <div class="stat-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">${tareasCompletadas}</span>
+                        <span class="stat-label">Tareas Completadas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Insertar antes de los tabs
+    const tabsContainer = document.querySelector('.tabs-container');
+    if (tabsContainer) {
+        tabsContainer.insertAdjacentHTML('beforebegin', statsCardHTML);
+    }
 }
 
 // Add button to go back to materias selection
@@ -272,6 +361,10 @@ function backToMateriasSelection() {
     const tabContent = document.querySelector('.tab-content');
     if (tabsContainer) tabsContainer.style.display = 'none';
     if (tabContent) tabContent.style.display = 'none';
+    
+    // Ocultar tarjeta de estadísticas
+    const statsCard = document.getElementById('materiaStatsCard');
+    if (statsCard) statsCard.remove();
     
     // Mostrar tarjetas de materias
     const cardsContainer = document.getElementById('materiasCardsContainer');
@@ -356,18 +449,60 @@ function setupTabs() {
                 case 'anuncios':
                     loadAnuncios();
                     break;
+                case 'desafios':
+                    loadDesafios();
+                    break;
                 case 'tareas':
                     loadTareas();
                     break;
                 case 'materiales':
                     loadMateriales();
                     break;
+                case 'foro':
+                    loadForo();
+                    break;
                 case 'estudiantes':
                     loadEstudiantes();
+                    break;
+                case 'notas':
+                    loadNotas();
                     break;
             }
         });
     });
+}
+
+// Load desafios
+function loadDesafios() {
+    const desafiosContainer = document.getElementById('desafiosContainer');
+    desafiosContainer.innerHTML = `
+        <div class="empty-state">
+            <i class="bi bi-trophy"></i>
+            <p>Próximamente: Desafíos</p>
+        </div>
+    `;
+}
+
+// Load foro
+function loadForo() {
+    const foroContainer = document.getElementById('foroContainer');
+    foroContainer.innerHTML = `
+        <div class="empty-state">
+            <i class="bi bi-chat-dots"></i>
+            <p>Próximamente: Foro</p>
+        </div>
+    `;
+}
+
+// Load notas
+function loadNotas() {
+    const notasContainer = document.getElementById('notasContainer');
+    notasContainer.innerHTML = `
+        <div class="empty-state">
+            <i class="bi bi-journal-text"></i>
+            <p>Próximamente: Notas</p>
+        </div>
+    `;
 }
 
 // Load anuncios

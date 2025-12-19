@@ -228,7 +228,7 @@ body {
 }
 
 .tab-btn.active {
-    background: #ff0000;
+    background: var(--materia-color, #ff0000);
     color: white;
 }
 
@@ -2589,5 +2589,152 @@ body {
     
     .materia-card-header i {
         font-size: 2rem;
+    }
+}
+
+
+/* ============================================
+   TARJETA DE ESTADÍSTICAS POR MATERIA
+   ============================================ */
+
+.materia-stats-card {
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.materia-stats-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.materia-stats-avatar {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.materia-stats-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.materia-stats-avatar i {
+    font-size: 1.8rem;
+    color: white;
+}
+
+.materia-stats-info h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 0.3rem 0;
+}
+
+.materia-stats-info p {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.materia-stats-info p i {
+    font-size: 1rem;
+}
+
+.materia-stats-boxes {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.materia-stat-box {
+    flex: 1;
+    min-width: 140px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.materia-stat-box:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+.materia-stat-box .stat-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.materia-stat-box .stat-icon i {
+    color: white;
+}
+
+.materia-stat-box .stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.materia-stat-box .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.materia-stat-box .stat-label {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    margin-top: 0.2rem;
+}
+
+/* Responsive para tarjeta de estadísticas */
+@media (max-width: 768px) {
+    .materia-stats-card {
+        padding: 1.2rem;
+    }
+    
+    .materia-stats-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .materia-stats-boxes {
+        justify-content: center;
+    }
+    
+    .materia-stat-box {
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .materia-stats-boxes {
+        flex-direction: column;
+    }
+    
+    .materia-stat-box {
+        width: 100%;
     }
 }

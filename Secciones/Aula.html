@@ -62,6 +62,10 @@
                 <i class="bi bi-megaphone"></i>
                 Anuncios
             </button>
+            <button class="tab-btn" data-tab="desafios">
+                <i class="bi bi-trophy"></i>
+                Desafíos
+            </button>
             <button class="tab-btn" data-tab="tareas">
                 <i class="bi bi-clipboard-check"></i>
                 Tareas
@@ -70,9 +74,17 @@
                 <i class="bi bi-folder"></i>
                 Materiales
             </button>
+            <button class="tab-btn" data-tab="foro">
+                <i class="bi bi-chat-dots"></i>
+                Foro
+            </button>
             <button class="tab-btn" data-tab="estudiantes" id="estudiantesTab" style="display: none;">
                 <i class="bi bi-people"></i>
                 Estudiantes
+            </button>
+            <button class="tab-btn" data-tab="notas">
+                <i class="bi bi-journal-text"></i>
+                Notas
             </button>
         </div>
 
@@ -88,6 +100,13 @@
                 </div>
                 <div class="posts-container" id="postsContainer">
                     <!-- Posts will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Desafíos Tab -->
+            <div class="tab-pane" id="desafiosPane">
+                <div class="desafios-container" id="desafiosContainer">
+                    <!-- Desafíos will be loaded here -->
                 </div>
             </div>
 
@@ -117,10 +136,24 @@
                 </div>
             </div>
 
+            <!-- Foro Tab -->
+            <div class="tab-pane" id="foroPane">
+                <div class="foro-container" id="foroContainer">
+                    <!-- Foro will be loaded here -->
+                </div>
+            </div>
+
             <!-- Estudiantes Tab -->
             <div class="tab-pane" id="estudiantesPane">
                 <div class="students-container" id="studentsContainer">
                     <!-- Students will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Notas Tab -->
+            <div class="tab-pane" id="notasPane">
+                <div class="notas-container" id="notasContainer">
+                    <!-- Notas will be loaded here -->
                 </div>
             </div>
         </div>
