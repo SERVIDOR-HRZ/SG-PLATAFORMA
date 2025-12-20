@@ -122,6 +122,7 @@ async function cargarInformacionUsuario() {
         // Cargar datos personales en el formulario
         document.getElementById('nombre').value = datosUsuario.nombre || '';
         document.getElementById('email').value = datosUsuario.usuario || datosUsuario.email || '';
+        document.getElementById('emailRecuperacion').value = datosUsuario.emailRecuperacion || '';
         document.getElementById('telefono').value = datosUsuario.telefono || '';
         document.getElementById('fechaNacimiento').value = datosUsuario.fechaNacimiento || '';
         document.getElementById('tipoDocumento').value = datosUsuario.tipoDocumento || '';
@@ -362,6 +363,7 @@ async function guardarInformacion(event) {
 
         const nombre = document.getElementById('nombre').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
+        const emailRecuperacion = document.getElementById('emailRecuperacion').value.trim();
         const fechaNacimiento = document.getElementById('fechaNacimiento').value;
         const tipoDocumento = document.getElementById('tipoDocumento').value;
         const numeroDocumento = document.getElementById('numeroDocumento').value.trim();
@@ -371,11 +373,22 @@ async function guardarInformacion(event) {
             throw new Error('El nombre es requerido');
         }
 
+        if (!emailRecuperacion) {
+            throw new Error('El correo de recuperación es requerido');
+        }
+
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailRecuperacion)) {
+            throw new Error('El correo de recuperación no es válido');
+        }
+
         // Actualizar usuario (sin modificar el email/usuario)
         const db = window.firebaseDB;
         await db.collection('usuarios').doc(usuarioActual.id).update({
             nombre: nombre,
             telefono: telefono,
+            emailRecuperacion: emailRecuperacion,
             fechaNacimiento: fechaNacimiento,
             tipoDocumento: tipoDocumento,
             numeroDocumento: numeroDocumento,
@@ -385,6 +398,7 @@ async function guardarInformacion(event) {
         // Actualizar sesión
         usuarioActual.nombre = nombre;
         usuarioActual.telefono = telefono;
+        usuarioActual.emailRecuperacion = emailRecuperacion;
         usuarioActual.tipoDocumento = tipoDocumento;
         usuarioActual.numeroDocumento = numeroDocumento;
         sessionStorage.setItem('currentUser', JSON.stringify(usuarioActual));
