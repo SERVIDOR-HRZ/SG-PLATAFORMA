@@ -367,6 +367,9 @@ function enterMateria(materiaId) {
     
     const config = materiasConfig[materiaId] || { nombre: materiaId, color: '#667eea' };
     
+    // Guardar el color de la materia actual para uso global
+    window.currentMateriaColor = config.color;
+    
     // Actualizar título
     document.getElementById('aulaTitle').textContent = `${currentAulaData.nombre} - ${config.nombre}`;
     
@@ -377,12 +380,20 @@ function enterMateria(materiaId) {
     // Mostrar tabs y contenido
     const tabsContainer = document.querySelector('.tabs-container');
     const tabContent = document.querySelector('.tab-content');
+    const mainContent = document.querySelector('.main-content');
+    
+    // Aplicar color de la materia a los elementos principales
+    if (mainContent) {
+        mainContent.style.setProperty('--materia-color', config.color);
+    }
     if (tabsContainer) {
         tabsContainer.style.display = 'flex';
-        // Aplicar color de la materia a los tabs
         tabsContainer.style.setProperty('--materia-color', config.color);
     }
-    if (tabContent) tabContent.style.display = 'block';
+    if (tabContent) {
+        tabContent.style.display = 'block';
+        tabContent.style.setProperty('--materia-color', config.color);
+    }
     
     // Agregar botón para volver a las materias
     addBackToMateriasButton();
@@ -1089,7 +1100,7 @@ async function createTaskCard(id, tarea) {
     return card;
 }
 
-// Load materiales
+// Load materiales organized by topics
 async function loadMateriales() {
     try {
         await esperarFirebase();
@@ -1098,44 +1109,101 @@ async function loadMateriales() {
         const materialsContainer = document.getElementById('materialsContainer');
         materialsContainer.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>';
 
-        // Construir query base
-        let query = db.collection('materiales').where('materia', '==', currentMateria);
-        
-        // Si hay un aula seleccionada, filtrar también por aulaId
+        // Load topics first
+        let topicsQuery = db.collection('temas').where('materia', '==', currentMateria);
         if (currentAulaId) {
-            query = query.where('aulaId', '==', currentAulaId);
+            topicsQuery = topicsQuery.where('aulaId', '==', currentAulaId);
         }
+        const topicsSnapshot = await topicsQuery.get();
 
-        const snapshot = await query.get();
+        // Load materials
+        let materialsQuery = db.collection('materiales').where('materia', '==', currentMateria);
+        if (currentAulaId) {
+            materialsQuery = materialsQuery.where('aulaId', '==', currentAulaId);
+        }
+        const materialsSnapshot = await materialsQuery.get();
 
-        if (snapshot.empty) {
+        // Organize topics
+        const topics = [];
+        topicsSnapshot.forEach(doc => {
+            topics.push({ id: doc.id, ...doc.data() });
+        });
+        topics.sort((a, b) => {
+            const orderA = a.orden || 0;
+            const orderB = b.orden || 0;
+            return orderA - orderB;
+        });
+
+        // Organize materials by topic
+        const materialsByTopic = {};
+        const uncategorizedMaterials = [];
+
+        materialsSnapshot.forEach(doc => {
+            const material = { id: doc.id, ...doc.data() };
+            if (material.temaId) {
+                if (!materialsByTopic[material.temaId]) {
+                    materialsByTopic[material.temaId] = [];
+                }
+                materialsByTopic[material.temaId].push(material);
+            } else {
+                uncategorizedMaterials.push(material);
+            }
+        });
+
+        // Sort materials within each topic by date
+        Object.keys(materialsByTopic).forEach(topicId => {
+            materialsByTopic[topicId].sort((a, b) => {
+                const fechaA = a.fecha ? a.fecha.seconds : 0;
+                const fechaB = b.fecha ? b.fecha.seconds : 0;
+                return fechaB - fechaA;
+            });
+        });
+
+        uncategorizedMaterials.sort((a, b) => {
+            const fechaA = a.fecha ? a.fecha.seconds : 0;
+            const fechaB = b.fecha ? b.fecha.seconds : 0;
+            return fechaB - fechaA;
+        });
+
+        // Check if there's any content
+        if (topics.length === 0 && uncategorizedMaterials.length === 0) {
             materialsContainer.innerHTML = `
-                <div class="empty-state">
-                    <i class="bi bi-folder"></i>
-                    <p>No hay materiales disponibles</p>
+                <div class="no-topics-state">
+                    <i class="bi bi-folder-plus"></i>
+                    <h3>No hay materiales aún</h3>
+                    <p>${currentUser.tipoUsuario === 'admin' ? 'Crea un tema y agrega materiales para comenzar' : 'El profesor aún no ha agregado materiales'}</p>
                 </div>
             `;
             return;
         }
 
-        // Sort manually by fecha
-        const materiales = [];
-        snapshot.forEach(doc => {
-            materiales.push({ id: doc.id, data: doc.data() });
-        });
-
-        materiales.sort((a, b) => {
-            const fechaA = a.data.fecha ? a.data.fecha.seconds : 0;
-            const fechaB = b.data.fecha ? b.data.fecha.seconds : 0;
-            return fechaB - fechaA; // Descending order
-        });
-
         materialsContainer.innerHTML = '';
 
-        materiales.forEach(material => {
-            const materialCard = createMaterialCard(material.id, material.data);
-            materialsContainer.appendChild(materialCard);
+        // Render topics with their materials
+        topics.forEach(topic => {
+            const topicMaterials = materialsByTopic[topic.id] || [];
+            const topicElement = createTopicElement(topic, topicMaterials);
+            materialsContainer.appendChild(topicElement);
         });
+
+        // Render uncategorized materials if any
+        if (uncategorizedMaterials.length > 0) {
+            const uncategorizedSection = document.createElement('div');
+            uncategorizedSection.className = 'uncategorized-section';
+            uncategorizedSection.innerHTML = `
+                <div class="uncategorized-header">
+                    <i class="bi bi-inbox"></i>
+                    <span>Materiales sin tema</span>
+                </div>
+            `;
+            
+            uncategorizedMaterials.forEach(material => {
+                const materialCard = createMaterialCard(material.id, material);
+                uncategorizedSection.appendChild(materialCard);
+            });
+            
+            materialsContainer.appendChild(uncategorizedSection);
+        }
 
     } catch (error) {
         console.error('Error al cargar materiales:', error);
@@ -1148,10 +1216,599 @@ async function loadMateriales() {
     }
 }
 
+// Create topic element with collapsible content
+function createTopicElement(topic, materials) {
+    const container = document.createElement('div');
+    container.className = 'topic-container';
+    container.id = `topic-${topic.id}`;
+
+    // Check if topic should be collapsed (from localStorage)
+    const collapsedTopics = JSON.parse(localStorage.getItem('collapsedTopics') || '{}');
+    if (collapsedTopics[topic.id]) {
+        container.classList.add('collapsed');
+    }
+
+    const materialsCount = materials.length;
+    const countText = materialsCount === 1 ? '1 material' : `${materialsCount} materiales`;
+
+    container.innerHTML = `
+        <div class="topic-header" onclick="toggleTopic('${topic.id}')">
+            <button class="topic-toggle" onclick="event.stopPropagation(); toggleTopic('${topic.id}')">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="topic-icon">
+                <i class="bi bi-folder-fill"></i>
+            </div>
+            <div class="topic-info">
+                <h3 class="topic-title">${topic.nombre}</h3>
+                ${topic.descripcion ? `<p class="topic-description">${topic.descripcion}</p>` : ''}
+            </div>
+            <span class="topic-count">${countText}</span>
+            ${currentUser.tipoUsuario === 'admin' ? `
+                <div class="topic-actions" onclick="event.stopPropagation()">
+                    <button class="topic-action-btn" onclick="editarTema('${topic.id}')" title="Editar tema">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="topic-action-btn delete" onclick="eliminarTema('${topic.id}')" title="Eliminar tema">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            ` : ''}
+        </div>
+        <div class="topic-content">
+            <div class="topic-materials" id="topic-materials-${topic.id}">
+                ${materials.length === 0 ? `
+                    <div class="topic-empty">
+                        <i class="bi bi-file-earmark-plus"></i>
+                        <p>No hay materiales en este tema</p>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+
+    // Add material cards
+    if (materials.length > 0) {
+        const materialsContainer = container.querySelector(`#topic-materials-${topic.id}`);
+        materials.forEach(material => {
+            const materialCard = createMaterialCard(material.id, material);
+            materialsContainer.appendChild(materialCard);
+        });
+    }
+
+    return container;
+}
+
+// Setup materials search functionality
+function setupMaterialsSearch() {
+    const searchInput = document.getElementById('materialsSearchInput');
+    const clearBtn = document.getElementById('clearMaterialsSearch');
+    
+    if (!searchInput) return;
+
+    let searchTimeout;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        
+        // Show/hide clear button
+        if (clearBtn) {
+            clearBtn.style.display = query ? 'flex' : 'none';
+        }
+
+        // Debounce search
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterMaterials(query);
+        }, 300);
+    });
+
+    // Clear search
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearBtn.style.display = 'none';
+            filterMaterials('');
+            searchInput.focus();
+        });
+    }
+
+    // Clear on Escape key
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            if (clearBtn) clearBtn.style.display = 'none';
+            filterMaterials('');
+        }
+    });
+}
+
+// Filter materials based on search query
+function filterMaterials(query) {
+    const materialsContainer = document.getElementById('materialsContainer');
+    if (!materialsContainer) return;
+
+    const normalizedQuery = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
+    // Remove existing search results info
+    const existingInfo = materialsContainer.querySelector('.search-results-info');
+    if (existingInfo) existingInfo.remove();
+    
+    const existingNoResults = materialsContainer.querySelector('.no-search-results');
+    if (existingNoResults) existingNoResults.remove();
+
+    // If no query, show all
+    if (!normalizedQuery) {
+        // Show all topics
+        materialsContainer.querySelectorAll('.topic-container').forEach(topic => {
+            topic.classList.remove('hidden-by-search', 'topic-match');
+            // Remove highlight from topic title
+            removeTopicHighlight(topic);
+            // Show all materials in topic
+            topic.querySelectorAll('.material-card').forEach(card => {
+                card.classList.remove('hidden-by-search');
+                // Remove highlights
+                removeHighlights(card);
+            });
+        });
+        
+        // Show uncategorized section
+        const uncategorized = materialsContainer.querySelector('.uncategorized-section');
+        if (uncategorized) {
+            uncategorized.classList.remove('hidden-by-search');
+            uncategorized.querySelectorAll('.material-card').forEach(card => {
+                card.classList.remove('hidden-by-search');
+                removeHighlights(card);
+            });
+        }
+        return;
+    }
+
+    let totalMatches = 0;
+    let topicsMatched = 0;
+
+    // Filter topics and their materials
+    materialsContainer.querySelectorAll('.topic-container').forEach(topic => {
+        let topicHasMatches = false;
+        let materialMatches = 0;
+        
+        // Check if topic title matches
+        const topicTitle = topic.querySelector('.topic-title')?.textContent || '';
+        const topicDesc = topic.querySelector('.topic-description')?.textContent || '';
+        const normalizedTopicTitle = topicTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const normalizedTopicDesc = topicDesc.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        
+        const topicMatches = normalizedTopicTitle.includes(normalizedQuery) || normalizedTopicDesc.includes(normalizedQuery);
+        
+        if (topicMatches) {
+            // Topic title matches - show all materials in this topic
+            topicHasMatches = true;
+            topicsMatched++;
+            topic.classList.add('topic-match');
+            highlightTopicTitle(topic, query);
+            
+            // Show all materials in this topic
+            topic.querySelectorAll('.material-card').forEach(card => {
+                card.classList.remove('hidden-by-search');
+                materialMatches++;
+                // Also highlight if material matches
+                const title = card.querySelector('.material-title')?.textContent || '';
+                const description = card.querySelector('.material-description')?.textContent || '';
+                const normalizedTitle = title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                const normalizedDesc = description.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                
+                if (normalizedTitle.includes(normalizedQuery) || normalizedDesc.includes(normalizedQuery)) {
+                    highlightText(card, query);
+                } else {
+                    removeHighlights(card);
+                }
+            });
+        } else {
+            // Topic doesn't match - check individual materials
+            topic.classList.remove('topic-match');
+            removeTopicHighlight(topic);
+            
+            topic.querySelectorAll('.material-card').forEach(card => {
+                const title = card.querySelector('.material-title')?.textContent || '';
+                const description = card.querySelector('.material-description')?.textContent || '';
+                
+                const normalizedTitle = title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                const normalizedDesc = description.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                
+                const matches = normalizedTitle.includes(normalizedQuery) || normalizedDesc.includes(normalizedQuery);
+                
+                if (matches) {
+                    card.classList.remove('hidden-by-search');
+                    topicHasMatches = true;
+                    materialMatches++;
+                    highlightText(card, query);
+                } else {
+                    card.classList.add('hidden-by-search');
+                    removeHighlights(card);
+                }
+            });
+        }
+        
+        totalMatches += materialMatches;
+        
+        // Show/hide topic based on matches
+        if (topicHasMatches) {
+            topic.classList.remove('hidden-by-search');
+            // Expand topic if it has matches
+            topic.classList.remove('collapsed');
+        } else {
+            topic.classList.add('hidden-by-search');
+        }
+    });
+
+    // Filter uncategorized materials
+    const uncategorized = materialsContainer.querySelector('.uncategorized-section');
+    if (uncategorized) {
+        let uncategorizedHasMatches = false;
+        
+        uncategorized.querySelectorAll('.material-card').forEach(card => {
+            const title = card.querySelector('.material-title')?.textContent || '';
+            const description = card.querySelector('.material-description')?.textContent || '';
+            
+            const normalizedTitle = title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const normalizedDesc = description.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            
+            const matches = normalizedTitle.includes(normalizedQuery) || normalizedDesc.includes(normalizedQuery);
+            
+            if (matches) {
+                card.classList.remove('hidden-by-search');
+                uncategorizedHasMatches = true;
+                totalMatches++;
+                highlightText(card, query);
+            } else {
+                card.classList.add('hidden-by-search');
+                removeHighlights(card);
+            }
+        });
+        
+        if (uncategorizedHasMatches) {
+            uncategorized.classList.remove('hidden-by-search');
+        } else {
+            uncategorized.classList.add('hidden-by-search');
+        }
+    }
+
+    // Show results info or no results message
+    if (totalMatches > 0 || topicsMatched > 0) {
+        const resultsInfo = document.createElement('div');
+        resultsInfo.className = 'search-results-info';
+        let resultText = '';
+        if (topicsMatched > 0 && totalMatches > 0) {
+            resultText = `${topicsMatched} ${topicsMatched === 1 ? 'tema' : 'temas'} y ${totalMatches} ${totalMatches === 1 ? 'material' : 'materiales'}`;
+        } else if (topicsMatched > 0) {
+            resultText = `${topicsMatched} ${topicsMatched === 1 ? 'tema' : 'temas'}`;
+        } else {
+            resultText = `${totalMatches} ${totalMatches === 1 ? 'resultado' : 'resultados'}`;
+        }
+        resultsInfo.innerHTML = `
+            <div class="results-count">
+                <i class="bi bi-search"></i>
+                <span>${resultText} para "<span class="search-term">${escapeHtml(query)}</span>"</span>
+            </div>
+        `;
+        materialsContainer.insertBefore(resultsInfo, materialsContainer.firstChild);
+    } else {
+        const noResults = document.createElement('div');
+        noResults.className = 'no-search-results';
+        noResults.innerHTML = `
+            <i class="bi bi-search"></i>
+            <h3>No se encontraron resultados</h3>
+            <p>No hay materiales que coincidan con "${escapeHtml(query)}"</p>
+        `;
+        materialsContainer.appendChild(noResults);
+    }
+}
+
+// Highlight matching text
+function highlightText(card, query) {
+    const titleEl = card.querySelector('.material-title');
+    const descEl = card.querySelector('.material-description');
+    
+    if (titleEl) {
+        titleEl.innerHTML = highlightMatches(titleEl.textContent, query);
+    }
+    if (descEl) {
+        descEl.innerHTML = highlightMatches(descEl.textContent, query);
+    }
+}
+
+// Remove highlights from card
+function removeHighlights(card) {
+    const titleEl = card.querySelector('.material-title');
+    const descEl = card.querySelector('.material-description');
+    
+    if (titleEl) {
+        titleEl.innerHTML = titleEl.textContent;
+    }
+    if (descEl) {
+        descEl.innerHTML = descEl.textContent;
+    }
+}
+
+// Highlight matches in text
+function highlightMatches(text, query) {
+    if (!query) return escapeHtml(text);
+    
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+    
+    return escapeHtml(text).replace(regex, '<span class="search-highlight">$1</span>');
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Toggle topic collapse/expand
+function toggleTopic(topicId) {
+    const container = document.getElementById(`topic-${topicId}`);
+    if (!container) return;
+
+    container.classList.toggle('collapsed');
+
+    // Save state to localStorage
+    const collapsedTopics = JSON.parse(localStorage.getItem('collapsedTopics') || '{}');
+    collapsedTopics[topicId] = container.classList.contains('collapsed');
+    localStorage.setItem('collapsedTopics', JSON.stringify(collapsedTopics));
+}
+
+// Load topics into select dropdown
+async function loadTopicsIntoSelect(selectId, selectedTopicId = null) {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+
+        const select = document.getElementById(selectId);
+        if (!select) return;
+
+        // Keep the first option
+        select.innerHTML = '<option value="">Selecciona un tema</option>';
+
+        let query = db.collection('temas').where('materia', '==', currentMateria);
+        if (currentAulaId) {
+            query = query.where('aulaId', '==', currentAulaId);
+        }
+
+        const snapshot = await query.get();
+
+        const topics = [];
+        snapshot.forEach(doc => {
+            topics.push({ id: doc.id, ...doc.data() });
+        });
+
+        topics.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+
+        topics.forEach(topic => {
+            const option = document.createElement('option');
+            option.value = topic.id;
+            option.textContent = topic.nombre;
+            if (selectedTopicId && topic.id === selectedTopicId) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error('Error loading topics:', error);
+    }
+}
+
+// Open create topic modal
+function openTopicModal() {
+    const modal = document.getElementById('createTopicModal');
+    // Aplicar color de la materia al modal
+    if (window.currentMateriaColor) {
+        modal.style.setProperty('--materia-color', window.currentMateriaColor);
+    }
+    modal.classList.add('active');
+    document.getElementById('topicName').focus();
+}
+
+// Close create topic modal
+function closeTopicModal() {
+    document.getElementById('createTopicModal').classList.remove('active');
+    document.getElementById('createTopicForm').reset();
+}
+
+// Create new topic
+async function crearTema() {
+    try {
+        const submitBtn = document.querySelector('#createTopicForm .submit-btn');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
+
+        const db = window.firebaseDB;
+        const nombre = document.getElementById('topicName').value.trim();
+        const descripcion = document.getElementById('topicDescription').value.trim();
+
+        if (!nombre) {
+            showAlertModal('Error', 'El nombre del tema es requerido');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            return;
+        }
+
+        // Get current max order
+        let query = db.collection('temas').where('materia', '==', currentMateria);
+        if (currentAulaId) {
+            query = query.where('aulaId', '==', currentAulaId);
+        }
+        const snapshot = await query.get();
+        
+        let maxOrder = 0;
+        snapshot.forEach(doc => {
+            const orden = doc.data().orden || 0;
+            if (orden > maxOrder) maxOrder = orden;
+        });
+
+        const newTopicRef = await db.collection('temas').add({
+            materia: currentMateria,
+            aulaId: currentAulaId || null,
+            nombre: nombre,
+            descripcion: descripcion || null,
+            orden: maxOrder + 1,
+            fecha: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        closeTopicModal();
+        showAlertModal('Éxito', 'Tema creado correctamente');
+        loadMateriales();
+
+        // Reload topics in select and select the new topic if material modal is open
+        const materialModal = document.getElementById('createMaterialModal');
+        if (materialModal && materialModal.classList.contains('active')) {
+            await loadTopicsIntoSelect('materialTopic', newTopicRef.id);
+        } else {
+            loadTopicsIntoSelect('materialTopic');
+        }
+
+    } catch (error) {
+        console.error('Error al crear tema:', error);
+        showAlertModal('Error', 'Error al crear el tema');
+    } finally {
+        const submitBtn = document.querySelector('#createTopicForm .submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Crear Tema';
+        }
+    }
+}
+
+// Edit topic
+async function editarTema(topicId) {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+
+        const doc = await db.collection('temas').doc(topicId).get();
+        if (!doc.exists) {
+            showAlertModal('Error', 'Tema no encontrado');
+            return;
+        }
+
+        const topic = doc.data();
+
+        document.getElementById('editTopicId').value = topicId;
+        document.getElementById('editTopicName').value = topic.nombre || '';
+        document.getElementById('editTopicDescription').value = topic.descripcion || '';
+
+        const modal = document.getElementById('editTopicModal');
+        // Aplicar color de la materia al modal
+        if (window.currentMateriaColor) {
+            modal.style.setProperty('--materia-color', window.currentMateriaColor);
+        }
+        modal.classList.add('active');
+
+    } catch (error) {
+        console.error('Error al cargar tema:', error);
+        showAlertModal('Error', 'Error al cargar el tema');
+    }
+}
+
+// Close edit topic modal
+function closeEditTopicModal() {
+    document.getElementById('editTopicModal').classList.remove('active');
+    document.getElementById('editTopicForm').reset();
+}
+
+// Save edited topic
+async function guardarTema() {
+    try {
+        const submitBtn = document.querySelector('#editTopicForm .submit-btn');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Guardando...';
+
+        const db = window.firebaseDB;
+        const topicId = document.getElementById('editTopicId').value;
+        const nombre = document.getElementById('editTopicName').value.trim();
+        const descripcion = document.getElementById('editTopicDescription').value.trim();
+
+        if (!nombre) {
+            showAlertModal('Error', 'El nombre del tema es requerido');
+            return;
+        }
+
+        await db.collection('temas').doc(topicId).update({
+            nombre: nombre,
+            descripcion: descripcion || null
+        });
+
+        closeEditTopicModal();
+        showAlertModal('Éxito', 'Tema actualizado correctamente');
+        loadMateriales();
+        loadTopicsIntoSelect('materialTopic');
+        loadTopicsIntoSelect('editMaterialTopic');
+
+    } catch (error) {
+        console.error('Error al guardar tema:', error);
+        showAlertModal('Error', 'Error al guardar el tema');
+    } finally {
+        const submitBtn = document.querySelector('#editTopicForm .submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Guardar Cambios';
+        }
+    }
+}
+
+// Delete topic
+function eliminarTema(topicId) {
+    showConfirmModal(
+        'Eliminar Tema',
+        '¿Estás seguro de que deseas eliminar este tema? Los materiales dentro del tema quedarán sin categoría.',
+        async () => {
+            try {
+                const db = window.firebaseDB;
+                
+                // Update materials to remove topic reference
+                const materialsSnapshot = await db.collection('materiales')
+                    .where('temaId', '==', topicId)
+                    .get();
+
+                const batch = db.batch();
+                materialsSnapshot.forEach(doc => {
+                    batch.update(doc.ref, { temaId: null });
+                });
+
+                // Delete the topic
+                batch.delete(db.collection('temas').doc(topicId));
+
+                await batch.commit();
+
+                showAlertModal('Éxito', 'Tema eliminado correctamente');
+                loadMateriales();
+                loadTopicsIntoSelect('materialTopic');
+                loadTopicsIntoSelect('editMaterialTopic');
+
+            } catch (error) {
+                console.error('Error al eliminar tema:', error);
+                showAlertModal('Error', 'Error al eliminar el tema');
+            }
+        }
+    );
+}
+
 // Create material card
 function createMaterialCard(id, material) {
     const card = document.createElement('div');
     card.className = 'material-card';
+
+    // Format date
+    let fechaStr = '';
+    if (material.fecha) {
+        const fecha = new Date(material.fecha.seconds * 1000);
+        fechaStr = formatearFecha(fecha);
+    }
 
     // Build media HTML (images and videos in grid)
     let mediaHTML = '';
@@ -1239,6 +1896,7 @@ function createMaterialCard(id, material) {
             <div class="material-content">
                 <h3 class="material-title">${material.titulo}</h3>
                 ${material.descripcion ? `<p class="material-description">${material.descripcion}</p>` : ''}
+                ${fechaStr ? `<span class="material-date"><i class="bi bi-calendar3"></i> ${fechaStr}</span>` : ''}
             </div>
             ${currentUser.tipoUsuario === 'admin' ? `
                 <div class="material-actions">
@@ -1472,9 +2130,34 @@ function setupEventListeners() {
     const createMaterialBtn = document.getElementById('createMaterialBtn');
     if (createMaterialBtn) {
         createMaterialBtn.addEventListener('click', () => {
-            document.getElementById('createMaterialModal').classList.add('active');
+            loadTopicsIntoSelect('materialTopic');
+            const modal = document.getElementById('createMaterialModal');
+            // Aplicar color de la materia al modal
+            if (window.currentMateriaColor) {
+                modal.style.setProperty('--materia-color', window.currentMateriaColor);
+            }
+            modal.classList.add('active');
         });
     }
+
+    // Create topic button
+    const createTopicBtn = document.getElementById('createTopicBtn');
+    if (createTopicBtn) {
+        createTopicBtn.addEventListener('click', () => {
+            openTopicModal();
+        });
+    }
+
+    // Quick add topic button (in material modal)
+    const quickAddTopicBtn = document.getElementById('quickAddTopicBtn');
+    if (quickAddTopicBtn) {
+        quickAddTopicBtn.addEventListener('click', () => {
+            openTopicModal();
+        });
+    }
+
+    // Materials search
+    setupMaterialsSearch();
 
     // Close modals
     setupModalListeners();
@@ -1485,7 +2168,7 @@ function setupEventListeners() {
 
 // Setup modal listeners
 function setupModalListeners() {
-    const modals = ['createPostModal', 'createTaskModal', 'createMaterialModal', 'submitTaskModal', 'viewSubmissionsModal'];
+    const modals = ['createPostModal', 'createTaskModal', 'createMaterialModal', 'submitTaskModal', 'viewSubmissionsModal', 'createTopicModal', 'editTopicModal'];
 
     modals.forEach(modalId => {
         const modal = document.getElementById(modalId);
@@ -1642,6 +2325,17 @@ function setupForms() {
     document.getElementById('editPostForm').addEventListener('submit', actualizarAnuncio);
     document.getElementById('editTaskForm').addEventListener('submit', actualizarTarea);
     document.getElementById('editMaterialForm').addEventListener('submit', actualizarMaterial);
+
+    // Topic forms
+    document.getElementById('createTopicForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await crearTema();
+    });
+
+    document.getElementById('editTopicForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await guardarTema();
+    });
 
     // Edit post video type change handler
     const editPostVideoType = document.getElementById('editPostVideoType');
@@ -2726,6 +3420,9 @@ async function editarMaterial(id) {
         document.getElementById('editMaterialDescription').value = data.descripcion || '';
         document.getElementById('editMaterialDriveUrl').value = data.driveUrl || '';
 
+        // Load topics and select current one
+        await loadTopicsIntoSelect('editMaterialTopic', data.temaId || null);
+
         // Store current data
         window.editMaterialCurrentImages = data.imageUrls || [];
         window.editMaterialCurrentVideos = data.videos || [];
@@ -2808,9 +3505,17 @@ async function actualizarMaterial(e) {
 
         const db = window.firebaseDB;
         const id = document.getElementById('editMaterialId').value;
+        const temaId = document.getElementById('editMaterialTopic').value;
         const titulo = document.getElementById('editMaterialTitle').value;
         const descripcion = document.getElementById('editMaterialDescription').value;
         const driveUrl = document.getElementById('editMaterialDriveUrl').value;
+
+        if (!temaId) {
+            showAlertModal('Error', 'Debes seleccionar un tema');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            return;
+        }
 
         // Upload new images
         const newImageUrls = [];
@@ -2841,6 +3546,7 @@ async function actualizarMaterial(e) {
         const allVideos = [...window.editMaterialCurrentVideos, ...window.editMaterialNewVideos];
 
         await db.collection('materiales').doc(id).update({
+            temaId: temaId,
             titulo: titulo,
             descripcion: descripcion,
             imageUrls: allImageUrls,
@@ -2870,9 +3576,17 @@ async function crearMaterial() {
         submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
 
         const db = window.firebaseDB;
+        const temaId = document.getElementById('materialTopic').value;
         const titulo = document.getElementById('materialTitle').value;
         const descripcion = document.getElementById('materialDescription').value;
         const driveUrl = document.getElementById('materialDriveUrl').value;
+
+        if (!temaId) {
+            showAlertModal('Error', 'Debes seleccionar un tema');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            return;
+        }
 
         // Upload images
         const imageUrls = [];
@@ -2901,7 +3615,8 @@ async function crearMaterial() {
 
         await db.collection('materiales').add({
             materia: currentMateria,
-            aulaId: currentAulaId || null, // Agregar ID del aula
+            aulaId: currentAulaId || null,
+            temaId: temaId,
             titulo: titulo,
             descripcion: descripcion,
             imageUrls: imageUrls,
@@ -3179,3 +3894,30 @@ function closeMediaModal() {
 }
 
 
+
+
+// Highlight topic title
+function highlightTopicTitle(topic, query) {
+    const titleEl = topic.querySelector('.topic-title');
+    const descEl = topic.querySelector('.topic-description');
+    
+    if (titleEl) {
+        titleEl.innerHTML = highlightMatches(titleEl.textContent, query);
+    }
+    if (descEl) {
+        descEl.innerHTML = highlightMatches(descEl.textContent, query);
+    }
+}
+
+// Remove highlight from topic title
+function removeTopicHighlight(topic) {
+    const titleEl = topic.querySelector('.topic-title');
+    const descEl = topic.querySelector('.topic-description');
+    
+    if (titleEl) {
+        titleEl.innerHTML = titleEl.textContent;
+    }
+    if (descEl) {
+        descEl.innerHTML = descEl.textContent;
+    }
+}

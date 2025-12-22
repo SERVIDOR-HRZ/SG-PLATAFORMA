@@ -125,14 +125,31 @@
 
             <!-- Materiales Tab -->
             <div class="tab-pane" id="materialesPane">
+                <!-- Search Bar -->
+                <div class="materials-search-container">
+                    <div class="search-input-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="materialsSearchInput" placeholder="Buscar materiales..." autocomplete="off">
+                        <button class="clear-search-btn" id="clearMaterialsSearch" style="display: none;">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="create-material-container" id="createMaterialContainer" style="display: none;">
-                    <button class="create-material-btn" id="createMaterialBtn">
-                        <i class="bi bi-plus-circle"></i>
-                        Agregar Material
-                    </button>
+                    <div class="material-actions-row">
+                        <button class="create-topic-btn" id="createTopicBtn">
+                            <i class="bi bi-folder-plus"></i>
+                            Crear Tema
+                        </button>
+                        <button class="create-material-btn" id="createMaterialBtn">
+                            <i class="bi bi-plus-circle"></i>
+                            Agregar Material
+                        </button>
+                    </div>
                 </div>
                 <div class="materials-container" id="materialsContainer">
-                    <!-- Materials will be loaded here -->
+                    <!-- Materials will be loaded here organized by topics -->
                 </div>
             </div>
 
@@ -355,8 +372,20 @@
                     <i class="bi bi-x"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="createMaterialForm">
+            <form id="createMaterialForm">
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label for="materialTopic">Tema</label>
+                        <div class="topic-select-container">
+                            <select id="materialTopic" required>
+                                <option value="">Selecciona un tema</option>
+                                <!-- Topics will be loaded dynamically -->
+                            </select>
+                            <button type="button" class="quick-add-topic-btn" id="quickAddTopicBtn" title="Crear nuevo tema">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
                     <div class="input-group">
                         <label for="materialTitle">Título</label>
                         <input type="text" id="materialTitle" required placeholder="Título del material">
@@ -401,12 +430,74 @@
                         <input type="url" id="materialDriveUrl" placeholder="https://drive.google.com/...">
                         <small>URL de carpeta compartida de Google Drive</small>
                     </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancelMaterial">Cancelar</button>
+                    <button type="submit" class="submit-btn">
+                        <i class="bi bi-check-lg"></i>
+                        Agregar Material
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <!-- Create Topic Modal -->
+    <div class="modal" id="createTopicModal">
+        <div class="modal-content modal-content-small">
+            <div class="modal-header">
+                <h3>Crear Tema</h3>
+                <button class="close-btn" onclick="closeTopicModal()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createTopicForm">
+                    <div class="input-group">
+                        <label for="topicName">Nombre del Tema</label>
+                        <input type="text" id="topicName" required placeholder="Ej: Unidad 1 - Introducción">
+                    </div>
+                    <div class="input-group">
+                        <label for="topicDescription">Descripción (opcional)</label>
+                        <textarea id="topicDescription" rows="2" placeholder="Breve descripción del tema"></textarea>
+                    </div>
                     <div class="modal-actions">
-                        <button type="button" class="cancel-btn" id="cancelMaterial">Cancelar</button>
+                        <button type="button" class="cancel-btn" onclick="closeTopicModal()">Cancelar</button>
                         <button type="submit" class="submit-btn">
                             <i class="bi bi-check-lg"></i>
-                            Agregar Material
+                            Crear Tema
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Topic Modal -->
+    <div class="modal" id="editTopicModal">
+        <div class="modal-content modal-content-small">
+            <div class="modal-header">
+                <h3>Editar Tema</h3>
+                <button class="close-btn" onclick="closeEditTopicModal()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editTopicForm">
+                    <input type="hidden" id="editTopicId">
+                    <div class="input-group">
+                        <label for="editTopicName">Nombre del Tema</label>
+                        <input type="text" id="editTopicName" required placeholder="Nombre del tema">
+                    </div>
+                    <div class="input-group">
+                        <label for="editTopicDescription">Descripción (opcional)</label>
+                        <textarea id="editTopicDescription" rows="2" placeholder="Breve descripción del tema"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" onclick="closeEditTopicModal()">Cancelar</button>
+                        <button type="submit" class="submit-btn">
+                            <i class="bi bi-check-lg"></i>
+                            Guardar Cambios
                         </button>
                     </div>
                 </form>
@@ -629,9 +720,16 @@
                     <i class="bi bi-x"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="editMaterialForm">
+            <form id="editMaterialForm">
+                <div class="modal-body">
                     <input type="hidden" id="editMaterialId">
+                    <div class="input-group">
+                        <label for="editMaterialTopic">Tema</label>
+                        <select id="editMaterialTopic" required>
+                            <option value="">Selecciona un tema</option>
+                            <!-- Topics will be loaded dynamically -->
+                        </select>
+                    </div>
                     <div class="input-group">
                         <label for="editMaterialTitle">Título</label>
                         <input type="text" id="editMaterialTitle" required placeholder="Título del material">
@@ -688,16 +786,15 @@
                         <input type="url" id="editMaterialDriveUrl" placeholder="https://drive.google.com/...">
                         <small>URL de carpeta compartida de Google Drive</small>
                     </div>
-
-                    <div class="modal-actions">
-                        <button type="button" class="cancel-btn" onclick="closeEditMaterialModal()">Cancelar</button>
-                        <button type="submit" class="submit-btn">
-                            <i class="bi bi-check-lg"></i>
-                            Guardar Cambios
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeEditMaterialModal()">Cancelar</button>
+                    <button type="submit" class="submit-btn">
+                        <i class="bi bi-check-lg"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
