@@ -1231,10 +1231,21 @@ async function loadCategoriasModal() {
                         <small>${stats.cantidad} movimiento${stats.cantidad !== 1 ? 's' : ''} - Total: ${formatNumber(stats.total)}</small>
                     </div>
                 </div>
-                <button class="btn-icon delete" title="Eliminar categoría">
-                    <i class="bi bi-trash"></i>
-                </button>
+                <div class="categoria-actions">
+                    <button class="btn-icon edit" title="Editar categoría">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn-icon delete" title="Eliminar categoría">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             `;
+            
+            const editBtn = categoriaItem.querySelector('.btn-icon.edit');
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                editarCategoria(categoria.id, categoria.nombre);
+            });
             
             const deleteBtn = categoriaItem.querySelector('.btn-icon.delete');
             deleteBtn.addEventListener('click', (e) => {
@@ -1260,6 +1271,23 @@ function crearCategoriaDesdModal() {
     const titulo = tipoCategoriasActual === 'ingreso' ? 'Nueva Categoría de Ingreso' : 'Nueva Categoría de Gasto';
     document.getElementById('modalNuevaCategoriaTitulo').textContent = titulo;
     document.getElementById('nombreNuevaCategoria').value = '';
+    document.getElementById('editingCategoriaId').value = '';
+    document.getElementById('btnCategoriaTxt').textContent = 'Crear Categoría';
+    document.getElementById('modalNuevaCategoria').classList.add('active');
+    
+    // Focus en el input
+    setTimeout(() => {
+        document.getElementById('nombreNuevaCategoria').focus();
+    }, 100);
+}
+
+// Editar categoría desde el modal
+function editarCategoria(categoriaId, nombreActual) {
+    const titulo = tipoCategoriasActual === 'ingreso' ? 'Editar Categoría de Ingreso' : 'Editar Categoría de Gasto';
+    document.getElementById('modalNuevaCategoriaTitulo').textContent = titulo;
+    document.getElementById('nombreNuevaCategoria').value = nombreActual;
+    document.getElementById('editingCategoriaId').value = categoriaId;
+    document.getElementById('btnCategoriaTxt').textContent = 'Guardar Cambios';
     document.getElementById('modalNuevaCategoria').classList.add('active');
     
     // Focus en el input
@@ -1272,23 +1300,27 @@ function crearCategoriaDesdModal() {
 function closeModalNuevaCategoria() {
     document.getElementById('modalNuevaCategoria').classList.remove('active');
     document.getElementById('formNuevaCategoria').reset();
+    document.getElementById('editingCategoriaId').value = '';
 }
 
-// Manejar creación de categoría
+// Manejar creación/edición de categoría
 async function handleCrearCategoria(e) {
     e.preventDefault();
     
     const nombreCategoria = document.getElementById('nombreNuevaCategoria').value.trim();
+    const editingId = document.getElementById('editingCategoriaId').value;
     
     if (!nombreCategoria) {
         showNotification('error', 'Error', 'Por favor ingresa un nombre para la categoría');
         return;
     }
     
-    // Verificar si ya existe
+    // Verificar si ya existe (excepto si es la misma que estamos editando)
     await window.loadCategorias();
     const existe = window.categoriasList.some(cat => 
-        cat.nombre.toLowerCase() === nombreCategoria.toLowerCase() && cat.tipo === tipoCategoriasActual
+        cat.nombre.toLowerCase() === nombreCategoria.toLowerCase() && 
+        cat.tipo === tipoCategoriasActual &&
+        cat.id !== editingId
     );
     
     if (existe) {
@@ -1298,13 +1330,41 @@ async function handleCrearCategoria(e) {
 
     try {
         const db = getDB();
-        await db.collection('categorias_financieras').add({
-            nombre: nombreCategoria,
-            tipo: tipoCategoriasActual,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        
+        if (editingId) {
+            // Actualizar categoría existente
+            const categoriaAnterior = window.categoriasList.find(cat => cat.id === editingId);
+            const nombreAnterior = categoriaAnterior ? categoriaAnterior.nombre : '';
+            
+            await db.collection('categorias_financieras').doc(editingId).update({
+                nombre: nombreCategoria,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            // Actualizar movimientos que usan esta categoría
+            if (nombreAnterior && nombreAnterior !== nombreCategoria) {
+                const movimientosSnapshot = await db.collection('movimientos')
+                    .where('categoria', '==', nombreAnterior)
+                    .get();
+                
+                const batch = db.batch();
+                movimientosSnapshot.forEach(doc => {
+                    batch.update(doc.ref, { categoria: nombreCategoria });
+                });
+                await batch.commit();
+            }
+            
+            showNotification('success', 'Categoría Actualizada', 'La categoría se ha actualizado correctamente');
+        } else {
+            // Crear nueva categoría
+            await db.collection('categorias_financieras').add({
+                nombre: nombreCategoria,
+                tipo: tipoCategoriasActual,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showNotification('success', 'Categoría Creada', 'La categoría se ha creado correctamente');
+        }
 
-        showNotification('success', 'Categoría Creada', 'La categoría se ha creado correctamente');
         closeModalNuevaCategoria();
         
         // Si se creó desde el formulario de movimiento, recargar y seleccionar
@@ -1316,9 +1376,12 @@ async function handleCrearCategoria(e) {
             // Si se creó desde el modal de gestión, recargar la lista
             await loadCategoriasModal();
         }
+        
+        // Recargar filtros
+        loadCategoriasFilterMovimientos();
     } catch (error) {
-        console.error('Error creating categoria:', error);
-        showNotification('error', 'Error', 'No se pudo crear la categoría');
+        console.error('Error saving categoria:', error);
+        showNotification('error', 'Error', 'No se pudo guardar la categoría');
     }
 }
 
@@ -1390,6 +1453,7 @@ window.openGestionarCategorias = openGestionarCategorias;
 window.closeGestionarCategorias = closeGestionarCategorias;
 window.loadCategoriasFilterMovimientos = loadCategoriasFilterMovimientos;
 window.openModalNuevaCategoriaDesdeFormulario = openModalNuevaCategoriaDesdeFormulario;
+window.editarCategoria = editarCategoria;
 
 // Función para copiar al portapapeles
 function copiarAlPortapapeles(texto, mensaje) {

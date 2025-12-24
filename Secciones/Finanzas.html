@@ -608,7 +608,7 @@
 
                     <div class="form-group">
                         <label for="descripcionMovimientoForm">Descripción *</label>
-                        <input type="text" id="descripcionMovimientoForm" placeholder="Descripción del movimiento" required>
+                        <textarea id="descripcionMovimientoForm" rows="3" placeholder="Descripción del movimiento (puedes usar saltos de línea)" required></textarea>
                     </div>
 
                     <div class="form-group">
@@ -723,7 +723,7 @@
         </div>
     </div>
 
-    <!-- Modal Nueva Categoría -->
+    <!-- Modal Nueva/Editar Categoría -->
     <div class="modal" id="modalNuevaCategoria">
         <div class="modal-content modal-small">
             <div class="modal-header">
@@ -734,6 +734,7 @@
             </div>
             <div class="modal-body">
                 <form id="formNuevaCategoria">
+                    <input type="hidden" id="editingCategoriaId" value="">
                     <div class="form-group">
                         <label for="nombreNuevaCategoria">Nombre de la Categoría *</label>
                         <input type="text" id="nombreNuevaCategoria" placeholder="Ej: Matrícula, Servicios, etc." required autofocus>
@@ -741,9 +742,71 @@
 
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" id="cancelarNuevaCategoria">Cancelar</button>
+                        <button type="submit" class="btn-primary" id="btnGuardarCategoria">
+                            <i class="bi bi-check-circle"></i>
+                            <span id="btnCategoriaTxt">Crear Categoría</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Movimiento -->
+    <div class="modal" id="modalEditarMovimiento">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalEditarMovimientoTitulo">Editar Movimiento</h3>
+                <button class="close-btn" id="closeModalEditarMovimiento">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarMovimiento">
+                    <input type="hidden" id="editingMovimientoId">
+                    <input type="hidden" id="editingMovimientoTipo">
+                    <input type="hidden" id="editingMovimientoCuentaIdOriginal">
+                    <input type="hidden" id="editingMovimientoMontoOriginal">
+
+                    <div class="form-group">
+                        <label for="editCuentaMovimiento">Cuenta *</label>
+                        <select id="editCuentaMovimiento" required>
+                            <option value="">Seleccionar cuenta</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editMontoMovimiento">Monto *</label>
+                        <input type="text" id="editMontoMovimiento" placeholder="0" required inputmode="numeric">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editCategoriaMovimiento">Categoría *</label>
+                        <select id="editCategoriaMovimiento" required>
+                            <option value="">Seleccionar categoría</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editDescripcionMovimiento">Descripción *</label>
+                        <textarea id="editDescripcionMovimiento" rows="3" placeholder="Descripción del movimiento" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editFechaMovimiento">Fecha *</label>
+                        <input type="date" id="editFechaMovimiento" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editNotasMovimiento">Notas</label>
+                        <textarea id="editNotasMovimiento" rows="3" placeholder="Notas adicionales"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelarEditarMovimiento">Cancelar</button>
                         <button type="submit" class="btn-primary">
                             <i class="bi bi-check-circle"></i>
-                            Crear Categoría
+                            Guardar Cambios
                         </button>
                     </div>
                 </form>
@@ -772,6 +835,7 @@
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/finanzas-cuentas.js"></script>
     <script src="../Elementos/js/finanzas.js"></script>
+    <script src="../Elementos/js/finanzas-edit.js"></script>
 </body>
 
 </html>

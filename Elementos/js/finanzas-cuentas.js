@@ -1293,3 +1293,5 @@ async function otorgarRecompensas(estudianteId, movimientoId, recompensasData) {
 
 window.loadEstudiantesSelect = loadEstudiantesSelect;
 window.otorgarRecompensas = otorgarRecompensas;
+
+

@@ -2653,3 +2653,249 @@ body {
     font-weight: bold;
     margin-left: 0.5rem;
 }
+
+
+/* ========== ESTILOS PARA EDICIÓN DE CATEGORÍAS Y MOVIMIENTOS ========== */
+
+/* Categorías - Acciones */
+.categoria-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.categoria-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.categoria-item:hover {
+    background: #e9ecef;
+}
+
+.categoria-item.nueva {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 2px dashed #667eea;
+    cursor: pointer;
+}
+
+.categoria-item.nueva:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+}
+
+.categoria-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.categoria-info i {
+    font-size: 1.2rem;
+    color: #667eea;
+}
+
+.categoria-info div strong {
+    display: block;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.categoria-info div small {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.categoria-item .btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.categoria-item .btn-icon.edit {
+    background: #667eea;
+    color: white;
+}
+
+.categoria-item .btn-icon.edit:hover {
+    background: #5a6fd6;
+    transform: scale(1.05);
+}
+
+.categoria-item .btn-icon.delete {
+    background: #dc3545;
+    color: white;
+}
+
+.categoria-item .btn-icon.delete:hover {
+    background: #c82333;
+    transform: scale(1.05);
+}
+
+/* Botones de movimientos */
+.movimiento-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-edit-mov {
+    background: #667eea !important;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-edit-mov:hover {
+    background: #5a6fd6 !important;
+    transform: scale(1.05);
+}
+
+.btn-delete-mov {
+    background: #dc3545 !important;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-delete-mov:hover {
+    background: #c82333 !important;
+    transform: scale(1.05);
+}
+
+/* Notas de movimientos con saltos de línea */
+.movimiento-notas {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: rgba(0, 0, 0, 0.03);
+    padding: 0.5rem;
+    border-radius: 6px;
+    border-left: 3px solid #ddd;
+}
+
+/* Descripción con saltos de línea */
+.movimiento-detalles h4 {
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Empty state pequeño */
+.empty-state-small {
+    text-align: center;
+    padding: 1.5rem;
+    color: #666;
+}
+
+.empty-state-small p {
+    font-size: 0.9rem;
+}
+
+/* Categorías tabs */
+.categorias-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.categoria-tab-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.categoria-tab-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.categoria-tab-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: transparent;
+}
+
+.categoria-tab-btn i {
+    font-size: 1.1rem;
+}
+
+/* Categorías content */
+.categorias-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.categorias-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Modal pequeño */
+.modal-small {
+    max-width: 400px;
+}
+
+/* Responsive para acciones de movimientos */
+@media (max-width: 768px) {
+    .movimiento-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .btn-edit-mov,
+    .btn-delete-mov {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .categoria-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .categoria-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
