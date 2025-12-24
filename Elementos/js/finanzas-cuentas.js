@@ -775,6 +775,15 @@ function closeModalMovimiento() {
 async function handleSaveMovimiento(e) {
     e.preventDefault();
 
+    // Obtener el botón de submit y deshabilitarlo
+    const btnSubmit = e.target.querySelector('button[type="submit"]');
+    const btnTextoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
+    
+    if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="bi bi-hourglass-split"></i> Registrando...';
+    }
+
     const tipo = document.getElementById('tipoMovimientoForm').value;
     const cuentaId = document.getElementById('cuentaMovimientoForm').value;
     const monto = obtenerValorNumerico(document.getElementById('montoMovimientoForm'));
@@ -785,6 +794,10 @@ async function handleSaveMovimiento(e) {
 
     if (!tipo || !cuentaId || !monto || !categoria || !descripcion || !fecha) {
         showNotification('error', 'Error', 'Por favor completa todos los campos requeridos');
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = btnTextoOriginal;
+        }
         return;
     }
 
@@ -795,6 +808,10 @@ async function handleSaveMovimiento(e) {
         const cuentaDoc = await db.collection('cuentas_bancarias').doc(cuentaId).get();
         if (!cuentaDoc.exists) {
             showNotification('error', 'Error', 'Cuenta no encontrada');
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = btnTextoOriginal;
+            }
             return;
         }
 
@@ -807,6 +824,10 @@ async function handleSaveMovimiento(e) {
         } else if (tipo === 'gasto') {
             if (nuevoSaldo < monto) {
                 showNotification('warning', 'Saldo Insuficiente', 'La cuenta no tiene saldo suficiente para este gasto');
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = btnTextoOriginal;
+                }
                 return;
             }
             nuevoSaldo -= monto;
@@ -889,6 +910,12 @@ async function handleSaveMovimiento(e) {
     } catch (error) {
         console.error('Error saving movimiento:', error);
         showNotification('error', 'Error', 'No se pudo registrar el movimiento');
+    } finally {
+        // Restaurar el botón en cualquier caso
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = btnTextoOriginal;
+        }
     }
 }
 

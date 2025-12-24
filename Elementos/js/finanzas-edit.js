@@ -179,6 +179,15 @@
     window.handleSaveEditMovimiento = async function (e) {
         e.preventDefault();
 
+        // Obtener el botón de submit y deshabilitarlo
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        const btnTextoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
+        
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+        }
+
         const movimientoId = document.getElementById('editingMovimientoId').value;
         const tipo = document.getElementById('editingMovimientoTipo').value;
         const cuentaIdOriginal = document.getElementById('editingMovimientoCuentaIdOriginal').value;
@@ -193,6 +202,10 @@
 
         if (!cuentaIdNueva || !montoNuevo || !categoria || !descripcion || !fecha) {
             showNotification('error', 'Error', 'Por favor completa todos los campos requeridos');
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = btnTextoOriginal;
+            }
             return;
         }
 
@@ -222,6 +235,10 @@
             const cuentaNuevaDoc = await db.collection('cuentas_bancarias').doc(cuentaIdNueva).get();
             if (!cuentaNuevaDoc.exists) {
                 showNotification('error', 'Error', 'Cuenta no encontrada');
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = btnTextoOriginal;
+                }
                 return;
             }
 
@@ -245,6 +262,10 @@
                         });
                     }
                     showNotification('warning', 'Saldo Insuficiente', 'La cuenta no tiene saldo suficiente para este gasto');
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = btnTextoOriginal;
+                    }
                     return;
                 }
                 saldoNuevo -= montoNuevo;
@@ -274,6 +295,12 @@
         } catch (error) {
             console.error('Error updating movimiento:', error);
             showNotification('error', 'Error', 'No se pudo actualizar el movimiento');
+        } finally {
+            // Restaurar el botón en cualquier caso
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = btnTextoOriginal;
+            }
         }
     };
 
