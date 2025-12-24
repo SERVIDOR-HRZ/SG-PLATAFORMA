@@ -419,6 +419,15 @@ async function loadMovimientos() {
 
     try {
         const db = getDB();
+        
+        // Cargar cuentas primero para tener los nombres actualizados
+        const cuentasSnapshot = await db.collection('cuentas_bancarias').get();
+        cuentasList = [];
+        cuentasSnapshot.forEach(doc => {
+            cuentasList.push({ id: doc.id, ...doc.data() });
+        });
+        window.cuentasList = cuentasList;
+        
         const filtroTipo = document.getElementById('filtroTipoMovimiento').value;
         const filtroCuenta = document.getElementById('filtroCuentaMovimiento').value;
         const filtroCategoria = document.getElementById('filtroCategoriaMovimiento').value;
