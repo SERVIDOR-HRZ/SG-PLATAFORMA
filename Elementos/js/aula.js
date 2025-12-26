@@ -1139,9 +1139,14 @@ async function loadMateriales() {
             }
         });
 
-        // Sort materials within each topic by date
+        // Sort materials within each topic by orden (or fecha if no orden)
         Object.keys(materialsByTopic).forEach(topicId => {
             materialsByTopic[topicId].sort((a, b) => {
+                // Primero por orden si existe
+                const ordenA = a.orden !== undefined ? a.orden : 999999;
+                const ordenB = b.orden !== undefined ? b.orden : 999999;
+                if (ordenA !== ordenB) return ordenA - ordenB;
+                // Si no hay orden, por fecha descendente
                 const fechaA = a.fecha ? a.fecha.seconds : 0;
                 const fechaB = b.fecha ? b.fecha.seconds : 0;
                 return fechaB - fechaA;
@@ -1149,6 +1154,9 @@ async function loadMateriales() {
         });
 
         uncategorizedMaterials.sort((a, b) => {
+            const ordenA = a.orden !== undefined ? a.orden : 999999;
+            const ordenB = b.orden !== undefined ? b.orden : 999999;
+            if (ordenA !== ordenB) return ordenA - ordenB;
             const fechaA = a.fecha ? a.fecha.seconds : 0;
             const fechaB = b.fecha ? b.fecha.seconds : 0;
             return fechaB - fechaA;
@@ -1185,13 +1193,24 @@ async function loadMateriales() {
                     <span>Materiales sin tema</span>
                 </div>
             `;
+            
+            // Contenedor para materiales sin categoría con drag & drop
+            const uncategorizedMaterialsContainer = document.createElement('div');
+            uncategorizedMaterialsContainer.className = 'topic-materials';
+            uncategorizedMaterialsContainer.id = 'topic-materials-uncategorized';
 
             uncategorizedMaterials.forEach(material => {
                 const materialCard = createMaterialCard(material.id, material);
-                uncategorizedSection.appendChild(materialCard);
+                uncategorizedMaterialsContainer.appendChild(materialCard);
             });
 
+            uncategorizedSection.appendChild(uncategorizedMaterialsContainer);
             materialsContainer.appendChild(uncategorizedSection);
+        }
+
+        // Inicializar drag & drop para materiales (solo admin)
+        if (currentUser.tipoUsuario === 'admin') {
+            initMaterialsDragAndDrop();
         }
 
     } catch (error) {
@@ -1917,6 +1936,13 @@ function createMaterialCard(id, material) {
     // No external Drive links - files are shown as embedded thumbnails only
     let driveFilesHTML = '';
 
+    // Agregar atributos para drag & drop
+    card.setAttribute('data-material-id', id);
+    card.setAttribute('data-topic-id', material.temaId || '');
+    if (currentUser.tipoUsuario === 'admin') {
+        card.setAttribute('draggable', 'true');
+    }
+
     card.innerHTML = `
         <div class="material-header">
             <div class="material-content">
@@ -1926,6 +1952,9 @@ function createMaterialCard(id, material) {
             </div>
             ${currentUser.tipoUsuario === 'admin' ? `
                 <div class="material-actions">
+                    <button class="material-drag-handle" title="Arrastrar para reordenar">
+                        <i class="bi bi-grip-vertical"></i>
+                    </button>
                     <button class="post-action-btn" onclick="editarMaterial('${id}')" title="Editar">
                         <i class="bi bi-pencil"></i>
                     </button>
@@ -4198,5 +4227,154 @@ function removeTopicHighlight(topic) {
     }
     if (descEl) {
         descEl.innerHTML = descEl.textContent;
+    }
+}
+
+
+// ==========================================
+// DRAG AND DROP PARA MATERIALES
+// ==========================================
+
+// Inicializar drag and drop para materiales
+function initMaterialsDragAndDrop() {
+    const materialsContainers = document.querySelectorAll('.topic-materials');
+    
+    materialsContainers.forEach(container => {
+        const cards = container.querySelectorAll('.material-card');
+        
+        cards.forEach(card => {
+            // Drag start
+            card.addEventListener('dragstart', handleMaterialDragStart);
+            
+            // Drag end
+            card.addEventListener('dragend', handleMaterialDragEnd);
+            
+            // Drag over
+            card.addEventListener('dragover', handleMaterialDragOver);
+            
+            // Drag leave
+            card.addEventListener('dragleave', handleMaterialDragLeave);
+            
+            // Drop
+            card.addEventListener('drop', handleMaterialDrop);
+        });
+        
+        // También permitir drop en el contenedor vacío
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        });
+        
+        container.addEventListener('drop', handleContainerDrop);
+    });
+}
+
+let draggedMaterialCard = null;
+
+function handleMaterialDragStart(e) {
+    draggedMaterialCard = this;
+    this.classList.add('material-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.getAttribute('data-material-id'));
+    
+    // Pequeño delay para que se vea el efecto
+    setTimeout(() => {
+        this.style.opacity = '0.5';
+    }, 0);
+}
+
+function handleMaterialDragEnd(e) {
+    this.classList.remove('material-dragging');
+    this.style.opacity = '1';
+    draggedMaterialCard = null;
+    
+    // Remover clases de todos los cards
+    document.querySelectorAll('.material-card').forEach(card => {
+        card.classList.remove('material-drag-over', 'material-drag-over-top', 'material-drag-over-bottom');
+    });
+}
+
+function handleMaterialDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    if (this !== draggedMaterialCard && draggedMaterialCard) {
+        const rect = this.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        
+        this.classList.remove('material-drag-over-top', 'material-drag-over-bottom');
+        
+        if (e.clientY < midY) {
+            this.classList.add('material-drag-over-top');
+        } else {
+            this.classList.add('material-drag-over-bottom');
+        }
+    }
+}
+
+function handleMaterialDragLeave(e) {
+    this.classList.remove('material-drag-over', 'material-drag-over-top', 'material-drag-over-bottom');
+}
+
+function handleMaterialDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (draggedMaterialCard && this !== draggedMaterialCard) {
+        const rect = this.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        const container = this.parentElement;
+        
+        if (e.clientY < midY) {
+            // Insertar antes
+            container.insertBefore(draggedMaterialCard, this);
+        } else {
+            // Insertar después
+            container.insertBefore(draggedMaterialCard, this.nextSibling);
+        }
+        
+        // Guardar el nuevo orden
+        saveMaterialsOrder(container);
+    }
+    
+    this.classList.remove('material-drag-over', 'material-drag-over-top', 'material-drag-over-bottom');
+}
+
+function handleContainerDrop(e) {
+    e.preventDefault();
+    
+    if (draggedMaterialCard) {
+        const container = e.currentTarget;
+        const cards = container.querySelectorAll('.material-card');
+        
+        // Si el contenedor está vacío o se suelta al final
+        if (cards.length === 0 || !e.target.classList.contains('material-card')) {
+            container.appendChild(draggedMaterialCard);
+            saveMaterialsOrder(container);
+        }
+    }
+}
+
+// Guardar el orden de los materiales en Firebase
+async function saveMaterialsOrder(container) {
+    try {
+        const db = window.firebaseDB;
+        const cards = container.querySelectorAll('.material-card');
+        const batch = db.batch();
+        
+        cards.forEach((card, index) => {
+            const materialId = card.getAttribute('data-material-id');
+            if (materialId) {
+                const materialRef = db.collection('materiales').doc(materialId);
+                batch.update(materialRef, { orden: index });
+            }
+        });
+        
+        await batch.commit();
+        console.log('Orden de materiales guardado correctamente');
+        
+    } catch (error) {
+        console.error('Error al guardar el orden de materiales:', error);
+        showAlertModal('Error', 'No se pudo guardar el nuevo orden de los materiales');
     }
 }
