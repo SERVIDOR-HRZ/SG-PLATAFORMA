@@ -3977,3 +3977,83 @@ body {
     color: #999;
     font-size: 0.9rem;
 }
+
+
+/* ==========================================
+   BUSCADOR DE ESTUDIANTES
+   ========================================== */
+
+.students-search-container {
+    margin-bottom: 1.5rem;
+}
+
+/* Contador de estudiantes */
+.students-count-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.students-count-info i {
+    color: var(--materia-color, #ff0000);
+    font-size: 1rem;
+}
+
+/* Ocultar estudiantes en búsqueda */
+.student-item.hidden-by-search {
+    display: none !important;
+}
+
+/* No results message */
+.no-students-results {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+}
+
+.no-students-results i {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #ddd;
+}
+
+.no-students-results p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+
+/* Ajustes para buscador de estudiantes */
+.students-search-container {
+    margin-bottom: 1rem;
+}
+
+/* Botón X más visible */
+.students-search-container .clear-search-btn {
+    background: #ff0000;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.students-search-container .clear-search-btn:hover {
+    background: #cc0000;
+}
+
+.students-search-container .clear-search-btn i {
+    font-size: 0.85rem;
+}

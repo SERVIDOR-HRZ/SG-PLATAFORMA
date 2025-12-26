@@ -1193,7 +1193,7 @@ async function loadMateriales() {
                     <span>Materiales sin tema</span>
                 </div>
             `;
-            
+
             // Contenedor para materiales sin categoría con drag & drop
             const uncategorizedMaterialsContainer = document.createElement('div');
             uncategorizedMaterialsContainer.className = 'topic-materials';
@@ -2094,10 +2094,20 @@ async function loadEstudiantes() {
 
         estudiantes.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
 
+        // Mostrar contador de estudiantes
+        const countInfo = document.createElement('div');
+        countInfo.className = 'students-count-info';
+        countInfo.id = 'studentsCountInfo';
+        countInfo.innerHTML = `<i class="bi bi-people-fill"></i> ${estudiantes.length} estudiante${estudiantes.length !== 1 ? 's' : ''}`;
+        studentsContainer.appendChild(countInfo);
+
         estudiantes.forEach(estudiante => {
             const studentItem = createStudentItem(estudiante);
             studentsContainer.appendChild(studentItem);
         });
+
+        // Inicializar búsqueda de estudiantes
+        setupStudentsSearch();
 
     } catch (error) {
         console.error('Error al cargar estudiantes:', error);
@@ -2114,6 +2124,8 @@ async function loadEstudiantes() {
 function createStudentItem(estudiante) {
     const item = document.createElement('div');
     item.className = 'student-item';
+    item.setAttribute('data-nombre', (estudiante.nombre || '').toLowerCase());
+    item.setAttribute('data-email', (estudiante.usuario || '').toLowerCase());
 
     item.innerHTML = `
         <div class="student-avatar">
@@ -2126,6 +2138,98 @@ function createStudentItem(estudiante) {
     `;
 
     return item;
+}
+
+// Setup students search functionality
+function setupStudentsSearch() {
+    const searchInput = document.getElementById('studentsSearchInput');
+    const clearBtn = document.getElementById('clearStudentsSearch');
+
+    if (!searchInput) return;
+
+    let searchTimeout;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+
+        // Show/hide clear button
+        if (clearBtn) {
+            clearBtn.style.display = query ? 'flex' : 'none';
+        }
+
+        // Debounce search
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterStudents(query);
+        }, 200);
+    });
+
+    // Clear search
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearBtn.style.display = 'none';
+            filterStudents('');
+            searchInput.focus();
+        });
+    }
+
+    // Clear on Escape key
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            if (clearBtn) clearBtn.style.display = 'none';
+            filterStudents('');
+        }
+    });
+}
+
+// Filter students based on search query
+function filterStudents(query) {
+    const studentsContainer = document.getElementById('studentsContainer');
+    if (!studentsContainer) return;
+
+    const normalizedQuery = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const studentItems = studentsContainer.querySelectorAll('.student-item');
+    let visibleCount = 0;
+
+    studentItems.forEach(item => {
+        const nombre = (item.getAttribute('data-nombre') || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const email = (item.getAttribute('data-email') || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        const matches = nombre.includes(normalizedQuery) || email.includes(normalizedQuery);
+
+        if (matches || !normalizedQuery) {
+            item.classList.remove('hidden-by-search');
+            visibleCount++;
+        } else {
+            item.classList.add('hidden-by-search');
+        }
+    });
+
+    // Update count info
+    const countInfo = document.getElementById('studentsCountInfo');
+    if (countInfo) {
+        if (normalizedQuery) {
+            countInfo.innerHTML = `<i class="bi bi-search"></i> ${visibleCount} resultado${visibleCount !== 1 ? 's' : ''} para "${query}"`;
+        } else {
+            countInfo.innerHTML = `<i class="bi bi-people-fill"></i> ${studentItems.length} estudiante${studentItems.length !== 1 ? 's' : ''}`;
+        }
+    }
+
+    // Show no results message if needed
+    const existingNoResults = studentsContainer.querySelector('.no-students-results');
+    if (existingNoResults) existingNoResults.remove();
+
+    if (visibleCount === 0 && normalizedQuery) {
+        const noResults = document.createElement('div');
+        noResults.className = 'no-students-results';
+        noResults.innerHTML = `
+            <i class="bi bi-search"></i>
+            <p>No se encontraron estudiantes con "${query}"</p>
+        `;
+        studentsContainer.appendChild(noResults);
+    }
 }
 
 // Setup event listeners
@@ -4238,33 +4342,33 @@ function removeTopicHighlight(topic) {
 // Inicializar drag and drop para materiales
 function initMaterialsDragAndDrop() {
     const materialsContainers = document.querySelectorAll('.topic-materials');
-    
+
     materialsContainers.forEach(container => {
         const cards = container.querySelectorAll('.material-card');
-        
+
         cards.forEach(card => {
             // Drag start
             card.addEventListener('dragstart', handleMaterialDragStart);
-            
+
             // Drag end
             card.addEventListener('dragend', handleMaterialDragEnd);
-            
+
             // Drag over
             card.addEventListener('dragover', handleMaterialDragOver);
-            
+
             // Drag leave
             card.addEventListener('dragleave', handleMaterialDragLeave);
-            
+
             // Drop
             card.addEventListener('drop', handleMaterialDrop);
         });
-        
+
         // También permitir drop en el contenedor vacío
         container.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
         });
-        
+
         container.addEventListener('drop', handleContainerDrop);
     });
 }
@@ -4276,7 +4380,7 @@ function handleMaterialDragStart(e) {
     this.classList.add('material-dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', this.getAttribute('data-material-id'));
-    
+
     // Pequeño delay para que se vea el efecto
     setTimeout(() => {
         this.style.opacity = '0.5';
@@ -4287,7 +4391,7 @@ function handleMaterialDragEnd(e) {
     this.classList.remove('material-dragging');
     this.style.opacity = '1';
     draggedMaterialCard = null;
-    
+
     // Remover clases de todos los cards
     document.querySelectorAll('.material-card').forEach(card => {
         card.classList.remove('material-drag-over', 'material-drag-over-top', 'material-drag-over-bottom');
@@ -4297,13 +4401,13 @@ function handleMaterialDragEnd(e) {
 function handleMaterialDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    
+
     if (this !== draggedMaterialCard && draggedMaterialCard) {
         const rect = this.getBoundingClientRect();
         const midY = rect.top + rect.height / 2;
-        
+
         this.classList.remove('material-drag-over-top', 'material-drag-over-bottom');
-        
+
         if (e.clientY < midY) {
             this.classList.add('material-drag-over-top');
         } else {
@@ -4319,12 +4423,12 @@ function handleMaterialDragLeave(e) {
 function handleMaterialDrop(e) {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (draggedMaterialCard && this !== draggedMaterialCard) {
         const rect = this.getBoundingClientRect();
         const midY = rect.top + rect.height / 2;
         const container = this.parentElement;
-        
+
         if (e.clientY < midY) {
             // Insertar antes
             container.insertBefore(draggedMaterialCard, this);
@@ -4332,21 +4436,21 @@ function handleMaterialDrop(e) {
             // Insertar después
             container.insertBefore(draggedMaterialCard, this.nextSibling);
         }
-        
+
         // Guardar el nuevo orden
         saveMaterialsOrder(container);
     }
-    
+
     this.classList.remove('material-drag-over', 'material-drag-over-top', 'material-drag-over-bottom');
 }
 
 function handleContainerDrop(e) {
     e.preventDefault();
-    
+
     if (draggedMaterialCard) {
         const container = e.currentTarget;
         const cards = container.querySelectorAll('.material-card');
-        
+
         // Si el contenedor está vacío o se suelta al final
         if (cards.length === 0 || !e.target.classList.contains('material-card')) {
             container.appendChild(draggedMaterialCard);
@@ -4361,7 +4465,7 @@ async function saveMaterialsOrder(container) {
         const db = window.firebaseDB;
         const cards = container.querySelectorAll('.material-card');
         const batch = db.batch();
-        
+
         cards.forEach((card, index) => {
             const materialId = card.getAttribute('data-material-id');
             if (materialId) {
@@ -4369,10 +4473,10 @@ async function saveMaterialsOrder(container) {
                 batch.update(materialRef, { orden: index });
             }
         });
-        
+
         await batch.commit();
         console.log('Orden de materiales guardado correctamente');
-        
+
     } catch (error) {
         console.error('Error al guardar el orden de materiales:', error);
         showAlertModal('Error', 'No se pudo guardar el nuevo orden de los materiales');
