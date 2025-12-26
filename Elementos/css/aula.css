@@ -311,6 +311,50 @@ body {
     border-radius: 10px;
     padding: 1.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+/* Bordes de color por materia */
+.post-card.materia-matematicas {
+    border-color: #2196F3;
+}
+
+.post-card.materia-lectura {
+    border-color: #F44336;
+}
+
+.post-card.materia-sociales {
+    border-color: #FF9800;
+}
+
+.post-card.materia-naturales {
+    border-color: #4CAF50;
+}
+
+.post-card.materia-ingles {
+    border-color: #9C27B0;
+}
+
+/* Efecto hover con sombra del color de la materia */
+.post-card.materia-matematicas:hover {
+    box-shadow: 0 4px 20px rgba(33, 150, 243, 0.25);
+}
+
+.post-card.materia-lectura:hover {
+    box-shadow: 0 4px 20px rgba(244, 67, 54, 0.25);
+}
+
+.post-card.materia-sociales:hover {
+    box-shadow: 0 4px 20px rgba(255, 152, 0, 0.25);
+}
+
+.post-card.materia-naturales:hover {
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.25);
+}
+
+.post-card.materia-ingles:hover {
+    box-shadow: 0 4px 20px rgba(156, 39, 176, 0.25);
 }
 
 .post-header {
@@ -4056,4 +4100,96 @@ body {
 
 .students-search-container .clear-search-btn i {
     font-size: 0.85rem;
+}
+
+
+/* ========== BOTÓN UNIRME A LA REUNIÓN ========== */
+.post-meeting-button {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-join-meeting {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.9rem 1.8rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-join-meeting:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.btn-join-meeting i {
+    font-size: 1.2rem;
+}
+
+/* Colores por materia */
+.btn-join-meeting.matematicas {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.btn-join-meeting.matematicas:hover {
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+}
+
+.btn-join-meeting.lectura {
+    background: linear-gradient(135deg, #F44336, #D32F2F);
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+}
+
+.btn-join-meeting.lectura:hover {
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+}
+
+.btn-join-meeting.sociales {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+}
+
+.btn-join-meeting.sociales:hover {
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
+.btn-join-meeting.naturales {
+    background: linear-gradient(135deg, #4CAF50, #388E3C);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.btn-join-meeting.naturales:hover {
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.btn-join-meeting.ingles {
+    background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+}
+
+.btn-join-meeting.ingles:hover {
+    box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+}
+
+/* Estilo especial para anuncios de clase */
+.post-card.clase-programada .post-meeting-button {
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .btn-join-meeting {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem;
+    }
 }

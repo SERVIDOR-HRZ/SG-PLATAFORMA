@@ -730,6 +730,12 @@ async function createPostCard(id, anuncio) {
     const card = document.createElement('div');
     card.className = 'post-card';
 
+    // Agregar clase de materia para el borde de color
+    const materiaClase = anuncio.materia || currentMateria;
+    if (materiaClase) {
+        card.classList.add(`materia-${materiaClase}`);
+    }
+
     // Agregar clase si el anuncio está cancelado
     if (anuncio.cancelada === true) {
         card.classList.add('cancelled');
@@ -817,6 +823,21 @@ async function createPostCard(id, anuncio) {
         mediaHTML = `<div class="post-media-container">${mediaItems.join('')}</div>`;
     }
 
+    // Build class meeting button if exists
+    let meetingButtonHTML = '';
+    if (anuncio.enlaceClase) {
+        // Obtener la materia del anuncio o usar la materia actual
+        const materiaClase = anuncio.materia || currentMateria;
+        meetingButtonHTML = `
+            <div class="post-meeting-button">
+                <a href="${anuncio.enlaceClase}" target="_blank" class="btn-join-meeting ${materiaClase}">
+                    <i class="bi bi-camera-video-fill"></i>
+                    Unirme a la reunión
+                </a>
+            </div>
+        `;
+    }
+
     card.innerHTML = `
         <div class="post-header">
             <div class="post-avatar">
@@ -840,6 +861,7 @@ async function createPostCard(id, anuncio) {
         ${anuncio.titulo ? `<h3 class="post-title">${anuncio.titulo}</h3>` : ''}
         <div class="post-content">${convertirEnlacesAClickeables(anuncio.contenido)}</div>
         ${mediaHTML}
+        ${meetingButtonHTML}
     `;
 
     return card;
