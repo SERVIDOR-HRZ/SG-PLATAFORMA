@@ -426,9 +426,16 @@
 
                     <!-- Drive Files -->
                     <div class="input-group">
-                        <label for="materialDriveUrl">Carpeta de Drive (opcional)</label>
-                        <input type="url" id="materialDriveUrl" placeholder="https://drive.google.com/...">
-                        <small>URL de carpeta compartida de Google Drive</small>
+                        <label>Archivos de Drive (opcional)</label>
+                        <div class="drive-file-input-container">
+                            <input type="url" id="materialDriveFileUrl" placeholder="URL del archivo de Drive (PDF, Doc, etc.)" class="drive-file-url-input">
+                            <button type="button" class="add-drive-file-btn" id="addMaterialDriveFileBtn">
+                                <i class="bi bi-plus-circle"></i>
+                                Agregar
+                            </button>
+                        </div>
+                        <small>Pega enlaces de archivos de Google Drive (PDFs, documentos, hojas de cálculo, etc.)</small>
+                        <div id="materialDriveFilesPreview" class="drive-files-preview"></div>
                     </div>
                 </div>
                 <div class="modal-actions">
@@ -780,11 +787,24 @@
                         <div id="editMaterialNewVideosPreview" class="videos-preview"></div>
                     </div>
 
-                    <!-- Drive Files -->
+                    <!-- Archivos de Drive Actuales -->
                     <div class="input-group">
-                        <label for="editMaterialDriveUrl">Carpeta de Drive (opcional)</label>
-                        <input type="url" id="editMaterialDriveUrl" placeholder="https://drive.google.com/...">
-                        <small>URL de carpeta compartida de Google Drive</small>
+                        <label>Archivos de Drive Actuales</label>
+                        <div id="editMaterialCurrentDriveFiles" class="current-drive-files-container"></div>
+                    </div>
+
+                    <!-- Agregar Nuevos Archivos de Drive -->
+                    <div class="input-group">
+                        <label>Agregar Archivos de Drive (opcional)</label>
+                        <div class="drive-file-input-container">
+                            <input type="url" id="editMaterialDriveFileUrl" placeholder="URL del archivo de Drive (PDF, Doc, etc.)" class="drive-file-url-input">
+                            <button type="button" class="add-drive-file-btn" id="addEditMaterialDriveFileBtn">
+                                <i class="bi bi-plus-circle"></i>
+                                Agregar
+                            </button>
+                        </div>
+                        <small>Pega enlaces de archivos de Google Drive (PDFs, documentos, hojas de cálculo, etc.)</small>
+                        <div id="editMaterialNewDriveFilesPreview" class="drive-files-preview"></div>
                     </div>
                 </div>
                 <div class="modal-actions">

@@ -80,7 +80,7 @@ async function loadAulaData() {
         if (!currentAulaData || currentAulaData.id !== currentAulaId) {
             await esperarFirebase();
             const aulaDoc = await window.firebaseDB.collection('aulas').doc(currentAulaId).get();
-            
+
             if (!aulaDoc.exists) {
                 window.location.href = 'Clases.html';
                 return;
@@ -97,14 +97,14 @@ async function loadAulaData() {
 
         // Obtener las materias visibles según el tipo de usuario
         let materiasVisibles = currentAulaData.materias || [];
-        
+
         // Si es profesor (no superusuario), filtrar por las materias que tiene asignadas en esta aula
         if (currentUser.tipoUsuario === 'admin') {
             const db = window.firebaseDB;
             const usuarioDoc = await db.collection('usuarios').doc(currentUser.id).get();
             const userData = usuarioDoc.data();
             const rol = userData.rol || currentUser.rol;
-            
+
             if (rol !== 'superusuario') {
                 // Nuevo sistema: aulasAsignadas es un array de objetos {aulaId, materias}
                 const aulasAsignadas = userData.aulasAsignadas || [];
@@ -114,7 +114,7 @@ async function loadAulaData() {
                     }
                     return a === currentAulaId;
                 });
-                
+
                 if (aulaAsignada && typeof aulaAsignada === 'object' && aulaAsignada.materias) {
                     // Filtrar solo las materias que el profesor tiene asignadas en esta aula
                     materiasVisibles = currentAulaData.materias.filter(m => aulaAsignada.materias.includes(m));
@@ -158,7 +158,7 @@ function showMateriasCards(materias) {
     // Obtener orden guardado del usuario para esta aula
     const savedOrder = getSavedMateriasOrder(currentAulaId);
     let orderedMaterias = materias;
-    
+
     if (savedOrder && savedOrder.length > 0) {
         // Ordenar según el orden guardado
         orderedMaterias = savedOrder.filter(m => materias.includes(m));
@@ -179,8 +179,8 @@ function showMateriasCards(materias) {
             </div>
             <div class="materias-cards-grid" id="materiasCardsGrid">
                 ${orderedMaterias.map(materiaId => {
-                    const config = materiasConfig[materiaId] || { nombre: materiaId, descripcion: '', icon: 'bi-book', color: '#667eea' };
-                    return `
+        const config = materiasConfig[materiaId] || { nombre: materiaId, descripcion: '', icon: 'bi-book', color: '#667eea' };
+        return `
                         <div class="materia-card" data-materia="${materiaId}" draggable="true" style="--materia-color: ${config.color}">
                             <div class="drag-handle">
                                 <i class="bi bi-grip-vertical"></i>
@@ -200,7 +200,7 @@ function showMateriasCards(materias) {
                             </div>
                         </div>
                     `;
-                }).join('')}
+    }).join('')}
             </div>
         </div>
     `;
@@ -263,7 +263,7 @@ function initMateriasDragAndDrop() {
             card.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', card.dataset.materia);
-            
+
             // Pequeño delay para que se vea el efecto
             setTimeout(() => {
                 card.style.opacity = '0.5';
@@ -275,7 +275,7 @@ function initMateriasDragAndDrop() {
             card.classList.remove('dragging');
             card.style.opacity = '1';
             draggedCard = null;
-            
+
             // Remover clases de todos los cards
             cards.forEach(c => {
                 c.classList.remove('drag-over', 'drag-over-left', 'drag-over-right');
@@ -290,19 +290,19 @@ function initMateriasDragAndDrop() {
         card.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            
+
             if (card !== draggedCard) {
                 const rect = card.getBoundingClientRect();
                 const midX = rect.left + rect.width / 2;
-                
+
                 card.classList.remove('drag-over-left', 'drag-over-right');
-                
+
                 if (e.clientX < midX) {
                     card.classList.add('drag-over-left');
                 } else {
                     card.classList.add('drag-over-right');
                 }
-                
+
                 draggedOverCard = card;
             }
         });
@@ -315,11 +315,11 @@ function initMateriasDragAndDrop() {
         // Drop
         card.addEventListener('drop', (e) => {
             e.preventDefault();
-            
+
             if (draggedCard && card !== draggedCard) {
                 const rect = card.getBoundingClientRect();
                 const midX = rect.left + rect.width / 2;
-                
+
                 if (e.clientX < midX) {
                     // Insertar antes
                     grid.insertBefore(draggedCard, card);
@@ -328,7 +328,7 @@ function initMateriasDragAndDrop() {
                     grid.insertBefore(draggedCard, card.nextSibling);
                 }
             }
-            
+
             card.classList.remove('drag-over', 'drag-over-left', 'drag-over-right');
         });
     });
@@ -356,7 +356,7 @@ function adjustColorBrightness(color, amount) {
 // Enter a specific materia (show tabs and content)
 function enterMateria(materiaId) {
     currentMateria = materiaId;
-    
+
     const materiasConfig = {
         'matematicas': { nombre: 'Matemáticas', color: '#2196F3' },
         'lectura': { nombre: 'Lectura Crítica', color: '#F44336' },
@@ -364,24 +364,24 @@ function enterMateria(materiaId) {
         'naturales': { nombre: 'Ciencias Naturales', color: '#4CAF50' },
         'ingles': { nombre: 'Inglés', color: '#9C27B0' }
     };
-    
+
     const config = materiasConfig[materiaId] || { nombre: materiaId, color: '#667eea' };
-    
+
     // Guardar el color de la materia actual para uso global
     window.currentMateriaColor = config.color;
-    
+
     // Actualizar título
     document.getElementById('aulaTitle').textContent = `${currentAulaData.nombre} - ${config.nombre}`;
-    
+
     // Ocultar tarjetas de materias
     const cardsContainer = document.getElementById('materiasCardsContainer');
     if (cardsContainer) cardsContainer.style.display = 'none';
-    
+
     // Mostrar tabs y contenido
     const tabsContainer = document.querySelector('.tabs-container');
     const tabContent = document.querySelector('.tab-content');
     const mainContent = document.querySelector('.main-content');
-    
+
     // Aplicar color de la materia a los elementos principales
     if (mainContent) {
         mainContent.style.setProperty('--materia-color', config.color);
@@ -394,13 +394,13 @@ function enterMateria(materiaId) {
         tabContent.style.display = 'block';
         tabContent.style.setProperty('--materia-color', config.color);
     }
-    
+
     // Agregar botón para volver a las materias
     addBackToMateriasButton();
-    
+
     // Mostrar tarjeta de estadísticas de la materia
     showMateriaStatsCard(materiaId, config);
-    
+
     // Show create buttons for admin
     if (currentUser.tipoUsuario === 'admin') {
         document.getElementById('createPostContainer').style.display = 'block';
@@ -408,7 +408,7 @@ function enterMateria(materiaId) {
         document.getElementById('createMaterialContainer').style.display = 'block';
         document.getElementById('estudiantesTab').style.display = 'flex';
     }
-    
+
     // Cargar contenido
     loadAnuncios();
 }
@@ -418,7 +418,7 @@ async function showMateriaStatsCard(materiaId, config) {
     // Remover tarjeta existente si hay
     const existingCard = document.getElementById('materiaStatsCard');
     if (existingCard) existingCard.remove();
-    
+
     // Obtener foto de perfil del usuario
     let userPhoto = '';
     try {
@@ -431,7 +431,7 @@ async function showMateriaStatsCard(materiaId, config) {
     } catch (error) {
         console.error('Error al obtener foto de perfil:', error);
     }
-    
+
     // Contar tareas completadas para esta materia y aula
     let tareasCompletadas = 0;
     try {
@@ -442,14 +442,14 @@ async function showMateriaStatsCard(materiaId, config) {
                 tareasQuery = tareasQuery.where('aulaId', '==', currentAulaId);
             }
             const tareasSnapshot = await tareasQuery.get();
-            
+
             // Contar entregas del estudiante
             for (const tareaDoc of tareasSnapshot.docs) {
                 const entregaSnapshot = await window.firebaseDB.collection('entregas')
                     .where('tareaId', '==', tareaDoc.id)
                     .where('estudianteId', '==', currentUser.id)
                     .get();
-                
+
                 if (!entregaSnapshot.empty) {
                     tareasCompletadas++;
                 }
@@ -458,10 +458,10 @@ async function showMateriaStatsCard(materiaId, config) {
     } catch (error) {
         console.error('Error al contar tareas completadas:', error);
     }
-    
+
     // Crear color más oscuro para el gradiente
     const darkerColor = adjustColorBrightness(config.color, -40);
-    
+
     // Crear la tarjeta de estadísticas
     const statsCardHTML = `
         <div class="materia-stats-card" id="materiaStatsCard" style="background: linear-gradient(135deg, ${config.color}, ${darkerColor});">
@@ -487,7 +487,7 @@ async function showMateriaStatsCard(materiaId, config) {
             </div>
         </div>
     `;
-    
+
     // Insertar antes de los tabs
     const tabsContainer = document.querySelector('.tabs-container');
     if (tabsContainer) {
@@ -507,23 +507,23 @@ function addBackToMateriasButton() {
 function backToMateriasSelection() {
     // Actualizar título
     document.getElementById('aulaTitle').textContent = currentAulaData.nombre || 'Aula';
-    
+
     // Ocultar tabs y contenido
     const tabsContainer = document.querySelector('.tabs-container');
     const tabContent = document.querySelector('.tab-content');
     if (tabsContainer) tabsContainer.style.display = 'none';
     if (tabContent) tabContent.style.display = 'none';
-    
+
     // Ocultar tarjeta de estadísticas
     const statsCard = document.getElementById('materiaStatsCard');
     if (statsCard) statsCard.remove();
-    
+
     // Mostrar tarjetas de materias
     const cardsContainer = document.getElementById('materiasCardsContainer');
     if (cardsContainer) {
         cardsContainer.style.display = 'block';
     }
-    
+
     // Limpiar materia actual
     currentMateria = '';
 }
@@ -668,7 +668,7 @@ async function loadAnuncios() {
 
         // Construir query base
         let query = db.collection('anuncios').where('materia', '==', currentMateria);
-        
+
         // Si hay un aula seleccionada, filtrar también por aulaId
         if (currentAulaId) {
             query = query.where('aulaId', '==', currentAulaId);
@@ -696,11 +696,11 @@ async function loadAnuncios() {
             // Primero ordenar por tipo (clases primero)
             const tipoA = a.data.tipo === 'clase' ? 0 : 1;
             const tipoB = b.data.tipo === 'clase' ? 0 : 1;
-            
+
             if (tipoA !== tipoB) {
                 return tipoA - tipoB;
             }
-            
+
             // Luego ordenar por fecha (más reciente primero)
             const fechaA = a.data.fecha ? a.data.fecha.seconds : 0;
             const fechaB = b.data.fecha ? b.data.fecha.seconds : 0;
@@ -729,7 +729,7 @@ async function loadAnuncios() {
 async function createPostCard(id, anuncio) {
     const card = document.createElement('div');
     card.className = 'post-card';
-    
+
     // Agregar clase si el anuncio está cancelado
     if (anuncio.cancelada === true) {
         card.classList.add('cancelled');
@@ -856,7 +856,7 @@ async function loadTareas() {
 
         // Construir query base
         let query = db.collection('tareas').where('materia', '==', currentMateria);
-        
+
         // Si hay un aula seleccionada, filtrar también por aulaId
         if (currentAulaId) {
             query = query.where('aulaId', '==', currentAulaId);
@@ -1041,19 +1041,8 @@ async function createTaskCard(id, tarea) {
         mediaHTML = `<div class="task-media-container">${mediaItems.join('')}</div>`;
     }
 
-    // Build Drive files HTML
+    // No external Drive links for tasks
     let driveFilesHTML = '';
-    if (tarea.driveUrl) {
-        driveFilesHTML = `
-            <div class="task-drive-files">
-                <a href="${tarea.driveUrl}" target="_blank" class="drive-file-link">
-                    <i class="bi bi-google"></i>
-                    <span>Ver archivos en Drive</span>
-                    <i class="bi bi-box-arrow-up-right"></i>
-                </a>
-            </div>
-        `;
-    }
 
     card.innerHTML = `
         <div class="task-header">
@@ -1196,12 +1185,12 @@ async function loadMateriales() {
                     <span>Materiales sin tema</span>
                 </div>
             `;
-            
+
             uncategorizedMaterials.forEach(material => {
                 const materialCard = createMaterialCard(material.id, material);
                 uncategorizedSection.appendChild(materialCard);
             });
-            
+
             materialsContainer.appendChild(uncategorizedSection);
         }
 
@@ -1283,14 +1272,14 @@ function createTopicElement(topic, materials) {
 function setupMaterialsSearch() {
     const searchInput = document.getElementById('materialsSearchInput');
     const clearBtn = document.getElementById('clearMaterialsSearch');
-    
+
     if (!searchInput) return;
 
     let searchTimeout;
 
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.trim();
-        
+
         // Show/hide clear button
         if (clearBtn) {
             clearBtn.style.display = query ? 'flex' : 'none';
@@ -1329,11 +1318,11 @@ function filterMaterials(query) {
     if (!materialsContainer) return;
 
     const normalizedQuery = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    
+
     // Remove existing search results info
     const existingInfo = materialsContainer.querySelector('.search-results-info');
     if (existingInfo) existingInfo.remove();
-    
+
     const existingNoResults = materialsContainer.querySelector('.no-search-results');
     if (existingNoResults) existingNoResults.remove();
 
@@ -1351,7 +1340,7 @@ function filterMaterials(query) {
                 removeHighlights(card);
             });
         });
-        
+
         // Show uncategorized section
         const uncategorized = materialsContainer.querySelector('.uncategorized-section');
         if (uncategorized) {
@@ -1371,22 +1360,22 @@ function filterMaterials(query) {
     materialsContainer.querySelectorAll('.topic-container').forEach(topic => {
         let topicHasMatches = false;
         let materialMatches = 0;
-        
+
         // Check if topic title matches
         const topicTitle = topic.querySelector('.topic-title')?.textContent || '';
         const topicDesc = topic.querySelector('.topic-description')?.textContent || '';
         const normalizedTopicTitle = topicTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         const normalizedTopicDesc = topicDesc.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        
+
         const topicMatches = normalizedTopicTitle.includes(normalizedQuery) || normalizedTopicDesc.includes(normalizedQuery);
-        
+
         if (topicMatches) {
             // Topic title matches - show all materials in this topic
             topicHasMatches = true;
             topicsMatched++;
             topic.classList.add('topic-match');
             highlightTopicTitle(topic, query);
-            
+
             // Show all materials in this topic
             topic.querySelectorAll('.material-card').forEach(card => {
                 card.classList.remove('hidden-by-search');
@@ -1396,7 +1385,7 @@ function filterMaterials(query) {
                 const description = card.querySelector('.material-description')?.textContent || '';
                 const normalizedTitle = title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 const normalizedDesc = description.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                
+
                 if (normalizedTitle.includes(normalizedQuery) || normalizedDesc.includes(normalizedQuery)) {
                     highlightText(card, query);
                 } else {
@@ -1407,16 +1396,16 @@ function filterMaterials(query) {
             // Topic doesn't match - check individual materials
             topic.classList.remove('topic-match');
             removeTopicHighlight(topic);
-            
+
             topic.querySelectorAll('.material-card').forEach(card => {
                 const title = card.querySelector('.material-title')?.textContent || '';
                 const description = card.querySelector('.material-description')?.textContent || '';
-                
+
                 const normalizedTitle = title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 const normalizedDesc = description.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                
+
                 const matches = normalizedTitle.includes(normalizedQuery) || normalizedDesc.includes(normalizedQuery);
-                
+
                 if (matches) {
                     card.classList.remove('hidden-by-search');
                     topicHasMatches = true;
@@ -1428,9 +1417,9 @@ function filterMaterials(query) {
                 }
             });
         }
-        
+
         totalMatches += materialMatches;
-        
+
         // Show/hide topic based on matches
         if (topicHasMatches) {
             topic.classList.remove('hidden-by-search');
@@ -1445,16 +1434,16 @@ function filterMaterials(query) {
     const uncategorized = materialsContainer.querySelector('.uncategorized-section');
     if (uncategorized) {
         let uncategorizedHasMatches = false;
-        
+
         uncategorized.querySelectorAll('.material-card').forEach(card => {
             const title = card.querySelector('.material-title')?.textContent || '';
             const description = card.querySelector('.material-description')?.textContent || '';
-            
+
             const normalizedTitle = title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             const normalizedDesc = description.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            
+
             const matches = normalizedTitle.includes(normalizedQuery) || normalizedDesc.includes(normalizedQuery);
-            
+
             if (matches) {
                 card.classList.remove('hidden-by-search');
                 uncategorizedHasMatches = true;
@@ -1465,7 +1454,7 @@ function filterMaterials(query) {
                 removeHighlights(card);
             }
         });
-        
+
         if (uncategorizedHasMatches) {
             uncategorized.classList.remove('hidden-by-search');
         } else {
@@ -1508,7 +1497,7 @@ function filterMaterials(query) {
 function highlightText(card, query) {
     const titleEl = card.querySelector('.material-title');
     const descEl = card.querySelector('.material-description');
-    
+
     if (titleEl) {
         titleEl.innerHTML = highlightMatches(titleEl.textContent, query);
     }
@@ -1521,7 +1510,7 @@ function highlightText(card, query) {
 function removeHighlights(card) {
     const titleEl = card.querySelector('.material-title');
     const descEl = card.querySelector('.material-description');
-    
+
     if (titleEl) {
         titleEl.innerHTML = titleEl.textContent;
     }
@@ -1533,10 +1522,10 @@ function removeHighlights(card) {
 // Highlight matches in text
 function highlightMatches(text, query) {
     if (!query) return escapeHtml(text);
-    
+
     const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedQuery})`, 'gi');
-    
+
     return escapeHtml(text).replace(regex, '<span class="search-highlight">$1</span>');
 }
 
@@ -1643,7 +1632,7 @@ async function crearTema() {
             query = query.where('aulaId', '==', currentAulaId);
         }
         const snapshot = await query.get();
-        
+
         let maxOrder = 0;
         snapshot.forEach(doc => {
             const orden = doc.data().orden || 0;
@@ -1769,7 +1758,7 @@ function eliminarTema(topicId) {
         async () => {
             try {
                 const db = window.firebaseDB;
-                
+
                 // Update materials to remove topic reference
                 const materialsSnapshot = await db.collection('materiales')
                     .where('temaId', '==', topicId)
@@ -1872,24 +1861,61 @@ function createMaterialCard(id, material) {
         });
     }
 
+    // Add drive files as small thumbnails (like images and videos)
+    if (material.driveFiles && material.driveFiles.length > 0) {
+        material.driveFiles.forEach(file => {
+            const fileId = file.fileId || extractDriveFileId(file.url);
+            const fileInfo = file.tipo ? file : detectDriveFileType(file.url);
+
+            // Create embed URL based on file type
+            let embedUrl = '';
+            let modalType = 'driveFile';
+
+            if (fileInfo.tipo === 'doc') {
+                embedUrl = `https://docs.google.com/document/d/${fileId}/preview`;
+            } else if (fileInfo.tipo === 'sheet') {
+                embedUrl = `https://docs.google.com/spreadsheets/d/${fileId}/preview`;
+            } else if (fileInfo.tipo === 'slide') {
+                embedUrl = `https://docs.google.com/presentation/d/${fileId}/preview`;
+            } else if (fileInfo.tipo === 'folder') {
+                // Folders can't be embedded, skip or show as link
+                return;
+            } else {
+                // PDF and other files
+                embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+            }
+
+            // Escape the URL for onclick
+            const escapedUrl = file.url.replace(/'/g, "\\'");
+            const escapedEmbedUrl = embedUrl.replace(/'/g, "\\'");
+
+            mediaItems.push(`
+                <div class="material-drive-file">
+                    <div class="drive-file-container-medium" onclick="openDriveFileModal('${escapedEmbedUrl}', '${escapedUrl}', '${fileInfo.nombre}', '${fileInfo.tipo}')">
+                        <iframe 
+                            src="${embedUrl}" 
+                            frameborder="0">
+                        </iframe>
+                        <div class="media-overlay">
+                            <i class="bi ${fileInfo.icono}"></i>
+                        </div>
+                        <div class="drive-file-label">
+                            <i class="bi ${fileInfo.icono}" style="color: ${getFileTypeColor(fileInfo.tipo)}"></i>
+                            <span>${fileInfo.nombre}</span>
+                        </div>
+                    </div>
+                </div>
+            `);
+        });
+    }
+
     // Wrap media items in grid container if there are any
     if (mediaItems.length > 0) {
         mediaHTML = `<div class="material-media-container">${mediaItems.join('')}</div>`;
     }
 
-    // Build Drive files HTML
+    // No external Drive links - files are shown as embedded thumbnails only
     let driveFilesHTML = '';
-    if (material.driveUrl) {
-        driveFilesHTML = `
-            <div class="material-drive-files">
-                <a href="${material.driveUrl}" target="_blank" class="drive-file-link">
-                    <i class="bi bi-google"></i>
-                    <span>Ver archivos en Drive</span>
-                    <i class="bi bi-box-arrow-up-right"></i>
-                </a>
-            </div>
-        `;
-    }
 
     card.innerHTML = `
         <div class="material-header">
@@ -1952,45 +1978,45 @@ function extractDriveFileId(url) {
 // Convertir enlaces en texto a enlaces clickeables
 function convertirEnlacesAClickeables(texto) {
     if (!texto) return '';
-    
+
     // Escapar HTML para prevenir XSS
     const escapeHtml = (text) => {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     };
-    
+
     // Escapar el texto primero
     let textoEscapado = escapeHtml(texto);
-    
+
     // Patrón para detectar URLs (http, https, www)
     const urlPattern = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
-    
+
     // Reemplazar URLs con enlaces clickeables
     textoEscapado = textoEscapado.replace(urlPattern, (match) => {
         let url = match;
         let displayUrl = match;
-        
+
         // Si no tiene protocolo, agregarlo
         if (!url.match(/^https?:\/\//i)) {
             url = 'https://' + url;
         }
-        
+
         // Limpiar caracteres al final
         url = url.replace(/[.,;:!?)\]]+$/, '');
         displayUrl = displayUrl.replace(/[.,;:!?)\]]+$/, '');
-        
+
         // Acortar URL para mostrar si es muy larga
         if (displayUrl.length > 50) {
             displayUrl = displayUrl.substring(0, 47) + '...';
         }
-        
+
         return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="content-link" title="${url}">${displayUrl}</a>`;
     });
-    
+
     // Restaurar saltos de línea
     textoEscapado = textoEscapado.replace(/\n/g, '<br>');
-    
+
     return textoEscapado;
 }
 
@@ -2004,7 +2030,7 @@ async function loadEstudiantes() {
         studentsContainer.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>';
 
         let snapshot;
-        
+
         // Si hay un aula seleccionada, buscar estudiantes con esa aula asignada
         if (currentAulaId) {
             snapshot = await db.collection('usuarios')
@@ -2036,7 +2062,7 @@ async function loadEstudiantes() {
         snapshot.forEach(doc => {
             estudiantes.push({ id: doc.id, ...doc.data() });
         });
-        
+
         estudiantes.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
 
         estudiantes.forEach(estudiante => {
@@ -2086,15 +2112,15 @@ function setupEventListeners() {
     // User menu dropdown
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdownMenu = document.getElementById('userDropdownMenu');
-    
+
     if (userMenuBtn && userDropdownMenu) {
-        userMenuBtn.addEventListener('click', function(e) {
+        userMenuBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             userDropdownMenu.classList.toggle('active');
         });
 
         // Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!userMenuBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
                 userDropdownMenu.classList.remove('active');
             }
@@ -2506,6 +2532,74 @@ function setupForms() {
             // Clear inputs
             editMaterialVideoType.value = '';
             editMaterialVideoUrl.value = '';
+        });
+    }
+
+    // Material Drive Files handler
+    window.currentMaterialDriveFiles = [];
+    const addMaterialDriveFileBtn = document.getElementById('addMaterialDriveFileBtn');
+    const materialDriveFileUrl = document.getElementById('materialDriveFileUrl');
+    const materialDriveFilesPreview = document.getElementById('materialDriveFilesPreview');
+
+    if (addMaterialDriveFileBtn) {
+        addMaterialDriveFileBtn.addEventListener('click', () => {
+            const url = materialDriveFileUrl.value.trim();
+
+            if (!url) {
+                showAlertModal('Error', 'Ingresa la URL del archivo de Drive');
+                return;
+            }
+
+            if (!url.includes('drive.google.com')) {
+                showAlertModal('Error', 'La URL debe ser de Google Drive');
+                return;
+            }
+
+            // Detect file type from URL
+            const fileInfo = detectDriveFileType(url);
+
+            // Add to array
+            window.currentMaterialDriveFiles.push({ url, ...fileInfo });
+
+            // Add to preview
+            renderDriveFilePreview(materialDriveFilesPreview, window.currentMaterialDriveFiles, 'removeMaterialDriveFile');
+
+            // Clear input
+            materialDriveFileUrl.value = '';
+        });
+    }
+
+    // Edit Material Drive Files handler
+    window.editMaterialNewDriveFiles = [];
+    const addEditMaterialDriveFileBtn = document.getElementById('addEditMaterialDriveFileBtn');
+    const editMaterialDriveFileUrl = document.getElementById('editMaterialDriveFileUrl');
+    const editMaterialNewDriveFilesPreview = document.getElementById('editMaterialNewDriveFilesPreview');
+
+    if (addEditMaterialDriveFileBtn) {
+        addEditMaterialDriveFileBtn.addEventListener('click', () => {
+            const url = editMaterialDriveFileUrl.value.trim();
+
+            if (!url) {
+                showAlertModal('Error', 'Ingresa la URL del archivo de Drive');
+                return;
+            }
+
+            if (!url.includes('drive.google.com')) {
+                showAlertModal('Error', 'La URL debe ser de Google Drive');
+                return;
+            }
+
+            // Detect file type from URL
+            const fileInfo = detectDriveFileType(url);
+
+            // Add to array
+            window.editMaterialNewDriveFiles.push({ url, ...fileInfo });
+
+            // Add to preview
+            renderDriveFilePreview(editMaterialNewDriveFilesPreview, window.editMaterialNewDriveFiles, 'removeEditMaterialNewDriveFile');
+
+            // Clear input
+            editMaterialDriveFileUrl.value = '';
         });
     }
 
@@ -3418,7 +3512,6 @@ async function editarMaterial(id) {
         document.getElementById('editMaterialId').value = id;
         document.getElementById('editMaterialTitle').value = data.titulo || '';
         document.getElementById('editMaterialDescription').value = data.descripcion || '';
-        document.getElementById('editMaterialDriveUrl').value = data.driveUrl || '';
 
         // Load topics and select current one
         await loadTopicsIntoSelect('editMaterialTopic', data.temaId || null);
@@ -3426,7 +3519,9 @@ async function editarMaterial(id) {
         // Store current data
         window.editMaterialCurrentImages = data.imageUrls || [];
         window.editMaterialCurrentVideos = data.videos || [];
+        window.editMaterialCurrentDriveFiles = data.driveFiles || [];
         window.editMaterialNewVideos = [];
+        window.editMaterialNewDriveFiles = [];
 
         // Display current images
         const currentImagesContainer = document.getElementById('editMaterialCurrentImages');
@@ -3473,9 +3568,20 @@ async function editarMaterial(id) {
             currentVideosContainer.innerHTML = '<p class="no-media-text">No hay videos</p>';
         }
 
+        // Display current drive files
+        const currentDriveFilesContainer = document.getElementById('editMaterialCurrentDriveFiles');
+        currentDriveFilesContainer.innerHTML = '';
+
+        if (window.editMaterialCurrentDriveFiles.length > 0) {
+            renderCurrentDriveFiles(currentDriveFilesContainer, window.editMaterialCurrentDriveFiles, 'removeEditMaterialCurrentDriveFile');
+        } else {
+            currentDriveFilesContainer.innerHTML = '<p class="no-media-text">No hay archivos de Drive</p>';
+        }
+
         // Clear new media previews
         document.getElementById('editMaterialNewImagesPreview').innerHTML = '';
         document.getElementById('editMaterialNewVideosPreview').innerHTML = '';
+        document.getElementById('editMaterialNewDriveFilesPreview').innerHTML = '';
 
         document.getElementById('editMaterialModal').classList.add('active');
     } catch (error) {
@@ -3490,7 +3596,9 @@ function closeEditMaterialModal() {
     document.getElementById('editMaterialForm').reset();
     window.editMaterialCurrentImages = [];
     window.editMaterialCurrentVideos = [];
+    window.editMaterialCurrentDriveFiles = [];
     window.editMaterialNewVideos = [];
+    window.editMaterialNewDriveFiles = [];
 }
 
 // Update material
@@ -3508,7 +3616,6 @@ async function actualizarMaterial(e) {
         const temaId = document.getElementById('editMaterialTopic').value;
         const titulo = document.getElementById('editMaterialTitle').value;
         const descripcion = document.getElementById('editMaterialDescription').value;
-        const driveUrl = document.getElementById('editMaterialDriveUrl').value;
 
         if (!temaId) {
             showAlertModal('Error', 'Debes seleccionar un tema');
@@ -3545,13 +3652,16 @@ async function actualizarMaterial(e) {
         // Combine current and new videos
         const allVideos = [...window.editMaterialCurrentVideos, ...window.editMaterialNewVideos];
 
+        // Combine current and new drive files
+        const allDriveFiles = [...(window.editMaterialCurrentDriveFiles || []), ...(window.editMaterialNewDriveFiles || [])];
+
         await db.collection('materiales').doc(id).update({
             temaId: temaId,
             titulo: titulo,
             descripcion: descripcion,
             imageUrls: allImageUrls,
             videos: allVideos,
-            driveUrl: driveUrl || null
+            driveFiles: allDriveFiles
         });
 
         closeEditMaterialModal();
@@ -3579,7 +3689,6 @@ async function crearMaterial() {
         const temaId = document.getElementById('materialTopic').value;
         const titulo = document.getElementById('materialTitle').value;
         const descripcion = document.getElementById('materialDescription').value;
-        const driveUrl = document.getElementById('materialDriveUrl').value;
 
         if (!temaId) {
             showAlertModal('Error', 'Debes seleccionar un tema');
@@ -3613,6 +3722,9 @@ async function crearMaterial() {
         // Get videos
         const videos = window.currentMaterialVideos || [];
 
+        // Get drive files
+        const driveFiles = window.currentMaterialDriveFiles || [];
+
         await db.collection('materiales').add({
             materia: currentMateria,
             aulaId: currentAulaId || null,
@@ -3621,7 +3733,7 @@ async function crearMaterial() {
             descripcion: descripcion,
             imageUrls: imageUrls,
             videos: videos,
-            driveUrl: driveUrl || null,
+            driveFiles: driveFiles,
             fecha: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -3629,7 +3741,9 @@ async function crearMaterial() {
         document.getElementById('createMaterialForm').reset();
         document.getElementById('materialImagesPreview').innerHTML = '';
         document.getElementById('materialVideosPreview').innerHTML = '';
+        document.getElementById('materialDriveFilesPreview').innerHTML = '';
         window.currentMaterialVideos = [];
+        window.currentMaterialDriveFiles = [];
 
         showAlertModal('Éxito', 'Material creado correctamente');
         loadMateriales();
@@ -3826,6 +3940,132 @@ function removeEditMaterialNewVideo(index) {
     });
 }
 
+// Detect Drive file type from URL
+function detectDriveFileType(url) {
+    const fileId = extractDriveFileId(url);
+    let tipo = 'default';
+    let nombre = 'Archivo de Drive';
+    let icono = 'bi-file-earmark';
+
+    // Try to detect type from URL patterns
+    if (url.includes('/document/') || url.includes('document/d/')) {
+        tipo = 'doc';
+        nombre = 'Documento de Google';
+        icono = 'bi-file-earmark-word';
+    } else if (url.includes('/spreadsheets/') || url.includes('spreadsheets/d/')) {
+        tipo = 'sheet';
+        nombre = 'Hoja de cálculo';
+        icono = 'bi-file-earmark-excel';
+    } else if (url.includes('/presentation/') || url.includes('presentation/d/')) {
+        tipo = 'slide';
+        nombre = 'Presentación';
+        icono = 'bi-file-earmark-slides';
+    } else if (url.includes('/file/d/') || url.includes('uc?id=')) {
+        // Could be PDF or other file
+        tipo = 'pdf';
+        nombre = 'Archivo PDF';
+        icono = 'bi-file-earmark-pdf';
+    } else if (url.includes('/folders/') || url.includes('folders/')) {
+        tipo = 'folder';
+        nombre = 'Carpeta de Drive';
+        icono = 'bi-folder';
+    }
+
+    return { tipo, nombre, icono, fileId };
+}
+
+// Get color for file type
+function getFileTypeColor(tipo) {
+    const colors = {
+        'pdf': '#d32f2f',
+        'doc': '#1976d2',
+        'sheet': '#388e3c',
+        'slide': '#f57c00',
+        'folder': '#ffc107',
+        'default': '#757575'
+    };
+    return colors[tipo] || colors['default'];
+}
+
+// Render Drive file preview
+function renderDriveFilePreview(container, files, removeFunction) {
+    container.innerHTML = '';
+
+    files.forEach((file, index) => {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'drive-file-preview-item';
+        previewItem.innerHTML = `
+            <div class="drive-file-icon ${file.tipo}">
+                <i class="bi ${file.icono}"></i>
+            </div>
+            <div class="drive-file-info">
+                <div class="drive-file-name">${file.nombre}</div>
+                <div class="drive-file-type">${file.url.substring(0, 50)}...</div>
+            </div>
+            <div class="drive-file-actions">
+                <button type="button" class="drive-file-remove-btn" onclick="${removeFunction}(${index})" title="Eliminar">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(previewItem);
+    });
+}
+
+// Remove material drive file
+function removeMaterialDriveFile(index) {
+    window.currentMaterialDriveFiles.splice(index, 1);
+    const container = document.getElementById('materialDriveFilesPreview');
+    renderDriveFilePreview(container, window.currentMaterialDriveFiles, 'removeMaterialDriveFile');
+}
+
+// Remove edit material new drive file
+function removeEditMaterialNewDriveFile(index) {
+    window.editMaterialNewDriveFiles.splice(index, 1);
+    const container = document.getElementById('editMaterialNewDriveFilesPreview');
+    renderDriveFilePreview(container, window.editMaterialNewDriveFiles, 'removeEditMaterialNewDriveFile');
+}
+
+// Remove edit material current drive file
+function removeEditMaterialCurrentDriveFile(index) {
+    window.editMaterialCurrentDriveFiles.splice(index, 1);
+    const container = document.getElementById('editMaterialCurrentDriveFiles');
+
+    if (window.editMaterialCurrentDriveFiles.length > 0) {
+        renderCurrentDriveFiles(container, window.editMaterialCurrentDriveFiles, 'removeEditMaterialCurrentDriveFile');
+    } else {
+        container.innerHTML = '<p class="no-media-text">No hay archivos de Drive</p>';
+    }
+}
+
+// Render current drive files for edit modal
+function renderCurrentDriveFiles(container, files, removeFunction) {
+    container.innerHTML = '';
+
+    files.forEach((file, index) => {
+        const fileInfo = typeof file === 'string' ? detectDriveFileType(file) : file;
+        const url = typeof file === 'string' ? file : file.url;
+
+        const fileItem = document.createElement('div');
+        fileItem.className = 'drive-file-preview-item';
+        fileItem.innerHTML = `
+            <div class="drive-file-icon ${fileInfo.tipo}">
+                <i class="bi ${fileInfo.icono}"></i>
+            </div>
+            <div class="drive-file-info">
+                <div class="drive-file-name">${fileInfo.nombre}</div>
+                <div class="drive-file-type">${url.substring(0, 50)}...</div>
+            </div>
+            <div class="drive-file-actions">
+                <button type="button" class="drive-file-remove-btn" onclick="${removeFunction}(${index})" title="Eliminar">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(fileItem);
+    });
+}
+
 // Clear edit post new image
 function clearEditPostNewImage() {
     document.getElementById('editPostNewImage').value = '';
@@ -3893,6 +4133,45 @@ function closeMediaModal() {
     modalContent.innerHTML = '';
 }
 
+// Open Drive file modal for full preview
+function openDriveFileModal(embedUrl, originalUrl, fileName, fileType) {
+    const modal = document.getElementById('mediaModal');
+    const modalContent = document.getElementById('mediaModalContent');
+
+    modalContent.innerHTML = `
+        <div class="drive-file-fullscreen">
+            <div class="drive-file-fullscreen-header">
+                <div class="drive-file-fullscreen-info">
+                    <i class="bi ${getFileTypeIcon(fileType)}" style="color: ${getFileTypeColor(fileType)}"></i>
+                    <span>${fileName}</span>
+                </div>
+            </div>
+            <div class="drive-file-fullscreen-content">
+                <iframe 
+                    src="${embedUrl}" 
+                    frameborder="0"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    `;
+
+    modal.classList.add('active');
+}
+
+// Get file type icon
+function getFileTypeIcon(tipo) {
+    const icons = {
+        'pdf': 'bi-file-earmark-pdf',
+        'doc': 'bi-file-earmark-word',
+        'sheet': 'bi-file-earmark-excel',
+        'slide': 'bi-file-earmark-slides',
+        'folder': 'bi-folder',
+        'default': 'bi-file-earmark'
+    };
+    return icons[tipo] || icons['default'];
+}
+
 
 
 
@@ -3900,7 +4179,7 @@ function closeMediaModal() {
 function highlightTopicTitle(topic, query) {
     const titleEl = topic.querySelector('.topic-title');
     const descEl = topic.querySelector('.topic-description');
-    
+
     if (titleEl) {
         titleEl.innerHTML = highlightMatches(titleEl.textContent, query);
     }
@@ -3913,7 +4192,7 @@ function highlightTopicTitle(topic, query) {
 function removeTopicHighlight(topic) {
     const titleEl = topic.querySelector('.topic-title');
     const descEl = topic.querySelector('.topic-description');
-    
+
     if (titleEl) {
         titleEl.innerHTML = titleEl.textContent;
     }
