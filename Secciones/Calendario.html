@@ -131,6 +131,112 @@
         </div> <!-- Cierre de calendario-container -->
     </main>
 
+    <!-- Modal Ver Clase (Solo Lectura) -->
+    <div class="modal" id="modalVerClase">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="verClaseTitulo">Detalles de la Clase</h3>
+                <button class="close-btn" id="closeModalVerClase">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="clase-detalle-container">
+                    <div class="clase-detalle-badge" id="verClaseMateriaBadge">
+                        <i class="bi bi-book-fill"></i>
+                        <span id="verClaseMateria">Materia</span>
+                    </div>
+                    
+                    <div class="clase-detalle-info">
+                        <div class="clase-detalle-item">
+                            <i class="bi bi-bookmark-fill"></i>
+                            <div>
+                                <label>Tipología</label>
+                                <span id="verClaseTipologia">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="clase-detalle-item">
+                            <i class="bi bi-folder-fill"></i>
+                            <div>
+                                <label>Unidad</label>
+                                <span id="verClaseUnidad">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="clase-detalle-item">
+                            <i class="bi bi-tag-fill"></i>
+                            <div>
+                                <label>Tema</label>
+                                <span id="verClaseTema">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="clase-detalle-item">
+                            <i class="bi bi-person-fill"></i>
+                            <div>
+                                <label>Tutor</label>
+                                <span id="verClaseTutor">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="clase-detalle-item">
+                            <i class="bi bi-calendar-fill"></i>
+                            <div>
+                                <label>Fecha</label>
+                                <span id="verClaseFecha">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="clase-detalle-item">
+                            <i class="bi bi-clock-fill"></i>
+                            <div>
+                                <label>Horario</label>
+                                <span id="verClaseHorario">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="clase-detalle-item">
+                            <i class="bi bi-hourglass-split"></i>
+                            <div>
+                                <label>Duración</label>
+                                <span id="verClaseDuracion">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="clase-detalle-item full-width" id="verClaseDescripcionContainer">
+                            <i class="bi bi-chat-left-text-fill"></i>
+                            <div>
+                                <label>Descripción</label>
+                                <span id="verClaseDescripcion">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="clase-detalle-item full-width" id="verClaseEnlaceContainer">
+                            <i class="bi bi-link-45deg"></i>
+                            <div>
+                                <label>Enlace de Clase</label>
+                                <a id="verClaseEnlace" href="#" target="_blank">-</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="clase-detalle-estado" id="verClaseEstadoContainer">
+                        <span class="estado-badge" id="verClaseEstado">Pendiente</span>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cerrarVerClase">Cerrar</button>
+                    <button type="button" class="btn-primary" id="btnEditarDesdeVer">
+                        <i class="bi bi-pencil"></i>
+                        Editar Clase
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Nueva Clase -->
     <div class="modal" id="modalNuevaClase">
         <div class="modal-content">
@@ -228,15 +334,14 @@
                         <label for="enlaceClase">Enlace de la Clase (opcional)</label>
                         <input type="url" id="enlaceClase" placeholder="https://meet.google.com/...">
                     </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn-secondary" id="cancelarClase">Cancelar</button>
-                        <button type="submit" class="btn-primary">
-                            <i class="bi bi-check-circle"></i>
-                            Programar Clase
-                        </button>
-                    </div>
                 </form>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelarClase">Cancelar</button>
+                <button type="submit" form="formNuevaClase" class="btn-primary">
+                    <i class="bi bi-check-circle"></i>
+                    Programar Clase
+                </button>
             </div>
         </div>
     </div>

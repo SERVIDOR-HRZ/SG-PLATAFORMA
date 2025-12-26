@@ -11,6 +11,7 @@ let currentAulaData = null;
 let aulasDisponibles = [];
 let todosLosProfesores = [];
 let editingClassId = null;
+let currentViewingClassId = null;
 
 document.addEventListener('DOMContentLoaded', function () {
     checkAuthentication();
@@ -630,11 +631,7 @@ function renderClassInCalendar(clase) {
 
         classCard.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (currentUser.tipoUsuario === 'admin') {
-                editClass(clase.id);
-            } else {
-                viewClassDetails(clase);
-            }
+            viewClassModal(clase.id);
         });
 
         container.appendChild(classCard);
@@ -739,7 +736,7 @@ function getClassStatusBadgeHTML(clase) {
 // Get class status buttons
 function getClassStatusButtons(clase) {
     const estado = clase.estado || 'pendiente';
-    
+
     if (estado === 'confirmada') {
         return `<button class="btn-status confirmed" title="Clase Confirmada" disabled><i class="bi bi-check-circle-fill"></i></button>`;
     } else if (estado === 'cancelada') {
@@ -807,7 +804,7 @@ function openNewClassModal(date = null) {
     horaFinEl.classList.add('empty');
 
     document.querySelector('#modalNuevaClase .modal-header h3').textContent = 'Programar Nueva Clase';
-    const submitBtn = document.querySelector('#formNuevaClase button[type="submit"]');
+    const submitBtn = document.querySelector('#modalNuevaClase button[type="submit"]');
     submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Programar Clase';
 
     const modal = document.getElementById('modalNuevaClase');
@@ -860,25 +857,25 @@ async function editClass(claseId) {
 
         const horaInicioEl = document.getElementById('horaInicioClase');
         const horaFinEl = document.getElementById('horaFinClase');
-        
+
         if (clase.horaInicio) {
             const horaInicioFormateada = convertirHora24a12(clase.horaInicio);
             horaInicioEl.dataset.timeValue = horaInicioFormateada;
             horaInicioEl.querySelector('span').textContent = horaInicioFormateada;
             horaInicioEl.classList.remove('empty');
         }
-        
+
         if (clase.horaFin) {
             const horaFinFormateada = convertirHora24a12(clase.horaFin);
             horaFinEl.dataset.timeValue = horaFinFormateada;
             horaFinEl.querySelector('span').textContent = horaFinFormateada;
             horaFinEl.classList.remove('empty');
         }
-        
+
         calcularDuracion();
 
         document.querySelector('#modalNuevaClase .modal-header h3').textContent = 'Editar Clase';
-        const submitBtn = document.querySelector('#formNuevaClase button[type="submit"]');
+        const submitBtn = document.querySelector('#modalNuevaClase button[type="submit"]');
         submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Actualizar Clase';
 
         document.getElementById('modalNuevaClase').classList.add('active');
@@ -890,6 +887,99 @@ async function editClass(claseId) {
 }
 
 window.editClass = editClass;
+
+// View class modal (solo lectura)
+async function viewClassModal(claseId) {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+
+        const claseDoc = await db.collection('clases_programadas').doc(claseId).get();
+
+        if (!claseDoc.exists) {
+            await showNotification('Error', 'Clase no encontrada', 'error');
+            return;
+        }
+
+        const clase = claseDoc.data();
+        currentViewingClassId = claseId;
+
+        const materiasNombres = {
+            'matematicas': 'Matematicas',
+            'lectura': 'Lectura Critica',
+            'sociales': 'Ciencias Sociales',
+            'naturales': 'Ciencias Naturales',
+            'ingles': 'Ingles'
+        };
+
+        const tipologiasNombres = {
+            'practica_libre': 'Practica (Libre)',
+            'practica_simulacro': 'Practica (Simulacro)',
+            'teorica_obligatorio': 'Teorica (Obligatorio)',
+            'teorica_practica_libre': 'Teorica-Practica (Libre)',
+            'na': 'N/A'
+        };
+
+        document.getElementById('verClaseTitulo').textContent = clase.titulo;
+
+        const materiaBadge = document.getElementById('verClaseMateriaBadge');
+        materiaBadge.className = 'clase-detalle-badge ' + clase.materia;
+        document.getElementById('verClaseMateria').textContent = materiasNombres[clase.materia] || clase.materia;
+
+        document.getElementById('verClaseTipologia').textContent = tipologiasNombres[clase.tipologia] || clase.tipologia || '-';
+        document.getElementById('verClaseUnidad').textContent = clase.unidad || '-';
+        document.getElementById('verClaseTema').textContent = clase.tema || '-';
+        document.getElementById('verClaseTutor').textContent = clase.tutorNombre || '-';
+
+        const fecha = new Date(clase.fecha + 'T00:00:00');
+        const fechaStr = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        document.getElementById('verClaseFecha').textContent = fechaStr;
+
+        const horaDisplay = clase.horaInicio && clase.horaFin ? clase.horaInicio + ' - ' + clase.horaFin : '-';
+        document.getElementById('verClaseHorario').textContent = horaDisplay;
+
+        document.getElementById('verClaseDuracion').textContent = clase.duracion ? clase.duracion + ' minutos' : '-';
+
+        const descripcionContainer = document.getElementById('verClaseDescripcionContainer');
+        if (clase.descripcion) {
+            descripcionContainer.style.display = 'flex';
+            document.getElementById('verClaseDescripcion').textContent = clase.descripcion;
+        } else {
+            descripcionContainer.style.display = 'none';
+        }
+
+        const enlaceContainer = document.getElementById('verClaseEnlaceContainer');
+        if (clase.enlace) {
+            enlaceContainer.style.display = 'flex';
+            const enlaceEl = document.getElementById('verClaseEnlace');
+            enlaceEl.href = clase.enlace;
+            enlaceEl.textContent = clase.enlace;
+        } else {
+            enlaceContainer.style.display = 'none';
+        }
+
+        const estado = clase.estado || 'pendiente';
+        const estadoBadge = document.getElementById('verClaseEstado');
+        estadoBadge.className = 'estado-badge ' + estado;
+        estadoBadge.textContent = estado === 'confirmada' ? 'Confirmada' : estado === 'cancelada' ? 'Cancelada' : 'Pendiente';
+
+        const btnEditar = document.getElementById('btnEditarDesdeVer');
+        btnEditar.style.display = currentUser.tipoUsuario === 'admin' ? 'inline-flex' : 'none';
+
+        document.getElementById('modalVerClase').classList.add('active');
+
+    } catch (error) {
+        console.error('Error al cargar clase:', error);
+        await showNotification('Error', 'Error al cargar los datos de la clase', 'error');
+    }
+}
+
+window.viewClassModal = viewClassModal;
+
+function closeModalVerClase() {
+    currentViewingClassId = null;
+    document.getElementById('modalVerClase').classList.remove('active');
+}
 
 // Conversiones de hora
 function convertirHora24a12(hora24) {
@@ -908,20 +998,20 @@ function convertirHora24aMinutos(hora24) {
 function convertirHora12a24(hora12) {
     const [time, period] = hora12.split(' ');
     let [hora, min] = time.split(':').map(Number);
-    
+
     if (period === 'PM' && hora !== 12) hora += 12;
     else if (period === 'AM' && hora === 12) hora = 0;
-    
+
     return `${hora.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
 }
 
 function convertirHoraAMinutos(horaStr) {
     const [time, period] = horaStr.split(' ');
     let [hora, min] = time.split(':').map(Number);
-    
+
     if (period === 'PM' && hora !== 12) hora += 12;
     else if (period === 'AM' && hora === 12) hora = 0;
-    
+
     return hora * 60 + min;
 }
 
@@ -929,17 +1019,17 @@ function convertirMinutosAHora(minutos) {
     let hora = Math.floor(minutos / 60);
     const min = minutos % 60;
     const period = hora >= 12 ? 'PM' : 'AM';
-    
+
     if (hora > 12) hora -= 12;
     else if (hora === 0) hora = 12;
-    
+
     return `${hora.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')} ${period}`;
 }
 
 function calcularDuracion() {
     const horaInicioEl = document.getElementById('horaInicioClase');
     const horaFinEl = document.getElementById('horaFinClase');
-    
+
     const horaInicio = horaInicioEl.dataset.timeValue;
     const horaFin = horaFinEl.dataset.timeValue;
 
@@ -973,12 +1063,12 @@ async function handleFormSubmit(e) {
         const descripcion = document.getElementById('descripcionClase').value;
         const tutorId = document.getElementById('tutorSelect').value;
         const fecha = document.getElementById('fechaClase').value;
-        
+
         const horaInicioEl = document.getElementById('horaInicioClase');
         const horaFinEl = document.getElementById('horaFinClase');
         const horaInicio12 = horaInicioEl.dataset.timeValue;
         const horaFin12 = horaFinEl.dataset.timeValue;
-        
+
         const horaInicio = horaInicio12 ? convertirHora12a24(horaInicio12) : '';
         const horaFin = horaFin12 ? convertirHora12a24(horaFin12) : '';
         const duracion = document.getElementById('duracionClase').value;
@@ -1038,7 +1128,7 @@ async function handleFormSubmit(e) {
         document.getElementById('formNuevaClase').reset();
 
         document.querySelector('#modalNuevaClase .modal-header h3').textContent = 'Programar Nueva Clase';
-        const submitBtn = document.querySelector('#formNuevaClase button[type="submit"]');
+        const submitBtn = document.querySelector('#modalNuevaClase button[type="submit"]');
         submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Programar Clase';
 
         await loadClasses();
@@ -1052,7 +1142,7 @@ async function handleFormSubmit(e) {
 // Confirm class
 async function confirmClass(classId) {
     const confirmed = await showConfirm('Confirmar Clase', '¿Confirmas que esta clase se realizó correctamente?');
-    
+
     if (confirmed) {
         try {
             await window.firebaseDB.collection('clases_programadas').doc(classId).update({
@@ -1072,18 +1162,18 @@ async function confirmClass(classId) {
 // Cancel class
 async function cancelClass(classId) {
     const confirmed = await showConfirm('Cancelar Clase', '¿Estás seguro de que deseas cancelar esta clase?');
-    
+
     if (confirmed) {
         try {
             const claseDoc = await window.firebaseDB.collection('clases_programadas').doc(classId).get();
             const claseData = claseDoc.data();
-            
+
             await window.firebaseDB.collection('clases_programadas').doc(classId).update({
                 estado: 'cancelada',
                 canceladaEn: firebase.firestore.FieldValue.serverTimestamp(),
                 canceladaPor: currentUser.id
             });
-            
+
             await actualizarAnuncioCancelacion(claseData);
             await showNotification('Clase Cancelada', 'La clase ha sido cancelada');
             loadClasses();
@@ -1339,7 +1429,7 @@ function setupEventListeners() {
         attachTimePicker('horaInicioClase');
         attachTimePicker('horaFinClase');
     }
-    
+
     document.getElementById('horaInicioClase').addEventListener('change', calcularDuracion);
     document.getElementById('horaFinClase').addEventListener('change', calcularDuracion);
 
@@ -1392,6 +1482,21 @@ function setupEventListeners() {
         if (e.target.id === 'modalNuevaClase') closeModal();
     });
 
+    // Modal Ver Clase (solo lectura)
+    document.getElementById('closeModalVerClase').addEventListener('click', closeModalVerClase);
+    document.getElementById('cerrarVerClase').addEventListener('click', closeModalVerClase);
+    document.getElementById('btnEditarDesdeVer').addEventListener('click', () => {
+        const claseIdParaEditar = currentViewingClassId;
+        document.getElementById('modalVerClase').classList.remove('active');
+        currentViewingClassId = null;
+        if (claseIdParaEditar) {
+            editClass(claseIdParaEditar);
+        }
+    });
+    document.getElementById('modalVerClase').addEventListener('click', (e) => {
+        if (e.target.id === 'modalVerClase') closeModalVerClase();
+    });
+
     // Form submit
     document.getElementById('formNuevaClase').addEventListener('submit', handleFormSubmit);
 
@@ -1426,7 +1531,7 @@ function closeModal() {
     document.getElementById('modalNuevaClase').classList.remove('active');
     document.getElementById('formNuevaClase').reset();
     document.querySelector('#modalNuevaClase .modal-header h3').textContent = 'Programar Nueva Clase';
-    const submitBtn = document.querySelector('#formNuevaClase button[type="submit"]');
+    const submitBtn = document.querySelector('#modalNuevaClase button[type="submit"]');
     submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Programar Clase';
 }
 
@@ -1484,7 +1589,7 @@ async function loadHistorialPagos() {
         pagosSnapshot.forEach(doc => {
             const pago = doc.data();
             pago.id = doc.id;
-            
+
             let fechaPago = '';
             if (pago.fechaPago) {
                 if (pago.fechaPago.toDate) {
@@ -1493,7 +1598,7 @@ async function loadHistorialPagos() {
                     fechaPago = pago.fechaPago.split('T')[0];
                 }
             }
-            
+
             if (fechaPago >= startDateStr && fechaPago <= endDateStr) {
                 pagos.push(pago);
             }
