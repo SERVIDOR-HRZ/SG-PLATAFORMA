@@ -2260,7 +2260,13 @@ function setupEventListeners() {
     const backBtn = document.getElementById('backBtn');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
-            window.location.href = 'Clases.html';
+            // Si estamos dentro de una materia, volver a la selección de materias
+            if (currentMateria) {
+                backToMateriasSelection();
+            } else {
+                // Si estamos en la selección de materias, ir a Clases.html
+                window.location.href = 'Clases.html';
+            }
         });
     }
 
