@@ -1142,7 +1142,7 @@ async function loadMateriales() {
         topics.sort((a, b) => {
             const orderA = a.orden || 0;
             const orderB = b.orden || 0;
-            return orderA - orderB;
+            return orderB - orderA; // Orden descendente: los más recientes primero
         });
 
         // Organize materials by topic
