@@ -608,6 +608,9 @@ async function loadClasses() {
         };
 
         renderClassList(simulatedSnapshot);
+        
+        // Aplicar filtros después de renderizar para mantener el estado de los filtros
+        aplicarFiltros();
 
     } catch (error) {
         console.error('Error al cargar clases:', error);
@@ -666,6 +669,15 @@ function renderClassList(clasesSnapshot) {
         'ingles': 'Inglés'
     };
 
+    const materiasIconos = {
+        'anuncios': 'bi-megaphone-fill',
+        'matematicas': 'bi-calculator-fill',
+        'lectura': 'bi-book-fill',
+        'sociales': 'bi-globe',
+        'naturales': 'bi-tree-fill',
+        'ingles': 'bi-translate'
+    };
+
     const tipologiasNombres = {
         'practica_libre': 'Práctica (Libre)',
         'practica_simulacro': 'Práctica (Simulacro)',
@@ -692,7 +704,7 @@ function renderClassList(clasesSnapshot) {
 
         classCard.innerHTML = `
             <div class="materia-badge-large materia-${clase.materia}">
-                <i class="bi bi-book-fill"></i>
+                <i class="bi ${materiasIconos[clase.materia] || 'bi-book-fill'}"></i>
                 ${materiasNombres[clase.materia]}
             </div>
             <div class="class-card-header">
