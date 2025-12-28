@@ -1186,7 +1186,10 @@ async function cancelClass(classId) {
 
 // Delete class
 async function deleteClass(claseId) {
-    const confirmed = await showConfirm('Eliminar Clase', '¿Estás seguro de que deseas eliminar esta clase?');
+    const confirmed = await showConfirm(
+        'Eliminar Clase',
+        '¿Estás seguro de que deseas eliminar esta clase? Esta acción no se puede deshacer y también se eliminará el anuncio asociado.'
+    );
 
     if (!confirmed) return;
 

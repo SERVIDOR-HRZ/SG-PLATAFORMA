@@ -2,11 +2,11 @@
 class TimePicker {
     constructor() {
         this.currentInput = null;
-        this.selectedHour = 11;
+        this.selectedHour = 12;
         this.selectedMinute = 0;
-        this.isPM = false;
+        this.isPM = null; // null = no seleccionado, true = PM, false = AM
         this.isSelectingHour = true;
-        this.currentRotation = 330; // Initialize to 11 o'clock position (11 * 30 = 330°)
+        this.currentRotation = 0; // Initialize to 12 o'clock position
         this.createModal();
         this.attachEventListeners();
     }
@@ -18,12 +18,12 @@ class TimePicker {
                     <div class="time-picker-header">
                         <h3>Seleccione el Tiempo</h3>
                         <div class="time-display">
-                            <div class="time-display-box active" id="hourDisplay">11</div>
+                            <div class="time-display-box active" id="hourDisplay">12</div>
                             <div class="time-display-separator">:</div>
                             <div class="time-display-box" id="minuteDisplay">00</div>
                             <div class="period-selector">
                                 <button class="period-btn" id="amBtn">AM</button>
-                                <button class="period-btn active" id="pmBtn">PM</button>
+                                <button class="period-btn" id="pmBtn">PM</button>
                             </div>
                         </div>
                     </div>
@@ -33,7 +33,7 @@ class TimePicker {
                         <div class="clock-center"></div>
                     </div>
                     <div class="time-picker-actions">
-                        <button class="time-picker-btn" id="timePickerCancel">CANCEL</button>
+                        <button class="time-picker-btn" id="timePickerCancel">CANCELAR</button>
                         <button class="time-picker-btn primary" id="timePickerOk">OK</button>
                     </div>
                 </div>
@@ -53,7 +53,7 @@ class TimePicker {
         // Close modal
         document.getElementById('timePickerCancel').addEventListener('click', () => this.close());
         document.getElementById('timePickerOk').addEventListener('click', () => this.confirm());
-        
+
         this.overlay.addEventListener('click', (e) => {
             if (e.target === this.overlay) this.close();
         });
@@ -69,7 +69,7 @@ class TimePicker {
 
     open(inputElement) {
         this.currentInput = inputElement;
-        
+
         // Parse existing value if any
         const value = inputElement.dataset.timeValue || '';
         if (value) {
@@ -79,15 +79,17 @@ class TimePicker {
             this.selectedMinute = parseInt(minutes);
             this.isPM = period === 'PM';
         } else {
-            this.selectedHour = 11;
+            // Reset to default values - no period selected
+            this.selectedHour = 12;
             this.selectedMinute = 0;
-            this.isPM = false;
+            this.isPM = null; // No period selected by default
         }
 
         this.isSelectingHour = true;
         // Initialize rotation to current hour without animation
         this.currentRotation = this.selectedHour === 12 ? 0 : this.selectedHour * 30;
         this.updateDisplay();
+        this.updatePeriodButtons();
         this.renderClock();
         this.overlay.classList.add('active');
     }
@@ -98,12 +100,26 @@ class TimePicker {
     }
 
     confirm() {
+        // Validate that AM/PM is selected
+        if (this.isPM === null) {
+            // Highlight the period buttons to indicate they need selection
+            this.amBtn.classList.add('required');
+            this.pmBtn.classList.add('required');
+
+            // Remove highlight after animation
+            setTimeout(() => {
+                this.amBtn.classList.remove('required');
+                this.pmBtn.classList.remove('required');
+            }, 1000);
+            return; // Don't close, require AM/PM selection
+        }
+
         if (this.currentInput) {
             const timeString = this.getFormattedTime();
             this.currentInput.dataset.timeValue = timeString;
             this.currentInput.querySelector('span').textContent = timeString;
             this.currentInput.classList.remove('empty');
-            
+
             // Trigger change event
             const event = new Event('change', { bubbles: true });
             this.currentInput.dispatchEvent(event);
@@ -131,20 +147,32 @@ class TimePicker {
 
     setPeriod(isPM) {
         this.isPM = isPM;
-        if (isPM) {
+        this.updatePeriodButtons();
+        this.updateDisplay();
+    }
+
+    updatePeriodButtons() {
+        // Remove required class when selecting
+        this.amBtn.classList.remove('required');
+        this.pmBtn.classList.remove('required');
+
+        if (this.isPM === true) {
             this.amBtn.classList.remove('active');
             this.pmBtn.classList.add('active');
-        } else {
+        } else if (this.isPM === false) {
             this.amBtn.classList.add('active');
             this.pmBtn.classList.remove('active');
+        } else {
+            // No period selected
+            this.amBtn.classList.remove('active');
+            this.pmBtn.classList.remove('active');
         }
-        this.updateDisplay();
     }
 
     renderClock() {
         this.clockFace.innerHTML = '';
-        const numbers = this.isSelectingHour ? 
-            [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] : 
+        const numbers = this.isSelectingHour ?
+            [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] :
             [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
         numbers.forEach((num, index) => {
@@ -154,7 +182,7 @@ class TimePicker {
             const angle = index * 30; // Each position is 30 degrees apart
             const radian = ((angle - 90) * Math.PI) / 180; // -90 to start from top
             const radius = 110; // Distance from center
-            
+
             const x = 140 + radius * Math.cos(radian) - 20; // 140 is center, 20 is half of number width
             const y = 140 + radius * Math.sin(radian) - 20;
 
@@ -192,7 +220,7 @@ class TimePicker {
     updateClockHand() {
         let value = this.isSelectingHour ? this.selectedHour : this.selectedMinute;
         let targetAngle;
-        
+
         if (this.isSelectingHour) {
             // For hours: 12 is at top (0 degrees), 3 is at 90 degrees, etc.
             targetAngle = value === 12 ? 0 : value * 30;
@@ -200,30 +228,30 @@ class TimePicker {
             // For minutes: 0 is at top (0 degrees), 15 is at 90 degrees, etc.
             targetAngle = (value / 5) * 30;
         }
-        
+
         // If currentRotation is not set, initialize it
         if (this.currentRotation === undefined) {
             this.currentRotation = targetAngle;
             this.clockHand.style.transform = `rotate(${targetAngle}deg)`;
             return;
         }
-        
+
         // Normalize current rotation to 0-360 range for comparison
         const normalizedCurrent = ((this.currentRotation % 360) + 360) % 360;
-        
+
         // Calculate the difference
         let diff = targetAngle - normalizedCurrent;
-        
+
         // Find shortest path: if difference is more than 180°, go the other way
         if (diff > 180) {
             diff -= 360;
         } else if (diff < -180) {
             diff += 360;
         }
-        
+
         // Update rotation by adding the shortest path difference
         this.currentRotation += diff;
-        
+
         // Apply the rotation (no normalization, let it be continuous)
         this.clockHand.style.transform = `rotate(${this.currentRotation}deg)`;
     }
