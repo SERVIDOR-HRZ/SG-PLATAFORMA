@@ -1046,8 +1046,23 @@ function calcularDuracion() {
 async function handleFormSubmit(e) {
     e.preventDefault();
 
+    // Get submit button and disable it to prevent double clicks
+    const submitBtn = document.querySelector('#modalNuevaClase button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    
+    // Check if already processing
+    if (submitBtn.disabled) {
+        return;
+    }
+    
+    // Disable button and show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+
     if (!currentAulaId) {
         await showNotification('Error', 'Debes seleccionar un aula primero', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
         return;
     }
 
@@ -1076,11 +1091,15 @@ async function handleFormSubmit(e) {
 
         if (!materia || !tipologia || !titulo || !tutorId || !fecha || !horaInicio || !horaFin) {
             await showNotification('Campos Requeridos', 'Por favor completa todos los campos requeridos (*)', 'warning');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
             return;
         }
 
         if (horaFin <= horaInicio) {
             await showNotification('Error de Horario', 'La hora de fin debe ser mayor que la hora de inicio', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
             return;
         }
 
@@ -1128,7 +1147,7 @@ async function handleFormSubmit(e) {
         document.getElementById('formNuevaClase').reset();
 
         document.querySelector('#modalNuevaClase .modal-header h3').textContent = 'Programar Nueva Clase';
-        const submitBtn = document.querySelector('#modalNuevaClase button[type="submit"]');
+        submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Programar Clase';
 
         await loadClasses();
@@ -1136,6 +1155,13 @@ async function handleFormSubmit(e) {
     } catch (error) {
         console.error('Error al procesar clase:', error);
         await showNotification('Error', 'Error al procesar la clase: ' + error.message, 'error');
+        
+        // Re-enable button on error
+        const submitBtn = document.querySelector('#modalNuevaClase button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = editingClassId ? 
+            '<i class="bi bi-check-circle"></i> Actualizar Clase' : 
+            '<i class="bi bi-check-circle"></i> Programar Clase';
     }
 }
 
