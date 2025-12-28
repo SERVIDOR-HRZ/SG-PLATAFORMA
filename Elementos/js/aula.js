@@ -1909,11 +1909,15 @@ function createMaterialCard(id, material) {
     if (material.driveFiles && material.driveFiles.length > 0) {
         material.driveFiles.forEach(file => {
             const fileId = file.fileId || extractDriveFileId(file.url);
+            const folderId = extractDriveFolderId(file.url);
             const fileInfo = file.tipo ? file : detectDriveFileType(file.url);
 
             // Create embed URL based on file type
             let embedUrl = '';
             let modalType = 'driveFile';
+
+            // Escape the URL for onclick
+            const escapedUrl = file.url.replace(/'/g, "\\'");
 
             if (fileInfo.tipo === 'doc') {
                 embedUrl = `https://docs.google.com/document/d/${fileId}/preview`;
@@ -1922,15 +1926,30 @@ function createMaterialCard(id, material) {
             } else if (fileInfo.tipo === 'slide') {
                 embedUrl = `https://docs.google.com/presentation/d/${fileId}/preview`;
             } else if (fileInfo.tipo === 'folder') {
-                // Folders can't be embedded, skip or show as link
+                // Carpetas de Drive - mostrar como tarjeta especial
+                const folderIdExtracted = folderId || fileId;
+                mediaItems.push(`
+                    <div class="material-drive-folder" onclick="openDriveFolderModal('${folderIdExtracted}', '${escapedUrl}')">
+                        <div class="drive-folder-card">
+                            <div class="drive-folder-icon">
+                                <i class="bi bi-folder-fill"></i>
+                            </div>
+                            <div class="drive-folder-info">
+                                <span class="drive-folder-name">${fileInfo.nombre || 'Carpeta de Drive'}</span>
+                                <span class="drive-folder-hint">Click para ver contenido</span>
+                            </div>
+                            <div class="drive-folder-arrow">
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                `);
                 return;
             } else {
                 // PDF and other files
                 embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
             }
 
-            // Escape the URL for onclick
-            const escapedUrl = file.url.replace(/'/g, "\\'");
             const escapedEmbedUrl = embedUrl.replace(/'/g, "\\'");
 
             mediaItems.push(`
@@ -2027,6 +2046,102 @@ function extractDriveFileId(url) {
         }
     }
     return null;
+}
+
+// Extract Google Drive folder ID from URL
+function extractDriveFolderId(url) {
+    const patterns = [
+        /\/folders\/([^\/\?]+)/,
+        /\/drive\/folders\/([^\/\?]+)/,
+        /folderId=([^&]+)/
+    ];
+
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) {
+            return match[1];
+        }
+    }
+    return null;
+}
+
+// Open Drive folder modal with professional view
+function openDriveFolderModal(folderId, originalUrl) {
+    const modal = document.getElementById('mediaModal');
+    const modalContent = document.getElementById('mediaModalContent');
+
+    // Crear URL de embed para la carpeta
+    const embedUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}#list`;
+    const gridUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
+
+    modalContent.innerHTML = `
+        <div class="drive-folder-fullscreen">
+            <div class="drive-folder-fullscreen-header">
+                <div class="drive-folder-fullscreen-info">
+                    <i class="bi bi-folder-fill" style="color: #ffc107; font-size: 1.8rem;"></i>
+                    <div class="drive-folder-title-section">
+                        <span class="drive-folder-title">Carpeta de Google Drive</span>
+                        <span class="drive-folder-subtitle">Haz clic en un archivo para abrirlo</span>
+                    </div>
+                </div>
+                <div class="drive-folder-actions">
+                    <div class="drive-folder-view-toggle">
+                        <button class="view-toggle-btn active" onclick="switchFolderView('list', '${folderId}')" title="Vista de lista">
+                            <i class="bi bi-list-ul"></i>
+                        </button>
+                        <button class="view-toggle-btn" onclick="switchFolderView('grid', '${folderId}')" title="Vista de cuadrícula">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                        </button>
+                    </div>
+                    <a href="${originalUrl}" target="_blank" class="drive-folder-open-btn">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                        Abrir en Drive
+                    </a>
+                </div>
+            </div>
+            <div class="drive-folder-fullscreen-content" id="driveFolderContent">
+                <div class="drive-folder-loading">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>Cargando contenido...</span>
+                </div>
+                <iframe 
+                    id="driveFolderIframe"
+                    src="${embedUrl}" 
+                    frameborder="0"
+                    onload="hideFolderLoading()">
+                </iframe>
+            </div>
+            <div class="drive-folder-footer">
+                <i class="bi bi-info-circle"></i>
+                <span>Los archivos se abrirán en una nueva pestaña. Asegúrate de que la carpeta tenga permisos públicos.</span>
+            </div>
+        </div>
+    `;
+
+    modal.classList.add('active');
+}
+
+// Switch folder view between list and grid
+function switchFolderView(view, folderId) {
+    const iframe = document.getElementById('driveFolderIframe');
+    const buttons = document.querySelectorAll('.view-toggle-btn');
+
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.closest('.view-toggle-btn').classList.add('active');
+
+    if (view === 'grid') {
+        iframe.src = `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
+    } else {
+        iframe.src = `https://drive.google.com/embeddedfolderview?id=${folderId}#list`;
+    }
+}
+
+// Hide folder loading indicator
+function hideFolderLoading() {
+    const loading = document.querySelector('.drive-folder-loading');
+    if (loading) {
+        loading.style.display = 'none';
+    }
 }
 
 // Convertir enlaces en texto a enlaces clickeables
