@@ -3127,13 +3127,14 @@ body {
 /* Topic Content */
 .topic-content {
     padding: 0;
-    max-height: 2000px;
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
     transition: max-height 0.4s ease, padding 0.3s ease;
 }
 
 .topic-container.collapsed .topic-content {
     max-height: 0;
+    overflow: hidden;
     padding: 0;
 }
 
