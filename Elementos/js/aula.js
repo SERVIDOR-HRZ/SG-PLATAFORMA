@@ -2070,8 +2070,7 @@ function openDriveFolderModal(folderId, originalUrl) {
     const modal = document.getElementById('mediaModal');
     const modalContent = document.getElementById('mediaModalContent');
 
-    // Crear URL de embed para la carpeta
-    const embedUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}#list`;
+    // Crear URL de embed para la carpeta - Grid por defecto (vista de miniaturas)
     const gridUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
 
     modalContent.innerHTML = `
@@ -2086,10 +2085,10 @@ function openDriveFolderModal(folderId, originalUrl) {
                 </div>
                 <div class="drive-folder-actions">
                     <div class="drive-folder-view-toggle">
-                        <button class="view-toggle-btn active" onclick="switchFolderView('list', '${folderId}')" title="Vista de lista">
+                        <button class="view-toggle-btn" onclick="switchFolderView('list', '${folderId}')" title="Vista de lista">
                             <i class="bi bi-list-ul"></i>
                         </button>
-                        <button class="view-toggle-btn" onclick="switchFolderView('grid', '${folderId}')" title="Vista de cuadrícula">
+                        <button class="view-toggle-btn active" onclick="switchFolderView('grid', '${folderId}')" title="Vista de cuadrícula">
                             <i class="bi bi-grid-3x3-gap"></i>
                         </button>
                     </div>
@@ -2106,14 +2105,14 @@ function openDriveFolderModal(folderId, originalUrl) {
                 </div>
                 <iframe 
                     id="driveFolderIframe"
-                    src="${embedUrl}" 
+                    src="${gridUrl}" 
                     frameborder="0"
                     onload="hideFolderLoading()">
                 </iframe>
             </div>
             <div class="drive-folder-footer">
                 <i class="bi bi-info-circle"></i>
-                <span>Los archivos se abrirán en una nueva pestaña. Asegúrate de que la carpeta tenga permisos públicos.</span>
+                <span>Los archivos se abrirán en una nueva pestaña.</span>
             </div>
         </div>
     `;
