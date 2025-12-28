@@ -7049,6 +7049,15 @@ sure forms don't interfere with modal layout */
     background: rgba(156, 39, 176, 0.1);
 }
 
+.materia-aula-checkbox .checkbox-content.anuncios {
+    color: #1a1a1a;
+}
+
+.materia-aula-checkbox input:checked+.checkbox-content.anuncios {
+    border-color: #1a1a1a;
+    background: rgba(26, 26, 26, 0.1);
+}
+
 /* Color Aula Grid */
 .color-aula-grid {
     display: flex;
@@ -7738,6 +7747,14 @@ sure forms don't interfere with modal layout */
 }
 
 /* Colores por materia */
+.materia-profesor-checkbox .materia-chip.anuncios {
+    color: #1a1a1a;
+}
+.materia-profesor-checkbox input:checked + .materia-chip.anuncios {
+    background: rgba(26, 26, 26, 0.15);
+    border-color: #1a1a1a;
+}
+
 .materia-profesor-checkbox .materia-chip.matematicas {
     color: #667eea;
 }

@@ -358,6 +358,10 @@
         background: linear-gradient(135deg, #9C27B0, #7B1FA2);
     }
 
+    .class-card-mini[data-materia="anuncios"] {
+        background: linear-gradient(135deg, #1a1a1a, #333333);
+    }
+
     /* List View */
     .list-header {
         display: flex;
@@ -455,6 +459,11 @@
         border-color: #9C27B0;
     }
 
+    .class-card-full[data-materia="anuncios"] {
+        background: linear-gradient(to bottom, #f5f5f5 0%, #ffffff 100%);
+        border-color: #1a1a1a;
+    }
+
     /* Badge grande de materia */
     .materia-badge-large {
         padding: 1.2rem 1.75rem;
@@ -491,6 +500,10 @@
 
     .materia-ingles {
         background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+    }
+
+    .materia-anuncios {
+        background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
     }
 
     .class-card-header {

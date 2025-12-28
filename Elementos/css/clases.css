@@ -264,6 +264,10 @@ body {
     background: #9C27B0;
 }
 
+.clase-card[data-materia="anuncios"] .clase-header {
+    background: #1a1a1a;
+}
+
 .clase-icon {
     font-size: 2.5rem;
     opacity: 0.95;
@@ -635,6 +639,10 @@ body {
 
 .aula-materia-tag.ingles {
     background: #9C27B0;
+}
+
+.aula-materia-tag.anuncios {
+    background: #1a1a1a;
 }
 
 .aula-selector-info {

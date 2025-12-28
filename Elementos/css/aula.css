@@ -336,6 +336,10 @@ body {
     border-color: #9C27B0;
 }
 
+.post-card.materia-anuncios {
+    border-color: #1a1a1a;
+}
+
 /* Efecto hover con sombra del color de la materia */
 .post-card.materia-matematicas:hover {
     box-shadow: 0 4px 20px rgba(33, 150, 243, 0.25);
@@ -355,6 +359,10 @@ body {
 
 .post-card.materia-ingles:hover {
     box-shadow: 0 4px 20px rgba(156, 39, 176, 0.25);
+}
+
+.post-card.materia-anuncios:hover {
+    box-shadow: 0 4px 20px rgba(26, 26, 26, 0.25);
 }
 
 .post-header {

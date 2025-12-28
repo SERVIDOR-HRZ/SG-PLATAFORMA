@@ -73,6 +73,12 @@ function esperarFirebase() {
 // Definir todas las materias disponibles
 const materiasDisponibles = [
     {
+        id: 'anuncios',
+        nombre: 'Anuncios Generales',
+        descripcion: 'Comunicados y avisos importantes',
+        icon: 'bi-megaphone'
+    },
+    {
         id: 'matematicas',
         nombre: 'Matemáticas',
         descripcion: 'Álgebra, geometría, cálculo y más',

@@ -46,6 +46,7 @@ async function getCurrentMateriaOrAula() {
 
     // Set title
     const materias = {
+        'anuncios': 'Anuncios Generales',
         'matematicas': 'Matemáticas',
         'lectura': 'Lectura Crítica',
         'sociales': 'Ciencias Sociales',
@@ -142,6 +143,7 @@ async function loadAulaData() {
 // Show materias as cards (initial view when entering an aula)
 function showMateriasCards(materias) {
     const materiasConfig = {
+        'anuncios': { nombre: 'Anuncios Generales', descripcion: 'Comunicados y avisos importantes', icon: 'bi-megaphone', color: '#1a1a1a' },
         'matematicas': { nombre: 'Matemáticas', descripcion: 'Álgebra, geometría, cálculo y más', icon: 'bi-calculator', color: '#2196F3' },
         'lectura': { nombre: 'Lectura Crítica', descripcion: 'Comprensión lectora y análisis de textos', icon: 'bi-book', color: '#F44336' },
         'sociales': { nombre: 'Ciencias Sociales', descripcion: 'Historia, geografía y ciudadanía', icon: 'bi-globe', color: '#FF9800' },
@@ -358,6 +360,7 @@ function enterMateria(materiaId) {
     currentMateria = materiaId;
 
     const materiasConfig = {
+        'anuncios': { nombre: 'Anuncios Generales', color: '#1a1a1a' },
         'matematicas': { nombre: 'Matemáticas', color: '#2196F3' },
         'lectura': { nombre: 'Lectura Crítica', color: '#F44336' },
         'sociales': { nombre: 'Ciencias Sociales', color: '#FF9800' },

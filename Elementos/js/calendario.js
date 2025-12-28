@@ -209,6 +209,7 @@ function renderAulasSelector() {
     }
 
     const materiasConfig = {
+        'anuncios': { nombre: 'Anuncios Generales', icon: 'bi-megaphone' },
         'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator' },
         'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book' },
         'sociales': { nombre: 'Ciencias Sociales', icon: 'bi-globe' },
@@ -332,6 +333,7 @@ function cargarMateriasSelect() {
     materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
 
     const materiasDisponibles = {
+        'anuncios': 'Anuncios Generales',
         'matematicas': 'Matemáticas',
         'lectura': 'Lectura Crítica',
         'sociales': 'Ciencias Sociales',
@@ -342,7 +344,7 @@ function cargarMateriasSelect() {
     userAsignaturas.forEach(asignaturaId => {
         const option = document.createElement('option');
         option.value = asignaturaId;
-        option.textContent = materiasDisponibles[asignaturaId];
+        option.textContent = materiasDisponibles[asignaturaId] || asignaturaId;
         materiaSelect.appendChild(option);
     });
 
@@ -354,6 +356,7 @@ function cargarMateriasSelect() {
 function cargarMateriasEnFiltro() {
     const filtroMateria = document.getElementById('filtroMateria');
     const materiasNombres = {
+        'anuncios': 'Anuncios Generales',
         'matematicas': 'Matemáticas',
         'lectura': 'Lectura Crítica',
         'sociales': 'Ciencias Sociales',
@@ -655,6 +658,7 @@ function renderClassList(clasesSnapshot) {
     }
 
     const materiasNombres = {
+        'anuncios': 'Anuncios Generales',
         'matematicas': 'Matemáticas',
         'lectura': 'Lectura Crítica',
         'sociales': 'Ciencias Sociales',

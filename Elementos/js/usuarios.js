@@ -4571,6 +4571,7 @@ function renderAulas() {
     aulasGrid.innerHTML = '';
 
     const materiasConfig = {
+        'anuncios': { nombre: 'anuncios', icon: 'bi-megaphone' },
         'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator' },
         'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book' },
         'sociales': { nombre: 'C. Sociales', icon: 'bi-globe' },
@@ -4986,6 +4987,7 @@ async function loadAulasForEditForm(selectedAulas = []) {
 // Render aulas checkboxes
 function renderAulasCheckboxes(container, aulas, inputName, selectedAulas = []) {
     const materiasConfig = {
+        'anuncios': { nombre: 'ANU', color: '#1a1a1a' },
         'matematicas': { nombre: 'MAT', color: '#2196F3' },
         'lectura': { nombre: 'LEC', color: '#F44336' },
         'sociales': { nombre: 'SOC', color: '#FF9800' },
@@ -5274,6 +5276,7 @@ function quitarTodosInstitucion() {
 
 // Configuración de materias
 const materiasConfigProfesor = {
+    'anuncios': { nombre: 'anuncios', icon: 'bi-megaphone', color: '#1a1a1a' },
     'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator', color: '#667eea' },
     'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book', color: '#dc3545' },
     'sociales': { nombre: 'C. Sociales', icon: 'bi-globe', color: '#ffc107' },
