@@ -1919,6 +1919,31 @@ function createMaterialCard(id, material) {
             // Escape the URL for onclick
             const escapedUrl = file.url.replace(/'/g, "\\'");
 
+            // Handle Canva files
+            if (fileInfo.tipo === 'canva') {
+                const canvaEmbedUrl = fileInfo.canvaEmbedUrl || file.canvaEmbedUrl;
+                const escapedCanvaUrl = (canvaEmbedUrl || file.url).replace(/'/g, "\\'");
+                
+                mediaItems.push(`
+                    <div class="material-canva-file" onclick="openCanvaModal('${escapedCanvaUrl}', '${escapedUrl}', '${fileInfo.nombre}')">
+                        <div class="canva-container-medium">
+                            <div class="canva-preview-placeholder">
+                                <i class="bi bi-palette"></i>
+                                <span>Canva</span>
+                            </div>
+                            <div class="media-overlay">
+                                <i class="bi bi-eye"></i>
+                            </div>
+                            <div class="canva-file-label">
+                                <i class="bi bi-palette" style="color: #00c4cc"></i>
+                                <span>${fileInfo.nombre}</span>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                return;
+            }
+
             if (fileInfo.tipo === 'doc') {
                 embedUrl = `https://docs.google.com/document/d/${fileId}/preview`;
             } else if (fileInfo.tipo === 'sheet') {
@@ -2813,7 +2838,7 @@ function setupForms() {
         });
     }
 
-    // Material Drive Files handler
+    // Material Drive Files handler (also supports Canva)
     window.currentMaterialDriveFiles = [];
     const addMaterialDriveFileBtn = document.getElementById('addMaterialDriveFileBtn');
     const materialDriveFileUrl = document.getElementById('materialDriveFileUrl');
@@ -2824,12 +2849,13 @@ function setupForms() {
             const url = materialDriveFileUrl.value.trim();
 
             if (!url) {
-                showAlertModal('Error', 'Ingresa la URL del archivo de Drive');
+                showAlertModal('Error', 'Ingresa la URL del archivo');
                 return;
             }
 
-            if (!url.includes('drive.google.com')) {
-                showAlertModal('Error', 'La URL debe ser de Google Drive');
+            // Accept both Google Drive and Canva URLs
+            if (!url.includes('drive.google.com') && !url.includes('canva.com')) {
+                showAlertModal('Error', 'La URL debe ser de Google Drive o Canva');
                 return;
             }
 
@@ -2858,12 +2884,13 @@ function setupForms() {
             const url = editMaterialDriveFileUrl.value.trim();
 
             if (!url) {
-                showAlertModal('Error', 'Ingresa la URL del archivo de Drive');
+                showAlertModal('Error', 'Ingresa la URL del archivo');
                 return;
             }
 
-            if (!url.includes('drive.google.com')) {
-                showAlertModal('Error', 'La URL debe ser de Google Drive');
+            // Accept both Google Drive and Canva URLs
+            if (!url.includes('drive.google.com') && !url.includes('canva.com')) {
+                showAlertModal('Error', 'La URL debe ser de Google Drive o Canva');
                 return;
             }
 
@@ -3853,7 +3880,7 @@ async function editarMaterial(id) {
         if (window.editMaterialCurrentDriveFiles.length > 0) {
             renderCurrentDriveFiles(currentDriveFilesContainer, window.editMaterialCurrentDriveFiles, 'removeEditMaterialCurrentDriveFile');
         } else {
-            currentDriveFilesContainer.innerHTML = '<p class="no-media-text">No hay archivos de Drive</p>';
+            currentDriveFilesContainer.innerHTML = '<p class="no-media-text">No hay archivos de Drive / Canva</p>';
         }
 
         // Clear new media previews
@@ -4218,12 +4245,25 @@ function removeEditMaterialNewVideo(index) {
     });
 }
 
-// Detect Drive file type from URL
+// Detect Drive file type from URL (also supports Canva)
 function detectDriveFileType(url) {
     const fileId = extractDriveFileId(url);
     let tipo = 'default';
     let nombre = 'Archivo de Drive';
     let icono = 'bi-file-earmark';
+
+    // Check if it's a Canva URL
+    if (url.includes('canva.com')) {
+        const canvaInfo = extractCanvaInfo(url);
+        return {
+            tipo: 'canva',
+            nombre: canvaInfo.nombre || 'Diseño de Canva',
+            icono: 'bi-palette',
+            fileId: canvaInfo.id,
+            canvaUrl: url,
+            canvaEmbedUrl: canvaInfo.embedUrl
+        };
+    }
 
     // Try to detect type from URL patterns
     if (url.includes('/document/') || url.includes('document/d/')) {
@@ -4252,6 +4292,44 @@ function detectDriveFileType(url) {
     return { tipo, nombre, icono, fileId };
 }
 
+// Extract Canva info from URL
+function extractCanvaInfo(url) {
+    let id = null;
+    let nombre = 'Diseño de Canva';
+    let embedUrl = null;
+
+    // Patterns for different Canva URL formats
+    // https://www.canva.com/design/DESIGN_ID/view
+    // https://www.canva.com/design/DESIGN_ID/SHARE_CODE/view
+    // https://www.canva.com/design/DESIGN_ID/edit
+    const designPattern = /canva\.com\/design\/([^\/]+)/;
+    const match = url.match(designPattern);
+
+    if (match && match[1]) {
+        id = match[1];
+        // Create embed URL for Canva
+        // Canva embed format: https://www.canva.com/design/DESIGN_ID/view?embed
+        embedUrl = `https://www.canva.com/design/${id}/view?embed`;
+    }
+
+    // Try to detect type from URL
+    if (url.includes('/presentation/') || url.includes('presentacion')) {
+        nombre = 'Presentación de Canva';
+    } else if (url.includes('/infographic/') || url.includes('infografia')) {
+        nombre = 'Infografía de Canva';
+    } else if (url.includes('/poster/') || url.includes('cartel')) {
+        nombre = 'Póster de Canva';
+    } else if (url.includes('/document/') || url.includes('documento')) {
+        nombre = 'Documento de Canva';
+    } else if (url.includes('/whiteboard/') || url.includes('pizarra')) {
+        nombre = 'Pizarra de Canva';
+    } else if (url.includes('/video/')) {
+        nombre = 'Video de Canva';
+    }
+
+    return { id, nombre, embedUrl };
+}
+
 // Get color for file type
 function getFileTypeColor(tipo) {
     const colors = {
@@ -4260,6 +4338,7 @@ function getFileTypeColor(tipo) {
         'sheet': '#388e3c',
         'slide': '#f57c00',
         'folder': '#ffc107',
+        'canva': '#00c4cc',
         'default': '#757575'
     };
     return colors[tipo] || colors['default'];
@@ -4312,7 +4391,7 @@ function removeEditMaterialCurrentDriveFile(index) {
     if (window.editMaterialCurrentDriveFiles.length > 0) {
         renderCurrentDriveFiles(container, window.editMaterialCurrentDriveFiles, 'removeEditMaterialCurrentDriveFile');
     } else {
-        container.innerHTML = '<p class="no-media-text">No hay archivos de Drive</p>';
+        container.innerHTML = '<p class="no-media-text">No hay archivos de Drive / Canva</p>';
     }
 }
 
@@ -4445,9 +4524,44 @@ function getFileTypeIcon(tipo) {
         'sheet': 'bi-file-earmark-excel',
         'slide': 'bi-file-earmark-slides',
         'folder': 'bi-folder',
+        'canva': 'bi-palette',
         'default': 'bi-file-earmark'
     };
     return icons[tipo] || icons['default'];
+}
+
+// Open Canva modal - shows preview card with link (Canva doesn't allow iframe embedding)
+function openCanvaModal(embedUrl, originalUrl, fileName) {
+    const modal = document.getElementById('mediaModal');
+    const modalContent = document.getElementById('mediaModalContent');
+
+    modalContent.innerHTML = `
+        <div class="canva-fullscreen canva-preview-mode">
+            <div class="canva-preview-card">
+                <div class="canva-preview-icon">
+                    <i class="bi bi-palette"></i>
+                </div>
+                <div class="canva-preview-info">
+                    <h3 class="canva-preview-title">${fileName}</h3>
+                    <p class="canva-preview-description">Este diseño está alojado en Canva. Haz clic en el botón para verlo.</p>
+                </div>
+                <a href="${originalUrl}" target="_blank" class="canva-preview-btn">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    Abrir en Canva
+                </a>
+            </div>
+        </div>
+    `;
+
+    modal.classList.add('active');
+}
+
+// Hide Canva loading indicator
+function hideCanvaLoading() {
+    const loading = document.querySelector('.canva-loading');
+    if (loading) {
+        loading.style.display = 'none';
+    }
 }
 
 
