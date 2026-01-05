@@ -1910,7 +1910,7 @@ function createMaterialCard(id, material) {
         material.driveFiles.forEach(file => {
             const fileId = file.fileId || extractDriveFileId(file.url);
             const folderId = extractDriveFolderId(file.url);
-            const fileInfo = file.tipo ? file : detectDriveFileType(file.url);
+            const fileInfo = file.tipo ? file : detectExternalLinkType(file.url);
 
             // Create embed URL based on file type
             let embedUrl = '';
@@ -1918,6 +1918,27 @@ function createMaterialCard(id, material) {
 
             // Escape the URL for onclick
             const escapedUrl = file.url.replace(/'/g, "\\'");
+
+            // Handle external links (GitHub, Notion, Figma, etc.)
+            if (fileInfo.isExternal || file.isExternal) {
+                mediaItems.push(`
+                    <div class="material-external-link" onclick="openExternalLink('${escapedUrl}')">
+                        <div class="external-link-card">
+                            <div class="external-link-icon" style="background-color: ${getFileTypeColor(fileInfo.tipo)}">
+                                <i class="bi ${fileInfo.icono}"></i>
+                            </div>
+                            <div class="external-link-info">
+                                <span class="external-link-name">${fileInfo.nombre}</span>
+                                <span class="external-link-url">${truncateUrl(file.url, 40)}</span>
+                            </div>
+                            <div class="external-link-arrow">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                return;
+            }
 
             // Handle Canva files
             if (fileInfo.tipo === 'canva') {
@@ -2849,18 +2870,18 @@ function setupForms() {
             const url = materialDriveFileUrl.value.trim();
 
             if (!url) {
-                showAlertModal('Error', 'Ingresa la URL del archivo');
+                showAlertModal('Error', 'Ingresa la URL del enlace');
                 return;
             }
 
-            // Accept both Google Drive and Canva URLs
-            if (!url.includes('drive.google.com') && !url.includes('canva.com')) {
-                showAlertModal('Error', 'La URL debe ser de Google Drive o Canva');
+            // Validate URL format (accept any valid URL)
+            if (!isValidUrl(url)) {
+                showAlertModal('Error', 'Ingresa una URL válida');
                 return;
             }
 
-            // Detect file type from URL
-            const fileInfo = detectDriveFileType(url);
+            // Detect file type from URL (supports Drive, Canva, and external links)
+            const fileInfo = detectExternalLinkType(url);
 
             // Add to array
             window.currentMaterialDriveFiles.push({ url, ...fileInfo });
@@ -2884,18 +2905,18 @@ function setupForms() {
             const url = editMaterialDriveFileUrl.value.trim();
 
             if (!url) {
-                showAlertModal('Error', 'Ingresa la URL del archivo');
+                showAlertModal('Error', 'Ingresa la URL del enlace');
                 return;
             }
 
-            // Accept both Google Drive and Canva URLs
-            if (!url.includes('drive.google.com') && !url.includes('canva.com')) {
-                showAlertModal('Error', 'La URL debe ser de Google Drive o Canva');
+            // Validate URL format (accept any valid URL)
+            if (!isValidUrl(url)) {
+                showAlertModal('Error', 'Ingresa una URL válida');
                 return;
             }
 
-            // Detect file type from URL
-            const fileInfo = detectDriveFileType(url);
+            // Detect file type from URL (supports Drive, Canva, and external links)
+            const fileInfo = detectExternalLinkType(url);
 
             // Add to array
             window.editMaterialNewDriveFiles.push({ url, ...fileInfo });
@@ -4339,9 +4360,168 @@ function getFileTypeColor(tipo) {
         'slide': '#f57c00',
         'folder': '#ffc107',
         'canva': '#00c4cc',
+        'github': '#24292e',
+        'gitlab': '#fc6d26',
+        'bitbucket': '#0052cc',
+        'notion': '#000000',
+        'figma': '#f24e1e',
+        'miro': '#ffd02f',
+        'trello': '#0079bf',
+        'youtube': '#ff0000',
+        'vimeo': '#1ab7ea',
+        'external': '#667eea',
         'default': '#757575'
     };
     return colors[tipo] || colors['default'];
+}
+
+// Validate URL format
+function isValidUrl(string) {
+    try {
+        const url = new URL(string);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+        return false;
+    }
+}
+
+// Detect external link type (supports Drive, Canva, GitHub, and any external URL)
+function detectExternalLinkType(url) {
+    // First check if it's a Drive URL
+    if (url.includes('drive.google.com')) {
+        return detectDriveFileType(url);
+    }
+    
+    // Check if it's a Canva URL
+    if (url.includes('canva.com')) {
+        return detectDriveFileType(url);
+    }
+    
+    // Check for GitHub
+    if (url.includes('github.com')) {
+        return {
+            tipo: 'github',
+            nombre: extractGitHubInfo(url),
+            icono: 'bi-github',
+            isExternal: true
+        };
+    }
+    
+    // Check for GitLab
+    if (url.includes('gitlab.com')) {
+        return {
+            tipo: 'gitlab',
+            nombre: 'Repositorio GitLab',
+            icono: 'bi-git',
+            isExternal: true
+        };
+    }
+    
+    // Check for Bitbucket
+    if (url.includes('bitbucket.org')) {
+        return {
+            tipo: 'bitbucket',
+            nombre: 'Repositorio Bitbucket',
+            icono: 'bi-git',
+            isExternal: true
+        };
+    }
+    
+    // Check for Notion
+    if (url.includes('notion.so') || url.includes('notion.site')) {
+        return {
+            tipo: 'notion',
+            nombre: 'Página de Notion',
+            icono: 'bi-journal-text',
+            isExternal: true
+        };
+    }
+    
+    // Check for Figma
+    if (url.includes('figma.com')) {
+        return {
+            tipo: 'figma',
+            nombre: 'Diseño de Figma',
+            icono: 'bi-vector-pen',
+            isExternal: true
+        };
+    }
+    
+    // Check for Miro
+    if (url.includes('miro.com')) {
+        return {
+            tipo: 'miro',
+            nombre: 'Tablero de Miro',
+            icono: 'bi-easel',
+            isExternal: true
+        };
+    }
+    
+    // Check for Trello
+    if (url.includes('trello.com')) {
+        return {
+            tipo: 'trello',
+            nombre: 'Tablero de Trello',
+            icono: 'bi-kanban',
+            isExternal: true
+        };
+    }
+    
+    // Check for YouTube
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        return {
+            tipo: 'youtube',
+            nombre: 'Video de YouTube',
+            icono: 'bi-youtube',
+            isExternal: true
+        };
+    }
+    
+    // Check for Vimeo
+    if (url.includes('vimeo.com')) {
+        return {
+            tipo: 'vimeo',
+            nombre: 'Video de Vimeo',
+            icono: 'bi-play-circle',
+            isExternal: true
+        };
+    }
+    
+    // Generic external link
+    const domain = extractDomain(url);
+    return {
+        tipo: 'external',
+        nombre: `Enlace externo (${domain})`,
+        icono: 'bi-link-45deg',
+        isExternal: true
+    };
+}
+
+// Extract domain from URL
+function extractDomain(url) {
+    try {
+        const urlObj = new URL(url);
+        return urlObj.hostname.replace('www.', '');
+    } catch (_) {
+        return 'enlace';
+    }
+}
+
+// Extract GitHub info from URL
+function extractGitHubInfo(url) {
+    try {
+        const urlObj = new URL(url);
+        const pathParts = urlObj.pathname.split('/').filter(p => p);
+        
+        if (pathParts.length >= 2) {
+            const user = pathParts[0];
+            const repo = pathParts[1];
+            return `GitHub: ${user}/${repo}`;
+        }
+        return 'Repositorio GitHub';
+    } catch (_) {
+        return 'Repositorio GitHub';
+    }
 }
 
 // Render Drive file preview
@@ -4400,7 +4580,7 @@ function renderCurrentDriveFiles(container, files, removeFunction) {
     container.innerHTML = '';
 
     files.forEach((file, index) => {
-        const fileInfo = typeof file === 'string' ? detectDriveFileType(file) : file;
+        const fileInfo = typeof file === 'string' ? detectExternalLinkType(file) : (file.tipo ? file : detectExternalLinkType(file.url));
         const url = typeof file === 'string' ? file : file.url;
 
         const fileItem = document.createElement('div');
@@ -4562,6 +4742,17 @@ function hideCanvaLoading() {
     if (loading) {
         loading.style.display = 'none';
     }
+}
+
+// Open external link in new tab
+function openExternalLink(url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+// Truncate URL for display
+function truncateUrl(url, maxLength) {
+    if (url.length <= maxLength) return url;
+    return url.substring(0, maxLength) + '...';
 }
 
 

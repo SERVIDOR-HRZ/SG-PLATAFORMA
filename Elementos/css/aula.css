@@ -4938,3 +4938,210 @@ body {
         font-size: 0.8rem;
     }
 }
+
+/* External link container in materials */
+.material-external-link {
+    width: auto;
+    flex-shrink: 0;
+    min-width: 250px;
+    max-width: 350px;
+    cursor: pointer;
+}
+
+.external-link-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.external-link-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
+    border-color: #5a67d8;
+    background: linear-gradient(135deg, #eef2ff 0%, #f8f9fa 100%);
+}
+
+.external-link-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.external-link-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.external-link-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.external-link-name {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.external-link-url {
+    display: block;
+    font-size: 0.75rem;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.external-link-arrow {
+    width: 32px;
+    height: 32px;
+    background: rgba(102, 126, 234, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.external-link-arrow i {
+    font-size: 0.9rem;
+    color: #667eea;
+    transition: transform 0.3s ease;
+}
+
+.external-link-card:hover .external-link-arrow {
+    background: #667eea;
+}
+
+.external-link-card:hover .external-link-arrow i {
+    color: white;
+    transform: translate(2px, -2px);
+}
+
+/* Drive file icon colors for external links */
+.drive-file-icon.github {
+    background: linear-gradient(135deg, #f6f8fa, #e1e4e8);
+    color: #24292e;
+    border: 1px solid #24292e;
+}
+
+.drive-file-icon.gitlab {
+    background: linear-gradient(135deg, #fef3e8, #fde8d7);
+    color: #fc6d26;
+    border: 1px solid #fc6d26;
+}
+
+.drive-file-icon.bitbucket {
+    background: linear-gradient(135deg, #e8f4ff, #d6ebff);
+    color: #0052cc;
+    border: 1px solid #0052cc;
+}
+
+.drive-file-icon.notion {
+    background: linear-gradient(135deg, #f7f6f3, #eae9e6);
+    color: #000000;
+    border: 1px solid #000000;
+}
+
+.drive-file-icon.figma {
+    background: linear-gradient(135deg, #fef0ed, #fde3dd);
+    color: #f24e1e;
+    border: 1px solid #f24e1e;
+}
+
+.drive-file-icon.miro {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    color: #ffd02f;
+    border: 1px solid #ffd02f;
+}
+
+.drive-file-icon.trello {
+    background: linear-gradient(135deg, #e8f4ff, #d6ebff);
+    color: #0079bf;
+    border: 1px solid #0079bf;
+}
+
+.drive-file-icon.youtube {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #ff0000;
+    border: 1px solid #ff0000;
+}
+
+.drive-file-icon.vimeo {
+    background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+    color: #1ab7ea;
+    border: 1px solid #1ab7ea;
+}
+
+.drive-file-icon.external {
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: #667eea;
+    border: 1px solid #667eea;
+}
+
+/* Responsive styles for external links */
+@media (max-width: 768px) {
+    .material-external-link {
+        min-width: 200px;
+        max-width: 300px;
+    }
+    
+    .external-link-card {
+        padding: 0.8rem 1rem;
+    }
+    
+    .external-link-icon {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .external-link-icon i {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .material-external-link {
+        min-width: 180px;
+        max-width: 100%;
+    }
+    
+    .external-link-card {
+        padding: 0.7rem 0.8rem;
+        gap: 0.8rem;
+    }
+    
+    .external-link-icon {
+        width: 38px;
+        height: 38px;
+    }
+    
+    .external-link-icon i {
+        font-size: 1.1rem;
+    }
+    
+    .external-link-name {
+        font-size: 0.85rem;
+    }
+    
+    .external-link-url {
+        font-size: 0.7rem;
+    }
+}
