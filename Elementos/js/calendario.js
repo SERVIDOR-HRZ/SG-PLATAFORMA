@@ -706,31 +706,37 @@ function renderClassList(clasesSnapshot) {
             <div class="materia-badge-large materia-${clase.materia}">
                 <i class="bi ${materiasIconos[clase.materia] || 'bi-book-fill'}"></i>
                 ${materiasNombres[clase.materia]}
+                <div class="class-status-badge-enhanced ${clase.estado || 'pendiente'}">
+                    <i class="bi bi-${clase.estado === 'confirmada' ? 'check-circle-fill' : clase.estado === 'cancelada' ? 'x-circle-fill' : 'clock-fill'}"></i>
+                    ${clase.estado === 'confirmada' ? 'Confirmada' : clase.estado === 'cancelada' ? 'Cancelada' : 'Pendiente'}
+                </div>
             </div>
             <div class="class-card-header">
                 <div class="class-info">
                     <h3>${clase.titulo}</h3>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                        ${clase.tipologia ? `<span class="class-badge">${tipologiasNombres[clase.tipologia] || clase.tipologia}</span>` : ''}
-                        ${clase.estado ? `<span class="class-badge ${clase.estado}">${clase.estado === 'confirmada' ? 'Confirmada' : clase.estado === 'cancelada' ? 'Cancelada' : 'Pendiente'}</span>` : '<span class="class-badge pendiente">Pendiente</span>'}
+                        ${clase.tipologia ? `<span class="tipologia-badge ${clase.tipologia.includes('teorica') ? 'teorica' : 'practica'}">${tipologiasNombres[clase.tipologia] || clase.tipologia}</span>` : ''}
                     </div>
                     <div class="class-meta">
-                        ${clase.tutorNombre ? `<div class="class-meta-item"><i class="bi bi-person"></i><span>Tutor: ${clase.tutorNombre}</span></div>` : ''}
+                        ${clase.tutorNombre ? `<div class="class-meta-item"><i class="bi bi-person"></i><span>Tutor: <strong>${clase.tutorNombre}</strong></span></div>` : ''}
                         <div class="class-meta-item"><i class="bi bi-calendar"></i><span>${fechaStr}</span></div>
                         <div class="class-meta-item"><i class="bi bi-clock"></i><span>${horaDisplay} (${clase.duracion} min)</span></div>
                         ${clase.unidad ? `<div class="class-meta-item"><i class="bi bi-folder"></i><span>${clase.unidad}</span></div>` : ''}
                         ${clase.tema ? `<div class="class-meta-item"><i class="bi bi-tag"></i><span>${clase.tema}</span></div>` : ''}
                     </div>
                 </div>
-                <div class="class-actions">
-                    ${getClassStatusButtons(clase)}
-                    <button class="btn-icon" onclick="editClass('${clase.id}')"><i class="bi bi-pencil"></i></button>
-                    <button class="btn-icon delete" onclick="deleteClass('${clase.id}')"><i class="bi bi-trash"></i></button>
-                </div>
             </div>
-            ${getClassStatusBadgeHTML(clase)}
             ${clase.descripcion ? `<div class="class-description"><i class="bi bi-chat-left-text"></i> ${clase.descripcion}</div>` : ''}
             ${clase.enlace ? `<div class="class-link"><i class="bi bi-link-45deg"></i><a href="${clase.enlace}" target="_blank">Enlace de clase</a></div>` : ''}
+            <div class="class-actions-container">
+                <div class="status-actions-group">
+                    ${getClassStatusButtons(clase)}
+                </div>
+                <div class="secondary-actions-group">
+                    <button class="btn-icon-action edit" data-tooltip="Editar clase" onclick="editClass('${clase.id}')"><i class="bi bi-pencil"></i></button>
+                    <button class="btn-icon-action delete" data-tooltip="Eliminar clase" onclick="deleteClass('${clase.id}')"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
         `;
 
         classesList.appendChild(classCard);
@@ -754,13 +760,13 @@ function getClassStatusButtons(clase) {
     const estado = clase.estado || 'pendiente';
 
     if (estado === 'confirmada') {
-        return `<button class="btn-status confirmed" title="Clase Confirmada" disabled><i class="bi bi-check-circle-fill"></i></button>`;
+        return `<button class="btn-status-action confirmed" title="Clase Confirmada" disabled><i class="bi bi-check-circle-fill"></i><span>Confirmada</span></button>`;
     } else if (estado === 'cancelada') {
-        return `<button class="btn-status cancelled" title="Clase Cancelada" disabled><i class="bi bi-x-circle-fill"></i></button>`;
+        return `<button class="btn-status-action cancelled" title="Clase Cancelada" disabled><i class="bi bi-x-circle-fill"></i><span>Cancelada</span></button>`;
     } else {
         return `
-            <button class="btn-status confirm" onclick="confirmClass('${clase.id}')" title="Confirmar Clase"><i class="bi bi-check-circle"></i></button>
-            <button class="btn-status cancel" onclick="cancelClass('${clase.id}')" title="Cancelar Clase"><i class="bi bi-x-circle"></i></button>
+            <button class="btn-status-action confirm" onclick="confirmClass('${clase.id}')" title="Confirmar Clase"><i class="bi bi-check-circle"></i><span>Confirmar</span></button>
+            <button class="btn-status-action cancel" onclick="cancelClass('${clase.id}')" title="Cancelar Clase"><i class="bi bi-x-circle"></i><span>Cancelar</span></button>
         `;
     }
 }
