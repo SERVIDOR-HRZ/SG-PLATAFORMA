@@ -109,9 +109,24 @@
             <div class="list-header">
                 <h2>Clases Programadas</h2>
                 <div class="list-filters">
-                    <select id="filtroMateria" class="filter-select">
-                        <option value="">Todas las materias</option>
-                    </select>
+                    <!-- Filtro de materias con checkboxes -->
+                    <div class="filter-dropdown" id="filtroMateriaDropdown">
+                        <button class="filter-dropdown-btn" id="btnFiltroMateria">
+                            <i class="bi bi-funnel"></i>
+                            <span>Materias</span>
+                            <span class="filter-count" id="filterMateriaCount"></span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="filter-dropdown-menu" id="menuFiltroMateria">
+                            <div class="filter-dropdown-header">
+                                <span>Seleccionar materias</span>
+                                <button class="btn-clear-filter" id="btnClearMaterias">Limpiar</button>
+                            </div>
+                            <div class="filter-options" id="filterMateriasOptions">
+                                <!-- Se generará dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
                     <select id="filtroEstado" class="filter-select">
                         <option value="">Todos los estados</option>
                         <option value="confirmada">Confirmadas</option>

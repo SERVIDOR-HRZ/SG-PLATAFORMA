@@ -354,7 +354,7 @@ function cargarMateriasSelect() {
 
 // Cargar materias en el filtro de la vista lista
 function cargarMateriasEnFiltro() {
-    const filtroMateria = document.getElementById('filtroMateria');
+    const filterOptions = document.getElementById('filterMateriasOptions');
     const materiasNombres = {
         'anuncios': 'Anuncios Generales',
         'matematicas': 'Matemáticas',
@@ -364,16 +364,80 @@ function cargarMateriasEnFiltro() {
         'ingles': 'Inglés'
     };
 
-    filtroMateria.innerHTML = '<option value="">Todas las materias</option>';
+    if (!filterOptions) return;
+
+    filterOptions.innerHTML = '';
 
     userAsignaturas.forEach(key => {
         if (materiasNombres[key]) {
-            const option = document.createElement('option');
-            option.value = key;
-            option.textContent = materiasNombres[key];
-            filtroMateria.appendChild(option);
+            const option = document.createElement('label');
+            option.className = 'filter-option';
+            option.innerHTML = `
+                <input type="checkbox" value="${key}" class="materia-checkbox">
+                <span class="filter-option-checkbox"><i class="bi bi-check"></i></span>
+                <span class="filter-option-label">
+                    <span class="filter-option-color ${key}"></span>
+                    <span class="filter-option-text">${materiasNombres[key]}</span>
+                </span>
+            `;
+            filterOptions.appendChild(option);
         }
     });
+
+    // Agregar eventos a los checkboxes
+    filterOptions.querySelectorAll('.materia-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            aplicarFiltros();
+            actualizarContadorFiltroMaterias();
+        });
+    });
+}
+
+// Inicializar dropdown de filtro de materias
+function initFiltroMateriasDropdown() {
+    const dropdown = document.getElementById('filtroMateriaDropdown');
+    const btn = document.getElementById('btnFiltroMateria');
+    const btnClear = document.getElementById('btnClearMaterias');
+
+    if (!dropdown || !btn) return;
+
+    // Toggle dropdown
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+    });
+
+    // Cerrar al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target)) {
+            dropdown.classList.remove('open');
+        }
+    });
+
+    // Limpiar filtros
+    if (btnClear) {
+        btnClear.addEventListener('click', () => {
+            document.querySelectorAll('.materia-checkbox').forEach(cb => cb.checked = false);
+            aplicarFiltros();
+            actualizarContadorFiltroMaterias();
+        });
+    }
+}
+
+// Actualizar contador de materias seleccionadas
+function actualizarContadorFiltroMaterias() {
+    const count = document.querySelectorAll('.materia-checkbox:checked').length;
+    const countEl = document.getElementById('filterMateriaCount');
+    const btn = document.getElementById('btnFiltroMateria');
+
+    if (countEl) {
+        countEl.textContent = count;
+        countEl.classList.toggle('visible', count > 0);
+    }
+
+    if (btn) {
+        btn.classList.toggle('active', count > 0);
+    }
 }
 
 // Cargar todos los profesores
@@ -691,56 +755,77 @@ function renderClassList(clasesSnapshot) {
         clase.id = doc.id;
 
         const classCard = document.createElement('div');
-        classCard.className = 'class-card-full';
+        classCard.className = 'class-card-full collapsed';
         classCard.dataset.materia = clase.materia;
         classCard.dataset.estado = clase.estado || 'pendiente';
 
         const fecha = new Date(clase.fecha + 'T00:00:00');
         const fechaStr = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const fechaCorta = fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 
         const horaDisplay = clase.horaInicio && clase.horaFin
             ? `${clase.horaInicio} - ${clase.horaFin}`
             : clase.hora || 'No especificada';
 
         classCard.innerHTML = `
-            <div class="materia-badge-large materia-${clase.materia}">
-                <i class="bi ${materiasIconos[clase.materia] || 'bi-book-fill'}"></i>
-                ${materiasNombres[clase.materia]}
-                <div class="class-status-badge-enhanced ${clase.estado || 'pendiente'}">
-                    <i class="bi bi-${clase.estado === 'confirmada' ? 'check-circle-fill' : clase.estado === 'cancelada' ? 'x-circle-fill' : 'clock-fill'}"></i>
-                    ${clase.estado === 'confirmada' ? 'Confirmada' : clase.estado === 'cancelada' ? 'Cancelada' : 'Pendiente'}
-                </div>
-            </div>
-            <div class="class-card-header">
-                <div class="class-info">
-                    <h3>${clase.titulo}</h3>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                        ${clase.tipologia ? `<span class="tipologia-badge ${clase.tipologia.includes('teorica') ? 'teorica' : 'practica'}">${tipologiasNombres[clase.tipologia] || clase.tipologia}</span>` : ''}
+            <div class="class-card-collapse-header" onclick="toggleClassCard(this)">
+                <div class="materia-badge-large materia-${clase.materia}">
+                    <i class="bi ${materiasIconos[clase.materia] || 'bi-book-fill'}"></i>
+                    <div class="collapse-header-title">
+                        <span>${materiasNombres[clase.materia]}</span>
+                        <span class="class-title-preview">— ${clase.titulo}</span>
                     </div>
-                    <div class="class-meta">
-                        ${clase.tutorNombre ? `<div class="class-meta-item"><i class="bi bi-person"></i><span>Tutor: <strong>${clase.tutorNombre}</strong></span></div>` : ''}
-                        <div class="class-meta-item"><i class="bi bi-calendar"></i><span>${fechaStr}</span></div>
-                        <div class="class-meta-item"><i class="bi bi-clock"></i><span>${horaDisplay} (${clase.duracion} min)</span></div>
-                        ${clase.unidad ? `<div class="class-meta-item"><i class="bi bi-folder"></i><span>${clase.unidad}</span></div>` : ''}
-                        ${clase.tema ? `<div class="class-meta-item"><i class="bi bi-tag"></i><span>${clase.tema}</span></div>` : ''}
+                    <div class="collapse-header-info">
+                        <span><i class="bi bi-calendar3"></i> ${fechaCorta}</span>
+                        <span><i class="bi bi-clock"></i> ${clase.horaInicio || ''}</span>
+                    </div>
+                    <div class="class-status-badge-enhanced ${clase.estado || 'pendiente'}">
+                        <i class="bi bi-${clase.estado === 'confirmada' ? 'check-circle-fill' : clase.estado === 'cancelada' ? 'x-circle-fill' : 'clock-fill'}"></i>
+                        ${clase.estado === 'confirmada' ? 'Confirmada' : clase.estado === 'cancelada' ? 'Cancelada' : 'Pendiente'}
+                    </div>
+                    <div class="collapse-toggle-icon">
+                        <i class="bi bi-chevron-down"></i>
                     </div>
                 </div>
             </div>
-            ${clase.descripcion ? `<div class="class-description"><i class="bi bi-chat-left-text"></i> ${clase.descripcion}</div>` : ''}
-            ${clase.enlace ? `<div class="class-link"><i class="bi bi-link-45deg"></i><a href="${clase.enlace}" target="_blank">Enlace de clase</a></div>` : ''}
-            <div class="class-actions-container">
-                <div class="status-actions-group">
-                    ${getClassStatusButtons(clase)}
+            <div class="class-card-collapse-content">
+                <div class="class-card-header">
+                    <div class="class-info">
+                        <h3>${clase.titulo}</h3>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            ${clase.tipologia ? `<span class="tipologia-badge ${clase.tipologia.includes('teorica') ? 'teorica' : 'practica'}">${tipologiasNombres[clase.tipologia] || clase.tipologia}</span>` : ''}
+                        </div>
+                        <div class="class-meta">
+                            ${clase.tutorNombre ? `<div class="class-meta-item"><i class="bi bi-person"></i><span>Tutor: <strong>${clase.tutorNombre}</strong></span></div>` : ''}
+                            <div class="class-meta-item"><i class="bi bi-calendar"></i><span>${fechaStr}</span></div>
+                            <div class="class-meta-item"><i class="bi bi-clock"></i><span>${horaDisplay} (${clase.duracion} min)</span></div>
+                            ${clase.unidad ? `<div class="class-meta-item"><i class="bi bi-folder"></i><span>${clase.unidad}</span></div>` : ''}
+                            ${clase.tema ? `<div class="class-meta-item"><i class="bi bi-tag"></i><span>${clase.tema}</span></div>` : ''}
+                        </div>
+                    </div>
                 </div>
-                <div class="secondary-actions-group">
-                    <button class="btn-icon-action edit" data-tooltip="Editar clase" onclick="editClass('${clase.id}')"><i class="bi bi-pencil"></i></button>
-                    <button class="btn-icon-action delete" data-tooltip="Eliminar clase" onclick="deleteClass('${clase.id}')"><i class="bi bi-trash"></i></button>
+                ${clase.descripcion ? `<div class="class-description"><i class="bi bi-chat-left-text"></i> ${clase.descripcion}</div>` : ''}
+                ${clase.enlace ? `<div class="class-link"><i class="bi bi-link-45deg"></i><a href="${clase.enlace}" target="_blank">Enlace de clase</a></div>` : ''}
+                <div class="class-actions-container">
+                    <div class="status-actions-group">
+                        ${getClassStatusButtons(clase)}
+                    </div>
+                    <div class="secondary-actions-group">
+                        <button class="btn-icon-action edit" data-tooltip="Editar clase" onclick="event.stopPropagation(); editClass('${clase.id}')"><i class="bi bi-pencil"></i></button>
+                        <button class="btn-icon-action delete" data-tooltip="Eliminar clase" onclick="event.stopPropagation(); deleteClass('${clase.id}')"><i class="bi bi-trash"></i></button>
+                    </div>
                 </div>
             </div>
         `;
 
         classesList.appendChild(classCard);
     });
+}
+
+// Toggle class card collapse
+function toggleClassCard(header) {
+    const card = header.closest('.class-card-full');
+    card.classList.toggle('collapsed');
 }
 
 // Get class status badge HTML
@@ -773,14 +858,16 @@ function getClassStatusButtons(clase) {
 
 // Aplicar filtros
 function aplicarFiltros() {
-    const filtroMateria = document.getElementById('filtroMateria').value;
+    // Obtener materias seleccionadas de los checkboxes
+    const materiasSeleccionadas = Array.from(document.querySelectorAll('.materia-checkbox:checked')).map(cb => cb.value);
     const filtroEstado = document.getElementById('filtroEstado').value;
     const classCards = document.querySelectorAll('.class-card-full');
 
     classCards.forEach(card => {
         const materia = card.dataset.materia;
         const estado = card.dataset.estado || '';
-        const matchMateria = !filtroMateria || materia === filtroMateria;
+        // Si no hay materias seleccionadas, mostrar todas
+        const matchMateria = materiasSeleccionadas.length === 0 || materiasSeleccionadas.includes(materia);
         const matchEstado = !filtroEstado || estado === filtroEstado;
         card.style.display = (matchMateria && matchEstado) ? 'block' : 'none';
     });
@@ -1520,7 +1607,7 @@ function setupEventListeners() {
     });
 
     // Filtros
-    document.getElementById('filtroMateria').addEventListener('change', aplicarFiltros);
+    initFiltroMateriasDropdown();
     document.getElementById('filtroEstado').addEventListener('change', aplicarFiltros);
 
     // Modal controls

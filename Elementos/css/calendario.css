@@ -479,15 +479,8 @@
         position: relative;
     }
 
-    .materia-badge-large i {
+    .materia-badge-large i:first-child {
         font-size: 1.5rem;
-    }
-
-    .materia-badge-large .class-status-badge-enhanced {
-        position: absolute;
-        top: 50%;
-        right: 1rem;
-        transform: translateY(-50%);
     }
 
     .materia-matematicas {
@@ -2161,5 +2154,385 @@
 
     .btn-status-action i {
         font-size: 1.2rem;
+    }
+}
+
+/* ========== TARJETAS COLAPSABLES ========== */
+.class-card-full {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    border: 1px solid #e8e8e8;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.class-card-full:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Header colapsable */
+.class-card-collapse-header {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.class-card-collapse-header:hover {
+    filter: brightness(0.97);
+}
+
+.class-card-collapse-header .materia-badge-large {
+    margin: 0;
+    border-radius: 16px 16px 0 0;
+    padding: 1rem 1.5rem;
+    padding-right: 4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.class-card-full.collapsed .class-card-collapse-header .materia-badge-large {
+    border-radius: 16px;
+}
+
+/* Icono de expandir/colapsar */
+.collapse-toggle-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.class-card-full.collapsed .collapse-toggle-icon {
+    transform: translateY(-50%) rotate(-90deg);
+}
+
+.class-card-collapse-header:hover .collapse-toggle-icon {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* Contenido colapsable */
+.class-card-collapse-content {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, opacity 0.3s ease, padding 0.3s ease;
+    opacity: 1;
+}
+
+.class-card-full.collapsed .class-card-collapse-content {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* Título en el header colapsado */
+.collapse-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.collapse-header-title > span:first-child {
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.collapse-header-title .class-title-preview {
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0.9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 250px;
+}
+
+.collapse-header-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.8rem;
+    opacity: 0.9;
+    margin-left: auto;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.collapse-header-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.3rem 0.6rem;
+    border-radius: 15px;
+}
+
+.collapse-header-info i {
+    font-size: 0.85rem;
+}
+
+/* Badge de estado en header */
+.class-card-collapse-header .class-status-badge-enhanced {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    flex-shrink: 0;
+    margin-right: 2.5rem;
+}
+
+/* Responsive tarjetas colapsables */
+@media (max-width: 768px) {
+    .collapse-header-title .class-title-preview {
+        display: none;
+    }
+
+    .collapse-header-info {
+        display: none;
+    }
+
+    .class-card-collapse-header .materia-badge-large {
+        padding: 0.9rem 1rem;
+        padding-right: 3.5rem;
+    }
+
+    .collapse-header-title > span:first-child {
+        font-size: 0.9rem;
+    }
+
+    .class-card-collapse-header .class-status-badge-enhanced {
+        font-size: 0.65rem;
+        padding: 0.35rem 0.7rem;
+        margin-right: 2rem;
+    }
+
+    .collapse-toggle-icon {
+        width: 28px;
+        height: 28px;
+        right: 0.75rem;
+    }
+}
+
+/* ========== FILTRO DROPDOWN DE MATERIAS ========== */
+.filter-dropdown {
+    position: relative;
+}
+
+.filter-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #333;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 160px;
+}
+
+.filter-dropdown-btn:hover {
+    border-color: #ff0000;
+}
+
+.filter-dropdown-btn.active {
+    border-color: #ff0000;
+    background: #fff5f5;
+}
+
+.filter-dropdown-btn .bi-chevron-down {
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+
+.filter-dropdown.open .filter-dropdown-btn .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.filter-count {
+    background: #ff0000;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    display: none;
+}
+
+.filter-count.visible {
+    display: inline-block;
+}
+
+.filter-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e0e0e0;
+    min-width: 280px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.filter-dropdown.open .filter-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.filter-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+    border-radius: 12px 12px 0 0;
+}
+
+.filter-dropdown-header span {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.85rem;
+}
+
+.btn-clear-filter {
+    background: none;
+    border: none;
+    color: #ff0000;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-clear-filter:hover {
+    background: #fff5f5;
+}
+
+.filter-options {
+    padding: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-option:hover {
+    background: #f5f5f5;
+}
+
+.filter-option input[type="checkbox"] {
+    display: none;
+}
+
+.filter-option-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.filter-option-checkbox i {
+    font-size: 0.8rem;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.filter-option input:checked + .filter-option-checkbox {
+    background: #ff0000;
+    border-color: #ff0000;
+}
+
+.filter-option input:checked + .filter-option-checkbox i {
+    opacity: 1;
+}
+
+.filter-option-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.filter-option-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.filter-option-color.matematicas { background: #2196F3; }
+.filter-option-color.lectura { background: #F44336; }
+.filter-option-color.sociales { background: #FF9800; }
+.filter-option-color.naturales { background: #4CAF50; }
+.filter-option-color.ingles { background: #9C27B0; }
+.filter-option-color.anuncios { background: #333; }
+
+.filter-option-text {
+    font-size: 0.9rem;
+    color: #333;
+}
+
+/* Responsive filtros */
+@media (max-width: 768px) {
+    .filter-dropdown-menu {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-radius: 20px 20px 0 0;
+        min-width: 100%;
+        transform: translateY(100%);
+    }
+
+    .filter-dropdown.open .filter-dropdown-menu {
+        transform: translateY(0);
+    }
+
+    .filter-options {
+        max-height: 50vh;
     }
 }
