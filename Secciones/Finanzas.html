@@ -41,29 +41,58 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab-btn active" data-tab="cuentas">
-                <i class="bi bi-bank"></i>
-                Cuentas Bancarias
-            </button>
-            <button class="tab-btn" data-tab="movimientos">
-                <i class="bi bi-arrow-left-right"></i>
-                Ingresos y Gastos
-            </button>
-            <button class="tab-btn" data-tab="tarifas">
-                <i class="bi bi-cash-coin"></i>
-                Tarifas por Hora
-            </button>
-            <button class="tab-btn" data-tab="pagos">
-                <i class="bi bi-calendar-check"></i>
-                Pagos Semanales
-            </button>
-            <button class="tab-btn" data-tab="historial">
-                <i class="bi bi-clock-history"></i>
-                Historial de Pagos
-            </button>
+        <!-- Selector de Aula -->
+        <div class="aula-selector-container" id="aulaSelectorContainer">
+            <div class="aula-selector-header">
+                <h2><i class="bi bi-door-open"></i> Selecciona un Aula</h2>
+                <p>Elige el aula para gestionar sus finanzas y pagos</p>
+            </div>
+            <div class="aulas-grid" id="aulasFinanzasGrid">
+                <!-- Las aulas se cargarán dinámicamente -->
+                <div class="loading-aulas">
+                    <i class="bi bi-arrow-clockwise spin"></i>
+                    <p>Cargando aulas...</p>
+                </div>
+            </div>
         </div>
+
+        <!-- Contenedor de Finanzas (oculto inicialmente) -->
+        <div class="finanzas-container" id="finanzasContainer" style="display: none;">
+            <!-- Breadcrumb de navegación -->
+            <div class="finanzas-breadcrumb">
+                <button class="btn-cambiar-aula" id="btnCambiarAula">
+                    <i class="bi bi-arrow-left"></i>
+                    Cambiar Aula
+                </button>
+                <div class="aula-actual-info" id="aulaActualInfo">
+                    <i class="bi bi-door-open"></i>
+                    <span id="aulaActualNombre">Aula</span>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="cuentas">
+                    <i class="bi bi-bank"></i>
+                    Cuentas Bancarias
+                </button>
+                <button class="tab-btn" data-tab="movimientos">
+                    <i class="bi bi-arrow-left-right"></i>
+                    Ingresos y Gastos
+                </button>
+                <button class="tab-btn" data-tab="tarifas">
+                    <i class="bi bi-cash-coin"></i>
+                    Tarifas por Hora
+                </button>
+                <button class="tab-btn" data-tab="pagos">
+                    <i class="bi bi-calendar-check"></i>
+                    Pagos Semanales
+                </button>
+                <button class="tab-btn" data-tab="historial">
+                    <i class="bi bi-clock-history"></i>
+                    Historial de Pagos
+                </button>
+            </div>
 
         <!-- Tab: Cuentas Bancarias -->
         <div class="tab-content active" id="cuentasTab">
@@ -275,6 +304,8 @@
                 <!-- Se generará dinámicamente -->
             </div>
         </div>
+
+        </div> <!-- Cierre de finanzas-container -->
     </main>
 
     <!-- Modal Editar Tarifa -->

@@ -9,6 +9,11 @@ let currentWeekEnd = null;
 let selectedProfesorId = null;
 let selectedPagoData = null;
 
+// Variables para el sistema de aulas
+let currentAulaId = null;
+let currentAulaData = null;
+let aulasDisponibles = [];
+
 // Get Firebase DB reference
 function getDB() {
     return window.firebaseDB;
@@ -21,9 +26,139 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     // Inicializar formateo numérico
     inicializarFormateoNumerico();
-    // Cargar cuentas al inicio (tab por defecto)
-    await loadCuentas();
+    // Cargar aulas disponibles
+    await loadAulasDisponibles();
 });
+
+// ========== SISTEMA DE AULAS ==========
+
+// Cargar aulas disponibles
+async function loadAulasDisponibles() {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+
+        const aulasGrid = document.getElementById('aulasFinanzasGrid');
+        aulasGrid.innerHTML = '<div class="loading-aulas"><i class="bi bi-arrow-clockwise spin"></i><p>Cargando aulas...</p></div>';
+
+        // Cargar todas las aulas (superusuario tiene acceso a todas)
+        const aulasSnapshot = await db.collection('aulas').orderBy('nombre').get();
+        aulasDisponibles = [];
+        aulasSnapshot.forEach(doc => {
+            aulasDisponibles.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Renderizar selector de aulas
+        renderAulasSelector();
+
+    } catch (error) {
+        console.error('Error al cargar aulas:', error);
+        document.getElementById('aulasFinanzasGrid').innerHTML = `
+            <div class="no-aulas-message">
+                <i class="bi bi-exclamation-triangle"></i>
+                <h3>Error al cargar aulas</h3>
+                <p>Intenta recargar la página</p>
+            </div>
+        `;
+    }
+}
+
+// Renderizar selector de aulas
+function renderAulasSelector() {
+    const aulasGrid = document.getElementById('aulasFinanzasGrid');
+
+    if (aulasDisponibles.length === 0) {
+        aulasGrid.innerHTML = `
+            <div class="no-aulas-message">
+                <i class="bi bi-door-closed"></i>
+                <h3>No hay aulas registradas</h3>
+                <p>Crea aulas desde el panel de administración</p>
+            </div>
+        `;
+        return;
+    }
+
+    const materiasConfig = {
+        'anuncios': { nombre: 'Anuncios Generales', icon: 'bi-megaphone' },
+        'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator' },
+        'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book' },
+        'sociales': { nombre: 'Ciencias Sociales', icon: 'bi-globe' },
+        'naturales': { nombre: 'Ciencias Naturales', icon: 'bi-tree' },
+        'ingles': { nombre: 'Inglés', icon: 'bi-translate' }
+    };
+
+    aulasGrid.innerHTML = aulasDisponibles.map(aula => {
+        const color = aula.color || '#ff0000';
+        const materias = aula.materias || [];
+
+        const materiasHTML = materias.map(materiaId => {
+            const config = materiasConfig[materiaId];
+            if (!config) return '';
+            return `<span class="materia-tag ${materiaId}"><i class="bi ${config.icon}"></i> ${config.nombre}</span>`;
+        }).join('');
+
+        return `
+            <div class="aula-card-finanzas" data-aula-id="${aula.id}" onclick="seleccionarAulaFinanzas('${aula.id}')">
+                <div class="aula-card-header" style="background: linear-gradient(135deg, ${color}, ${adjustColorFinanzas(color, -30)})">
+                    <i class="bi bi-door-open-fill"></i>
+                    <h3>${aula.nombre}</h3>
+                </div>
+                <div class="aula-card-body">
+                    ${aula.descripcion ? `<p>${aula.descripcion}</p>` : ''}
+                    <div class="aula-materias-tags">
+                        ${materiasHTML || '<span class="text-muted">Sin materias</span>'}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Ajustar brillo del color
+function adjustColorFinanzas(color, amount) {
+    const hex = color.replace('#', '');
+    const num = parseInt(hex, 16);
+    const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+    const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+    const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+    return '#' + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Seleccionar un aula
+async function seleccionarAulaFinanzas(aulaId) {
+    currentAulaId = aulaId;
+    currentAulaData = aulasDisponibles.find(a => a.id === aulaId);
+
+    if (!currentAulaData) {
+        showNotification('error', 'Error', 'Aula no encontrada');
+        return;
+    }
+
+    // Mostrar contenedor de finanzas y ocultar selector
+    document.getElementById('aulaSelectorContainer').style.display = 'none';
+    document.getElementById('finanzasContainer').style.display = 'block';
+
+    // Actualizar info del aula actual
+    document.getElementById('aulaActualNombre').textContent = currentAulaData.nombre;
+    const aulaInfo = document.getElementById('aulaActualInfo');
+    aulaInfo.style.background = `linear-gradient(135deg, ${currentAulaData.color || '#ff0000'}, ${adjustColorFinanzas(currentAulaData.color || '#ff0000', -30)})`;
+
+    // Cargar datos del tab activo (cuentas por defecto)
+    await loadCuentas();
+}
+
+// Volver al selector de aulas
+function volverASelectorAulasFinanzas() {
+    currentAulaId = null;
+    currentAulaData = null;
+
+    document.getElementById('finanzasContainer').style.display = 'none';
+    document.getElementById('aulaSelectorContainer').style.display = 'block';
+}
+
+// Hacer funciones globales
+window.seleccionarAulaFinanzas = seleccionarAulaFinanzas;
+window.volverASelectorAulasFinanzas = volverASelectorAulasFinanzas;
 
 // Check authentication and permissions
 async function checkAuth() {
@@ -127,6 +262,9 @@ function setupEventListeners() {
     document.getElementById('backBtn').addEventListener('click', () => {
         window.location.href = 'Panel_Admin.html';
     });
+
+    // Botón cambiar aula
+    document.getElementById('btnCambiarAula').addEventListener('click', volverASelectorAulasFinanzas);
 
     // Tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -239,7 +377,7 @@ function switchTab(tab) {
     }
 }
 
-// Load tarifas
+// Load tarifas (filtrado por profesores del aula)
 async function loadTarifas() {
     const tarifasTableBody = document.getElementById('tarifasTableBody');
     tarifasTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div></div></td></tr>';
@@ -250,10 +388,26 @@ async function loadTarifas() {
             .where('tipoUsuario', '==', 'admin')
             .get();
 
-        // Filtrar solo los que tienen rol profesor
+        // Filtrar solo los que tienen rol profesor y están asignados al aula
         const profesoresDocs = profesoresSnapshot.docs.filter(doc => {
             const data = doc.data();
-            return data.rol === 'profesor' || data.rol === 'admin';
+            if (data.rol !== 'profesor' && data.rol !== 'admin' && data.rol !== 'superusuario') {
+                return false;
+            }
+            
+            // Si hay un aula seleccionada, filtrar por profesores asignados a esa aula
+            if (currentAulaId) {
+                // Superusuarios siempre tienen acceso
+                if (data.rol === 'superusuario') return true;
+                
+                const aulasAsignadas = data.aulasAsignadas || [];
+                return aulasAsignadas.some(a => {
+                    if (typeof a === 'object' && a.aulaId) return a.aulaId === currentAulaId;
+                    return a === currentAulaId;
+                });
+            }
+            
+            return true;
         });
 
         if (profesoresDocs.length === 0) {
@@ -262,8 +416,8 @@ async function loadTarifas() {
                     <td colspan="8" style="text-align: center; padding: 3rem;">
                         <div class="empty-state">
                             <i class="bi bi-person-x"></i>
-                            <h3>No hay profesores registrados</h3>
-                            <p>Registra profesores para asignarles tarifas</p>
+                            <h3>No hay profesores asignados a esta aula</h3>
+                            <p>Asigna profesores al aula desde la gestión de usuarios</p>
                         </div>
                     </td>
                 </tr>
@@ -443,7 +597,7 @@ async function handleSaveTarifa(e) {
     }
 }
 
-// Load pagos semana
+// Load pagos semana (filtrado por profesores del aula)
 async function loadPagosSemana() {
     const pagosTableBody = document.getElementById('pagosTableBody');
     pagosTableBody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div></div></td></tr>';
@@ -454,10 +608,26 @@ async function loadPagosSemana() {
             .where('tipoUsuario', '==', 'admin')
             .get();
 
-        // Filtrar solo los que tienen rol profesor
+        // Filtrar solo los que tienen rol profesor y están asignados al aula
         const profesoresDocs = profesoresSnapshot.docs.filter(doc => {
             const data = doc.data();
-            return data.rol === 'profesor' || data.rol === 'admin';
+            if (data.rol !== 'profesor' && data.rol !== 'admin' && data.rol !== 'superusuario') {
+                return false;
+            }
+            
+            // Si hay un aula seleccionada, filtrar por profesores asignados a esa aula
+            if (currentAulaId) {
+                // Superusuarios siempre tienen acceso
+                if (data.rol === 'superusuario') return true;
+                
+                const aulasAsignadas = data.aulasAsignadas || [];
+                return aulasAsignadas.some(a => {
+                    if (typeof a === 'object' && a.aulaId) return a.aulaId === currentAulaId;
+                    return a === currentAulaId;
+                });
+            }
+            
+            return true;
         });
 
         if (profesoresDocs.length === 0) {
@@ -466,7 +636,7 @@ async function loadPagosSemana() {
                     <td colspan="11" style="text-align: center; padding: 3rem;">
                         <div class="empty-state">
                             <i class="bi bi-person-x"></i>
-                            <h3>No hay profesores registrados</h3>
+                            <h3>No hay profesores asignados a esta aula</h3>
                         </div>
                     </td>
                 </tr>
@@ -504,7 +674,7 @@ async function loadPagosSemana() {
     }
 }
 
-// Calcular clases de la semana
+// Calcular clases de la semana (filtrado por aula)
 async function calcularClasesSemana(profesorId) {
     try {
         let totalClases = 0;
@@ -512,9 +682,16 @@ async function calcularClasesSemana(profesorId) {
 
         // Buscar en la colección 'clases_programadas'
         try {
-            const clasesSnapshot = await getDB().collection('clases_programadas')
-                .where('tutorId', '==', profesorId)
-                .get();
+            // Construir query base
+            let query = getDB().collection('clases_programadas')
+                .where('tutorId', '==', profesorId);
+            
+            // Si hay un aula seleccionada, filtrar por ella
+            if (currentAulaId) {
+                query = query.where('aulaId', '==', currentAulaId);
+            }
+
+            const clasesSnapshot = await query.get();
 
             clasesSnapshot.forEach(doc => {
                 const clase = doc.data();
@@ -559,21 +736,31 @@ async function calcularClasesSemana(profesorId) {
     }
 }
 
-// Verificar pago de la semana
+// Verificar pago de la semana (compatible con pagos antiguos sin aulaId)
 async function verificarPagoSemana(profesorId) {
     try {
+        // Buscar pagos de esta semana para este profesor
         const pagosSnapshot = await getDB().collection('pagos')
             .where('profesorId', '==', profesorId)
             .where('semanaInicio', '==', firebase.firestore.Timestamp.fromDate(currentWeekStart))
             .where('semanaFin', '==', firebase.firestore.Timestamp.fromDate(currentWeekEnd))
-            .limit(1)
             .get();
 
-        if (!pagosSnapshot.empty) {
-            return { id: pagosSnapshot.docs[0].id, ...pagosSnapshot.docs[0].data() };
-        }
+        // Filtrar por aula en cliente (para compatibilidad con pagos antiguos)
+        let pagoEncontrado = null;
+        pagosSnapshot.forEach(doc => {
+            const pago = doc.data();
+            // Si hay aula seleccionada, verificar que coincida o que no tenga aulaId (pago antiguo)
+            if (currentAulaId) {
+                if (pago.aulaId === currentAulaId || !pago.aulaId) {
+                    pagoEncontrado = { id: doc.id, ...pago };
+                }
+            } else {
+                pagoEncontrado = { id: doc.id, ...pago };
+            }
+        });
 
-        return null;
+        return pagoEncontrado;
     } catch (error) {
         console.error('Error verificando pago:', error);
         return null;
@@ -846,6 +1033,8 @@ async function handleRegistrarPago(e) {
             comprobanteUrl: comprobanteUrl,
             cuentaId: cuentaId,
             cuentaNombre: cuenta.nombre,
+            aulaId: currentAulaId || null,
+            aulaNombre: currentAulaData ? currentAulaData.nombre : '',
             notas: notas || '',
             pagadoPor: currentUser.id,
             pagadoPorNombre: currentUser.nombre || '',
@@ -889,7 +1078,7 @@ async function uploadToImgBB(file) {
     }
 }
 
-// Load historial
+// Load historial (filtrado por aula - incluye pagos antiguos sin aulaId)
 async function loadHistorial() {
     const historialList = document.getElementById('historialList');
     historialList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -908,6 +1097,10 @@ async function loadHistorial() {
         let pagos = [];
         pagosSnapshot.forEach(doc => {
             const pago = { id: doc.id, ...doc.data() };
+            
+            // Filtrar por aula si hay una seleccionada
+            // IMPORTANTE: Incluir pagos antiguos que no tienen aulaId (compatibilidad)
+            if (currentAulaId && pago.aulaId && pago.aulaId !== currentAulaId) return;
             
             // Aplicar filtro de profesor
             if (filtroProfesor && pago.profesorId !== filtroProfesor) return;

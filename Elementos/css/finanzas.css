@@ -2899,3 +2899,261 @@ body {
         justify-content: flex-end;
     }
 }
+
+
+/* ========== SISTEMA DE AULAS PARA FINANZAS ========== */
+
+/* Selector de Aulas */
+.aula-selector-container {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+}
+
+.aula-selector-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.aula-selector-header h2 {
+    color: #333;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.aula-selector-header h2 i {
+    color: #ff0000;
+}
+
+.aula-selector-header p {
+    color: #666;
+    font-size: 1rem;
+}
+
+.aulas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.loading-aulas {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.loading-aulas i {
+    font-size: 2.5rem;
+    color: #ff0000;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.loading-aulas i.spin {
+    animation: spin 1s linear infinite;
+}
+
+.aula-card-finanzas {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.aula-card-finanzas:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(255, 0, 0, 0.2);
+    border-color: #ff0000;
+}
+
+.aula-card-header {
+    padding: 1.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.aula-card-header i {
+    font-size: 2rem;
+}
+
+.aula-card-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.aula-card-body {
+    padding: 1.25rem;
+}
+
+.aula-card-body p {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.aula-materias-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.materia-tag {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #f5f5f5;
+    color: #666;
+}
+
+.materia-tag.matematicas {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.materia-tag.lectura {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.materia-tag.sociales {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.materia-tag.naturales {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.materia-tag.ingles {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.materia-tag.anuncios {
+    background: #f5f5f5;
+    color: #424242;
+}
+
+.text-muted {
+    color: #999;
+    font-style: italic;
+}
+
+.no-aulas-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.no-aulas-message i {
+    font-size: 4rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.no-aulas-message h3 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+/* Breadcrumb de navegación */
+.finanzas-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.btn-cambiar-aula {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 8px;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-cambiar-aula:hover {
+    background: #ff0000;
+    color: white;
+}
+
+.aula-actual-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.aula-actual-info i {
+    font-size: 1.25rem;
+}
+
+/* Contenedor de Finanzas */
+.finanzas-container {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive para selector de aulas */
+@media (max-width: 768px) {
+    .aulas-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .finanzas-breadcrumb {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .btn-cambiar-aula {
+        justify-content: center;
+    }
+    
+    .aula-actual-info {
+        justify-content: center;
+    }
+}
