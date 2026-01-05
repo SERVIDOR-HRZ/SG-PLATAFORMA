@@ -4538,6 +4538,11 @@ body {
         height: 28px;
     }
     
+    .drive-folder-fullscreen {
+        height: 100dvh;
+        max-height: -webkit-fill-available;
+    }
+    
     .drive-folder-title {
         font-size: 1rem;
     }
