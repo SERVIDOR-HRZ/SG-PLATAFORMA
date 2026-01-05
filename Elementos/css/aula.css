@@ -1637,6 +1637,7 @@ body {
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
+    max-height: 90dvh;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
@@ -2192,7 +2193,10 @@ body {
         width: 100%;
         margin: 0;
         border-radius: 0;
-        max-height: 100vh;
+        max-height: 85dvh;
+        max-height: -webkit-fill-available;
+        height: auto;
+        margin-top: auto;
     }
     
     .modal-header {
@@ -4484,8 +4488,11 @@ body {
     
     .drive-folder-fullscreen {
         width: 100vw;
-        height: 100vh;
+        height: 85dvh;
+        height: 85vh;
+        max-height: -webkit-fill-available;
         border-radius: 0;
+        margin-top: auto;
     }
     
     .drive-folder-fullscreen-header {
@@ -4536,11 +4543,6 @@ body {
     .drive-folder-arrow {
         width: 28px;
         height: 28px;
-    }
-    
-    .drive-folder-fullscreen {
-        height: 100dvh;
-        max-height: -webkit-fill-available;
     }
     
     .drive-folder-title {
