@@ -912,25 +912,121 @@ body {
         height: 100px;
         max-height: 100px;
     }
+    
+    .header h1 {
+        font-size: 1.3rem;
+    }
 }
 
 @media (max-width: 768px) {
-    .calendario-estudiante-container {
+    .header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .header-logo {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .back-btn {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .user-name {
+        display: none;
+    }
+
+    .main-content {
         padding: 1rem;
         margin-top: 70px;
     }
-
-    .calendario-est-header {
+    
+    .aula-selector-estudiante {
+        padding: 1.5rem;
+    }
+    
+    .aula-selector-header-est h3 {
+        font-size: 1.2rem;
+    }
+    
+    .aulas-estudiante-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .aula-card-est-header {
+        padding: 1rem;
+    }
+    
+    .aula-card-est-header h4 {
+        font-size: 1rem;
+    }
+    
+    .aula-card-est-body {
+        padding: 1rem;
+    }
+    
+    .calendario-breadcrumb-est {
         flex-direction: column;
-        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+    
+    .btn-cambiar-aula-est,
+    .aula-actual-info-est {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .vista-toggle-est {
+        width: 100%;
+        padding: 0.4rem;
+    }
+    
+    .vista-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
     }
 
     .materias-leyenda {
         gap: 0.5rem;
+        padding: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .leyenda-item {
         font-size: 0.75rem;
+    }
+    
+    .calendario-mensual-est,
+    .calendario-semanal-est {
+        padding: 1rem;
+    }
+    
+    .calendario-nav {
+        margin-bottom: 1rem;
+    }
+    
+    .calendario-nav h3 {
+        font-size: 1rem;
+    }
+    
+    .nav-btn-est {
+        width: 35px;
+        height: 35px;
+    }
+
+    .dia-header {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.7rem;
     }
 
     .dia-celda {
@@ -944,62 +1040,224 @@ body {
     }
 
     .clase-mini-est {
-        font-size: 0.55rem;
+        font-size: 0.6rem;
         padding: 0.2rem 0.3rem;
     }
 
     .semana-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
     }
 
     .dia-semana-card {
         min-height: 150px;
     }
-
-    .calendario-nav h3 {
-        font-size: 1.1rem;
+    
+    .dia-semana-header {
+        padding: 0.6rem;
     }
     
-    .vista-toggle-est {
-        width: 100%;
+    .dia-semana-header .dia-nombre {
+        font-size: 0.7rem;
     }
     
-    .vista-btn {
-        flex: 1;
-        justify-content: center;
+    .dia-semana-header .dia-num {
+        font-size: 1.3rem;
+    }
+    
+    .dia-semana-body {
+        padding: 0.5rem;
+    }
+    
+    .clase-semanal-card {
+        padding: 0.5rem;
+    }
+    
+    .clase-semanal-card .clase-hora {
+        font-size: 0.65rem;
+    }
+    
+    .clase-semanal-card .clase-titulo {
+        font-size: 0.7rem;
     }
 }
 
 @media (max-width: 480px) {
+    .header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .header-left {
+        gap: 0.5rem;
+    }
+    
+    .header h1 {
+        font-size: 0.95rem;
+    }
+    
+    .header-logo {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .back-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+    
+    .main-content {
+        padding: 0.75rem;
+        margin-top: 60px;
+    }
+    
+    .aula-selector-estudiante {
+        padding: 1rem;
+    }
+    
+    .aula-selector-header-est {
+        margin-bottom: 1rem;
+    }
+    
+    .aula-selector-header-est h3 {
+        font-size: 1.1rem;
+    }
+    
+    .aula-selector-header-est h3 i {
+        font-size: 1.3rem;
+    }
+    
+    .aula-selector-header-est p {
+        font-size: 0.85rem;
+    }
+    
+    .aulas-estudiante-grid {
+        grid-template-columns: 1fr;
+    }
+
     .calendario-grid-est {
         font-size: 0.7rem;
     }
 
     .dia-header {
-        padding: 0.5rem 0.2rem;
-        font-size: 0.65rem;
+        padding: 0.4rem 0.15rem;
+        font-size: 0.6rem;
     }
 
     .dia-celda {
-        height: 70px;
-        max-height: 70px;
+        height: 65px;
+        max-height: 65px;
+        padding: 0.2rem;
+    }
+    
+    .dia-numero {
+        font-size: 0.75rem;
+        margin-bottom: 0.2rem;
+    }
+    
+    .dia-celda.hoy .dia-numero {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .clase-mini-est {
+        font-size: 0.5rem;
+        padding: 0.15rem 0.2rem;
     }
 
     .semana-grid {
         grid-template-columns: 1fr;
     }
-
-    .aulas-estudiante-grid {
-        grid-template-columns: 1fr;
+    
+    .dia-semana-card {
+        min-height: 120px;
     }
 
     .vista-toggle-est {
-        width: 100%;
-        justify-content: center;
+        padding: 0.3rem;
+    }
+    
+    .vista-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        gap: 0.3rem;
+    }
+    
+    .vista-btn i {
+        font-size: 1rem;
+    }
+    
+    .materias-leyenda {
+        padding: 0.5rem;
+        gap: 0.4rem;
+    }
+    
+    .leyenda-item {
+        font-size: 0.65rem;
+    }
+    
+    .leyenda-color {
+        width: 10px;
+        height: 10px;
     }
 
     .modal-clase-content {
         width: 95%;
         max-height: 90vh;
+    }
+    
+    .modal-clase-header {
+        padding: 1rem;
+    }
+    
+    .modal-clase-header h3 {
+        font-size: 1rem;
+    }
+    
+    .modal-clase-body {
+        padding: 1rem;
+    }
+    
+    .detalle-item {
+        padding: 0.5rem 0;
+    }
+    
+    .detalle-item i {
+        font-size: 1rem;
+    }
+    
+    .detalle-item .detalle-label {
+        font-size: 0.65rem;
+    }
+    
+    .detalle-item .detalle-valor {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .header h1 {
+        font-size: 0.85rem;
+    }
+    
+    .dia-header {
+        font-size: 0.55rem;
+    }
+    
+    .dia-celda {
+        height: 55px;
+        max-height: 55px;
+    }
+    
+    .dia-numero {
+        font-size: 0.7rem;
+    }
+    
+    .clase-mini-est {
+        display: none;
+    }
+    
+    .clase-mini-est:first-child {
+        display: block;
     }
 }
