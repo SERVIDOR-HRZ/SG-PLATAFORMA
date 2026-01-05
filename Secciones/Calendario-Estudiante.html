@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mi Calendario - Seamos Genios</title>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/calendario-estudiante.css">
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" id="btnVolverPanelEst">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
+            <h1>Mi Calendario de Clases</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info" id="userInfoContainer">
+                <span class="user-name" id="userName">ESTUDIANTE</span>
+                <div class="user-avatar" id="userAvatarContainer">
+                    <div class="user-avatar-default" id="userAvatarDefault">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto de perfil">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Selector de Aula (Pantalla inicial) -->
+        <div class="aula-selector-estudiante" id="aulaSelectorEstudiante">
+            <div class="aula-selector-header-est">
+                <h3><i class="bi bi-door-open"></i> Selecciona un Aula</h3>
+                <p>Elige el aula para ver tu calendario de clases</p>
+            </div>
+            <div class="aulas-estudiante-grid" id="aulasEstudianteGrid">
+                <div class="loading-calendario">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <p>Cargando aulas...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenedor del Calendario (oculto hasta seleccionar aula) -->
+        <div id="calendarioVistaContainer" style="display: none;">
+            <!-- Breadcrumb para cambiar aula -->
+            <div class="calendario-breadcrumb-est">
+                <button class="btn-cambiar-aula-est" id="btnCambiarAulaEst">
+                    <i class="bi bi-arrow-left"></i>
+                    Cambiar Aula
+                </button>
+                <div class="aula-actual-info-est" id="aulaActualInfoEst">
+                    <i class="bi bi-door-open"></i>
+                    <span id="aulaActualNombreEst">Aula</span>
+                </div>
+            </div>
+
+            <!-- Toggle de Vista -->
+            <div class="vista-toggle-est">
+                <button class="vista-btn active" data-vista="calendario">
+                    <i class="bi bi-calendar-month"></i> Mensual
+                </button>
+                <button class="vista-btn" data-vista="semanal">
+                    <i class="bi bi-calendar-week"></i> Semanal
+                </button>
+            </div>
+
+            <!-- Leyenda de Materias -->
+            <div class="materias-leyenda">
+                <div class="leyenda-item">
+                    <span class="leyenda-color matematicas"></span>
+                    <span>Matemáticas</span>
+                </div>
+                <div class="leyenda-item">
+                    <span class="leyenda-color lectura"></span>
+                    <span>Lectura Crítica</span>
+                </div>
+                <div class="leyenda-item">
+                    <span class="leyenda-color sociales"></span>
+                    <span>Ciencias Sociales</span>
+                </div>
+                <div class="leyenda-item">
+                    <span class="leyenda-color naturales"></span>
+                    <span>Ciencias Naturales</span>
+                </div>
+                <div class="leyenda-item">
+                    <span class="leyenda-color ingles"></span>
+                    <span>Inglés</span>
+                </div>
+            </div>
+
+            <!-- Vista Calendario Mensual -->
+            <div class="calendario-mensual-est" id="calendarioMensualEst">
+                <div class="calendario-nav">
+                    <button class="nav-btn-est" id="btnPrevCalEst">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <h3 id="calendarioNavTitle">Enero De 2026</h3>
+                    <button class="nav-btn-est" id="btnNextCalEst">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="calendario-grid-est" id="calendarioGridEst">
+                    <!-- Se genera dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Vista Calendario Semanal -->
+            <div class="calendario-semanal-est" id="calendarioSemanalEst">
+                <div class="calendario-nav">
+                    <button class="nav-btn-est" onclick="navegarCalendarioEst(-1)">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <h3 id="calendarioNavTitleSemanal">5 De Ene - 11 De Ene</h3>
+                    <button class="nav-btn-est" onclick="navegarCalendarioEst(1)">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="semana-grid" id="semanaGridEst">
+                    <!-- Se genera dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Detalle de Clase -->
+    <div class="modal-clase-detalle" id="modalClaseDetalleEst">
+        <div class="modal-clase-content">
+            <div class="modal-clase-header matematicas">
+                <h3>Título de la Clase</h3>
+                <span class="materia-nombre"><i class="bi bi-book"></i> Materia</span>
+                <button class="btn-cerrar-modal" id="btnCerrarModalClaseEst">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-clase-body">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/calendario-estudiante.js"></script>
+</body>
+
+</html>
