@@ -28,6 +28,45 @@ let allUsers = [];
 let filteredUsers = [];
 let currentUserForReset = null;
 let currentUserForEdit = null;
+
+// Cache de nombres de aulas para mostrar en la tabla
+let aulasNombresCache = {};
+
+// Función para obtener los nombres de las aulas de un usuario
+function getAulasNombres(aulasAsignadas) {
+    if (!aulasAsignadas || aulasAsignadas.length === 0) return [];
+    
+    return aulasAsignadas.map(aula => {
+        const aulaId = typeof aula === 'object' ? aula.aulaId : aula;
+        // Buscar en el cache primero
+        if (aulasNombresCache[aulaId]) {
+            return aulasNombresCache[aulaId];
+        }
+        // Buscar en allAulas si está disponible
+        if (typeof allAulas !== 'undefined' && allAulas.length > 0) {
+            const aulaData = allAulas.find(a => a.id === aulaId);
+            if (aulaData) {
+                aulasNombresCache[aulaId] = aulaData.nombre;
+                return aulaData.nombre;
+            }
+        }
+        return aulaId; // Retornar el ID si no se encuentra el nombre
+    }).filter(nombre => nombre); // Filtrar valores vacíos
+}
+
+// Función para cargar el cache de nombres de aulas
+async function loadAulasNombresCache() {
+    try {
+        await waitForFirebase();
+        const snapshot = await window.firebaseDB.collection('aulas').get();
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            aulasNombresCache[doc.id] = data.nombre || doc.id;
+        });
+    } catch (error) {
+        console.error('Error loading aulas nombres cache:', error);
+    }
+}
 let currentDashboardView = 'dashboard'; // dashboard, profesores, estudiantes
 
 // Security code for creating superusers
@@ -654,21 +693,22 @@ function updateColumnVisibility(view) {
     const table = document.getElementById('usersTable');
     if (!table) return;
 
-    // All column selectors - use more specific selectors
+    // All column selectors - use more specific selectors (actualizado con nueva columna Nombre Aulas)
     const rolColumn = table.querySelector('thead th:nth-child(3)'); // Rol column
     const estadoColumn = table.querySelector('thead th:nth-child(4)'); // Estado column
     const puntosColumn = table.querySelector('thead th:nth-child(5)'); // Puntos column
     const insigniasColumn = table.querySelector('thead th:nth-child(6)'); // Insignias column
-    const materiasColumn = table.querySelector('thead th:nth-child(7)'); // Materias Acceso column
-    const telefonoColumn = table.querySelector('thead th:nth-child(8)'); // Teléfono column
-    const documentoColumn = table.querySelector('thead th:nth-child(9)'); // Documento column
-    const institucionColumn = table.querySelector('thead th:nth-child(10)'); // Institución column
-    const gradoColumn = table.querySelector('thead th:nth-child(11)'); // Grado column
-    const departamentoColumn = table.querySelector('thead th:nth-child(12)'); // Departamento column
-    const emailRecuperacionColumn = table.querySelector('thead th:nth-child(13)'); // Email Recuperación column
-    const codigoRecuperacionColumn = table.querySelector('thead th:nth-child(14)'); // Código Recuperación column
-    const fechaColumn = table.querySelector('thead th:nth-child(15)'); // Fecha Registro column
-    const accionesColumn = table.querySelector('thead th:nth-child(16)'); // Acciones column
+    const aulasColumn = table.querySelector('thead th:nth-child(7)'); // Aulas Asignadas column
+    const nombreAulasColumn = table.querySelector('thead th:nth-child(8)'); // Nombre Aulas column (NUEVA)
+    const telefonoColumn = table.querySelector('thead th:nth-child(9)'); // Teléfono column
+    const documentoColumn = table.querySelector('thead th:nth-child(10)'); // Documento column
+    const institucionColumn = table.querySelector('thead th:nth-child(11)'); // Institución column
+    const gradoColumn = table.querySelector('thead th:nth-child(12)'); // Grado column
+    const departamentoColumn = table.querySelector('thead th:nth-child(13)'); // Departamento column
+    const emailRecuperacionColumn = table.querySelector('thead th:nth-child(14)'); // Email Recuperación column
+    const codigoRecuperacionColumn = table.querySelector('thead th:nth-child(15)'); // Código Recuperación column
+    const fechaColumn = table.querySelector('thead th:nth-child(16)'); // Fecha Registro column
+    const accionesColumn = table.querySelector('thead th:nth-child(17)'); // Acciones column
 
     // Hide gamification columns for profesores, superusuarios, and estudiantes (since we have dedicated insignias view)
     const shouldHideGamification = view === 'profesores' || view === 'superusuarios' || view === 'estudiantes';
@@ -718,7 +758,8 @@ function updateColumnVisibility(view) {
         if (estadoColumn) estadoColumn.style.display = 'none';
         if (puntosColumn) puntosColumn.style.display = 'none';
         if (insigniasColumn) insigniasColumn.style.display = 'none';
-        if (materiasColumn) materiasColumn.style.display = 'none';
+        if (aulasColumn) aulasColumn.style.display = 'none';
+        if (nombreAulasColumn) nombreAulasColumn.style.display = 'none';
         if (telefonoColumn) telefonoColumn.style.display = 'none';
         if (documentoColumn) documentoColumn.style.display = 'none';
         if (institucionColumn) institucionColumn.style.display = 'none';
@@ -736,7 +777,8 @@ function updateColumnVisibility(view) {
         if (estadoColumn) estadoColumn.style.display = 'none';
         if (puntosColumn) puntosColumn.style.display = ''; // Show Puntos column
         if (insigniasColumn) insigniasColumn.style.display = ''; // Show Insignias column
-        if (materiasColumn) materiasColumn.style.display = 'none';
+        if (aulasColumn) aulasColumn.style.display = 'none';
+        if (nombreAulasColumn) nombreAulasColumn.style.display = 'none';
         if (telefonoColumn) telefonoColumn.style.display = 'none';
         if (documentoColumn) documentoColumn.style.display = 'none';
         if (institucionColumn) institucionColumn.style.display = 'none';
@@ -751,7 +793,8 @@ function updateColumnVisibility(view) {
         // Show all columns for other views, then apply specific hiding rules
         if (rolColumn) rolColumn.style.display = '';
         if (estadoColumn) estadoColumn.style.display = '';
-        if (materiasColumn) materiasColumn.style.display = '';
+        if (aulasColumn) aulasColumn.style.display = '';
+        if (nombreAulasColumn) nombreAulasColumn.style.display = '';
         if (telefonoColumn) telefonoColumn.style.display = '';
         if (fechaColumn) fechaColumn.style.display = '';
         if (accionesColumn) accionesColumn.style.display = '';
@@ -786,24 +829,25 @@ function updateColumnVisibility(view) {
     // Update all table rows in the users table specifically
     const tableRows = table.querySelectorAll('tbody tr');
     tableRows.forEach(row => {
-        // All cell selectors
+        // All cell selectors (actualizado con nueva columna Nombre Aulas)
         const cells = row.querySelectorAll('td');
-        if (cells.length < 16) return; // Skip if row doesn't have all cells
+        if (cells.length < 17) return; // Skip if row doesn't have all cells (ahora son 17)
 
         const rolCell = cells[2]; // 3rd column (index 2)
         const estadoCell = cells[3]; // 4th column
         const puntosCell = cells[4]; // 5th column
         const insigniasCell = cells[5]; // 6th column
-        const materiasCell = cells[6]; // 7th column
-        const telefonoCell = cells[7]; // 8th column
-        const documentoCell = cells[8]; // 9th column
-        const institucionCell = cells[9]; // 10th column
-        const gradoCell = cells[10]; // 11th column
-        const departamentoCell = cells[11]; // 12th column
-        const emailRecuperacionCell = cells[12]; // 13th column
-        const codigoRecuperacionCell = cells[13]; // 14th column
-        const fechaCell = cells[14]; // 15th column
-        const accionesCell = cells[15]; // 16th column
+        const aulasCell = cells[6]; // 7th column - Aulas Asignadas
+        const nombreAulasCell = cells[7]; // 8th column - Nombre Aulas (NUEVA)
+        const telefonoCell = cells[8]; // 9th column
+        const documentoCell = cells[9]; // 10th column
+        const institucionCell = cells[10]; // 11th column
+        const gradoCell = cells[11]; // 12th column
+        const departamentoCell = cells[12]; // 13th column
+        const emailRecuperacionCell = cells[13]; // 14th column
+        const codigoRecuperacionCell = cells[14]; // 15th column
+        const fechaCell = cells[15]; // 16th column
+        const accionesCell = cells[16]; // 17th column
 
         if (isRecoveryView) {
             // Hide most cells for recovery view, but keep Rol visible
@@ -811,7 +855,8 @@ function updateColumnVisibility(view) {
             if (estadoCell) estadoCell.style.display = 'none';
             if (puntosCell) puntosCell.style.display = 'none';
             if (insigniasCell) insigniasCell.style.display = 'none';
-            if (materiasCell) materiasCell.style.display = 'none';
+            if (aulasCell) aulasCell.style.display = 'none';
+            if (nombreAulasCell) nombreAulasCell.style.display = 'none';
             if (telefonoCell) telefonoCell.style.display = 'none';
             if (documentoCell) documentoCell.style.display = 'none';
             if (institucionCell) institucionCell.style.display = 'none';
@@ -829,7 +874,8 @@ function updateColumnVisibility(view) {
             if (estadoCell) estadoCell.style.display = 'none';
             if (puntosCell) puntosCell.style.display = ''; // Show Puntos cell
             if (insigniasCell) insigniasCell.style.display = ''; // Show Insignias cell
-            if (materiasCell) materiasCell.style.display = 'none';
+            if (aulasCell) aulasCell.style.display = 'none';
+            if (nombreAulasCell) nombreAulasCell.style.display = 'none';
             if (telefonoCell) telefonoCell.style.display = 'none';
             if (documentoCell) documentoCell.style.display = 'none';
             if (institucionCell) institucionCell.style.display = 'none';
@@ -844,7 +890,8 @@ function updateColumnVisibility(view) {
             // Show all cells for other views, then apply specific hiding rules
             if (rolCell) rolCell.style.display = '';
             if (estadoCell) estadoCell.style.display = '';
-            if (materiasCell) materiasCell.style.display = '';
+            if (aulasCell) aulasCell.style.display = '';
+            if (nombreAulasCell) nombreAulasCell.style.display = '';
             if (telefonoCell) telefonoCell.style.display = '';
             if (fechaCell) fechaCell.style.display = '';
             if (accionesCell) accionesCell.style.display = '';
@@ -883,6 +930,9 @@ async function loadUsers() {
     try {
         showLoading(true);
         await waitForFirebase();
+
+        // Cargar cache de nombres de aulas primero
+        await loadAulasNombresCache();
 
         const usersSnapshot = await window.firebaseDB.collection('usuarios').get();
 
@@ -1099,6 +1149,18 @@ function renderUsers() {
                             </span>
                         </div>` :
                         (user.tipoUsuario === 'admin' ? '<span class="text-muted">Sin aulas</span>' : 'N/A')))}
+            </td>
+            <td>
+                ${(() => {
+                    if ((user.tipoUsuario === 'estudiante' || user.tipoUsuario === 'admin') && user.aulasAsignadas && user.aulasAsignadas.length > 0) {
+                        return `<button class="ver-aulas-btn" onclick="mostrarAulasUsuario('${user.id}', '${user.nombre}')" title="Ver aulas asignadas">
+                            <i class="bi bi-eye"></i> Ver Aulas
+                        </button>`;
+                    } else if (user.tipoUsuario === 'estudiante' || user.tipoUsuario === 'admin') {
+                        return '<span class="text-muted">-</span>';
+                    }
+                    return 'N/A';
+                })()}
             </td>
             <td>
                 ${user.telefono ?
@@ -5494,7 +5556,139 @@ function getAulasProfesorFromForm(formType) {
     return aulasAsignadas;
 }
 
+// ==========================================
+// MODAL PARA VER AULAS DEL USUARIO
+// ==========================================
+
+// Función para mostrar las aulas de un usuario en un modal
+async function mostrarAulasUsuario(userId, userName) {
+    // Buscar el usuario
+    const user = allUsers.find(u => u.id === userId);
+    if (!user || !user.aulasAsignadas || user.aulasAsignadas.length === 0) {
+        showMessage('Este usuario no tiene aulas asignadas', 'info');
+        return;
+    }
+
+    // Obtener información completa de las aulas
+    const aulasInfo = [];
+    for (const aulaRef of user.aulasAsignadas) {
+        const aulaId = typeof aulaRef === 'object' ? aulaRef.aulaId : aulaRef;
+        
+        // Buscar en allAulas o en el cache
+        let aulaData = null;
+        if (typeof allAulas !== 'undefined' && allAulas.length > 0) {
+            aulaData = allAulas.find(a => a.id === aulaId);
+        }
+        
+        // Si no está en allAulas, buscar en Firebase
+        if (!aulaData && window.firebaseDB) {
+            try {
+                const aulaDoc = await window.firebaseDB.collection('aulas').doc(aulaId).get();
+                if (aulaDoc.exists) {
+                    aulaData = { id: aulaDoc.id, ...aulaDoc.data() };
+                }
+            } catch (error) {
+                console.error('Error fetching aula:', error);
+            }
+        }
+
+        if (aulaData) {
+            aulasInfo.push({
+                id: aulaId,
+                nombre: aulaData.nombre || aulaId,
+                color: aulaData.color || '#667eea',
+                descripcion: aulaData.descripcion || '',
+                materias: aulaData.materias || []
+            });
+        } else {
+            aulasInfo.push({
+                id: aulaId,
+                nombre: aulasNombresCache[aulaId] || aulaId,
+                color: '#667eea',
+                descripcion: '',
+                materias: []
+            });
+        }
+    }
+
+    // Crear el modal si no existe
+    let modal = document.getElementById('verAulasModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'verAulasModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content ver-aulas-modal-content">
+                <div class="modal-header">
+                    <h3 id="verAulasModalTitle">Aulas Asignadas</h3>
+                    <button class="close-btn" onclick="cerrarModalAulas()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="verAulasModalBody">
+                    <!-- Aulas se cargarán aquí -->
+                </div>
+                <div class="modal-actions">
+                    <button class="cancel-btn" onclick="cerrarModalAulas()">Cerrar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Cerrar al hacer clic fuera
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModalAulas();
+            }
+        });
+    }
+
+    // Actualizar título
+    document.getElementById('verAulasModalTitle').innerHTML = `
+        <i class="bi bi-door-open-fill"></i> Aulas de ${userName}
+    `;
+
+    // Generar contenido de las aulas
+    const aulasHTML = aulasInfo.map(aula => `
+        <div class="aula-info-card" style="border-left: 4px solid ${aula.color};">
+            <div class="aula-info-header" style="background: linear-gradient(135deg, ${aula.color}20, ${aula.color}10);">
+                <div class="aula-color-indicator" style="background: ${aula.color};"></div>
+                <h4 class="aula-info-nombre">${aula.nombre}</h4>
+            </div>
+            ${aula.descripcion ? `<p class="aula-info-descripcion">${aula.descripcion}</p>` : ''}
+            ${aula.materias && aula.materias.length > 0 ? `
+                <div class="aula-info-materias">
+                    <span class="materias-label"><i class="bi bi-book"></i> Materias:</span>
+                    <div class="materias-tags">
+                        ${aula.materias.map(m => `<span class="materia-tag" style="background: ${aula.color}30; color: ${aula.color}; border: 1px solid ${aula.color}50;">${m}</span>`).join('')}
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+
+    document.getElementById('verAulasModalBody').innerHTML = `
+        <div class="aulas-info-container">
+            <p class="aulas-count-info"><i class="bi bi-info-circle"></i> ${aulasInfo.length} aula${aulasInfo.length > 1 ? 's' : ''} asignada${aulasInfo.length > 1 ? 's' : ''}</p>
+            ${aulasHTML}
+        </div>
+    `;
+
+    // Mostrar modal
+    modal.classList.add('show');
+}
+
+// Función para cerrar el modal de aulas
+function cerrarModalAulas() {
+    const modal = document.getElementById('verAulasModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
 // Hacer funciones globales
+window.mostrarAulasUsuario = mostrarAulasUsuario;
+window.cerrarModalAulas = cerrarModalAulas;
 window.toggleAulaProfesor = toggleAulaProfesor;
 window.loadAulasForProfesorCreateForm = loadAulasForProfesorCreateForm;
 window.loadAulasForProfesorEditForm = loadAulasForProfesorEditForm;

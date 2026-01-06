@@ -213,7 +213,7 @@ body {
     top: 70px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
+    z-index: 999;
     max-width: 1400px;
     width: calc(100% - 40px);
 }
