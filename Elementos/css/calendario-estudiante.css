@@ -432,6 +432,132 @@ body {
 .leyenda-color.ingles { background: #9C27B0; }
 .leyenda-color.anuncios { background: #1a1a1a; }
 
+/* Links de Materias */
+.links-materias-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.links-materias-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #1a1a1a, #333);
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.links-materias-header i:first-child {
+    font-size: 1.2rem;
+}
+
+.btn-toggle-links {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-toggle-links:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-toggle-links.collapsed i {
+    transform: rotate(-90deg);
+}
+
+.links-materias-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.links-materias-body.collapsed {
+    display: none;
+}
+
+.link-materia-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.link-materia-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.link-materia-item i:last-child {
+    margin-left: auto;
+    opacity: 0.7;
+    font-size: 0.85rem;
+}
+
+.link-materia-item.matematicas { background: linear-gradient(135deg, #2196F3, #1976D2); }
+.link-materia-item.lectura { background: linear-gradient(135deg, #F44336, #D32F2F); }
+.link-materia-item.sociales { background: linear-gradient(135deg, #FF9800, #F57C00); }
+.link-materia-item.naturales { background: linear-gradient(135deg, #4CAF50, #388E3C); }
+.link-materia-item.ingles { background: linear-gradient(135deg, #9C27B0, #7B1FA2); }
+
+/* Filtro de Materia Semanal */
+.filtro-materia-semanal {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.filtro-materia-semanal label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.filtro-materia-semanal select {
+    flex: 1;
+    max-width: 250px;
+    padding: 0.6rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filtro-materia-semanal select:focus {
+    outline: none;
+    border-color: #ff0000;
+}
+
 /* Vista Calendario Mensual */
 .calendario-mensual-est {
     background: white;
@@ -878,6 +1004,46 @@ body {
 .estado-badge-modal.cancelada {
     background: #f8d7da;
     color: #721c24;
+}
+
+/* Botón Unirse a Clase */
+.btn-unirse-clase {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+}
+
+.btn-unirse-clase:hover {
+    background: linear-gradient(135deg, #cc0000, #990000);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
+    color: white;
+}
+
+.enlace-clase-item {
+    background: #fff5f5;
+    border-radius: 10px;
+    padding: 1rem !important;
+    margin-top: 0.5rem;
+}
+
+.badge-predeterminado {
+    font-size: 0.7rem;
+    background: #e8f4fd;
+    color: #0066cc;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    font-weight: 500;
 }
 
 /* Loading */

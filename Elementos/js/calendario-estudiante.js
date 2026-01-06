@@ -6,6 +6,16 @@ let calendarioEstAulaData = null;
 let calendarioEstClases = [];
 let calendarioEstAulas = [];
 let currentUserEst = null;
+let filtroMateriaActivo = ''; // Filtro de materia para vista semanal
+
+// Links predeterminados por materia
+const LINKS_MATERIAS = {
+    'matematicas': 'https://meet.google.com/swm-cavq-xqz',
+    'lectura': 'https://meet.google.com/hnq-ufiv-kjv',
+    'sociales': 'https://meet.google.com/skb-jdkg-fnb',
+    'naturales': 'https://meet.google.com/ubb-gpgj-jug',
+    'ingles': 'https://meet.google.com/ihn-ihft-trk'
+};
 
 // Configuración de materias
 const materiasConfigEst = {
@@ -350,7 +360,7 @@ function crearCeldaDiaEst(date, isOtherMonth, grid) {
 // Renderizar calendario semanal
 function renderCalendarioSemanalEst() {
     const grid = document.getElementById('semanaGridEst');
-    const navTitle = document.getElementById('calendarioNavTitle');
+    const navTitle = document.getElementById('calendarioNavTitleSemanal');
     if (!grid) return;
 
     // Calcular inicio y fin de semana
@@ -393,7 +403,11 @@ function renderCalendarioSemanalEst() {
         const body = document.createElement('div');
         body.className = 'dia-semana-body';
 
-        const clasesDelDia = calendarioEstClases.filter(c => c.fecha === dateStr);
+        // Filtrar clases de este día y por materia si hay filtro activo
+        let clasesDelDia = calendarioEstClases.filter(c => c.fecha === dateStr);
+        if (filtroMateriaActivo) {
+            clasesDelDia = clasesDelDia.filter(c => c.materia === filtroMateriaActivo);
+        }
         
         if (clasesDelDia.length === 0) {
             body.innerHTML = '<div class="sin-clases"><i class="bi bi-calendar-x"></i>Sin clases</div>';
@@ -417,6 +431,20 @@ function renderCalendarioSemanalEst() {
     // Mostrar vista semanal, ocultar mensual
     document.getElementById('calendarioMensualEst').style.display = 'none';
     document.getElementById('calendarioSemanalEst').classList.add('active');
+}
+
+// Filtrar por materia en vista semanal
+function filtrarPorMateria(materia) {
+    filtroMateriaActivo = materia;
+    renderCalendarioSemanalEst();
+}
+
+// Toggle panel de links
+function toggleLinksPanel() {
+    const body = document.getElementById('linksMateriasBody');
+    const btn = document.getElementById('btnToggleLinks');
+    body.classList.toggle('collapsed');
+    btn.classList.toggle('collapsed');
 }
 
 
@@ -451,6 +479,10 @@ function mostrarDetalleClaseEst(clase) {
     const estadoClass = clase.estado || 'pendiente';
     const estadoText = estadoClass === 'confirmada' ? 'Confirmada' : estadoClass === 'cancelada' ? 'Cancelada' : 'Pendiente';
     const estadoIcon = estadoClass === 'confirmada' ? 'check-circle-fill' : estadoClass === 'cancelada' ? 'x-circle-fill' : 'clock-fill';
+
+    // Determinar enlace a mostrar (personalizado o predeterminado de la materia)
+    const enlaceClase = clase.enlace || LINKS_MATERIAS[clase.materia] || '';
+    const esPredeterminado = !clase.enlace && LINKS_MATERIAS[clase.materia];
 
     body.innerHTML = `
         <div class="detalle-item">
@@ -503,14 +535,14 @@ function mostrarDetalleClaseEst(clase) {
             </div>
         </div>
         ` : ''}
-        ${clase.enlace ? `
-        <div class="detalle-item">
-            <i class="bi bi-link-45deg"></i>
+        ${enlaceClase ? `
+        <div class="detalle-item enlace-clase-item">
+            <i class="bi bi-camera-video-fill"></i>
             <div class="detalle-contenido">
-                <div class="detalle-label">Enlace de Clase</div>
+                <div class="detalle-label">Enlace de Clase ${esPredeterminado ? '<span class="badge-predeterminado">(Link de la materia)</span>' : ''}</div>
                 <div class="detalle-valor">
-                    <a href="${clase.enlace}" target="_blank">
-                        Unirse a la clase <i class="bi bi-box-arrow-up-right"></i>
+                    <a href="${enlaceClase}" target="_blank" class="btn-unirse-clase">
+                        <i class="bi bi-box-arrow-up-right"></i> Unirse a la clase
                     </a>
                 </div>
             </div>
@@ -632,3 +664,5 @@ window.mostrarDetalleClaseEst = mostrarDetalleClaseEst;
 window.cerrarModalClaseEst = cerrarModalClaseEst;
 window.navegarCalendarioEst = navegarCalendarioEst;
 window.cambiarVistaCalendarioEst = cambiarVistaCalendarioEst;
+window.filtrarPorMateria = filtrarPorMateria;
+window.toggleLinksPanel = toggleLinksPanel;

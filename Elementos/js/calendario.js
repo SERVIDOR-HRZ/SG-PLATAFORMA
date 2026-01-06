@@ -13,6 +13,15 @@ let todosLosProfesores = [];
 let editingClassId = null;
 let currentViewingClassId = null;
 
+// Links predeterminados por materia
+const LINKS_PREDETERMINADOS = {
+    'matematicas': 'https://meet.google.com/swm-cavq-xqz',
+    'lectura': 'https://meet.google.com/hnq-ufiv-kjv',
+    'sociales': 'https://meet.google.com/skb-jdkg-fnb',
+    'naturales': 'https://meet.google.com/ubb-gpgj-jug',
+    'ingles': 'https://meet.google.com/ihn-ihft-trk'
+};
+
 document.addEventListener('DOMContentLoaded', function () {
     checkAuthentication();
     loadUserInfo();
@@ -962,7 +971,24 @@ async function editClass(claseId) {
         document.getElementById('descripcionClase').value = clase.descripcion || '';
         document.getElementById('fechaClase').value = clase.fecha;
         document.getElementById('duracionClase').value = clase.duracion;
-        document.getElementById('enlaceClase').value = clase.enlace || '';
+        
+        // Configurar tipo de enlace
+        const enlacePredeterminado = LINKS_PREDETERMINADOS[clase.materia];
+        if (clase.enlace && clase.enlace === enlacePredeterminado) {
+            document.getElementById('enlacePredeterminado').checked = true;
+            document.getElementById('enlacePersonalizadoContainer').style.display = 'none';
+            document.getElementById('enlacePredeterminadoInfo').style.display = 'flex';
+        } else if (clase.enlace) {
+            document.getElementById('enlacePersonalizado').checked = true;
+            document.getElementById('enlacePersonalizadoContainer').style.display = 'block';
+            document.getElementById('enlacePredeterminadoInfo').style.display = 'none';
+            document.getElementById('enlaceClase').value = clase.enlace;
+        } else {
+            document.getElementById('enlacePredeterminado').checked = true;
+            document.getElementById('enlacePersonalizadoContainer').style.display = 'none';
+            document.getElementById('enlacePredeterminadoInfo').style.display = 'flex';
+        }
+        actualizarEnlacePredeterminado(clase.materia);
 
         const horaInicioEl = document.getElementById('horaInicioClase');
         const horaFinEl = document.getElementById('horaFinClase');
@@ -1196,7 +1222,15 @@ async function handleFormSubmit(e) {
         const horaInicio = horaInicio12 ? convertirHora12a24(horaInicio12) : '';
         const horaFin = horaFin12 ? convertirHora12a24(horaFin12) : '';
         const duracion = document.getElementById('duracionClase').value;
-        const enlace = document.getElementById('enlaceClase').value;
+        
+        // Determinar enlace según tipo seleccionado
+        const tipoEnlace = document.querySelector('input[name="tipoEnlace"]:checked').value;
+        let enlace = '';
+        if (tipoEnlace === 'predeterminado') {
+            enlace = LINKS_PREDETERMINADOS[materia] || '';
+        } else {
+            enlace = document.getElementById('enlaceClase').value;
+        }
 
         if (!materia || !tipologia || !titulo || !tutorId || !fecha || !horaInicio || !horaFin) {
             await showNotification('Campos Requeridos', 'Por favor completa todos los campos requeridos (*)', 'warning');
@@ -1574,6 +1608,16 @@ function setupEventListeners() {
     // Cargar tutores cuando cambia la materia
     document.getElementById('materiaSelect').addEventListener('change', (e) => {
         cargarTutoresPorMateria(e.target.value);
+        actualizarEnlacePredeterminado(e.target.value);
+    });
+
+    // Selector de tipo de enlace
+    document.querySelectorAll('input[name="tipoEnlace"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const esPersonalizado = e.target.value === 'personalizado';
+            document.getElementById('enlacePersonalizadoContainer').style.display = esPersonalizado ? 'block' : 'none';
+            document.getElementById('enlacePredeterminadoInfo').style.display = esPersonalizado ? 'none' : 'flex';
+        });
     });
 
     // View toggle
@@ -1671,6 +1715,24 @@ function closeModal() {
     document.querySelector('#modalNuevaClase .modal-header h3').textContent = 'Programar Nueva Clase';
     const submitBtn = document.querySelector('#modalNuevaClase button[type="submit"]');
     submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Programar Clase';
+    
+    // Resetear selector de enlace
+    document.getElementById('enlacePredeterminado').checked = true;
+    document.getElementById('enlacePersonalizadoContainer').style.display = 'none';
+    document.getElementById('enlacePredeterminadoInfo').style.display = 'flex';
+    document.getElementById('enlacePredeterminadoTexto').textContent = 'Selecciona una materia para ver el link';
+}
+
+// Actualizar enlace predeterminado según materia
+function actualizarEnlacePredeterminado(materia) {
+    const infoEl = document.getElementById('enlacePredeterminadoTexto');
+    const link = LINKS_PREDETERMINADOS[materia];
+    
+    if (link) {
+        infoEl.innerHTML = `Link: <a href="${link}" target="_blank">${link}</a>`;
+    } else {
+        infoEl.textContent = 'Esta materia no tiene link predeterminado';
+    }
 }
 
 // ========== HISTORIAL DE PAGOS ==========

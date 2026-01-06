@@ -859,6 +859,78 @@
         gap: 1rem;
     }
 
+    /* Selector de tipo de enlace */
+    .enlace-tipo-selector {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .enlace-option {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .enlace-option:hover {
+        border-color: #ff0000;
+        background: #fff5f5;
+    }
+
+    .enlace-option input[type="radio"] {
+        width: auto;
+        accent-color: #ff0000;
+    }
+
+    .enlace-option input[type="radio"]:checked + .enlace-option-label {
+        color: #ff0000;
+        font-weight: 600;
+    }
+
+    .enlace-option:has(input:checked) {
+        border-color: #ff0000;
+        background: #fff5f5;
+    }
+
+    .enlace-option-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .enlace-option-label i {
+        font-size: 1.1rem;
+    }
+
+    .enlace-predeterminado-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: #e8f4fd;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #0066cc;
+    }
+
+    .enlace-predeterminado-info i {
+        font-size: 1rem;
+    }
+
+    .enlace-predeterminado-info a {
+        color: #0066cc;
+        word-break: break-all;
+    }
+
     /* Empty State */
     .empty-state {
         text-align: center;

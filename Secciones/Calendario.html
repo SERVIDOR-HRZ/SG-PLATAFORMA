@@ -346,8 +346,30 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="enlaceClase">Enlace de la Clase (opcional)</label>
-                        <input type="url" id="enlaceClase" placeholder="https://meet.google.com/...">
+                        <label>Enlace de la Clase</label>
+                        <div class="enlace-tipo-selector">
+                            <label class="enlace-option">
+                                <input type="radio" name="tipoEnlace" value="predeterminado" id="enlacePredeterminado" checked>
+                                <span class="enlace-option-label">
+                                    <i class="bi bi-link-45deg"></i>
+                                    Usar link predeterminado de la materia
+                                </span>
+                            </label>
+                            <label class="enlace-option">
+                                <input type="radio" name="tipoEnlace" value="personalizado" id="enlacePersonalizado">
+                                <span class="enlace-option-label">
+                                    <i class="bi bi-pencil"></i>
+                                    Usar link personalizado
+                                </span>
+                            </label>
+                        </div>
+                        <div id="enlacePersonalizadoContainer" style="display: none; margin-top: 0.5rem;">
+                            <input type="url" id="enlaceClase" placeholder="https://meet.google.com/...">
+                        </div>
+                        <div id="enlacePredeterminadoInfo" class="enlace-predeterminado-info">
+                            <i class="bi bi-info-circle"></i>
+                            <span id="enlacePredeterminadoTexto">Selecciona una materia para ver el link</span>
+                        </div>
                     </div>
                 </form>
             </div>

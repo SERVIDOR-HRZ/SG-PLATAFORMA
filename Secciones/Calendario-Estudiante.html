@@ -105,6 +105,44 @@
                 </div>
             </div>
 
+            <!-- Links de Clases por Materia -->
+            <div class="links-materias-container" id="linksMaterias">
+                <div class="links-materias-header">
+                    <i class="bi bi-link-45deg"></i>
+                    <span>Links de Clases por Materia</span>
+                    <button class="btn-toggle-links" id="btnToggleLinks" onclick="toggleLinksPanel()">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="links-materias-body" id="linksMateriasBody">
+                    <a href="https://meet.google.com/swm-cavq-xqz" target="_blank" class="link-materia-item matematicas">
+                        <i class="bi bi-calculator-fill"></i>
+                        <span>Matemáticas</span>
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <a href="https://meet.google.com/hnq-ufiv-kjv" target="_blank" class="link-materia-item lectura">
+                        <i class="bi bi-book-fill"></i>
+                        <span>Lectura Crítica</span>
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <a href="https://meet.google.com/skb-jdkg-fnb" target="_blank" class="link-materia-item sociales">
+                        <i class="bi bi-globe"></i>
+                        <span>Ciencias Sociales</span>
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <a href="https://meet.google.com/ubb-gpgj-jug" target="_blank" class="link-materia-item naturales">
+                        <i class="bi bi-tree-fill"></i>
+                        <span>Ciencias Naturales</span>
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <a href="https://meet.google.com/ihn-ihft-trk" target="_blank" class="link-materia-item ingles">
+                        <i class="bi bi-translate"></i>
+                        <span>Inglés</span>
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+            </div>
+
             <!-- Vista Calendario Mensual -->
             <div class="calendario-mensual-est" id="calendarioMensualEst">
                 <div class="calendario-nav">
@@ -131,6 +169,18 @@
                     <button class="nav-btn-est" onclick="navegarCalendarioEst(1)">
                         <i class="bi bi-chevron-right"></i>
                     </button>
+                </div>
+                <!-- Filtro de materias para vista semanal -->
+                <div class="filtro-materia-semanal" id="filtroMateriaSemanal">
+                    <label><i class="bi bi-funnel"></i> Filtrar por materia:</label>
+                    <select id="selectFiltroMateria" onchange="filtrarPorMateria(this.value)">
+                        <option value="">Todas las materias</option>
+                        <option value="matematicas">Matemáticas</option>
+                        <option value="lectura">Lectura Crítica</option>
+                        <option value="sociales">Ciencias Sociales</option>
+                        <option value="naturales">Ciencias Naturales</option>
+                        <option value="ingles">Inglés</option>
+                    </select>
                 </div>
                 <div class="semana-grid" id="semanaGridEst">
                     <!-- Se genera dinámicamente -->
