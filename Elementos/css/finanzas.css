@@ -821,53 +821,79 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
-    border: 2px dashed #ddd;
-    border-radius: 8px;
+    padding: 1.5rem 2rem;
+    border: 2px dashed #ff0000;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
 }
 
 .file-upload-label:hover {
-    border-color: #ff0000;
-    background: #fff5f5;
+    border-color: #cc0000;
+    background: linear-gradient(135deg, #ffe8e8 0%, #ffcccc 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.15);
 }
 
 .file-upload-label i {
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: #ff0000;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    transition: transform 0.3s ease;
+}
+
+.file-upload-label:hover i {
+    transform: translateY(-3px);
+}
+
+.file-upload-label span {
+    font-size: 0.95rem;
+    color: #666;
+    font-weight: 500;
 }
 
 .file-preview {
     position: relative;
     margin-top: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .file-preview img {
     width: 100%;
-    border-radius: 8px;
+    border-radius: 12px;
+    display: block;
 }
 
 .remove-file {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #dc3545;
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
     color: white;
     border: none;
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(255, 0, 0, 0.4);
+    font-size: 1.1rem;
+}
+
+.remove-file:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
 }
 
 #comprobanteImage {
     width: 100%;
-    border-radius: 8px;
+    border-radius: 12px;
     margin-bottom: 1rem;
 }
 
@@ -1441,84 +1467,191 @@ body {
 }
 
 .movimiento-item {
-    padding: 1.5rem;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 1.25rem 1.5rem;
+    margin: 0.75rem;
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    background: white;
 }
 
 .movimiento-item:hover {
-    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .movimiento-item:last-child {
-    border-bottom: none;
+    margin-bottom: 0.75rem;
 }
 
 .movimiento-item.ingreso {
-    border-left: 5px solid #28a745;
+    border: 2px solid #28a745;
+    background: linear-gradient(135deg, #f8fff9 0%, #e8f5e9 100%);
+}
+
+.movimiento-item.ingreso:hover {
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
 }
 
 .movimiento-item.gasto {
-    border-left: 5px solid #dc3545;
+    border: 2px solid #dc3545;
+    background: linear-gradient(135deg, #fff8f8 0%, #ffebee 100%);
+}
+
+.movimiento-item.gasto:hover {
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
 }
 
 .movimiento-info {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 1rem;
     flex: 1;
+    min-width: 0;
 }
 
 .movimiento-icon {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: white;
+    flex-shrink: 0;
 }
 
 .movimiento-item.ingreso .movimiento-icon {
     background: linear-gradient(135deg, #28a745, #20c997);
+    box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
 }
 
 .movimiento-item.gasto .movimiento-icon {
     background: linear-gradient(135deg, #dc3545, #c82333);
+    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+}
+
+.movimiento-detalles {
+    flex: 1;
+    min-width: 0;
 }
 
 .movimiento-detalles h4 {
     font-size: 1rem;
     color: #333;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
 .movimiento-detalles p {
     font-size: 0.85rem;
     color: #666;
+    margin: 0;
 }
 
 .movimiento-categoria {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
-    background: #f0f0f0;
-    border-radius: 12px;
+    padding: 0.3rem 0.85rem;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 20px;
     font-size: 0.75rem;
-    color: #666;
+    color: #555;
+    font-weight: 500;
+    margin-top: 0.35rem;
+}
+
+.movimiento-item.ingreso .movimiento-categoria {
+    background: rgba(40, 167, 69, 0.15);
+    color: #1e7e34;
+}
+
+.movimiento-item.gasto .movimiento-categoria {
+    background: rgba(220, 53, 69, 0.15);
+    color: #bd2130;
+}
+
+.movimiento-fecha {
+    font-size: 0.8rem;
+    color: #888;
+    display: block;
     margin-top: 0.25rem;
+}
+
+/* Notas con ver más */
+.movimiento-notas-container {
+    margin-top: 0.5rem;
+    position: relative;
+}
+
+.movimiento-notas {
+    font-size: 0.8rem;
+    color: #666;
+    line-height: 1.5;
+    background: rgba(0, 0, 0, 0.03);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border-left: 3px solid #ddd;
+    margin: 0;
+    overflow: hidden;
+    max-height: 3.5em;
+    transition: max-height 0.3s ease;
+}
+
+.movimiento-notas.expanded {
+    max-height: 500px;
+}
+
+.movimiento-item.ingreso .movimiento-notas {
+    border-left-color: #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+.movimiento-item.gasto .movimiento-notas {
+    border-left-color: #dc3545;
+    background: rgba(220, 53, 69, 0.05);
+}
+
+.btn-ver-mas {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0.25rem 0;
+    margin-top: 0.25rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 0.2s;
+}
+
+.btn-ver-mas:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.btn-ver-mas i {
+    font-size: 0.7rem;
+    transition: transform 0.3s;
+}
+
+.btn-ver-mas.expanded i {
+    transform: rotate(180deg);
 }
 
 .movimiento-monto {
     text-align: right;
     margin-right: 1rem;
+    flex-shrink: 0;
 }
 
 .movimiento-monto-valor {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
 }
 
@@ -1536,9 +1669,34 @@ body {
     margin-top: 0.25rem;
 }
 
-.movimiento-fecha {
-    font-size: 0.8rem;
-    color: #999;
+.movimiento-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.movimiento-actions .btn-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+}
+
+.movimiento-actions .btn-edit-mov {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+}
+
+.movimiento-actions .btn-edit-mov:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+}
+
+.movimiento-actions .btn-delete-mov {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+
+.movimiento-actions .btn-delete-mov:hover {
+    background: linear-gradient(135deg, #c82333, #a71d2a);
 }
 
 /* Form Help Text */
@@ -1623,14 +1781,28 @@ body {
 
     .movimiento-item {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
         gap: 1rem;
+        padding: 1rem;
+    }
+
+    .movimiento-info {
+        width: 100%;
     }
 
     .movimiento-monto {
         width: 100%;
         text-align: left;
         margin-right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.75rem;
+        border-top: 1px dashed rgba(0,0,0,0.1);
+    }
+
+    .movimiento-actions {
+        justify-content: flex-end;
     }
 }
 
@@ -2212,15 +2384,49 @@ body {
 
 /* Modal de Pago Mejorado */
 .modal-pago-grande {
-    max-width: 700px;
+    max-width: 750px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-pago-grande .modal-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    border-radius: 15px 15px 0 0;
+    flex-shrink: 0;
+}
+
+.modal-pago-grande .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    padding-bottom: 0;
+}
+
+.modal-pago-grande .form-actions {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1.25rem 1.5rem;
+    margin: 0 -1.5rem;
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
 }
 
 .pago-profesor-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+    border-radius: 15px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     color: white;
+    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.3);
 }
 
 .profesor-info-header {
@@ -2235,6 +2441,7 @@ body {
     border-radius: 50%;
     border: 3px solid white;
     object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .profesor-datos h4 {
@@ -2250,10 +2457,11 @@ body {
 }
 
 .pago-seccion {
-    background: #f8f9fa;
-    border-radius: 10px;
+    background: #fff5f5;
+    border-radius: 12px;
     padding: 1.25rem;
     margin-bottom: 1.25rem;
+    border: 1px solid #ffcccc;
 }
 
 .seccion-titulo {
@@ -2267,7 +2475,7 @@ body {
 }
 
 .seccion-titulo i {
-    color: #667eea;
+    color: #ff0000;
     font-size: 1.1rem;
 }
 
@@ -2284,7 +2492,7 @@ body {
     padding: 0.75rem;
     background: white;
     border-radius: 8px;
-    border-left: 3px solid #667eea;
+    border-left: 3px solid #ff0000;
 }
 
 .dato-label {
@@ -2313,7 +2521,7 @@ body {
 
 .btn-copy-small {
     padding: 0.35rem 0.5rem;
-    background: #667eea;
+    background: #ff0000;
     color: white;
     border: none;
     border-radius: 6px;
@@ -2326,7 +2534,7 @@ body {
 }
 
 .btn-copy-small:hover {
-    background: #5568d3;
+    background: #cc0000;
     transform: translateY(-1px);
 }
 
@@ -2347,6 +2555,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    border: 1px solid #f0f0f0;
 }
 
 .pago-resumen .resumen-item span {
@@ -2361,8 +2570,9 @@ body {
 
 .pago-resumen .resumen-item.total {
     grid-column: 1 / -1;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
     color: white;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
 }
 
 .pago-resumen .resumen-item.total span {
@@ -2373,6 +2583,70 @@ body {
 .pago-resumen .resumen-item.total strong {
     color: white;
     font-size: 1.5rem;
+}
+
+/* Descripción de Clases en Modal de Pago */
+.clases-detalle-container {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    border: 1px solid #e0e0e0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.clases-detalle-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #ff0000;
+}
+
+.clases-detalle-header i {
+    color: #ff0000;
+    font-size: 1rem;
+}
+
+.clases-detalle-header span {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.clase-detalle-item {
+    padding: 0.65rem 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #ff0000;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.clase-detalle-item:last-child {
+    margin-bottom: 0;
+}
+
+.clase-detalle-item .clase-fecha {
+    font-weight: 600;
+    color: #ff0000;
+}
+
+.clase-detalle-item .clase-horario {
+    color: #666;
+}
+
+.clase-detalle-item .clase-titulo {
+    color: #333;
+    font-weight: 500;
+}
+
+.clase-detalle-item .clase-duracion {
+    color: #888;
+    font-size: 0.8rem;
 }
 
 /* Responsive */

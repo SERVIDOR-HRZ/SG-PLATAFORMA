@@ -27,9 +27,32 @@
             const cuenta = window.cuentasList ? window.cuentasList.find(c => c.id === movimiento.cuentaId) : null;
             const nombreCuenta = cuenta ? cuenta.nombre : 'Cuenta eliminada';
 
-            // Formatear descripción y notas con saltos de línea
+            // Formatear descripción (título)
             const descripcionHTML = (movimiento.descripcion || '').replace(/\n/g, '<br>');
-            const notasHTML = movimiento.notas ? movimiento.notas.replace(/\n/g, '<br>') : '';
+            
+            // Formatear notas con saltos de línea
+            const notasTexto = movimiento.notas || '';
+            const notasHTML = notasTexto.replace(/\n/g, '<br>');
+            
+            // Verificar si las notas son largas (más de 100 caracteres o más de 2 líneas)
+            const esNotaLarga = notasTexto.length > 100 || (notasTexto.match(/\n/g) || []).length > 1;
+            
+            // Generar HTML de notas con botón ver más si es necesario
+            let notasContainerHTML = '';
+            if (notasTexto) {
+                const uniqueId = `notas-${movimiento.id}`;
+                notasContainerHTML = `
+                    <div class="movimiento-notas-container">
+                        <p class="movimiento-notas" id="${uniqueId}">${notasHTML}</p>
+                        ${esNotaLarga ? `
+                            <button class="btn-ver-mas" data-target="${uniqueId}">
+                                <span>Ver más</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
 
             item.innerHTML = `
                 <div class="movimiento-info">
@@ -38,9 +61,9 @@
                     </div>
                     <div class="movimiento-detalles">
                         <h4>${descripcionHTML}</h4>
-                        <p>${movimiento.categoria}</p>
+                        <span class="movimiento-categoria">${movimiento.categoria}</span>
                         <span class="movimiento-fecha">${fechaStr}</span>
-                        ${notasHTML ? `<p class="movimiento-notas">${notasHTML}</p>` : ''}
+                        ${notasContainerHTML}
                     </div>
                 </div>
                 <div class="movimiento-monto">
@@ -60,9 +83,29 @@
             // Event listeners para los botones
             const editBtn = item.querySelector('.btn-edit-mov');
             const deleteBtn = item.querySelector('.btn-delete-mov');
+            const verMasBtn = item.querySelector('.btn-ver-mas');
 
             editBtn.addEventListener('click', () => openEditMovimiento(movimiento));
             deleteBtn.addEventListener('click', () => deleteMovimiento(movimiento.id, movimiento.tipo, movimiento.monto, movimiento.cuentaId));
+            
+            // Event listener para ver más
+            if (verMasBtn) {
+                verMasBtn.addEventListener('click', function() {
+                    const targetId = this.dataset.target;
+                    const notasEl = document.getElementById(targetId);
+                    const spanText = this.querySelector('span');
+                    
+                    if (notasEl.classList.contains('expanded')) {
+                        notasEl.classList.remove('expanded');
+                        spanText.textContent = 'Ver más';
+                        this.classList.remove('expanded');
+                    } else {
+                        notasEl.classList.add('expanded');
+                        spanText.textContent = 'Ver menos';
+                        this.classList.add('expanded');
+                    }
+                });
+            }
 
             return item;
         };

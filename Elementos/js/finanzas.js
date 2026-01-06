@@ -679,6 +679,7 @@ async function calcularClasesSemana(profesorId) {
     try {
         let totalClases = 0;
         let totalMinutos = 0;
+        let clasesDetalle = []; // Array para guardar detalles de cada clase
 
         // Buscar en la colección 'clases_programadas'
         try {
@@ -714,25 +715,41 @@ async function calcularClasesSemana(profesorId) {
                 if (fechaClase >= currentWeekStart && fechaClase <= currentWeekEnd) {
                     totalClases++;
                     
-                    if (clase.duracion) {
-                        totalMinutos += clase.duracion;
+                    const duracion = clase.duracion || 0;
+                    if (duracion) {
+                        totalMinutos += duracion;
                     }
+                    
+                    // Guardar detalle de la clase
+                    clasesDetalle.push({
+                        fecha: fechaClase,
+                        horaInicio: clase.horaInicio || '',
+                        horaFin: clase.horaFin || '',
+                        titulo: clase.titulo || clase.materia || 'Clase',
+                        descripcion: clase.descripcion || '',
+                        duracion: duracion,
+                        materia: clase.materia || ''
+                    });
                 }
             });
         } catch (error) {
             console.error('Error buscando clases:', error);
         }
 
+        // Ordenar clases por fecha
+        clasesDetalle.sort((a, b) => a.fecha - b.fecha);
+
         const totalHoras = totalMinutos / 60;
 
         return {
             totalClases,
             totalHoras: totalHoras.toFixed(2),
-            totalMinutos
+            totalMinutos,
+            clasesDetalle
         };
     } catch (error) {
         console.error('Error calculando clases:', error);
-        return { totalClases: 0, totalHoras: 0, totalMinutos: 0 };
+        return { totalClases: 0, totalHoras: 0, totalMinutos: 0, clasesDetalle: [] };
     }
 }
 
@@ -1666,9 +1683,13 @@ window.openRegistrarPago = async function(profesorId, clasesData, tarifa) {
         if (!profesorDoc.exists) return;
 
         const profesor = { id: profesorDoc.id, ...profesorDoc.data() };
+        
+        // Recalcular clases para obtener los detalles completos con fechas válidas
+        const clasesDataCompleto = await calcularClasesSemana(profesorId);
+        
         selectedPagoData = {
             profesorId,
-            clasesData,
+            clasesData: clasesDataCompleto,
             tarifa,
             profesor
         };
@@ -1687,7 +1708,7 @@ window.openRegistrarPago = async function(profesorId, clasesData, tarifa) {
             
             const initialDiv = document.createElement('div');
             initialDiv.className = 'avatar-initial';
-            initialDiv.style.cssText = 'width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold;';
+            initialDiv.style.cssText = 'width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold;';
             initialDiv.textContent = profesor.nombre.charAt(0).toUpperCase();
             avatarParent.insertBefore(initialDiv, avatarContainer);
         }
@@ -1695,11 +1716,11 @@ window.openRegistrarPago = async function(profesorId, clasesData, tarifa) {
         document.getElementById('modalPagoProfesorNombre').textContent = profesor.nombre;
         document.getElementById('modalPagoProfesorEmail').textContent = profesor.email;
 
-        document.getElementById('resumenClases').textContent = clasesData.totalClases;
-        document.getElementById('resumenHoras').textContent = `${clasesData.totalHoras}h`;
+        document.getElementById('resumenClases').textContent = clasesDataCompleto.totalClases;
+        document.getElementById('resumenHoras').textContent = `${clasesDataCompleto.totalHoras}h`;
         document.getElementById('resumenTarifa').textContent = `${formatNumber(tarifa)}`;
 
-        const total = tarifa * parseFloat(clasesData.totalHoras);
+        const total = tarifa * parseFloat(clasesDataCompleto.totalHoras);
         document.getElementById('resumenTotal').textContent = `${formatNumber(total)}`;
 
         // Llenar datos de pago del profesor
@@ -1743,6 +1764,9 @@ window.openRegistrarPago = async function(profesorId, clasesData, tarifa) {
             btnCopyNombre.style.display = 'none';
         }
 
+        // Generar descripción predeterminada con detalles de clases
+        generarDescripcionPago(clasesDataCompleto);
+
         // Cargar cuentas para pagar
         const totalPago = total;
         await loadCuentasPagoSelect(totalPago);
@@ -1753,5 +1777,99 @@ window.openRegistrarPago = async function(profesorId, clasesData, tarifa) {
         showNotification('error', 'Error', 'No se pudo cargar la información del pago');
     }
 };
+
+// Función para generar la descripción predeterminada del pago
+function generarDescripcionPago(clasesData) {
+    const notasPagoEl = document.getElementById('notasPago');
+    const clasesDetalleContainer = document.getElementById('clasesDetalleContainer');
+    
+    // Calcular número de semana del año
+    const getWeekNumber = (date) => {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    };
+    
+    const weekNum = getWeekNumber(currentWeekStart);
+    const options = { day: 'numeric', month: 'short' };
+    const startStr = currentWeekStart.toLocaleDateString('es-ES', options);
+    const endStr = currentWeekEnd.toLocaleDateString('es-ES', options);
+    
+    // Generar descripción base
+    let descripcion = `${clasesData.totalHoras} Horas Totales - Semana ${weekNum} - ${startStr} al ${endStr}`;
+    
+    const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    
+    // Si hay detalles de clases, agregarlos
+    if (clasesData.clasesDetalle && clasesData.clasesDetalle.length > 0) {
+        descripcion += '\n\n';
+        
+        clasesData.clasesDetalle.forEach((clase, index) => {
+            const fecha = clase.fecha;
+            if (!fecha || typeof fecha.getDay !== 'function') return;
+            
+            const diaSemana = diasSemana[fecha.getDay()];
+            const dia = fecha.getDate().toString().padStart(2, '0');
+            const mes = meses[fecha.getMonth()];
+            
+            const horaInicio = clase.horaInicio || '';
+            const horaFin = clase.horaFin || '';
+            const horario = horaInicio && horaFin ? `(${horaInicio} - ${horaFin})` : '';
+            
+            const duracionHoras = (clase.duracion / 60).toFixed(1);
+            const duracionTexto = duracionHoras == 1 ? '1 hora' : `${duracionHoras} horas`;
+            
+            const titulo = clase.titulo || clase.materia || 'Clase';
+            
+            descripcion += `${diaSemana} ${dia} ${mes} ${horario}: ${titulo} (${duracionTexto})`;
+            
+            if (index < clasesData.clasesDetalle.length - 1) {
+                descripcion += '\n';
+            }
+        });
+    }
+    
+    // Establecer la descripción en el textarea
+    notasPagoEl.value = descripcion;
+    
+    // Mostrar detalles visuales de las clases si existe el contenedor
+    if (clasesDetalleContainer && clasesData.clasesDetalle && clasesData.clasesDetalle.length > 0) {
+        let detalleHTML = '';
+        clasesData.clasesDetalle.forEach(clase => {
+            const fecha = clase.fecha;
+            if (!fecha || typeof fecha.getDay !== 'function') return;
+            
+            const diaSemana = diasSemana[fecha.getDay()];
+            const dia = fecha.getDate().toString().padStart(2, '0');
+            const mes = meses[fecha.getMonth()];
+            
+            const horaInicio = clase.horaInicio || '';
+            const horaFin = clase.horaFin || '';
+            const horario = horaInicio && horaFin ? `${horaInicio} - ${horaFin}` : 'Sin horario';
+            
+            const duracionHoras = (clase.duracion / 60).toFixed(1);
+            const duracionTexto = duracionHoras == 1 ? '1 hora' : `${duracionHoras} horas`;
+            
+            const titulo = clase.titulo || clase.materia || 'Clase';
+            
+            detalleHTML += `
+                <div class="clase-detalle-item">
+                    <span class="clase-fecha">${diaSemana} ${dia} ${mes}</span>
+                    <span class="clase-horario">(${horario})</span>: 
+                    <span class="clase-titulo">${titulo}</span>
+                    <span class="clase-duracion"> - ${duracionTexto}</span>
+                </div>
+            `;
+        });
+        
+        clasesDetalleContainer.innerHTML = detalleHTML;
+        clasesDetalleContainer.style.display = 'block';
+    } else if (clasesDetalleContainer) {
+        clasesDetalleContainer.style.display = 'none';
+    }
+}
 
 window.copiarAlPortapapeles = copiarAlPortapapeles;
