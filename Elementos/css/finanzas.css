@@ -1699,6 +1699,49 @@ body {
     background: linear-gradient(135deg, #c82333, #a71d2a);
 }
 
+/* Modal Editar Movimiento - Header y Footer fijos */
+.modal-editar-movimiento,
+.modal-nuevo-movimiento {
+    max-width: 600px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-editar-movimiento .modal-header,
+.modal-nuevo-movimiento .modal-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    border-radius: 15px 15px 0 0;
+    flex-shrink: 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-editar-movimiento .modal-body,
+.modal-nuevo-movimiento .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    padding-bottom: 0;
+}
+
+.modal-editar-movimiento .form-actions,
+.modal-nuevo-movimiento .form-actions {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1.25rem 1.5rem;
+    margin: 1rem -1.5rem 0 -1.5rem;
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
 /* Form Help Text */
 .form-help {
     display: block;
