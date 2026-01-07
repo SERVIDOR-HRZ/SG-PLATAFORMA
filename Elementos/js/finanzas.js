@@ -1041,6 +1041,7 @@ async function handleRegistrarPago(e) {
             profesorId: selectedPagoData.profesorId,
             profesorNombre: selectedPagoData.profesor.nombre || '',
             profesorEmail: selectedPagoData.profesor.email || selectedPagoData.profesor.usuario || '',
+            metodoPago: selectedPagoData.profesor.metodoPago || '',
             semanaInicio: firebase.firestore.Timestamp.fromDate(currentWeekStart),
             semanaFin: firebase.firestore.Timestamp.fromDate(currentWeekEnd),
             clasesTotales: selectedPagoData.clasesData.totalClases,
@@ -1050,6 +1051,7 @@ async function handleRegistrarPago(e) {
             comprobanteUrl: comprobanteUrl,
             cuentaId: cuentaId,
             cuentaNombre: cuenta.nombre,
+            cuentaTipo: cuenta.tipo || '',
             aulaId: currentAulaId || null,
             aulaNombre: currentAulaData ? currentAulaData.nombre : '',
             notas: notas || '',
@@ -1146,6 +1148,25 @@ async function loadHistorial() {
             return;
         }
 
+        // Obtener tipos de cuenta para pagos que no lo tienen
+        const cuentasCache = {};
+        for (const pago of pagos) {
+            if (!pago.cuentaTipo && pago.cuentaId && !cuentasCache[pago.cuentaId]) {
+                try {
+                    const cuentaDoc = await getDB().collection('cuentas_bancarias').doc(pago.cuentaId).get();
+                    if (cuentaDoc.exists) {
+                        cuentasCache[pago.cuentaId] = cuentaDoc.data().tipo || '';
+                    }
+                } catch (e) {
+                    console.log('No se pudo obtener cuenta:', pago.cuentaId);
+                }
+            }
+            // Asignar el tipo de cuenta al pago
+            if (!pago.cuentaTipo && pago.cuentaId && cuentasCache[pago.cuentaId]) {
+                pago.cuentaTipo = cuentasCache[pago.cuentaId];
+            }
+        }
+
         historialList.innerHTML = '';
 
         pagos.forEach(pago => {
@@ -1179,24 +1200,66 @@ function createHistorialItem(pago) {
     const mes = fecha.toLocaleDateString('es-ES', { month: 'short' });
     const semanaInicio = pago.semanaInicio ? pago.semanaInicio.toDate() : new Date();
     const semanaFin = pago.semanaFin ? pago.semanaFin.toDate() : new Date();
+    
+    // Formatear rango de semana más corto
+    const semanaInicioStr = semanaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    const semanaFinStr = semanaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    
+    // Mostrar tipo de cuenta (Nequi, Daviplata, etc.)
+    const metodoPagoDisplay = pago.cuentaTipo || pago.metodoPago || 'No especificado';
 
     item.innerHTML = `
-        <div class="historial-info">
+        <div class="historial-header">
             <div class="historial-fecha">
-                <div class="historial-dia">${dia}</div>
-                <div class="historial-mes">${mes}</div>
+                <div class="historial-fecha-icon">
+                    <div class="historial-dia">${dia}</div>
+                    <div class="historial-mes">${mes}</div>
+                </div>
+                <div class="historial-semana">${semanaInicioStr} - ${semanaFinStr}</div>
             </div>
-            <div class="historial-detalles">
-                <h4>${pago.profesorNombre}</h4>
-                <p>Semana: ${semanaInicio.toLocaleDateString('es-ES')} - ${semanaFin.toLocaleDateString('es-ES')}</p>
-                <p>${pago.clasesTotales} clases • ${pago.horasTotales}h • $${formatNumber(pago.tarifaPorHora)}/h</p>
+            <div class="historial-status">
+                <i class="bi bi-check-circle-fill"></i> Pagado
             </div>
         </div>
-        <div class="historial-monto">$${formatNumber(pago.totalPagado)}</div>
-        <div class="historial-actions">
-            <button class="btn-icon view" onclick="verComprobante('${pago.comprobanteUrl}')">
-                <i class="bi bi-eye"></i>
-            </button>
+        <div class="historial-body">
+            <div class="historial-info">
+                <div class="historial-avatar-default">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="historial-detalles">
+                    <h4>${pago.profesorNombre}</h4>
+                    <p><i class="bi bi-envelope"></i> ${pago.profesorEmail || 'Sin email'}</p>
+                </div>
+            </div>
+            <div class="historial-stats">
+                <div class="historial-stat">
+                    <span class="historial-stat-label">Clases</span>
+                    <span class="historial-stat-value">${pago.clasesTotales}</span>
+                </div>
+                <div class="historial-stat">
+                    <span class="historial-stat-label">Horas</span>
+                    <span class="historial-stat-value">${pago.horasTotales}h</span>
+                </div>
+                <div class="historial-stat">
+                    <span class="historial-stat-label">Tarifa/h</span>
+                    <span class="historial-stat-value">$${formatNumber(pago.tarifaPorHora)}</span>
+                </div>
+            </div>
+            <div class="historial-monto-container">
+                <span class="historial-monto-label">Total Pagado</span>
+                <span class="historial-monto">$${formatNumber(pago.totalPagado)}</span>
+            </div>
+        </div>
+        <div class="historial-footer">
+            <div class="historial-metodo">
+                <i class="bi bi-credit-card-2-front"></i>
+                <strong>${metodoPagoDisplay}</strong>
+            </div>
+            <div class="historial-actions">
+                <button class="btn-icon view" onclick="verComprobante('${pago.comprobanteUrl}')" title="Ver comprobante">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
         </div>
     `;
 
