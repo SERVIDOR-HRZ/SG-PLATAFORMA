@@ -686,17 +686,22 @@ function setupDesafiosSubmenu() {
             document.getElementById(`${subtab}Subtab`).classList.add('active');
         });
     });
+    
+    // Botón iniciar desafío
+    const iniciarDesafioBtn = document.getElementById('iniciarDesafioBtn');
+    if (iniciarDesafioBtn) {
+        iniciarDesafioBtn.addEventListener('click', () => {
+            // Redirigir a la página de desafíos con la materia actual
+            window.location.href = `Desafios.html?materia=${currentMateria}&aula=${currentAulaId}`;
+        });
+    }
 }
 
 // Load desafios
 function loadDesafios() {
     const desafiosContainer = document.getElementById('desafiosContainer');
-    desafiosContainer.innerHTML = `
-        <div class="empty-state">
-            <i class="bi bi-trophy"></i>
-            <p>Próximamente: Desafíos</p>
-        </div>
-    `;
+    // Los desafíos se cargarán aquí cuando estén disponibles
+    desafiosContainer.innerHTML = '';
 }
 
 // Load foro
