@@ -105,8 +105,89 @@
 
             <!-- Desafíos Tab -->
             <div class="tab-pane" id="desafiosPane">
-                <div class="desafios-container" id="desafiosContainer">
-                    <!-- Desafíos will be loaded here -->
+                <!-- Submenú de Desafíos -->
+                <div class="desafios-submenu">
+                    <button class="desafios-submenu-btn active" data-subtab="retos">
+                        <i class="bi bi-trophy-fill"></i>
+                        Retos
+                    </button>
+                    <button class="desafios-submenu-btn" data-subtab="tienda">
+                        <i class="bi bi-shop"></i>
+                        Tienda
+                    </button>
+                </div>
+                
+                <!-- Contenido de Retos -->
+                <div class="desafios-subtab active" id="retosSubtab">
+                    <div class="retos-main-container">
+                        <div class="retos-hero">
+                            <div class="retos-hero-icon">
+                                <i class="bi bi-trophy-fill"></i>
+                            </div>
+                            <h3>¡Pon a prueba tus conocimientos!</h3>
+                            <p>Completa desafíos para ganar monedas y subir de nivel</p>
+                            <button class="iniciar-desafio-btn" id="iniciarDesafioBtn">
+                                <i class="bi bi-play-fill"></i>
+                                Iniciar Desafío
+                            </button>
+                        </div>
+                    </div>
+                    <div class="desafios-container" id="desafiosContainer">
+                        <!-- Desafíos will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Contenido de Tienda -->
+                <div class="desafios-subtab" id="tiendaSubtab">
+                    <div class="tienda-container" id="tiendaContainer">
+                        <h4 class="tienda-section-title"><i class="bi bi-lightning-fill"></i> Energía</h4>
+                        <div class="tienda-items-grid">
+                            <div class="tienda-item" data-item="energia1" data-precio="20">
+                                <div class="tienda-item-icon energia">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    <span class="cantidad">+1</span>
+                                </div>
+                                <div class="tienda-item-info">
+                                    <span class="tienda-item-nombre">1 Energía</span>
+                                    <span class="tienda-item-precio"><i class="bi bi-coin"></i> 20</span>
+                                </div>
+                                <button class="tienda-comprar-btn">Comprar</button>
+                            </div>
+                            <div class="tienda-item" data-item="energia3" data-precio="50">
+                                <div class="tienda-item-icon energia">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    <span class="cantidad">+3</span>
+                                </div>
+                                <div class="tienda-item-info">
+                                    <span class="tienda-item-nombre">3 Energías</span>
+                                    <span class="tienda-item-precio"><i class="bi bi-coin"></i> 50</span>
+                                </div>
+                                <button class="tienda-comprar-btn">Comprar</button>
+                            </div>
+                            <div class="tienda-item" data-item="energia5" data-precio="80">
+                                <div class="tienda-item-icon energia destacado">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    <span class="cantidad">+5</span>
+                                </div>
+                                <div class="tienda-item-info">
+                                    <span class="tienda-item-nombre">5 Energías</span>
+                                    <span class="tienda-item-precio"><i class="bi bi-coin"></i> 80</span>
+                                </div>
+                                <button class="tienda-comprar-btn">Comprar</button>
+                            </div>
+                            <div class="tienda-item tienda-item-premium" data-item="energiaInfinita" data-precio="1000">
+                                <div class="tienda-item-icon energia-infinita">
+                                    <i class="bi bi-infinity"></i>
+                                </div>
+                                <div class="tienda-item-info">
+                                    <span class="tienda-item-nombre">Energía Infinita</span>
+                                    <span class="tienda-item-duracion"><i class="bi bi-clock"></i> 24 horas</span>
+                                    <span class="tienda-item-precio"><i class="bi bi-coin"></i> 1000</span>
+                                </div>
+                                <button class="tienda-comprar-btn premium-btn">Comprar</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

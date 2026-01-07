@@ -2714,6 +2714,10 @@ body {
     margin-bottom: 1.5rem;
 }
 
+.materia-stats-info {
+    flex: 1;
+}
+
 .materia-stats-avatar {
     width: 60px;
     height: 60px;
@@ -5144,4 +5148,414 @@ body {
     .external-link-url {
         font-size: 0.7rem;
     }
+}
+
+
+/* ==================== DESAFÍOS SUBMENU ==================== */
+.desafios-submenu {
+    display: flex;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.desafios-submenu-btn {
+    flex: 1;
+    padding: 0.8rem 1.5rem;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.desafios-submenu-btn:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.desafios-submenu-btn.active {
+    background: var(--materia-color, #ff0000);
+    color: white;
+    border-color: var(--materia-color, #ff0000);
+}
+
+.desafios-submenu-btn i {
+    font-size: 1.1rem;
+}
+
+/* Subtabs content */
+.desafios-subtab {
+    display: none;
+}
+
+.desafios-subtab.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Tienda Container */
+.tienda-container {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tienda-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.tienda-monedas {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 3px 10px rgba(255, 165, 0, 0.3);
+}
+
+.tienda-monedas i {
+    font-size: 1.3rem;
+}
+
+.tienda-monedas .monedas-label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.tienda-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tienda-section-title i {
+    color: #FFEB3B;
+}
+
+.tienda-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.tienda-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.tienda-item:hover {
+    border-color: #FFD700;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.tienda-item-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.tienda-item-icon.energia {
+    background: linear-gradient(135deg, #FFEB3B, #FFC107);
+}
+
+.tienda-item-icon.energia i {
+    font-size: 2rem;
+    color: white;
+}
+
+.tienda-item-icon .cantidad {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: #333;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+}
+
+.tienda-item-icon.destacado {
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+}
+
+.tienda-item-info {
+    text-align: center;
+}
+
+.tienda-item-nombre {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.3rem;
+}
+
+.tienda-item-precio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    color: #FFA500;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.tienda-item-precio i {
+    font-size: 1rem;
+}
+
+.tienda-item-descuento {
+    display: block;
+    font-size: 0.75rem;
+    color: #28a745;
+    font-weight: 600;
+    margin-top: 0.2rem;
+}
+
+.tienda-comprar-btn {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: var(--materia-color, #2196F3);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tienda-comprar-btn:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}
+
+/* Energía Infinita - Premium */
+.tienda-item-premium {
+    border: 2px solid #9C27B0;
+    background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+}
+
+.tienda-item-premium:hover {
+    border-color: #7B1FA2;
+    box-shadow: 0 5px 20px rgba(156, 39, 176, 0.3);
+}
+
+.tienda-item-icon.energia-infinita {
+    background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+    box-shadow: 0 0 25px rgba(156, 39, 176, 0.5);
+}
+
+.tienda-item-icon.energia-infinita i {
+    font-size: 2.2rem;
+    color: white;
+}
+
+.tienda-item-duracion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: #7B1FA2;
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+}
+
+.premium-btn {
+    background: linear-gradient(135deg, #9C27B0, #7B1FA2) !important;
+}
+
+.premium-btn:hover {
+    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+}
+
+/* ==================== RETOS HERO ==================== */
+.retos-main-container {
+    margin-bottom: 1.5rem;
+}
+
+.retos-hero {
+    background: white;
+    border-radius: 15px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.retos-hero-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.retos-hero-icon i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.retos-hero h3 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.retos-hero p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.iniciar-desafio-btn {
+    padding: 1rem 2.5rem;
+    background: var(--materia-color, #2196F3);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.iniciar-desafio-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+}
+
+.iniciar-desafio-btn i {
+    font-size: 1.3rem;
+}
+
+/* ==================== BARRA DE NIVEL ==================== */
+.materia-level-container {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+.level-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.level-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.level-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.2rem 0.8rem;
+    border-radius: 20px;
+}
+
+.level-progress-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.4rem;
+}
+
+.level-progress-fill {
+    height: 100%;
+    background: white;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.level-progress-text {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: right;
+    display: block;
+}
+
+/* ==================== ENERGÍA ==================== */
+.materia-energy-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.materia-energy-badge i {
+    color: #FFEB3B;
+    font-size: 0.9rem;
+}
+
+.materia-monedas-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255, 215, 0, 0.3);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.materia-monedas-badge i {
+    color: #FFD700;
+    font-size: 0.9rem;
 }

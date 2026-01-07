@@ -492,6 +492,14 @@ async function showMateriaStatsCard(materiaId, config) {
                     <h2>¡Hola, ${currentUser.nombre || 'Usuario'}!</h2>
                     <p><i class="bi bi-book"></i> ${config.nombre} - ${currentAulaData?.nombre || 'Aula'}</p>
                 </div>
+                <div class="materia-energy-badge">
+                    <i class="bi bi-lightning-fill"></i>
+                    <span>5/5</span>
+                </div>
+                <div class="materia-monedas-badge">
+                    <i class="bi bi-coin"></i>
+                    <span id="monedasHeader">0</span>
+                </div>
             </div>
             <div class="materia-stats-boxes">
                 <div class="materia-stat-box">
@@ -503,6 +511,16 @@ async function showMateriaStatsCard(materiaId, config) {
                         <span class="stat-label">Tareas Completadas</span>
                     </div>
                 </div>
+            </div>
+            <div class="materia-level-container">
+                <div class="level-info">
+                    <span class="level-label">Nivel</span>
+                    <span class="level-value">0</span>
+                </div>
+                <div class="level-progress-bar">
+                    <div class="level-progress-fill" style="width: 0%;"></div>
+                </div>
+                <span class="level-progress-text">0 / 100 XP</span>
             </div>
         </div>
     `;
@@ -644,6 +662,28 @@ function setupTabs() {
                     loadNotas();
                     break;
             }
+        });
+    });
+    
+    // Setup desafíos submenu
+    setupDesafiosSubmenu();
+}
+
+// Setup desafíos submenu (Retos / Tienda)
+function setupDesafiosSubmenu() {
+    const submenuBtns = document.querySelectorAll('.desafios-submenu-btn');
+    
+    submenuBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const subtab = btn.getAttribute('data-subtab');
+            
+            // Remove active from all submenu buttons
+            submenuBtns.forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.desafios-subtab').forEach(s => s.classList.remove('active'));
+            
+            // Add active to clicked
+            btn.classList.add('active');
+            document.getElementById(`${subtab}Subtab`).classList.add('active');
         });
     });
 }
