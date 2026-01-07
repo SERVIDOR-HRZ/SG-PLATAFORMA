@@ -720,8 +720,6 @@ async function openNuevoIngreso() {
     // Limpiar campos de gamificación
     document.getElementById('estudianteCompradorForm').value = '';
     document.getElementById('puntosOtorgadosForm').value = '0';
-    document.getElementById('insigniaForm').value = '';
-    document.getElementById('mensajeRecompensaForm').value = '';
     document.getElementById('recompensasContainer').style.display = 'none';
 
     loadCuentasSelect();
@@ -861,14 +859,10 @@ async function handleSaveMovimiento(e) {
                 const estudianteSelect = document.getElementById('estudianteCompradorForm');
                 const estudianteNombre = estudianteSelect.options[estudianteSelect.selectedIndex].dataset.nombre;
                 const puntos = parseInt(document.getElementById('puntosOtorgadosForm').value) || 0;
-                const insignia = document.getElementById('insigniaForm').value;
-                const mensaje = document.getElementById('mensajeRecompensaForm').value.trim();
 
                 movimientoData.estudianteId = estudianteId;
                 movimientoData.estudianteNombre = estudianteNombre;
                 movimientoData.puntosOtorgados = puntos;
-                movimientoData.insignia = insignia || null;
-                movimientoData.mensajeRecompensa = mensaje || null;
                 movimientoData.fechaRecompensa = firebase.firestore.FieldValue.serverTimestamp();
             }
         }
@@ -880,8 +874,6 @@ async function handleSaveMovimiento(e) {
             console.log('Otorgando recompensas a:', movimientoData.estudianteNombre);
             const recompensasData = {
                 puntos: movimientoData.puntosOtorgados,
-                insignia: movimientoData.insignia,
-                mensaje: movimientoData.mensajeRecompensa,
                 descripcion: descripcion
             };
             
@@ -1271,7 +1263,6 @@ async function otorgarRecompensas(estudianteId, movimientoId, recompensasData) {
 
         const estudiante = estudianteDoc.data();
         const puntosActuales = estudiante.puntosAcumulados || 0;
-        const insigniasActuales = estudiante.insignias || [];
         const historialRecompensas = estudiante.historialRecompensas || [];
 
         // Preparar datos de actualización
@@ -1279,40 +1270,12 @@ async function otorgarRecompensas(estudianteId, movimientoId, recompensasData) {
             puntosAcumulados: puntosActuales + (recompensasData.puntos || 0)
         };
 
-        // Agregar insignia si existe
-        if (recompensasData.insignia) {
-            const insigniasMap = {
-                'primera-compra': { nombre: 'Primera Compra', icono: '🎉' },
-                'comprador-frecuente': { nombre: 'Comprador Frecuente', icono: '⭐' },
-                'gran-compra': { nombre: 'Gran Compra', icono: '💎' },
-                'cliente-vip': { nombre: 'Cliente VIP', icono: '👑' },
-                'apoyo-especial': { nombre: 'Apoyo Especial', icono: '🏆' },
-                'benefactor': { nombre: 'Benefactor', icono: '🌟' }
-            };
-
-            const insigniaInfo = insigniasMap[recompensasData.insignia];
-            if (insigniaInfo) {
-                const nuevaInsignia = {
-                    tipo: recompensasData.insignia,
-                    nombre: insigniaInfo.nombre,
-                    icono: insigniaInfo.icono,
-                    fecha: new Date(),
-                    movimientoId: movimientoId,
-                    mensaje: recompensasData.mensaje || ''
-                };
-                insigniasActuales.push(nuevaInsignia);
-                updateData.insignias = insigniasActuales;
-            }
-        }
-
         // Agregar al historial
         const nuevoHistorial = {
             fecha: new Date(),
             puntos: recompensasData.puntos || 0,
-            insignia: recompensasData.insignia || null,
             movimientoId: movimientoId,
-            descripcion: recompensasData.descripcion || '',
-            mensaje: recompensasData.mensaje || ''
+            descripcion: recompensasData.descripcion || ''
         };
         historialRecompensas.push(nuevoHistorial);
         updateData.historialRecompensas = historialRecompensas;
