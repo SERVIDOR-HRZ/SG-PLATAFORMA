@@ -96,7 +96,7 @@ async function initDesafios() {
     document.body.style.background = `linear-gradient(180deg, ${colores.bg} 0%, ${colores.bgLight} 50%, ${colores.bg} 100%)`;
     
     const nombreMateria = currentMateria.charAt(0).toUpperCase() + currentMateria.slice(1);
-    document.getElementById('materiaTitle').textContent = `Desafíos - ${nombreMateria}`;
+    document.getElementById('materiaTitle').textContent = nombreMateria;
     
     generatePath();
     setupEventListeners();
