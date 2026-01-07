@@ -800,6 +800,7 @@ async function handleCreateTest(e) {
 
         const testData = {
             nombre: formData.get('testName').trim(),
+            tipo: formData.get('testType') || 'prueba', // Tipo: prueba o minisimulacro
             fechaInicio: startDate,
             fechaFin: endDate,
             fechaDisponible: startDate, // Mantener compatibilidad
@@ -897,7 +898,10 @@ async function handleCreateTest(e) {
         }
 
         await db.collection('pruebas').add(testData);
-        showNotification('Prueba creada exitosamente', 'success');
+        
+        const typeLabels = { 'prueba': 'Prueba', 'minisimulacro': 'Minisimulacro', 'reto': 'Reto' };
+        const tipoCreado = testData.tipo || 'prueba';
+        showNotification(`${typeLabels[tipoCreado]} creado exitosamente`, 'success');
         hideCreateTestModal();
         await loadAllTests();
         renderTestsList();
@@ -914,16 +918,43 @@ async function handleCreateTest(e) {
     }
 }
 
-// Render tests list (admin view)
+// Render tests list (admin view) - Filtrado por tipo
 function renderTestsList() {
     const testsList = document.getElementById('testsList');
+    const currentType = typeof getCurrentTestType === 'function' ? getCurrentTestType() : 'prueba';
+    
+    // Filtrar pruebas según el tipo seleccionado
+    // Si es 'reto', por ahora no mostramos nada (será diferente)
+    let filteredTests = [];
+    
+    if (currentType === 'reto') {
+        // Los retos tendrán su propia lógica después
+        filteredTests = allTests.filter(test => test.tipo === 'reto');
+    } else {
+        // Para pruebas y minisimulacros, filtrar por tipo
+        // Si no tiene tipo definido, se considera 'prueba' por defecto
+        filteredTests = allTests.filter(test => {
+            const testType = test.tipo || 'prueba';
+            return testType === currentType;
+        });
+    }
 
-    if (allTests.length === 0) {
+    if (filteredTests.length === 0) {
+        const typeLabels = {
+            'prueba': 'pruebas creadas',
+            'minisimulacro': 'minisimulacros creados',
+            'reto': 'retos creados'
+        };
+        const btnLabels = {
+            'prueba': 'Crear Nueva Prueba',
+            'minisimulacro': 'Crear Nuevo Minisimulacro',
+            'reto': 'Crear Nuevo Reto'
+        };
         testsList.innerHTML = `
             <div class="empty-state">
                 <i class="bi bi-file-earmark-text"></i>
-                <h3>No hay pruebas creadas</h3>
-                <p>Crea tu primera prueba haciendo clic en "Crear Nueva Prueba"</p>
+                <h3>No hay ${typeLabels[currentType]}</h3>
+                <p>Crea tu primer registro haciendo clic en "${btnLabels[currentType]}"</p>
             </div>
         `;
         return;
@@ -931,7 +962,7 @@ function renderTestsList() {
 
     testsList.innerHTML = '';
 
-    allTests.forEach(test => {
+    filteredTests.forEach(test => {
         const testCard = createTestCard(test);
         testsList.appendChild(testCard);
     });
@@ -1168,6 +1199,12 @@ async function editTest(testId) {
         document.getElementById('editTestName').value = test.nombre;
         document.getElementById('editTestStartDate').value = test.fechaInicio || test.fechaDisponible;
         document.getElementById('editTestEndDate').value = test.fechaFin || test.fechaDisponible;
+        
+        // Cargar el tipo de evaluación
+        const testType = test.tipo || 'prueba';
+        if (typeof setTypeToggle === 'function') {
+            setTypeToggle('editTestTypeGroup', testType);
+        }
         
         // Configure Block 1 toggle and fields
         const hasBlock1 = test.bloque1 && test.bloque1.horaInicio && test.bloque1.horaFin;
@@ -1553,6 +1590,7 @@ async function handleEditTest(e) {
 
         const updateData = {
             nombre: formData.get('editTestName').trim(),
+            tipo: formData.get('editTestType') || 'prueba', // Tipo: prueba o minisimulacro
             fechaInicio: startDate,
             fechaFin: endDate,
             fechaDisponible: startDate, // Mantener compatibilidad

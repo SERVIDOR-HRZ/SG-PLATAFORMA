@@ -65,11 +65,27 @@
     <main class="main-content">
         <!-- Admin View -->
         <div id="adminView" class="admin-view">
+            <!-- Menu de Tabs -->
+            <div class="type-tabs" id="typeTabs">
+                <button class="type-tab active" data-type="prueba">
+                    <i class="bi bi-clipboard-check"></i>
+                    Pruebas
+                </button>
+                <button class="type-tab" data-type="minisimulacro">
+                    <i class="bi bi-lightning"></i>
+                    Minisimulacros
+                </button>
+                <button class="type-tab" data-type="reto">
+                    <i class="bi bi-trophy"></i>
+                    Retos
+                </button>
+            </div>
+
             <!-- Action Buttons -->
             <div class="action-buttons">
                 <button class="btn btn-primary" id="createTestBtn">
                     <i class="bi bi-plus-circle"></i>
-                    Crear Nueva Prueba
+                    <span id="createBtnText">Crear Nueva Prueba</span>
                 </button>
             </div>
 
@@ -104,6 +120,22 @@
             </div>
             <div class="modal-body">
                 <form id="createTestForm">
+                    <!-- Tipo de Evaluación -->
+                    <div class="form-group" id="testTypeGroup">
+                        <label>Tipo de Evaluación</label>
+                        <div class="type-toggle-buttons">
+                            <button type="button" class="type-toggle-btn active" data-value="prueba">
+                                <i class="bi bi-clipboard-check"></i>
+                                Prueba
+                            </button>
+                            <button type="button" class="type-toggle-btn" data-value="minisimulacro">
+                                <i class="bi bi-lightning"></i>
+                                Minisimulacro
+                            </button>
+                        </div>
+                        <input type="hidden" id="testType" name="testType" value="prueba">
+                    </div>
+
                     <div class="form-group">
                         <label for="testName">Nombre de la Prueba</label>
                         <input type="text" id="testName" name="testName" placeholder="Ej: Evaluación Matemáticas" required>
@@ -242,6 +274,22 @@
                 <form id="editTestForm">
                     <input type="hidden" id="editTestId" name="editTestId">
 
+                    <!-- Tipo de Evaluación -->
+                    <div class="form-group" id="editTestTypeGroup">
+                        <label>Tipo de Evaluación</label>
+                        <div class="type-toggle-buttons">
+                            <button type="button" class="type-toggle-btn active" data-value="prueba">
+                                <i class="bi bi-clipboard-check"></i>
+                                Prueba
+                            </button>
+                            <button type="button" class="type-toggle-btn" data-value="minisimulacro">
+                                <i class="bi bi-lightning"></i>
+                                Minisimulacro
+                            </button>
+                        </div>
+                        <input type="hidden" id="editTestType" name="editTestType" value="prueba">
+                    </div>
+
                     <div class="form-group">
                         <label for="editTestName">Nombre de la Prueba</label>
                         <input type="text" id="editTestName" name="editTestName" placeholder="Ej: Evaluación Matemáticas" required>
@@ -374,6 +422,7 @@
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/perfil-compartido.js"></script>
     <script src="../Elementos/js/time-picker.js"></script>
+    <script src="../Elementos/js/pruebas-menu.js"></script>
     <script src="../Elementos/js/pruebas-admin.js"></script>
     <script src="../Elementos/js/pruebas-institution-filter.js"></script>
 
