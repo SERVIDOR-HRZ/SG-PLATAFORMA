@@ -1129,14 +1129,6 @@ function renderUsers() {
                     </div>` : 'N/A'}
             </td>
             <td>
-                ${user.tipoUsuario === 'estudiante' && user.insignias && user.insignias.length > 0 ?
-                `<div class="insignias-cell-simple">
-                        <strong>${user.insignias.length}</strong>
-                        <small class="insignias-preview-icons" data-insignias='${JSON.stringify(user.insignias)}'></small>
-                    </div>` :
-                (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">0</span>' : 'N/A')}
-            </td>
-            <td>
                 ${user.tipoUsuario === 'estudiante' && user.aulasAsignadas && user.aulasAsignadas.length > 0 ?
                 `<div class="aulas-cell" data-aulas='${JSON.stringify(user.aulasAsignadas)}'>
                         <span class="aulas-count-badge"><i class="bi bi-door-open"></i> ${user.aulasAsignadas.length} aula${user.aulasAsignadas.length > 1 ? 's' : ''}</span>
