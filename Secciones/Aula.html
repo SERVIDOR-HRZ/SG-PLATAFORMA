@@ -252,8 +252,8 @@
                     <i class="bi bi-x"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="createTaskForm">
+            <form id="createTaskForm">
+                <div class="modal-body">
                     <div class="input-group">
                         <label for="taskTitle">Título</label>
                         <input type="text" id="taskTitle" required placeholder="Título de la tarea">
@@ -307,16 +307,15 @@
                             <span>Puedes agregar enlaces a carpetas, PDFs o cualquier archivo de Google Drive. Asegúrate de que tengan permisos públicos.</span>
                         </div>
                     </div>
-                    
-                    <div class="modal-actions">
-                        <button type="button" class="cancel-btn" id="cancelTask">Cancelar</button>
-                        <button type="submit" class="submit-btn">
-                            <i class="bi bi-check-lg"></i>
-                            Crear Tarea
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancelTask">Cancelar</button>
+                    <button type="submit" class="submit-btn">
+                        <i class="bi bi-check-lg"></i>
+                        Crear Tarea
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
