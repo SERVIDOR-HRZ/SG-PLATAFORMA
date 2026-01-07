@@ -127,8 +127,19 @@ async function loadAulaData() {
         if (materiasVisibles && materiasVisibles.length > 0) {
             // Guardar las materias visibles en currentAulaData para uso posterior
             currentAulaData.materiasVisibles = materiasVisibles;
-            // Mostrar las materias como tarjetas (ocultar tabs y contenido)
-            showMateriasCards(materiasVisibles);
+            
+            // Verificar si hay una materia en la URL (para persistir al recargar)
+            const urlParams = new URLSearchParams(window.location.search);
+            const materiaFromUrl = urlParams.get('materia');
+            
+            if (materiaFromUrl && materiasVisibles.includes(materiaFromUrl)) {
+                // Si hay una materia válida en la URL, entrar directamente a ella
+                showMateriasCards(materiasVisibles);
+                enterMateria(materiaFromUrl);
+            } else {
+                // Mostrar las materias como tarjetas (ocultar tabs y contenido)
+                showMateriasCards(materiasVisibles);
+            }
         } else {
             window.location.href = 'Clases.html';
             return;
@@ -359,6 +370,11 @@ function adjustColorBrightness(color, amount) {
 function enterMateria(materiaId) {
     currentMateria = materiaId;
 
+    // Actualizar la URL para persistir la materia seleccionada (sin recargar la página)
+    const url = new URL(window.location.href);
+    url.searchParams.set('materia', materiaId);
+    window.history.replaceState({}, '', url);
+
     const materiasConfig = {
         'anuncios': { nombre: 'Anuncios Generales', color: '#1a1a1a' },
         'matematicas': { nombre: 'Matemáticas', color: '#2196F3' },
@@ -529,6 +545,11 @@ function backToMateriasSelection() {
 
     // Limpiar materia actual
     currentMateria = '';
+    
+    // Limpiar el parámetro materia de la URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('materia');
+    window.history.replaceState({}, '', url);
 }
 
 // Load user info
