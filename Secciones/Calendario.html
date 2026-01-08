@@ -82,8 +82,8 @@
                     Vista Calendario
                 </button>
                 <button class="toggle-btn" data-view="lista">
-                    <i class="bi bi-list-ul"></i>
-                    Vista Lista
+                    <i class="bi bi-check2-square"></i>
+                    Confirmar Clases
                 </button>
             </div>
 
@@ -107,7 +107,7 @@
         <!-- Vista Lista -->
         <div class="list-view" id="listView" style="display: none;">
             <div class="list-header">
-                <h2>Clases Programadas</h2>
+                <h2>Confirmar tus Clases</h2>
                 <div class="list-filters">
                     <!-- Filtro de materias con checkboxes -->
                     <div class="filter-dropdown" id="filtroMateriaDropdown">
@@ -128,9 +128,9 @@
                         </div>
                     </div>
                     <select id="filtroEstado" class="filter-select">
+                        <option value="pendiente">Pendientes</option>
                         <option value="">Todos los estados</option>
                         <option value="confirmada">Confirmadas</option>
-                        <option value="pendiente">Pendientes</option>
                         <option value="cancelada">Canceladas</option>
                     </select>
                 </div>

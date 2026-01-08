@@ -764,9 +764,11 @@ function renderClassList(clasesSnapshot) {
         clase.id = doc.id;
 
         const classCard = document.createElement('div');
-        classCard.className = 'class-card-full collapsed';
+        // Las pendientes se muestran desplegadas, las demás colapsadas
+        const estadoClase = clase.estado || 'pendiente';
+        classCard.className = estadoClase === 'pendiente' ? 'class-card-full' : 'class-card-full collapsed';
         classCard.dataset.materia = clase.materia;
-        classCard.dataset.estado = clase.estado || 'pendiente';
+        classCard.dataset.estado = estadoClase;
 
         const fecha = new Date(clase.fecha + 'T00:00:00');
         const fechaStr = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
