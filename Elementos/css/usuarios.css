@@ -3730,6 +3730,20 @@ body {
     font-size: 0.9rem;
 }
 
+/* Monedas cell styling (alias for puntos) */
+.monedas-cell-simple {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+}
+
+.monedas-cell-simple strong {
+    font-weight: 700;
+    color: #333;
+    font-size: 0.9rem;
+}
+
 /* Insignias cell styling */
 .insignias-cell {
     display: flex;

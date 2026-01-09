@@ -710,8 +710,8 @@ function updateColumnVisibility(view) {
     const fechaColumn = table.querySelector('thead th:nth-child(16)'); // Fecha Registro column
     const accionesColumn = table.querySelector('thead th:nth-child(17)'); // Acciones column
 
-    // Hide gamification columns for profesores, superusuarios, and estudiantes (since we have dedicated insignias view)
-    const shouldHideGamification = view === 'profesores' || view === 'superusuarios' || view === 'estudiantes';
+    // Hide gamification columns for profesores and superusuarios only (NOT for estudiantes - they need to see their coins and badges)
+    const shouldHideGamification = view === 'profesores' || view === 'superusuarios';
 
     // Hide student-specific columns for profesores and superusuarios
     const shouldHideStudentColumns = view === 'profesores' || view === 'superusuarios';
@@ -1124,7 +1124,7 @@ function renderUsers() {
             </td>
             <td>
                 ${user.tipoUsuario === 'estudiante' ?
-                `<div class="puntos-cell-simple">
+                `<div class="monedas-cell-simple">
                         <strong>${user.puntos || user.puntosAcumulados || 0}</strong>
                     </div>` : 'N/A'}
             </td>
