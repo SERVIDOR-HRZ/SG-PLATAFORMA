@@ -1447,26 +1447,6 @@
     font-size: 1.2rem;
 }
 
-/* Empty state for student view */
-.student-view .empty-state {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    border-radius: 16px;
-    padding: 4rem 2rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.student-view .empty-state i {
-    color: rgba(255, 255, 255, 0.2);
-}
-
-.student-view .empty-state h3 {
-    color: #ffffff;
-}
-
-.student-view .empty-state p {
-    color: rgba(255, 255, 255, 0.6);
-}
-
 /* Student tests list */
 .student-tests-list {
     display: flex;
@@ -1482,11 +1462,15 @@
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     padding: 0.5rem;
     border-radius: 12px;
     border: 1px solid rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 70px;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .type-tab {

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 let currentUser = null;
 let studentTests = [];
+let currentTestType = 'prueba'; // Default to 'prueba'
 
 // Check authentication and determine view
 function checkAuthentication() {
@@ -49,7 +50,44 @@ function setupEventListeners() {
     // Back button
     document.getElementById('backBtn').addEventListener('click', goBack);
 
+    // Type tabs
+    setupTypeTabs();
+
     // Logout button en dropdown (manejado por perfil-compartido.js)
+}
+
+// Setup type tabs
+function setupTypeTabs() {
+    const typeTabs = document.querySelectorAll('.type-tab');
+    
+    typeTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            typeTabs.forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Update current type
+            currentTestType = this.dataset.type;
+            
+            // Update section title
+            updateSectionTitle();
+            
+            // Re-render tests with filter
+            renderStudentTests();
+        });
+    });
+}
+
+// Update section title based on current type
+function updateSectionTitle() {
+    const sectionTitle = document.getElementById('sectionTitle');
+    if (currentTestType === 'prueba') {
+        sectionTitle.innerHTML = '<i class="bi bi-clipboard-check"></i> Mis Pruebas Asignadas';
+    } else if (currentTestType === 'minisimulacro') {
+        sectionTitle.innerHTML = '<i class="bi bi-lightning"></i> Mis Minisimulacros Asignados';
+    }
 }
 
 // Go back to student panel
@@ -387,12 +425,19 @@ async function checkCompletedBlocks(testId, studentId) {
 function renderStudentTests() {
     const studentTestsList = document.getElementById('studentTestsList');
 
-    if (studentTests.length === 0) {
+    // Filter tests by current type
+    const filteredTests = studentTests.filter(test => {
+        const testType = test.tipo || 'prueba'; // Default to 'prueba' if no type
+        return testType === currentTestType;
+    });
+
+    if (filteredTests.length === 0) {
+        const typeLabel = currentTestType === 'prueba' ? 'pruebas' : 'minisimulacros';
         studentTestsList.innerHTML = `
             <div class="empty-state">
                 <i class="bi bi-file-earmark-text"></i>
-                <h3>No tienes pruebas asignadas</h3>
-                <p>Cuando tu profesor te asigne pruebas, aparecerán aquí</p>
+                <h3>No tienes ${typeLabel} asignados</h3>
+                <p>Cuando tu profesor te asigne ${typeLabel}, aparecerán aquí</p>
             </div>
         `;
         return;
@@ -400,7 +445,7 @@ function renderStudentTests() {
 
     studentTestsList.innerHTML = '';
 
-    studentTests.forEach(test => {
+    filteredTests.forEach(test => {
         const testCard = createStudentTestCard(test);
         studentTestsList.appendChild(testCard);
     });

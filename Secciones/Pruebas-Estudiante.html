@@ -65,8 +65,20 @@
     <main class="main-content">
         <!-- Student View -->
         <div class="student-view">
+            <!-- Menu de Tabs -->
+            <div class="type-tabs" id="typeTabs">
+                <button class="type-tab active" data-type="prueba">
+                    <i class="bi bi-clipboard-check"></i>
+                    Pruebas
+                </button>
+                <button class="type-tab" data-type="minisimulacro">
+                    <i class="bi bi-lightning"></i>
+                    Minisimulacros
+                </button>
+            </div>
+
             <div class="assigned-tests">
-                <h2>Mis Pruebas Asignadas</h2>
+                <h2 id="sectionTitle"><i class="bi bi-clipboard-check"></i> Mis Pruebas Asignadas</h2>
                 <div class="student-tests-list" id="studentTestsList">
                     <!-- Student tests will be loaded here -->
                 </div>
