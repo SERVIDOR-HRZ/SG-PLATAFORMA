@@ -1467,7 +1467,12 @@ function openEditUserModal(userId) {
 
     // Fill form with user data
     elements.editNombre.value = user.nombre || '';
-    elements.editUsuario.value = user.usuario || user.email || '';
+    // Remove @seamosgenios.com from username for editing
+    let usuarioValue = user.usuario || user.email || '';
+    if (usuarioValue.includes('@seamosgenios.com')) {
+        usuarioValue = usuarioValue.replace('@seamosgenios.com', '');
+    }
+    elements.editUsuario.value = usuarioValue;
     elements.editTelefono.value = user.telefono || '';
     elements.editEmailRecuperacion.value = user.emailRecuperacion || '';
 
