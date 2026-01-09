@@ -8006,3 +8006,181 @@ sure forms don't interfere with modal layout */
         font-size: 0.75rem;
     }
 }
+
+
+/* ============================================
+   INSIGNIAS COUNT BADGE & MODAL STYLES
+   ============================================ */
+
+/* Insignias count badge in table */
+.insignias-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.insignias-count-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+.insignias-count-badge i {
+    font-size: 0.9rem;
+}
+
+.insignias-cell-simple {
+    cursor: pointer;
+}
+
+/* Ver Insignias Modal */
+.ver-insignias-modal {
+    max-width: 600px;
+    width: 95%;
+}
+
+.ver-insignias-modal .modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ver-insignias-modal .modal-header h3 i {
+    color: #ffc107;
+}
+
+.insignias-info-container {
+    padding: 1rem 0;
+}
+
+.insignias-count-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #fff8e1, #fff3cd);
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+}
+
+.insignias-count-info i {
+    color: #ffc107;
+    font-size: 1.1rem;
+}
+
+.insignias-grid-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.insignia-info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.insignia-info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.insignia-icon-display {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.insignia-icon-display i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.insignia-info-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.insignia-nombre {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.insignia-descripcion {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.insignia-categoria-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    background: #f0f0f0;
+    color: #555;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.no-insignias-message {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #999;
+}
+
+.no-insignias-message i {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.no-insignias-message p {
+    font-size: 1rem;
+}
+
+.error-message {
+    text-align: center;
+    padding: 2rem;
+    color: #dc3545;
+}
+
+.error-message i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .insignias-grid-display {
+        grid-template-columns: 1fr;
+    }
+    
+    .ver-insignias-modal {
+        max-width: 95%;
+        margin: 1rem;
+    }
+}

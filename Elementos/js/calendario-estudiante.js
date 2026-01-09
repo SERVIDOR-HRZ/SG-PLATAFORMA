@@ -481,8 +481,12 @@ function mostrarDetalleClaseEst(clase) {
     const estadoIcon = estadoClass === 'confirmada' ? 'check-circle-fill' : estadoClass === 'cancelada' ? 'x-circle-fill' : 'clock-fill';
 
     // Determinar enlace a mostrar (personalizado o predeterminado de la materia)
-    const enlaceClase = clase.enlace || LINKS_MATERIAS[clase.materia] || '';
+    let enlaceClase = (clase.enlace || LINKS_MATERIAS[clase.materia] || '').trim();
     const esPredeterminado = !clase.enlace && LINKS_MATERIAS[clase.materia];
+    const tieneEnlaceValido = enlaceClase && enlaceClase.length > 0 && enlaceClase !== 'undefined' && enlaceClase !== 'null';
+    
+    // Color del botón según la materia
+    const colorMateria = materiaInfo.color || '#667eea';
 
     body.innerHTML = `
         <div class="detalle-item">
@@ -535,13 +539,13 @@ function mostrarDetalleClaseEst(clase) {
             </div>
         </div>
         ` : ''}
-        ${enlaceClase ? `
-        <div class="detalle-item enlace-clase-item">
-            <i class="bi bi-camera-video-fill"></i>
+        ${tieneEnlaceValido ? `
+        <div class="detalle-item enlace-clase-item" style="background: ${colorMateria}10;">
+            <i class="bi bi-camera-video-fill" style="color: ${colorMateria};"></i>
             <div class="detalle-contenido">
                 <div class="detalle-label">Enlace de Clase ${esPredeterminado ? '<span class="badge-predeterminado">(Link de la materia)</span>' : ''}</div>
                 <div class="detalle-valor">
-                    <a href="${enlaceClase}" target="_blank" class="btn-unirse-clase">
+                    <a href="${enlaceClase}" target="_blank" class="btn-unirse-clase" style="background: linear-gradient(135deg, ${colorMateria}, ${colorMateria}dd); color: white !important;">
                         <i class="bi bi-box-arrow-up-right"></i> Unirse a la clase
                     </a>
                 </div>

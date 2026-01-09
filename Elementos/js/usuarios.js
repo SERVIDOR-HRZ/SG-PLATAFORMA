@@ -1129,6 +1129,12 @@ function renderUsers() {
                     </div>` : 'N/A'}
             </td>
             <td>
+                ${user.tipoUsuario === 'estudiante' ?
+                `<div class="insignias-cell-simple" onclick="verInsigniasUsuario('${user.id}', '${user.nombre}')" title="Click para ver insignias">
+                        <span class="insignias-count-badge"><i class="bi bi-award-fill"></i> ${user.insignias && user.insignias.length > 0 ? user.insignias.length : 0}</span>
+                    </div>` : 'N/A'}
+            </td>
+            <td>
                 ${user.tipoUsuario === 'estudiante' && user.aulasAsignadas && user.aulasAsignadas.length > 0 ?
                 `<div class="aulas-cell" data-aulas='${JSON.stringify(user.aulasAsignadas)}'>
                         <span class="aulas-count-badge"><i class="bi bi-door-open"></i> ${user.aulasAsignadas.length} aula${user.aulasAsignadas.length > 1 ? 's' : ''}</span>
@@ -5678,9 +5684,187 @@ function cerrarModalAulas() {
     }
 }
 
+// Función para ver las insignias de un usuario
+async function verInsigniasUsuario(userId, userName) {
+    // Buscar el usuario
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) {
+        showMessage('Usuario no encontrado', 'error');
+        return;
+    }
+
+    const insigniasUsuario = user.insignias || [];
+    
+    // Crear modal si no existe
+    let modal = document.getElementById('verInsigniasModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'verInsigniasModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content ver-insignias-modal">
+                <div class="modal-header">
+                    <h3 id="verInsigniasModalTitle">Insignias del Estudiante</h3>
+                    <button class="close-btn" onclick="cerrarModalInsignias()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="verInsigniasModalBody">
+                    <!-- Contenido dinámico -->
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Cerrar al hacer clic fuera
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModalInsignias();
+            }
+        });
+    }
+
+    // Actualizar título
+    document.getElementById('verInsigniasModalTitle').innerHTML = `<i class="bi bi-award-fill"></i> Insignias de ${userName}`;
+
+    // Si no tiene insignias
+    if (insigniasUsuario.length === 0) {
+        document.getElementById('verInsigniasModalBody').innerHTML = `
+            <div class="no-insignias-message">
+                <i class="bi bi-award" style="font-size: 3rem; color: #ccc;"></i>
+                <p>Este estudiante aún no tiene insignias</p>
+            </div>
+        `;
+        modal.classList.add('show');
+        return;
+    }
+
+    // Cargar información de las insignias desde Firebase
+    try {
+        await waitForFirebase();
+        const insigniasSnapshot = await window.firebaseDB.collection('insignias').get();
+        const todasInsignias = {};
+        insigniasSnapshot.forEach(doc => {
+            todasInsignias[doc.id] = { id: doc.id, ...doc.data() };
+        });
+
+        // Mapear las insignias del usuario con su información completa
+        // Las insignias pueden estar guardadas como strings (IDs) o como objetos
+        const insigniasInfo = insigniasUsuario.map(insigniaItem => {
+            // Determinar el ID de la insignia (puede ser string o objeto)
+            let insigniaId;
+            let insigniaData = null;
+            
+            if (typeof insigniaItem === 'string') {
+                // Es un ID simple
+                insigniaId = insigniaItem;
+            } else if (typeof insigniaItem === 'object' && insigniaItem !== null) {
+                // Es un objeto, puede tener id, insigniaId, o ser la insignia completa
+                insigniaId = insigniaItem.id || insigniaItem.insigniaId || null;
+                // Si el objeto ya tiene los datos de la insignia, usarlos
+                if (insigniaItem.nombre) {
+                    insigniaData = insigniaItem;
+                }
+            }
+            
+            // Buscar en Firebase si tenemos un ID
+            if (insigniaId && todasInsignias[insigniaId]) {
+                return todasInsignias[insigniaId];
+            }
+            
+            // Si ya teníamos los datos del objeto, usarlos
+            if (insigniaData) {
+                return {
+                    id: insigniaId || 'unknown',
+                    nombre: insigniaData.nombre || 'Insignia',
+                    icono: insigniaData.icono || 'award-fill',
+                    color: insigniaData.color || '#667eea',
+                    descripcion: insigniaData.descripcion || '',
+                    categoria: insigniaData.categoria || ''
+                };
+            }
+            
+            // Fallback: mostrar lo que tengamos
+            return { 
+                id: insigniaId || 'unknown', 
+                nombre: insigniaId || 'Insignia', 
+                icono: 'award-fill', 
+                color: '#667eea' 
+            };
+        });
+
+        // Generar HTML de las insignias
+        // Nota: el icono se guarda sin el prefijo 'bi-', así que lo agregamos aquí
+        const insigniasHTML = insigniasInfo.map(insignia => {
+            // Asegurar que el ícono tenga el formato correcto
+            let iconClass = insignia.icono || 'award-fill';
+            // Si ya tiene 'bi-' al inicio, no agregarlo de nuevo
+            if (!iconClass.startsWith('bi-')) {
+                iconClass = 'bi-' + iconClass;
+            }
+            
+            return `
+            <div class="insignia-info-card" style="border-color: ${insignia.color || '#667eea'};">
+                <div class="insignia-icon-display" style="background: linear-gradient(135deg, ${insignia.color || '#667eea'}, ${insignia.color || '#667eea'}dd);">
+                    <i class="bi ${iconClass}"></i>
+                </div>
+                <div class="insignia-info-content">
+                    <h4 class="insignia-nombre">${insignia.nombre || 'Insignia'}</h4>
+                    ${insignia.descripcion ? `<p class="insignia-descripcion">${insignia.descripcion}</p>` : ''}
+                    ${insignia.categoria ? `<span class="insignia-categoria-tag">${getCategoriaLabel(insignia.categoria)}</span>` : ''}
+                </div>
+            </div>
+        `}).join('');
+
+        document.getElementById('verInsigniasModalBody').innerHTML = `
+            <div class="insignias-info-container">
+                <p class="insignias-count-info"><i class="bi bi-trophy-fill"></i> ${insigniasInfo.length} insignia${insigniasInfo.length > 1 ? 's' : ''} obtenida${insigniasInfo.length > 1 ? 's' : ''}</p>
+                <div class="insignias-grid-display">
+                    ${insigniasHTML}
+                </div>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('Error loading insignias:', error);
+        document.getElementById('verInsigniasModalBody').innerHTML = `
+            <div class="error-message">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>Error al cargar las insignias</p>
+            </div>
+        `;
+    }
+
+    // Mostrar modal
+    modal.classList.add('show');
+}
+
+// Función auxiliar para obtener el label de la categoría
+function getCategoriaLabel(categoria) {
+    const categorias = {
+        'matematicas': 'Matemáticas',
+        'lectura': 'Lectura Crítica',
+        'sociales': 'Ciencias Sociales',
+        'ciencias': 'Ciencias Naturales',
+        'naturales': 'Ciencias Naturales',
+        'ingles': 'Inglés'
+    };
+    return categorias[categoria] || categoria;
+}
+
+// Función para cerrar el modal de insignias
+function cerrarModalInsignias() {
+    const modal = document.getElementById('verInsigniasModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
 // Hacer funciones globales
 window.mostrarAulasUsuario = mostrarAulasUsuario;
 window.cerrarModalAulas = cerrarModalAulas;
+window.verInsigniasUsuario = verInsigniasUsuario;
+window.cerrarModalInsignias = cerrarModalInsignias;
 window.toggleAulaProfesor = toggleAulaProfesor;
 window.loadAulasForProfesorCreateForm = loadAulasForProfesorCreateForm;
 window.loadAulasForProfesorEditForm = loadAulasForProfesorEditForm;
