@@ -7215,6 +7215,7 @@ sure forms don't interfere with modal layout */
     transition: all 0.3s ease;
     background: white;
     min-height: 80px;
+    position: relative;
 }
 
 .aula-permiso-checkbox .aula-checkbox-header {
@@ -7252,6 +7253,49 @@ sure forms don't interfere with modal layout */
     border-color: var(--aula-color, #667eea);
     background: rgba(102, 126, 234, 0.08);
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+/* Checkmark indicator for selected aulas */
+.aula-permiso-checkbox .aula-checkbox-content::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #d0d0d0;
+    border-radius: 50%;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.aula-permiso-checkbox .aula-checkbox-content::after {
+    content: '\F26B';
+    font-family: 'bootstrap-icons';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: white;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.aula-permiso-checkbox input:checked+.aula-checkbox-content::before {
+    background: var(--aula-color, #667eea);
+    border-color: var(--aula-color, #667eea);
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+}
+
+.aula-permiso-checkbox input:checked+.aula-checkbox-content::after {
+    opacity: 1;
+    transform: scale(1);
 }
 
 .aula-permiso-checkbox:hover .aula-checkbox-content {
