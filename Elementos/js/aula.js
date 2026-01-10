@@ -8,6 +8,24 @@ let currentUser = {};
 const IMGBB_API_KEY = '0d447185d3dc7cba69ee1c6df144f146';
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
 
+// ============ SISTEMA DE NIVELES PROGRESIVO ============
+// Nivel 1→2: 100 XP, Nivel 2→3: 200 XP, Nivel 3→4: 400 XP, etc. (se duplica)
+
+function getXPForLevel(level) {
+    if (level <= 1) return 0;
+    return 100 * (Math.pow(2, level - 1) - 1);
+}
+
+function calculateLevelFromXP(totalXP) {
+    if (totalXP < 100) return 1;
+    const level = Math.floor(Math.log2(totalXP / 100 + 1) + 1);
+    return Math.max(1, level);
+}
+
+function getXPNeededForNextLevel(currentLevel) {
+    return 100 * Math.pow(2, currentLevel - 1);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     checkAuthentication();
     loadUserInfo();
@@ -430,6 +448,89 @@ function enterMateria(materiaId) {
 
     // Cargar contenido
     loadAnuncios();
+    
+    // Iniciar sistema de regeneración de energía
+    initEnergyRegeneration();
+}
+
+// Sistema de regeneración de energía (cada 10 minutos)
+let energyRegenInterval = null;
+
+async function initEnergyRegeneration() {
+    // Limpiar intervalo anterior si existe
+    if (energyRegenInterval) {
+        clearInterval(energyRegenInterval);
+    }
+    
+    // Verificar y regenerar energía al cargar
+    await checkAndRegenerateEnergy();
+    
+    // Configurar intervalo para verificar cada minuto
+    energyRegenInterval = setInterval(async () => {
+        await checkAndRegenerateEnergy();
+    }, 60000); // Verificar cada minuto
+}
+
+async function checkAndRegenerateEnergy() {
+    try {
+        if (!window.firebaseDB) return;
+        
+        const db = window.firebaseDB;
+        const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
+        
+        if (!userDoc.exists) return;
+        
+        const userData = userDoc.data();
+        const energiaActual = userData.energia !== undefined ? userData.energia : 10;
+        const energiaMax = userData.energiaMax || 10;
+        const ultimaRegeneracion = userData.ultimaRegeneracionEnergia?.toDate() || new Date(0);
+        
+        // Si tiene energía infinita activa, no regenerar
+        if (userData.energiaInfinita && userData.energiaInfinitaExpira) {
+            const expira = userData.energiaInfinitaExpira.toDate ? userData.energiaInfinitaExpira.toDate() : new Date(userData.energiaInfinitaExpira);
+            if (expira > new Date()) {
+                return; // Energía infinita activa
+            }
+        }
+        
+        // Si ya tiene energía máxima, solo actualizar timestamp
+        if (energiaActual >= energiaMax) {
+            return;
+        }
+        
+        // Calcular cuántas energías regenerar (1 cada 10 minutos)
+        const ahora = new Date();
+        const minutosTranscurridos = Math.floor((ahora - ultimaRegeneracion) / (1000 * 60));
+        const energiasARegenerar = Math.floor(minutosTranscurridos / 10);
+        
+        if (energiasARegenerar > 0) {
+            const nuevaEnergia = Math.min(energiaActual + energiasARegenerar, energiaMax);
+            
+            await db.collection('usuarios').doc(currentUser.id).update({
+                energia: nuevaEnergia,
+                ultimaRegeneracionEnergia: firebase.firestore.Timestamp.now()
+            });
+            
+            // Actualizar UI
+            updateEnergyUI(nuevaEnergia, energiaMax);
+        }
+    } catch (error) {
+        console.error('Error regenerando energía:', error);
+    }
+}
+
+function updateEnergyUI(energia, energiaMax) {
+    // Actualizar en la tarjeta de stats
+    const energyBadge = document.querySelector('.materia-energy-badge span');
+    if (energyBadge) {
+        energyBadge.textContent = `${energia}/${energiaMax}`;
+    }
+    
+    // Actualizar en la tienda si está visible
+    const tiendaEnergy = document.getElementById('tiendaEnergia');
+    if (tiendaEnergy) {
+        tiendaEnergy.textContent = `${energia}/${energiaMax}`;
+    }
 }
 
 // Mostrar tarjeta de estadísticas de la materia
@@ -438,17 +539,47 @@ async function showMateriaStatsCard(materiaId, config) {
     const existingCard = document.getElementById('materiaStatsCard');
     if (existingCard) existingCard.remove();
 
-    // Obtener foto de perfil del usuario
+    // Obtener datos del usuario (foto, energía, monedas, nivel, xp)
     let userPhoto = '';
+    let energia = 10;
+    let energiaMax = 10;
+    let monedas = 0;
+    let nivel = 1;
+    let xp = 0;
+    
     try {
         if (window.firebaseDB) {
             const userDoc = await window.firebaseDB.collection('usuarios').doc(currentUser.id).get();
             if (userDoc.exists) {
-                userPhoto = userDoc.data().fotoPerfil || '';
+                const data = userDoc.data();
+                userPhoto = data.fotoPerfil || '';
+                energia = data.energia !== undefined ? data.energia : 10;
+                energiaMax = data.energiaMax || 10;
+                monedas = data.puntos || data.puntosAcumulados || 0;
+                
+                // Cargar XP y nivel POR MATERIA (no global)
+                const progresoKey = `progreso_${materiaId}`;
+                if (data[progresoKey]) {
+                    xp = data[progresoKey].xp || 0;
+                } else {
+                    xp = 0;
+                }
+                
+                // Calcular nivel basado en XP de esta materia (sistema progresivo)
+                nivel = calculateLevelFromXP(xp);
+                
+                // Verificar energía infinita
+                if (data.energiaInfinita && data.energiaInfinitaExpira) {
+                    const expira = data.energiaInfinitaExpira.toDate ? data.energiaInfinitaExpira.toDate() : new Date(data.energiaInfinitaExpira);
+                    if (expira > new Date()) {
+                        energia = '∞';
+                        energiaMax = '';
+                    }
+                }
             }
         }
     } catch (error) {
-        console.error('Error al obtener foto de perfil:', error);
+        console.error('Error al obtener datos del usuario:', error);
     }
 
     // Contar tareas completadas para esta materia y aula
@@ -480,8 +611,16 @@ async function showMateriaStatsCard(materiaId, config) {
 
     // Crear color más oscuro para el gradiente
     const darkerColor = adjustColorBrightness(config.color, -40);
+    
+    // Calcular progreso de nivel (sistema progresivo: 100, 200, 400, 800...)
+    const xpParaNivel = getXPNeededForNextLevel(nivel);
+    const xpBaseNivel = getXPForLevel(nivel);
+    const xpActualNivel = xp - xpBaseNivel;
+    const progresoNivel = (xpActualNivel / xpParaNivel) * 100;
 
     // Crear la tarjeta de estadísticas
+    const energiaDisplay = energiaMax ? `${energia}/${energiaMax}` : `${energia}`;
+    
     const statsCardHTML = `
         <div class="materia-stats-card" id="materiaStatsCard" style="background: linear-gradient(135deg, ${config.color}, ${darkerColor});">
             <div class="materia-stats-header">
@@ -494,11 +633,11 @@ async function showMateriaStatsCard(materiaId, config) {
                 </div>
                 <div class="materia-energy-badge">
                     <i class="bi bi-lightning-fill"></i>
-                    <span>5/5</span>
+                    <span>${energiaDisplay}</span>
                 </div>
                 <div class="materia-monedas-badge">
                     <i class="bi bi-coin"></i>
-                    <span id="monedasHeader">0</span>
+                    <span id="monedasHeader">${monedas}</span>
                 </div>
             </div>
             <div class="materia-stats-boxes">
@@ -515,12 +654,12 @@ async function showMateriaStatsCard(materiaId, config) {
             <div class="materia-level-container">
                 <div class="level-info">
                     <span class="level-label">Nivel</span>
-                    <span class="level-value">0</span>
+                    <span class="level-value">${nivel}</span>
                 </div>
                 <div class="level-progress-bar">
-                    <div class="level-progress-fill" style="width: 0%;"></div>
+                    <div class="level-progress-fill" style="width: ${progresoNivel}%;"></div>
                 </div>
-                <span class="level-progress-text">0 / 100 XP</span>
+                <span class="level-progress-text">${xpActualNivel} / ${xpParaNivel} XP</span>
             </div>
         </div>
     `;
@@ -684,6 +823,11 @@ function setupDesafiosSubmenu() {
             // Add active to clicked
             btn.classList.add('active');
             document.getElementById(`${subtab}Subtab`).classList.add('active');
+            
+            // Si es tienda, cargar datos del usuario
+            if (subtab === 'tienda') {
+                loadTiendaData();
+            }
         });
     });
     
@@ -695,7 +839,284 @@ function setupDesafiosSubmenu() {
             window.location.href = `Desafios.html?materia=${currentMateria}&aula=${currentAulaId}`;
         });
     }
+    
+    // Setup tienda buttons
+    setupTiendaButtons();
 }
+
+// Cargar datos de la tienda
+async function loadTiendaData() {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+        const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
+        
+        if (userDoc.exists) {
+            const data = userDoc.data();
+            const monedas = data.puntos || data.puntosAcumulados || 0;
+            let energia = data.energia !== undefined ? data.energia : 10;
+            const energiaMax = data.energiaMax || 10;
+            
+            // Verificar energía infinita
+            let energiaDisplay = `${energia}/${energiaMax}`;
+            if (data.energiaInfinita && data.energiaInfinitaExpira) {
+                const expira = data.energiaInfinitaExpira.toDate ? data.energiaInfinitaExpira.toDate() : new Date(data.energiaInfinitaExpira);
+                if (expira > new Date()) {
+                    energiaDisplay = '∞';
+                }
+            }
+            
+            // Actualizar monedas en el header
+            const monedasHeader = document.getElementById('monedasHeader');
+            if (monedasHeader) {
+                monedasHeader.textContent = monedas;
+            }
+            
+            // Actualizar energía en el header
+            const energyBadge = document.querySelector('.materia-energy-badge span');
+            if (energyBadge) {
+                energyBadge.textContent = energiaDisplay;
+            }
+            
+            // Actualizar en la tienda
+            const tiendaMonedas = document.getElementById('tiendaMonedas');
+            if (tiendaMonedas) {
+                tiendaMonedas.textContent = monedas;
+            }
+            
+            const tiendaEnergia = document.getElementById('tiendaEnergia');
+            if (tiendaEnergia) {
+                tiendaEnergia.textContent = energiaDisplay;
+            }
+        }
+    } catch (error) {
+        console.error('Error cargando datos de tienda:', error);
+    }
+}
+
+// Setup tienda buttons
+function setupTiendaButtons() {
+    const tiendaItems = document.querySelectorAll('.tienda-item');
+    
+    tiendaItems.forEach(item => {
+        const comprarBtn = item.querySelector('.tienda-comprar-btn');
+        if (comprarBtn) {
+            comprarBtn.addEventListener('click', () => {
+                const itemType = item.dataset.item;
+                const precio = parseInt(item.dataset.precio);
+                mostrarConfirmacionCompra(itemType, precio);
+            });
+        }
+    });
+}
+
+// Variables para la compra pendiente
+let compraPendiente = { itemType: null, precio: null };
+
+// Mostrar modal de confirmación de compra
+function mostrarConfirmacionCompra(itemType, precio) {
+    compraPendiente = { itemType, precio };
+    
+    const modal = document.getElementById('confirmarCompraModal');
+    const mensaje = document.getElementById('confirmarCompraMensaje');
+    
+    if (!modal || !mensaje) {
+        // Si no existe el modal, proceder directamente
+        handleCompra(itemType, precio);
+        return;
+    }
+    
+    mensaje.textContent = `¿Deseas comprar ${getItemName(itemType)} por ${precio} monedas?`;
+    modal.style.display = 'flex';
+}
+
+// Cerrar modal de confirmación
+function cerrarConfirmacionCompra() {
+    const modal = document.getElementById('confirmarCompraModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Confirmar la compra
+function confirmarCompra() {
+    const itemType = compraPendiente.itemType;
+    const precio = compraPendiente.precio;
+    
+    cerrarConfirmacionCompra();
+    compraPendiente = { itemType: null, precio: null };
+    
+    if (itemType && precio) {
+        handleCompra(itemType, precio);
+    }
+}
+
+// Cancelar la compra
+function cancelarCompra() {
+    cerrarConfirmacionCompra();
+    compraPendiente = { itemType: null, precio: null };
+}
+
+// Inicializar eventos del modal de confirmación
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmarBtn = document.getElementById('confirmarCompraBtn');
+    const cancelarBtn = document.getElementById('cancelarCompraBtn');
+    const modal = document.getElementById('confirmarCompraModal');
+    
+    if (confirmarBtn) {
+        confirmarBtn.addEventListener('click', confirmarCompra);
+    }
+    if (cancelarBtn) {
+        cancelarBtn.addEventListener('click', cancelarCompra);
+    }
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cancelarCompra();
+            }
+        });
+    }
+});
+
+// Manejar compra en la tienda
+async function handleCompra(itemType, precio) {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+        
+        // Obtener datos actuales del usuario
+        const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
+        if (!userDoc.exists) {
+            showTiendaAlert('Error', 'No se encontró el usuario', 'error');
+            return;
+        }
+        
+        const userData = userDoc.data();
+        const monedasActuales = userData.puntos || userData.puntosAcumulados || 0;
+        
+        // Verificar si tiene suficientes monedas
+        if (monedasActuales < precio) {
+            showTiendaAlert('Monedas insuficientes', `Necesitas ${precio} monedas pero solo tienes ${monedasActuales}`, 'warning');
+            return;
+        }
+        
+        // Calcular lo que se va a agregar
+        let updateData = {
+            puntos: monedasActuales - precio,
+            puntosAcumulados: monedasActuales - precio
+        };
+        
+        // Determinar qué se compró
+        if (itemType.startsWith('energia')) {
+            const cantidadEnergia = getCantidadFromItem(itemType, 'energia');
+            const energiaActual = userData.energia || 0;
+            
+            if (itemType === 'energiaInfinita') {
+                // Energía infinita por 24 horas
+                updateData.energiaInfinita = true;
+                updateData.energiaInfinitaExpira = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            } else {
+                // Sumar energía sin límite (puede superar el máximo)
+                updateData.energia = energiaActual + cantidadEnergia;
+            }
+        } else if (itemType.startsWith('pista')) {
+            const cantidadPistas = getCantidadFromItem(itemType, 'pista');
+            const pistasActuales = userData.pistas || 0;
+            updateData.pistas = pistasActuales + cantidadPistas;
+        }
+        
+        // Actualizar en Firebase
+        await db.collection('usuarios').doc(currentUser.id).update(updateData);
+        
+        // Actualizar UI
+        loadTiendaData();
+        
+        // Mostrar confirmación
+        showTiendaAlert('¡Compra exitosa!', `Has comprado ${getItemName(itemType)} por ${precio} monedas`, 'success');
+        
+    } catch (error) {
+        console.error('Error en la compra:', error);
+        showTiendaAlert('Error', 'No se pudo completar la compra', 'error');
+    }
+}
+
+// Obtener cantidad del item
+function getCantidadFromItem(itemType, prefix) {
+    const match = itemType.match(new RegExp(`${prefix}(\\d+)`));
+    return match ? parseInt(match[1]) : 1;
+}
+
+// Obtener nombre del item
+function getItemName(itemType) {
+    const names = {
+        'energia1': '1 Energía',
+        'energia3': '3 Energías',
+        'energia5': '5 Energías',
+        'energiaInfinita': 'Energía Infinita (24h)',
+        'pista1': '1 Pista',
+        'pista3': '3 Pistas',
+        'pista5': '5 Pistas',
+        'pista10': '10 Pistas'
+    };
+    return names[itemType] || itemType;
+}
+
+// Mostrar alerta de tienda
+function showTiendaAlert(title, message, type = 'success') {
+    const modal = document.getElementById('tiendaAlertModal');
+    const icon = document.getElementById('tiendaAlertIcon');
+    
+    if (!modal || !icon) {
+        console.error('Modal de tienda no encontrado');
+        alert(`${title}\n\n${message}`);
+        return;
+    }
+    
+    document.getElementById('tiendaAlertTitulo').textContent = title;
+    document.getElementById('tiendaAlertMensaje').textContent = message;
+    
+    // Cambiar icono y color según tipo
+    if (type === 'error') {
+        icon.style.background = 'linear-gradient(180deg, #F44336 0%, #D32F2F 100%)';
+        icon.innerHTML = '<i class="bi bi-x-circle-fill" style="font-size: 2.5rem; color: white;"></i>';
+    } else if (type === 'warning') {
+        icon.style.background = 'linear-gradient(180deg, #FF9800 0%, #F57C00 100%)';
+        icon.innerHTML = '<i class="bi bi-exclamation-triangle-fill" style="font-size: 2.5rem; color: white;"></i>';
+    } else if (type === 'info') {
+        icon.style.background = 'linear-gradient(180deg, #2196F3 0%, #1976D2 100%)';
+        icon.innerHTML = '<i class="bi bi-info-circle-fill" style="font-size: 2.5rem; color: white;"></i>';
+    } else {
+        // success
+        icon.style.background = 'linear-gradient(180deg, #4CAF50 0%, #388E3C 100%)';
+        icon.innerHTML = '<i class="bi bi-check-circle-fill" style="font-size: 2.5rem; color: white;"></i>';
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function closeTiendaAlert() {
+    const modal = document.getElementById('tiendaAlertModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Inicializar evento del botón de alerta de tienda
+document.addEventListener('DOMContentLoaded', function() {
+    const alertBtn = document.getElementById('tiendaAlertBtn');
+    if (alertBtn) {
+        alertBtn.addEventListener('click', closeTiendaAlert);
+    }
+    
+    const alertModal = document.getElementById('tiendaAlertModal');
+    if (alertModal) {
+        alertModal.addEventListener('click', function(e) {
+            if (e.target === alertModal) {
+                closeTiendaAlert();
+            }
+        });
+    }
+});
 
 // Load desafios
 function loadDesafios() {

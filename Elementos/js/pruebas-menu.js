@@ -65,49 +65,65 @@ function selectType(type) {
     currentTestType = type;
     
     const createBtnText = document.getElementById('createBtnText');
-    const testsContainerTitle = document.querySelector('.tests-container h2');
+    const testsContainer = document.getElementById('testsContainer');
+    const testsContainerTitle = testsContainer ? testsContainer.querySelector('h2') : null;
     const testTypeGroup = document.getElementById('testTypeGroup');
     const editTestTypeGroup = document.getElementById('editTestTypeGroup');
     const createTestBtn = document.getElementById('createTestBtn');
+    const actionButtons = document.querySelector('.action-buttons');
+    const desafiosAdminView = document.getElementById('desafiosAdminView');
     
     // Actualizar textos según el tipo
     const typeLabels = {
         'prueba': { btn: 'Crear Nueva Prueba', title: 'Pruebas Creadas' },
         'minisimulacro': { btn: 'Crear Nuevo Minisimulacro', title: 'Minisimulacros Creados' },
-        'reto': { btn: 'Crear Nuevo Reto', title: 'Retos Creados' }
+        'reto': { btn: 'Crear Nuevo Nivel', title: 'Desafíos' }
     };
     
     const labels = typeLabels[type];
     
-    if (createBtnText) {
-        createBtnText.textContent = labels.btn;
-    }
-    
-    if (testsContainerTitle) {
-        const icons = {
-            'prueba': 'bi-clipboard-check',
-            'minisimulacro': 'bi-lightning',
-            'reto': 'bi-trophy'
-        };
-        testsContainerTitle.innerHTML = `<i class="bi ${icons[type]}"></i> ${labels.title}`;
-    }
-    
-    // Mostrar/ocultar selector de tipo en modales
-    // En Retos no se muestra porque será diferente
+    // Mostrar/ocultar vistas según el tipo
     if (type === 'reto') {
-        if (testTypeGroup) testTypeGroup.style.display = 'none';
-        if (editTestTypeGroup) editTestTypeGroup.style.display = 'none';
+        // Mostrar vista de desafíos
+        if (testsContainer) testsContainer.style.display = 'none';
+        if (actionButtons) actionButtons.style.display = 'none';
+        if (desafiosAdminView) {
+            desafiosAdminView.style.display = 'block';
+            // Inicializar desafíos admin si existe la función
+            if (typeof initDesafiosAdmin === 'function') {
+                initDesafiosAdmin();
+            }
+        }
     } else {
+        // Mostrar vista de pruebas/minisimulacros
+        if (testsContainer) testsContainer.style.display = 'block';
+        if (actionButtons) actionButtons.style.display = 'flex';
+        if (desafiosAdminView) desafiosAdminView.style.display = 'none';
+        
+        if (createBtnText) {
+            createBtnText.textContent = labels.btn;
+        }
+        
+        if (testsContainerTitle) {
+            const icons = {
+                'prueba': 'bi-clipboard-check',
+                'minisimulacro': 'bi-lightning',
+                'reto': 'bi-trophy'
+            };
+            testsContainerTitle.innerHTML = `<i class="bi ${icons[type]}"></i> ${labels.title}`;
+        }
+        
+        // Mostrar/ocultar selector de tipo en modales
         if (testTypeGroup) testTypeGroup.style.display = 'block';
         if (editTestTypeGroup) editTestTypeGroup.style.display = 'block';
         
         // Pre-seleccionar el tipo actual en los toggles
         setTypeToggle('testTypeGroup', type);
         setTypeToggle('editTestTypeGroup', type);
+        
+        // Cargar datos según el tipo
+        loadTestsByType(type);
     }
-    
-    // Cargar datos según el tipo
-    loadTestsByType(type);
 }
 
 function setTypeToggle(groupId, type) {

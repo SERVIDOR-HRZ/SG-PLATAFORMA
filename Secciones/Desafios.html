@@ -27,9 +27,14 @@
         </div>
         <div class="header-right">
             <div class="header-stats">
-                <div class="stat-badge energy">
+                <div class="stat-badge energy" id="energyBadge">
                     <i class="bi bi-lightning-fill"></i>
                     <span id="energiaActual">5</span>
+                    <span class="energy-timer" id="energyTimer" style="display: none;"><i class="bi bi-clock"></i><span id="timerText">00:00</span></span>
+                </div>
+                <div class="stat-badge hints" id="hintsBadge">
+                    <i class="bi bi-lightbulb-fill"></i>
+                    <span id="pistasActual">0</span>
                 </div>
                 <div class="stat-badge coins">
                     <i class="bi bi-coin"></i>
@@ -45,6 +50,11 @@
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Botón de reinicio flotante -->
+        <button class="reset-progress-btn" id="resetProgressBtn" title="Reiniciar progreso">
+            <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+        
         <div class="path-container" id="pathContainer">
             <!-- El camino de niveles se genera dinámicamente -->
         </div>
@@ -147,11 +157,57 @@
         </div>
     </div>
 
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <script src="../Elementos/js/firebase-config.js"></script>
+    <!-- Modal de Alerta -->
+    <div class="modal" id="alertModal">
+        <div class="modal-content modal-alert">
+            <div class="alert-icon" id="alertIcon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h2 id="alertTitulo">Aviso</h2>
+            <p id="alertMensaje">Mensaje de alerta</p>
+            <button class="continuar-btn" id="alertBtn">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Reinicio -->
+    <div class="modal" id="resetModal">
+        <div class="modal-content modal-reset">
+            <div class="reset-warning-icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h2 class="reset-title">⚠️ ¡ADVERTENCIA!</h2>
+            <div class="reset-warning-box">
+                <p class="reset-warning-text">Estás a punto de <strong>REINICIAR TODO TU PROGRESO</strong> en esta materia.</p>
+                <ul class="reset-list">
+                    <li><i class="bi bi-x-circle-fill"></i> Se perderán TODOS los niveles completados</li>
+                    <li><i class="bi bi-x-circle-fill"></i> Tu XP volverá a 0</li>
+                    <li><i class="bi bi-x-circle-fill"></i> Tu nivel volverá a 1</li>
+                    <li><i class="bi bi-x-circle-fill"></i> Todas las estrellas se perderán</li>
+                </ul>
+                <p class="reset-irreversible">🚫 Esta acción es <strong>IRREVERSIBLE</strong></p>
+            </div>
+            <p class="reset-confirm-text">Escribe <strong>"REINICIAR"</strong> para confirmar:</p>
+            <input type="text" id="resetConfirmInput" class="reset-confirm-input" placeholder="Escribe REINICIAR" autocomplete="off">
+            <div class="reset-actions">
+                <button class="reset-cancel-btn" id="cancelResetBtn">
+                    <i class="bi bi-x-lg"></i>
+                    Cancelar
+                </button>
+                <button class="reset-confirm-btn" id="confirmResetBtn" disabled>
+                    <i class="bi bi-trash3-fill"></i>
+                    Reiniciar Todo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/desafios.js"></script>
 </body>
 

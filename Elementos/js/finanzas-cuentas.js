@@ -1343,12 +1343,15 @@ async function otorgarRecompensas(estudianteId, movimientoId, recompensasData) {
         }
 
         const estudiante = estudianteDoc.data();
-        const puntosActuales = estudiante.puntosAcumulados || 0;
+        // Leer de ambos campos para obtener el valor actual correcto
+        const puntosActuales = estudiante.puntos || estudiante.puntosAcumulados || 0;
         const historialRecompensas = estudiante.historialRecompensas || [];
+        const nuevosPuntos = puntosActuales + (recompensasData.puntos || 0);
 
-        // Preparar datos de actualización
+        // Preparar datos de actualización - actualizar AMBOS campos para consistencia
         const updateData = {
-            puntosAcumulados: puntosActuales + (recompensasData.puntos || 0)
+            puntos: nuevosPuntos,
+            puntosAcumulados: nuevosPuntos
         };
 
         // Agregar al historial
@@ -1456,7 +1459,8 @@ function renderizarListaEstudiantes() {
     }
 
     container.innerHTML = estudiantesFiltrados.map(est => {
-        const monedas = est.puntosAcumulados || est.puntos || 0;
+        // Leer de ambos campos para consistencia
+        const monedas = est.puntos || est.puntosAcumulados || 0;
         const foto = est.fotoPerfil ? `<img src="${est.fotoPerfil}" alt="${est.nombre}">` : `<i class="bi bi-person-fill"></i>`;
         
         return `
@@ -1530,10 +1534,11 @@ async function otorgarMonedasRapido(estudianteId, estudianteNombre) {
         if (success) {
             showNotification('success', '¡Listo!', `+${monedas} monedas para ${estudianteNombre}`);
             
-            // Actualizar monedas en la lista sin recargar todo
+            // Actualizar monedas en la lista sin recargar todo - actualizar ambos campos
             const estudianteIndex = todosLosEstudiantesRecompensa.findIndex(e => e.id === estudianteId);
             if (estudianteIndex !== -1) {
-                const actual = todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados || 0;
+                const actual = todosLosEstudiantesRecompensa[estudianteIndex].puntos || todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados || 0;
+                todosLosEstudiantesRecompensa[estudianteIndex].puntos = actual + monedas;
                 todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados = actual + monedas;
             }
             
@@ -1567,7 +1572,7 @@ async function quitarMonedasRapido(estudianteId, estudianteNombre) {
 
     // Verificar que el estudiante tenga suficientes monedas
     const estudiante = todosLosEstudiantesRecompensa.find(e => e.id === estudianteId);
-    const monedasActuales = estudiante?.puntosAcumulados || 0;
+    const monedasActuales = estudiante?.puntos || estudiante?.puntosAcumulados || 0;
     
     if (monedasActuales < monedas) {
         showNotification('error', 'Error', `${estudianteNombre} solo tiene ${monedasActuales} monedas`);
@@ -1584,8 +1589,9 @@ async function quitarMonedasRapido(estudianteId, estudianteNombre) {
     try {
         const db = getDB();
         
-        // Actualizar en Firebase
+        // Actualizar AMBOS campos en Firebase para consistencia
         await db.collection('usuarios').doc(estudianteId).update({
+            puntos: firebase.firestore.FieldValue.increment(-monedas),
             puntosAcumulados: firebase.firestore.FieldValue.increment(-monedas),
             historialRecompensas: firebase.firestore.FieldValue.arrayUnion({
                 fecha: new Date(),
@@ -1601,7 +1607,8 @@ async function quitarMonedasRapido(estudianteId, estudianteNombre) {
         // Actualizar monedas en la lista sin recargar todo
         const estudianteIndex = todosLosEstudiantesRecompensa.findIndex(e => e.id === estudianteId);
         if (estudianteIndex !== -1) {
-            const actual = todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados || 0;
+            const actual = todosLosEstudiantesRecompensa[estudianteIndex].puntos || todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados || 0;
+            todosLosEstudiantesRecompensa[estudianteIndex].puntos = Math.max(0, actual - monedas);
             todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados = Math.max(0, actual - monedas);
         }
         

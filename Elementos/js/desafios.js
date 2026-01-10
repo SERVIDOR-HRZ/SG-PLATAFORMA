@@ -1,55 +1,64 @@
-// Desafios.js - Sistema de desafíos estilo Duolingo
+// Desafios.js - Sistema de desafíos con niveles dinámicos desde Firebase
 
 let currentUser = null;
 let currentMateria = '';
+let currentAulaId = '';
 let currentNivel = 1;
-let nivelDesbloqueado = 1
+let nivelDesbloqueado = 1;
 let currentPreguntaIndex = 0;
 let preguntasActuales = [];
 let respuestasCorrectas = 0;
 let selectedOption = null;
+let nivelesData = [];
+let energyTimerInterval = null;
+let ultimaRegeneracionGlobal = null;
+let currentNivelData = null; // Datos del nivel actual (recompensas, etc.)
 
-// Preguntas por materia
-const preguntasPorMateria = {
-    matematicas: [
-        { pregunta: "¿Cuánto es 15 + 27?", opciones: ["40", "42", "44", "38"], correcta: 1 },
-        { pregunta: "¿Cuál es el resultado de 8 × 7?", opciones: ["54", "56", "58", "52"], correcta: 1 },
-        { pregunta: "Si tengo 100 y gasto 35, ¿cuánto me queda?", opciones: ["75", "60", "65", "55"], correcta: 2 },
-        { pregunta: "¿Cuánto es 144 ÷ 12?", opciones: ["10", "11", "12", "14"], correcta: 2 },
-        { pregunta: "¿Cuál es el valor de 5²?", opciones: ["10", "15", "20", "25"], correcta: 3 },
-        { pregunta: "¿Cuánto es 3 × 9?", opciones: ["24", "27", "30", "21"], correcta: 1 },
-        { pregunta: "¿Cuál es la raíz cuadrada de 81?", opciones: ["7", "8", "9", "10"], correcta: 2 }
-    ],
-    lectura: [
-        { pregunta: "¿Qué tipo de palabra es 'rápidamente'?", opciones: ["Sustantivo", "Adjetivo", "Adverbio", "Verbo"], correcta: 2 },
-        { pregunta: "¿Cuál es el sinónimo de 'feliz'?", opciones: ["Triste", "Contento", "Enojado", "Cansado"], correcta: 1 },
-        { pregunta: "¿Qué signo se usa para hacer una pregunta?", opciones: ["Punto", "Coma", "Signos de interrogación", "Dos puntos"], correcta: 2 },
-        { pregunta: "¿Cuál es el antónimo de 'grande'?", opciones: ["Enorme", "Gigante", "Pequeño", "Alto"], correcta: 2 },
-        { pregunta: "¿Qué es un sustantivo?", opciones: ["Una acción", "Un nombre", "Una cualidad", "Una cantidad"], correcta: 1 }
-    ],
-    sociales: [
-        { pregunta: "¿Cuál es el continente más grande?", opciones: ["África", "América", "Asia", "Europa"], correcta: 2 },
-        { pregunta: "¿Cuántos océanos hay en la Tierra?", opciones: ["3", "4", "5", "6"], correcta: 2 },
-        { pregunta: "¿Qué es la democracia?", opciones: ["Gobierno de uno", "Gobierno del pueblo", "Gobierno militar", "Sin gobierno"], correcta: 1 },
-        { pregunta: "¿Cuál es la capital de Colombia?", opciones: ["Medellín", "Cali", "Bogotá", "Barranquilla"], correcta: 2 },
-        { pregunta: "¿En qué año llegó Colón a América?", opciones: ["1490", "1491", "1492", "1493"], correcta: 2 }
-    ],
-    naturales: [
-        { pregunta: "¿Cuál es el planeta más cercano al Sol?", opciones: ["Venus", "Mercurio", "Tierra", "Marte"], correcta: 1 },
-        { pregunta: "¿Qué gas necesitan las plantas para la fotosíntesis?", opciones: ["Oxígeno", "Nitrógeno", "CO₂", "Hidrógeno"], correcta: 2 },
-        { pregunta: "¿Cuántos huesos tiene el cuerpo humano adulto?", opciones: ["106", "156", "206", "256"], correcta: 2 },
-        { pregunta: "¿Qué órgano bombea la sangre?", opciones: ["Pulmones", "Hígado", "Corazón", "Riñones"], correcta: 2 },
-        { pregunta: "¿Cuál es el estado del agua a 0°C?", opciones: ["Líquido", "Sólido", "Gaseoso", "Plasma"], correcta: 1 }
-    ],
-    ingles: [
-        { pregunta: "What is 'perro' in English?", opciones: ["Cat", "Dog", "Bird", "Fish"], correcta: 1 },
-        { pregunta: "How do you say 'buenos días'?", opciones: ["Good night", "Good afternoon", "Good morning", "Good evening"], correcta: 2 },
-        { pregunta: "What color is the sky?", opciones: ["Green", "Red", "Blue", "Yellow"], correcta: 2 },
-        { pregunta: "Complete: She ___ a student.", opciones: ["am", "is", "are", "be"], correcta: 1 },
-        { pregunta: "What is the plural of 'child'?", opciones: ["Childs", "Children", "Childes", "Child"], correcta: 1 }
-    ]
+let userGameData = {
+    energia: 10,
+    energiaMax: 10,
+    monedas: 0,
+    pistas: 0,
+    xp: 0,
+    nivel: 1,
+    nivelesCompletados: {},
+    energiaInfinita: false
 };
 
+// ============ SISTEMA DE NIVELES PROGRESIVO ============
+// Nivel 1→2: 100 XP, Nivel 2→3: 200 XP, Nivel 3→4: 400 XP, etc. (se duplica)
+
+// Calcular XP total necesario para alcanzar un nivel
+function getXPForLevel(level) {
+    if (level <= 1) return 0;
+    // Suma de serie geométrica: 100 * (2^(n-1) - 1) / (2 - 1) = 100 * (2^(n-1) - 1)
+    return 100 * (Math.pow(2, level - 1) - 1);
+}
+
+// Calcular nivel basado en XP total
+function calculateLevelFromXP(totalXP) {
+    if (totalXP < 100) return 1;
+    // Resolver: 100 * (2^(n-1) - 1) <= totalXP
+    // 2^(n-1) <= totalXP/100 + 1
+    // n-1 <= log2(totalXP/100 + 1)
+    // n <= log2(totalXP/100 + 1) + 1
+    const level = Math.floor(Math.log2(totalXP / 100 + 1) + 1);
+    return Math.max(1, level);
+}
+
+// Obtener XP actual dentro del nivel (para la barra de progreso)
+function getXPInCurrentLevel(totalXP) {
+    const currentLevel = calculateLevelFromXP(totalXP);
+    const xpForCurrentLevel = getXPForLevel(currentLevel);
+    return totalXP - xpForCurrentLevel;
+}
+
+// Obtener XP necesario para el siguiente nivel
+function getXPNeededForNextLevel(currentLevel) {
+    return 100 * Math.pow(2, currentLevel - 1);
+}
+
+// Colores por materia
 const coloresMaterias = {
     matematicas: { main: '#2196F3', dark: '#1976D2', bg: '#1a3a5c', bgLight: '#234b73' },
     lectura: { main: '#E53935', dark: '#C62828', bg: '#4a2020', bgLight: '#5c2828' },
@@ -58,7 +67,7 @@ const coloresMaterias = {
     ingles: { main: '#9C27B0', dark: '#7B1FA2', bg: '#3a1a4a', bgLight: '#4b2360' }
 };
 
-// Patrón del camino (porcentaje desde el centro: -1 = izq, 0 = centro, 1 = der)
+// Patrón del camino
 const pathPattern = [0, -0.6, 0, 0.6, 0, 0.6, 0, -0.6, 0, -0.6];
 
 document.addEventListener('DOMContentLoaded', initDesafios);
@@ -86,6 +95,7 @@ async function initDesafios() {
     
     const urlParams = new URLSearchParams(window.location.search);
     currentMateria = urlParams.get('materia') || 'matematicas';
+    currentAulaId = urlParams.get('aula') || '';
     
     // Aplicar colores de la materia
     const colores = coloresMaterias[currentMateria] || coloresMaterias.matematicas;
@@ -98,26 +108,332 @@ async function initDesafios() {
     const nombreMateria = currentMateria.charAt(0).toUpperCase() + currentMateria.slice(1);
     document.getElementById('materiaTitle').textContent = nombreMateria;
     
+    // Esperar Firebase
+    await esperarFirebase();
+    
+    // Cargar datos del usuario
+    await loadUserGameData();
+    
+    // Cargar niveles desde Firebase
+    await loadNiveles();
+    
+    // Actualizar UI
+    updateHeaderStats();
+    
+    // Generar camino
     generatePath();
+    
     setupEventListeners();
+}
+
+function esperarFirebase() {
+    return new Promise(resolve => {
+        const verificar = () => {
+            if (window.firebaseDB) {
+                resolve();
+            } else {
+                setTimeout(verificar, 100);
+            }
+        };
+        verificar();
+    });
+}
+
+async function loadUserGameData() {
+    try {
+        const db = window.firebaseDB;
+        const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
+        
+        if (userDoc.exists) {
+            const data = userDoc.data();
+            userGameData.monedas = data.puntos || data.puntosAcumulados || 0;
+            userGameData.pistas = data.pistas || 0;
+            userGameData.energia = data.energia !== undefined ? data.energia : 10;
+            userGameData.energiaMax = data.energiaMax || 10;
+            
+            // Cargar XP y nivel POR MATERIA
+            const progresoKey = `progreso_${currentMateria}`;
+            if (data[progresoKey]) {
+                userGameData.xp = data[progresoKey].xp || 0;
+                userGameData.nivelesCompletados = data[progresoKey].nivelesCompletados || {};
+                nivelDesbloqueado = data[progresoKey].nivelDesbloqueado || 1;
+            } else {
+                userGameData.xp = 0;
+                userGameData.nivelesCompletados = {};
+                nivelDesbloqueado = 1;
+            }
+            
+            // Calcular nivel basado en XP de esta materia (sistema progresivo)
+            userGameData.nivel = calculateLevelFromXP(userGameData.xp);
+            
+            // Debug: mostrar datos cargados
+            console.log(`Datos del usuario para ${currentMateria}:`, {
+                monedas: userGameData.monedas,
+                xp: userGameData.xp,
+                nivel: userGameData.nivel,
+                energia: userGameData.energia,
+                nivelDesbloqueado: nivelDesbloqueado
+            });
+            
+            // Guardar última regeneración para el timer
+            ultimaRegeneracionGlobal = data.ultimaRegeneracionEnergia?.toDate() || new Date();
+            
+            // Verificar energía infinita
+            userGameData.energiaInfinita = false;
+            userGameData.energiaInfinitaExpira = null;
+            if (data.energiaInfinita && data.energiaInfinitaExpira) {
+                const expira = data.energiaInfinitaExpira.toDate ? data.energiaInfinitaExpira.toDate() : new Date(data.energiaInfinitaExpira);
+                if (expira > new Date()) {
+                    userGameData.energiaInfinita = true;
+                    userGameData.energiaInfinitaExpira = expira;
+                }
+            }
+            
+            // Verificar y regenerar energía si es necesario
+            await checkAndRegenerateEnergy(data);
+            
+            // Iniciar timer de energía
+            startEnergyTimer();
+        }
+    } catch (error) {
+        console.error('Error cargando datos del usuario:', error);
+    }
+}
+
+// Sistema de regeneración de energía (1 cada 10 minutos)
+async function checkAndRegenerateEnergy(userData) {
+    try {
+        // Si tiene energía infinita activa, no regenerar
+        if (userGameData.energiaInfinita) return;
+        
+        const energiaActual = userGameData.energia;
+        const energiaMax = userGameData.energiaMax;
+        
+        // Si ya tiene energía máxima, no hacer nada
+        if (energiaActual >= energiaMax) return;
+        
+        const ultimaRegeneracion = userData.ultimaRegeneracionEnergia?.toDate() || new Date(0);
+        const ahora = new Date();
+        const minutosTranscurridos = Math.floor((ahora - ultimaRegeneracion) / (1000 * 60));
+        const energiasARegenerar = Math.floor(minutosTranscurridos / 10);
+        
+        if (energiasARegenerar > 0) {
+            const nuevaEnergia = Math.min(energiaActual + energiasARegenerar, energiaMax);
+            userGameData.energia = nuevaEnergia;
+            ultimaRegeneracionGlobal = ahora;
+            
+            const db = window.firebaseDB;
+            await db.collection('usuarios').doc(currentUser.id).update({
+                energia: nuevaEnergia,
+                ultimaRegeneracionEnergia: firebase.firestore.Timestamp.now()
+            });
+        }
+    } catch (error) {
+        console.error('Error regenerando energía:', error);
+    }
+}
+
+// Timer de energía - muestra cuenta regresiva para la próxima regeneración
+function startEnergyTimer() {
+    // Limpiar intervalo anterior si existe
+    if (energyTimerInterval) {
+        clearInterval(energyTimerInterval);
+    }
+    
+    // Actualizar inmediatamente
+    updateEnergyTimer();
+    
+    // Actualizar cada segundo
+    energyTimerInterval = setInterval(updateEnergyTimer, 1000);
+}
+
+function updateEnergyTimer() {
+    const timerElement = document.getElementById('energyTimer');
+    const timerText = document.getElementById('timerText');
+    
+    if (!timerElement || !timerText) return;
+    
+    // Si tiene energía infinita, mostrar tiempo restante
+    if (userGameData.energiaInfinita && userGameData.energiaInfinitaExpira) {
+        const ahora = new Date();
+        const tiempoRestante = userGameData.energiaInfinitaExpira - ahora;
+        
+        // Si expiró, desactivar energía infinita
+        if (tiempoRestante <= 0) {
+            userGameData.energiaInfinita = false;
+            userGameData.energiaInfinitaExpira = null;
+            updateHeaderStats();
+            return;
+        }
+        
+        // Mostrar timer con tiempo restante de energía infinita
+        timerElement.style.display = 'flex';
+        timerElement.classList.add('infinite-timer');
+        
+        const horas = Math.floor(tiempoRestante / (1000 * 60 * 60));
+        const minutos = Math.floor((tiempoRestante % (1000 * 60 * 60)) / (1000 * 60));
+        const segundos = Math.floor((tiempoRestante % (1000 * 60)) / 1000);
+        
+        if (horas > 0) {
+            timerText.textContent = `${horas}h ${minutos.toString().padStart(2, '0')}m`;
+        } else {
+            timerText.textContent = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+        }
+        return;
+    }
+    
+    // Quitar clase de infinito si no tiene
+    timerElement.classList.remove('infinite-timer');
+    
+    // Si tiene energía máxima, ocultar timer
+    if (userGameData.energia >= userGameData.energiaMax) {
+        timerElement.style.display = 'none';
+        return;
+    }
+    
+    // Calcular tiempo restante para la próxima regeneración
+    const ahora = new Date();
+    const ultimaRegen = ultimaRegeneracionGlobal || ahora;
+    const tiempoTranscurrido = ahora - ultimaRegen;
+    const tiempoParaProxima = (10 * 60 * 1000) - (tiempoTranscurrido % (10 * 60 * 1000));
+    
+    // Si ya pasó el tiempo, regenerar
+    if (tiempoParaProxima <= 0 || tiempoTranscurrido >= 10 * 60 * 1000) {
+        regenerateOneEnergy();
+        return;
+    }
+    
+    // Mostrar timer
+    timerElement.style.display = 'flex';
+    
+    const minutosRestantes = Math.floor(tiempoParaProxima / (1000 * 60));
+    const segundosRestantes = Math.floor((tiempoParaProxima % (1000 * 60)) / 1000);
+    
+    timerText.textContent = `${minutosRestantes.toString().padStart(2, '0')}:${segundosRestantes.toString().padStart(2, '0')}`;
+}
+
+async function regenerateOneEnergy() {
+    if (userGameData.energia >= userGameData.energiaMax) return;
+    
+    userGameData.energia++;
+    ultimaRegeneracionGlobal = new Date();
+    
+    try {
+        const db = window.firebaseDB;
+        await db.collection('usuarios').doc(currentUser.id).update({
+            energia: userGameData.energia,
+            ultimaRegeneracionEnergia: firebase.firestore.Timestamp.now()
+        });
+    } catch (error) {
+        console.error('Error actualizando energía:', error);
+    }
+    
+    updateHeaderStats();
+}
+
+async function loadNiveles() {
+    try {
+        const db = window.firebaseDB;
+        
+        // Obtener TODOS los niveles y filtrar en cliente (evita índices)
+        const nivelesSnapshot = await db.collection('desafios_niveles').get();
+        
+        nivelesData = [];
+        nivelesSnapshot.forEach(doc => {
+            const data = doc.data();
+            // Filtrar por materia en el cliente
+            if (data.materia === currentMateria) {
+                nivelesData.push({
+                    id: doc.id,
+                    ...data
+                });
+            }
+        });
+        
+        // Ordenar en el cliente por número
+        nivelesData.sort((a, b) => (a.numero || 0) - (b.numero || 0));
+        
+        console.log(`Cargados ${nivelesData.length} niveles para ${currentMateria}`);
+    } catch (error) {
+        console.error('Error cargando niveles:', error);
+        nivelesData = [];
+    }
+}
+
+function updateHeaderStats() {
+    // Mostrar energía (infinita o normal)
+    const energiaDisplay = userGameData.energiaInfinita ? '∞' : userGameData.energia;
+    document.getElementById('energiaActual').textContent = energiaDisplay;
+    document.getElementById('monedasActual').textContent = userGameData.monedas;
+    document.getElementById('nivelActual').textContent = userGameData.nivel;
+    
+    // Mostrar pistas
+    const pistasElement = document.getElementById('pistasActual');
+    if (pistasElement) {
+        pistasElement.textContent = userGameData.pistas;
+    }
+    
+    // Actualizar badge de pistas
+    const hintsBadge = document.getElementById('hintsBadge');
+    if (hintsBadge) {
+        if (userGameData.pistas <= 0) {
+            hintsBadge.classList.add('empty');
+            hintsBadge.classList.remove('has-hints');
+        } else {
+            hintsBadge.classList.remove('empty');
+            hintsBadge.classList.add('has-hints');
+        }
+    }
+    
+    // Actualizar badge de energía con clase especial si es infinita
+    const energyBadge = document.getElementById('energyBadge');
+    if (energyBadge) {
+        if (userGameData.energiaInfinita) {
+            energyBadge.classList.add('infinite');
+        } else {
+            energyBadge.classList.remove('infinite');
+        }
+    }
+    
+    // Actualizar visibilidad del timer - mostrar si tiene energía infinita o si necesita regenerar
+    const timerElement = document.getElementById('energyTimer');
+    if (timerElement) {
+        if (userGameData.energiaInfinita) {
+            // Mostrar timer con tiempo restante de energía infinita
+            timerElement.style.display = 'flex';
+        } else if (userGameData.energia >= userGameData.energiaMax) {
+            timerElement.style.display = 'none';
+        } else {
+            timerElement.style.display = 'flex';
+        }
+    }
 }
 
 function generatePath() {
     const container = document.getElementById('pathContainer');
     container.innerHTML = '';
     
-    const totalNiveles = 500;
+    // Si no hay niveles creados, mostrar mensaje
+    if (nivelesData.length === 0) {
+        container.innerHTML = `
+            <div class="no-niveles-message">
+                <i class="bi bi-emoji-frown"></i>
+                <h3>No hay niveles disponibles</h3>
+                <p>Aún no se han creado desafíos para esta materia.</p>
+                <p>Los profesores pueden crear niveles desde el panel de administración.</p>
+            </div>
+        `;
+        return;
+    }
     
-    // Crear contenedor de nodos
     const nodesContainer = document.createElement('div');
     nodesContainer.className = 'nodes-container';
     nodesContainer.id = 'nodesContainer';
     
     let nodeIndex = 0;
     
-    // Generar nodos con cofres intercalados
-    for (let nivel = 1; nivel <= totalNiveles; nivel++) {
-        // Crear nodo de nivel normal
+    // Generar nodos basados en los niveles de Firebase
+    nivelesData.forEach((nivel, index) => {
         const patternIndex = nodeIndex % pathPattern.length;
         const offsetPercent = pathPattern[patternIndex];
         
@@ -125,13 +441,13 @@ function generatePath() {
         row.className = 'level-row';
         row.dataset.offset = offsetPercent;
         
-        const node = createLevelNode(nivel, false);
+        const node = createLevelNode(nivel, index + 1);
         row.appendChild(node);
         nodesContainer.appendChild(row);
         nodeIndex++;
         
-        // Después de cada 10 niveles, agregar un cofre
-        if (nivel % 10 === 0) {
+        // Cofre cada 10 niveles
+        if ((index + 1) % 10 === 0) {
             const chestPatternIndex = nodeIndex % pathPattern.length;
             const chestOffset = pathPattern[chestPatternIndex];
             
@@ -139,40 +455,61 @@ function generatePath() {
             chestRow.className = 'level-row';
             chestRow.dataset.offset = chestOffset;
             
-            const chestNode = createChestNode(nivel); // El cofre se desbloquea al completar el nivel 10, 20, etc.
+            const chestNode = createChestNode(index + 1);
             chestRow.appendChild(chestNode);
             nodesContainer.appendChild(chestRow);
             nodeIndex++;
         }
-    }
+    });
     
     container.appendChild(nodesContainer);
     
-    // Dibujar líneas después de renderizar
     setTimeout(drawLines, 100);
 }
 
-function createLevelNode(nivel, isChest = false) {
+function createLevelNode(nivelData, numero) {
     const node = document.createElement('div');
     node.className = 'level-node';
-    node.dataset.nivel = nivel;
+    node.dataset.nivel = numero;
+    node.dataset.nivelId = nivelData.id;
     
-    if (nivel < nivelDesbloqueado) {
+    const completedData = userGameData.nivelesCompletados[nivelData.id];
+    const isCompleted = !!completedData;
+    const isAvailable = numero <= nivelDesbloqueado;
+    
+    // Obtener estrellas (puede ser un número o true para compatibilidad)
+    let stars = 0;
+    if (completedData) {
+        stars = typeof completedData === 'object' ? (completedData.stars || 1) : 1;
+    }
+    
+    if (isCompleted) {
         node.classList.add('completed');
-    } else if (nivel === nivelDesbloqueado) {
+        node.dataset.stars = stars;
+    } else if (isAvailable) {
         node.classList.add('available');
     } else {
         node.classList.add('locked');
     }
     
+    // Generar HTML de estrellas
+    const starsHTML = isCompleted ? `
+        <div class="node-stars" data-stars="${stars}">
+            <i class="bi bi-star-fill ${stars >= 1 ? 'active' : ''}"></i>
+            <i class="bi bi-star-fill ${stars >= 2 ? 'active' : ''}"></i>
+            <i class="bi bi-star-fill ${stars >= 3 ? 'active' : ''}"></i>
+        </div>
+    ` : '';
+    
     node.innerHTML = `
-        <span class="node-number">${nivel}</span>
+        <span class="node-number">${numero}</span>
         <span class="node-check"><i class="bi bi-check-lg"></i></span>
         <span class="node-icon"><i class="bi bi-lock-fill"></i></span>
+        ${starsHTML}
     `;
     
-    if (nivel <= nivelDesbloqueado) {
-        node.addEventListener('click', () => openDesafioModal(nivel));
+    if (isAvailable) {
+        node.addEventListener('click', () => openDesafioModal(nivelData, numero));
     }
     
     return node;
@@ -183,9 +520,13 @@ function createChestNode(afterLevel) {
     node.className = 'level-node chest';
     node.dataset.chestAfter = afterLevel;
     
-    // El cofre se desbloquea cuando completas el nivel anterior (afterLevel)
-    // Se puede abrir cuando nivelDesbloqueado > afterLevel
-    if (nivelDesbloqueado > afterLevel) {
+    const chestKey = `chest_${currentMateria}_${afterLevel}`;
+    const isOpened = userGameData.nivelesCompletados[chestKey];
+    const isAvailable = nivelDesbloqueado > afterLevel && !isOpened;
+    
+    if (isOpened) {
+        node.classList.add('completed');
+    } else if (isAvailable) {
         node.classList.add('available');
     } else {
         node.classList.add('locked');
@@ -196,134 +537,151 @@ function createChestNode(afterLevel) {
         <span class="chest-coins">+100 <i class="bi bi-coin"></i></span>
     `;
     
-    if (nivelDesbloqueado > afterLevel) {
+    if (isAvailable) {
         node.addEventListener('click', () => openChestModal(afterLevel));
     }
     
     return node;
 }
 
-function openChestModal(nivel) {
+
+async function openChestModal(nivel) {
     currentNivel = nivel;
+    
+    const modal = document.getElementById('desafioModal');
     document.getElementById('desafioTitulo').textContent = `¡Cofre de Recompensa!`;
-    document.getElementById('desafioModal').querySelector('.desafio-icon').innerHTML = '<i class="bi bi-box2-heart-fill"></i>';
-    document.getElementById('desafioModal').querySelector('.desafio-icon').style.background = 'linear-gradient(180deg, #FFD700 0%, #FFA000 100%)';
-    document.getElementById('desafioModal').querySelector('.desafio-descripcion').textContent = '¡Felicidades! Has alcanzado un cofre de recompensa. Ábrelo para obtener tus monedas.';
-    document.getElementById('desafioModal').querySelector('.desafio-recompensas').innerHTML = `
+    modal.querySelector('.desafio-icon').innerHTML = '<i class="bi bi-box2-heart-fill"></i>';
+    modal.querySelector('.desafio-icon').style.background = 'linear-gradient(180deg, #FFD700 0%, #FFA000 100%)';
+    modal.querySelector('.desafio-descripcion').textContent = '¡Felicidades! Has alcanzado un cofre de recompensa. Ábrelo para obtener tus monedas.';
+    modal.querySelector('.desafio-recompensas').innerHTML = `
         <div class="recompensa"><i class="bi bi-coin"></i> +100 Monedas</div>
     `;
-    document.getElementById('desafioModal').querySelector('.desafio-costo').style.display = 'none';
+    modal.querySelector('.desafio-costo').style.display = 'none';
     document.getElementById('startDesafio').innerHTML = '<i class="bi bi-box-arrow-in-down"></i> Abrir Cofre';
-    document.getElementById('desafioModal').classList.add('active');
+    document.getElementById('startDesafio').dataset.isChest = 'true';
+    modal.classList.add('active');
 }
 
-function drawLines() {
-    // Eliminar SVG anterior
-    const oldSvg = document.querySelector('.path-svg');
-    if (oldSvg) oldSvg.remove();
+async function openDesafioModal(nivelData, numero) {
+    currentNivel = numero;
+    currentNivelData = nivelData; // Guardar datos del nivel para usar en recompensas
+    preguntasActuales = nivelData.preguntas || [];
     
-    const container = document.getElementById('pathContainer');
-    const nodesContainer = document.getElementById('nodesContainer');
-    const rows = nodesContainer.querySelectorAll('.level-row');
+    const modal = document.getElementById('desafioModal');
+    document.getElementById('desafioTitulo').textContent = `Nivel ${numero}`;
     
-    if (rows.length < 2) return;
+    // Restaurar estilo del ícono
+    const colores = coloresMaterias[currentMateria] || coloresMaterias.matematicas;
+    modal.querySelector('.desafio-icon').innerHTML = '<i class="bi bi-trophy-fill"></i>';
+    modal.querySelector('.desafio-icon').style.background = `linear-gradient(180deg, ${colores.main} 0%, ${colores.dark} 100%)`;
     
-    const containerRect = container.getBoundingClientRect();
+    modal.querySelector('.desafio-descripcion').textContent = nivelData.descripcion || 'Responde correctamente las preguntas para ganar monedas y experiencia.';
     
-    // Crear SVG
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.classList.add('path-svg');
-    svg.setAttribute('width', '100%');
-    svg.setAttribute('height', nodesContainer.offsetHeight);
+    const monedasRecompensa = nivelData.recompensaMonedas || 10;
+    const xpRecompensa = nivelData.recompensaXP || 20;
     
-    // Dibujar líneas entre nodos
-    for (let i = 0; i < rows.length - 1; i++) {
-        const currentNode = rows[i].querySelector('.level-node');
-        const nextNode = rows[i + 1].querySelector('.level-node');
-        
-        const currentRect = currentNode.getBoundingClientRect();
-        const nextRect = nextNode.getBoundingClientRect();
-        
-        // Calcular posiciones relativas al contenedor
-        const x1 = currentRect.left + currentRect.width / 2 - containerRect.left;
-        const y1 = currentRect.top + currentRect.height - containerRect.top;
-        const x2 = nextRect.left + nextRect.width / 2 - containerRect.left;
-        const y2 = nextRect.top - containerRect.top;
-        
-        // Crear path con curva
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        const midY = (y1 + y2) / 2;
-        const d = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`;
-        path.setAttribute('d', d);
-        path.classList.add('path-line');
-        
-        // Estado de la línea
-        const nivel = i + 1;
-        if (nivel < nivelDesbloqueado) {
-            path.classList.add('completed');
-        } else if (nivel === nivelDesbloqueado) {
-            path.classList.add('available');
-        } else {
-            path.classList.add('locked');
-        }
-        
-        svg.appendChild(path);
-    }
+    modal.querySelector('.desafio-recompensas').innerHTML = `
+        <div class="recompensa"><i class="bi bi-coin"></i> +${monedasRecompensa} Monedas</div>
+        <div class="recompensa"><i class="bi bi-star-fill"></i> +${xpRecompensa} XP</div>
+    `;
     
-    container.insertBefore(svg, nodesContainer);
-}
-
-function redrawLines() {
-    drawLines();
-}
-
-function setupEventListeners() {
-    document.getElementById('backBtn').addEventListener('click', () => {
-        const aulaId = new URLSearchParams(window.location.search).get('aula');
-        window.location.href = `Aula.html?aula=${aulaId}&materia=${currentMateria}`;
-    });
+    modal.querySelector('.desafio-costo').style.display = 'flex';
+    modal.querySelector('.desafio-costo').innerHTML = `
+        <i class="bi bi-lightning-fill"></i>
+        <span>Costo: 1 Energía</span>
+    `;
     
-    document.getElementById('closeDesafioModal').addEventListener('click', closeDesafioModal);
-    document.getElementById('cancelDesafio').addEventListener('click', closeDesafioModal);
-    document.getElementById('startDesafio').addEventListener('click', startDesafio);
+    document.getElementById('startDesafio').innerHTML = '<i class="bi bi-play-fill"></i> Comenzar';
+    document.getElementById('startDesafio').dataset.isChest = 'false';
+    document.getElementById('startDesafio').dataset.nivelId = nivelData.id;
     
-    document.getElementById('closePreguntaModal').addEventListener('click', closePreguntaModal);
-    document.getElementById('verificarBtn').addEventListener('click', verificarRespuesta);
-    
-    document.getElementById('continuarBtn').addEventListener('click', closeResultadoModal);
-    
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.remove('active');
-        });
-    });
-}
-
-function openDesafioModal(nivel) {
-    currentNivel = nivel;
-    document.getElementById('desafioTitulo').textContent = `Nivel ${nivel}`;
-    document.getElementById('desafioModal').classList.add('active');
+    modal.classList.add('active');
 }
 
 function closeDesafioModal() {
     document.getElementById('desafioModal').classList.remove('active');
 }
 
-function startDesafio() {
+async function startDesafio() {
+    const startBtn = document.getElementById('startDesafio');
+    const isChest = startBtn.dataset.isChest === 'true';
+    
+    if (isChest) {
+        await openChest();
+        return;
+    }
+    
+    // Verificar energía (si no tiene energía infinita)
+    if (!userGameData.energiaInfinita && userGameData.energia < 1) {
+        showAlert('Sin Energía', 'No tienes suficiente energía. Compra más en la tienda o espera 10 minutos para regenerar 1 energía.');
+        return;
+    }
+    
+    // Verificar que hay preguntas
+    if (!preguntasActuales || preguntasActuales.length === 0) {
+        showAlert('Error', 'Este nivel no tiene preguntas configuradas.');
+        return;
+    }
+    
+    // Consumir energía (solo si no tiene energía infinita)
+    if (!userGameData.energiaInfinita) {
+        userGameData.energia--;
+        await updateUserEnergy();
+    }
+    updateHeaderStats();
+    
     closeDesafioModal();
     
-    const preguntas = preguntasPorMateria[currentMateria] || preguntasPorMateria.matematicas;
-    preguntasActuales = shuffleArray([...preguntas]).slice(0, 5);
     currentPreguntaIndex = 0;
     respuestasCorrectas = 0;
     
     showPregunta();
 }
 
+async function openChest() {
+    const chestKey = `chest_${currentMateria}_${currentNivel}`;
+    
+    // Dar recompensa
+    userGameData.monedas += 100;
+    userGameData.nivelesCompletados[chestKey] = true;
+    
+    // Guardar en Firebase
+    await saveUserProgress();
+    
+    closeDesafioModal();
+    
+    // Mostrar resultado
+    showChestResult();
+    
+    // Regenerar camino
+    generatePath();
+    updateHeaderStats();
+}
+
+function showChestResult() {
+    const resultadoIcon = document.getElementById('resultadoIcon');
+    resultadoIcon.className = 'resultado-icon success';
+    resultadoIcon.innerHTML = '<i class="bi bi-gift-fill"></i>';
+    
+    document.getElementById('resultadoTitulo').textContent = '¡Cofre Abierto!';
+    document.getElementById('resultadoMensaje').textContent = 'Has obtenido tu recompensa';
+    
+    document.getElementById('resultadoStats').innerHTML = `
+        <div class="resultado-stat">
+            <i class="bi bi-coin"></i>
+            <span>+100 Monedas</span>
+        </div>
+    `;
+    
+    document.getElementById('resultadoModal').classList.add('active');
+}
+
 function showPregunta() {
     const pregunta = preguntasActuales[currentPreguntaIndex];
     
-    const progreso = (currentPreguntaIndex / preguntasActuales.length) * 100;
+    // Calcular progreso: (pregunta actual) / total * 100
+    // Para que en 5/5 muestre 100%, usamos (índice + 1) / total
+    const progreso = ((currentPreguntaIndex + 1) / preguntasActuales.length) * 100;
     document.getElementById('progresoFill').style.width = `${progreso}%`;
     document.getElementById('preguntaNumero').textContent = `${currentPreguntaIndex + 1}/${preguntasActuales.length}`;
     
@@ -331,6 +689,50 @@ function showPregunta() {
     
     const opcionesContainer = document.getElementById('opcionesContainer');
     opcionesContainer.innerHTML = '';
+    
+    // Agregar botón de pista si hay pista disponible
+    if (pregunta.pista) {
+        const pistaBtn = document.createElement('button');
+        if (userGameData.pistas > 0) {
+            pistaBtn.className = 'pista-btn';
+            pistaBtn.innerHTML = `
+                <div class="pista-btn-left">
+                    <div class="pista-btn-icon">
+                        <i class="bi bi-lightbulb-fill"></i>
+                    </div>
+                    <span class="pista-btn-text">Usar Pista</span>
+                </div>
+                <div class="pista-btn-count">
+                    <i class="bi bi-lightbulb"></i>
+                    ${userGameData.pistas}
+                </div>
+            `;
+            pistaBtn.addEventListener('click', () => usarPista(pregunta.pista));
+        } else {
+            pistaBtn.className = 'pista-btn pista-btn-disabled';
+            pistaBtn.innerHTML = `
+                <div class="pista-btn-left">
+                    <div class="pista-btn-icon">
+                        <i class="bi bi-lightbulb"></i>
+                    </div>
+                    <span class="pista-btn-text">Sin pistas</span>
+                </div>
+                <div class="pista-btn-count">
+                    <i class="bi bi-lightbulb"></i>
+                    0
+                </div>
+            `;
+            pistaBtn.disabled = true;
+        }
+        opcionesContainer.appendChild(pistaBtn);
+    }
+    
+    // Contenedor para la pista mostrada
+    const pistaContainer = document.createElement('div');
+    pistaContainer.className = 'pista-mostrada';
+    pistaContainer.id = 'pistaMostrada';
+    pistaContainer.style.display = 'none';
+    opcionesContainer.appendChild(pistaContainer);
     
     const letras = ['A', 'B', 'C', 'D'];
     pregunta.opciones.forEach((opcion, index) => {
@@ -352,6 +754,25 @@ function showPregunta() {
     verificarBtn.classList.remove('next');
     
     document.getElementById('preguntaModal').classList.add('active');
+}
+
+async function usarPista(pista) {
+    if (userGameData.pistas <= 0) return;
+    
+    userGameData.pistas--;
+    await updateUserPistas();
+    
+    // Mostrar la pista
+    const pistaContainer = document.getElementById('pistaMostrada');
+    pistaContainer.innerHTML = `
+        <i class="bi bi-lightbulb-fill"></i>
+        <span>${pista}</span>
+    `;
+    pistaContainer.style.display = 'flex';
+    
+    // Ocultar botón de pista
+    const pistaBtn = document.querySelector('.pista-btn');
+    if (pistaBtn) pistaBtn.style.display = 'none';
 }
 
 function selectOption(btn, index) {
@@ -406,8 +827,9 @@ function closePreguntaModal() {
     document.getElementById('preguntaModal').classList.remove('active');
 }
 
-function showResultado() {
+async function showResultado() {
     const porcentaje = (respuestasCorrectas / preguntasActuales.length) * 100;
+    const nivelId = document.getElementById('startDesafio').dataset.nivelId;
     
     const resultadoIcon = document.getElementById('resultadoIcon');
     const resultadoTitulo = document.getElementById('resultadoTitulo');
@@ -415,16 +837,58 @@ function showResultado() {
     
     resultadoIcon.className = 'resultado-icon';
     
-    if (porcentaje >= 80) {
+    // Obtener recompensas configuradas del nivel
+    const monedasBase = currentNivelData?.recompensaMonedas || 10;
+    const xpBase = currentNivelData?.recompensaXP || 20;
+    
+    // Calcular estrellas basado en respuestas correctas
+    // 5/5 = 3 estrellas, 4/5 = 2 estrellas, 3/5 = 1 estrella, menos = 0 estrellas
+    let stars = 0;
+    if (porcentaje === 100) {
+        stars = 3;
+    } else if (porcentaje >= 80) {
+        stars = 2;
+    } else if (porcentaje >= 60) {
+        stars = 1;
+    }
+    
+    // Calcular recompensas: proporcional a respuestas correctas
+    const monedasGanadas = Math.floor(monedasBase * (respuestasCorrectas / preguntasActuales.length));
+    const xpGanado = Math.floor(xpBase * (respuestasCorrectas / preguntasActuales.length));
+    
+    // Actualizar datos del usuario
+    userGameData.monedas += monedasGanadas;
+    userGameData.xp += xpGanado;
+    
+    // Si aprobó (>=60%), marcar nivel como completado y desbloquear siguiente
+    if (porcentaje >= 60) {
+        // Guardar con estrellas - solo actualizar si obtiene más estrellas que antes
+        const previousData = userGameData.nivelesCompletados[nivelId];
+        const previousStars = previousData && typeof previousData === 'object' ? (previousData.stars || 0) : (previousData ? 1 : 0);
+        
+        if (stars > previousStars) {
+            userGameData.nivelesCompletados[nivelId] = { 
+                completed: true, 
+                stars: stars,
+                bestScore: respuestasCorrectas,
+                completedAt: new Date().toISOString()
+            };
+        }
+        
+        // Desbloquear siguiente nivel
+        if (currentNivel >= nivelDesbloqueado) {
+            nivelDesbloqueado = currentNivel + 1;
+        }
+        
         resultadoIcon.classList.add('success');
         resultadoIcon.innerHTML = '<i class="bi bi-trophy-fill"></i>';
-        resultadoTitulo.textContent = '¡Increíble!';
-        resultadoMensaje.textContent = 'Has dominado este nivel';
-    } else if (porcentaje >= 50) {
+        resultadoTitulo.textContent = stars === 3 ? '¡Perfecto!' : stars === 2 ? '¡Excelente!' : '¡Bien hecho!';
+        resultadoMensaje.textContent = 'Has completado este nivel';
+    } else if (porcentaje >= 40) {
         resultadoIcon.classList.add('partial');
         resultadoIcon.innerHTML = '<i class="bi bi-star-half"></i>';
-        resultadoTitulo.textContent = '¡Buen trabajo!';
-        resultadoMensaje.textContent = 'Sigue practicando para mejorar';
+        resultadoTitulo.textContent = '¡Buen intento!';
+        resultadoMensaje.textContent = 'Necesitas 60% para aprobar';
     } else {
         resultadoIcon.classList.add('fail');
         resultadoIcon.innerHTML = '<i class="bi bi-emoji-frown"></i>';
@@ -432,12 +896,37 @@ function showResultado() {
         resultadoMensaje.textContent = 'Inténtalo de nuevo';
     }
     
-    const monedasGanadas = respuestasCorrectas * 2;
-    const xpGanado = respuestasCorrectas * 4;
+    // Generar HTML de estrellas para el resultado
+    const starsHTML = `
+        <div class="resultado-stars">
+            <i class="bi bi-star-fill ${stars >= 1 ? 'active' : ''}"></i>
+            <i class="bi bi-star-fill ${stars >= 2 ? 'active' : ''}"></i>
+            <i class="bi bi-star-fill ${stars >= 3 ? 'active' : ''}"></i>
+        </div>
+    `;
     
-    document.getElementById('respuestasCorrectas').textContent = respuestasCorrectas;
-    document.getElementById('monedasGanadas').textContent = monedasGanadas;
-    document.getElementById('xpGanado').textContent = xpGanado;
+    document.getElementById('resultadoStats').innerHTML = `
+        ${starsHTML}
+        <div class="resultado-stat">
+            <i class="bi bi-check-circle"></i>
+            <span><span id="respuestasCorrectas">${respuestasCorrectas}</span>/${preguntasActuales.length} Correctas</span>
+        </div>
+        <div class="resultado-stat">
+            <i class="bi bi-coin"></i>
+            <span>+<span id="monedasGanadas">${monedasGanadas}</span> Monedas</span>
+        </div>
+        <div class="resultado-stat">
+            <i class="bi bi-star-fill"></i>
+            <span>+<span id="xpGanado">${xpGanado}</span> XP</span>
+        </div>
+    `;
+    
+    // Guardar progreso
+    await saveUserProgress();
+    
+    // Actualizar UI
+    updateHeaderStats();
+    generatePath();
     
     document.getElementById('resultadoModal').classList.add('active');
 }
@@ -446,10 +935,272 @@ function closeResultadoModal() {
     document.getElementById('resultadoModal').classList.remove('active');
 }
 
+
+// ============ FIREBASE OPERATIONS ============
+
+async function saveUserProgress() {
+    try {
+        const db = window.firebaseDB;
+        const progresoKey = `progreso_${currentMateria}`;
+        
+        // Calcular nivel basado en XP de esta materia (sistema progresivo)
+        const nuevoNivel = calculateLevelFromXP(userGameData.xp);
+        userGameData.nivel = nuevoNivel;
+        
+        // Guardar XP y nivel POR MATERIA (dentro del progreso de la materia)
+        // Las monedas son globales (compartidas entre materias)
+        await db.collection('usuarios').doc(currentUser.id).update({
+            puntos: userGameData.monedas,
+            puntosAcumulados: userGameData.monedas,
+            [progresoKey]: {
+                xp: userGameData.xp,
+                nivel: nuevoNivel,
+                nivelesCompletados: userGameData.nivelesCompletados,
+                nivelDesbloqueado: nivelDesbloqueado
+            }
+        });
+        
+        console.log(`Progreso guardado para ${currentMateria}:`, {
+            xp: userGameData.xp,
+            nivel: nuevoNivel,
+            nivelDesbloqueado: nivelDesbloqueado
+        });
+    } catch (error) {
+        console.error('Error guardando progreso:', error);
+    }
+}
+
+async function updateUserEnergy() {
+    try {
+        const db = window.firebaseDB;
+        
+        // Solo actualizar la energía, NO el timestamp de regeneración
+        // El timestamp solo se actualiza cuando se REGENERA energía, no cuando se gasta
+        await db.collection('usuarios').doc(currentUser.id).update({
+            energia: userGameData.energia
+        });
+    } catch (error) {
+        console.error('Error actualizando energía:', error);
+    }
+}
+
+async function updateUserPistas() {
+    try {
+        const db = window.firebaseDB;
+        await db.collection('usuarios').doc(currentUser.id).update({
+            pistas: userGameData.pistas
+        });
+    } catch (error) {
+        console.error('Error actualizando pistas:', error);
+    }
+}
+
+// ============ DRAWING FUNCTIONS ============
+
+function drawLines() {
+    const oldSvg = document.querySelector('.path-svg');
+    if (oldSvg) oldSvg.remove();
+    
+    const container = document.getElementById('pathContainer');
+    const nodesContainer = document.getElementById('nodesContainer');
+    
+    if (!nodesContainer) return;
+    
+    const rows = nodesContainer.querySelectorAll('.level-row');
+    
+    if (rows.length < 2) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('path-svg');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', nodesContainer.offsetHeight);
+    
+    for (let i = 0; i < rows.length - 1; i++) {
+        const currentNode = rows[i].querySelector('.level-node');
+        const nextNode = rows[i + 1].querySelector('.level-node');
+        
+        if (!currentNode || !nextNode) continue;
+        
+        const currentRect = currentNode.getBoundingClientRect();
+        const nextRect = nextNode.getBoundingClientRect();
+        
+        const x1 = currentRect.left + currentRect.width / 2 - containerRect.left;
+        const y1 = currentRect.top + currentRect.height - containerRect.top;
+        const x2 = nextRect.left + nextRect.width / 2 - containerRect.left;
+        const y2 = nextRect.top - containerRect.top;
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const midY = (y1 + y2) / 2;
+        const d = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`;
+        path.setAttribute('d', d);
+        path.classList.add('path-line');
+        
+        const nivel = parseInt(currentNode.dataset.nivel) || i + 1;
+        if (nivel < nivelDesbloqueado) {
+            path.classList.add('completed');
+        } else if (nivel === nivelDesbloqueado) {
+            path.classList.add('available');
+        } else {
+            path.classList.add('locked');
+        }
+        
+        svg.appendChild(path);
+    }
+    
+    container.insertBefore(svg, nodesContainer);
+}
+
+function redrawLines() {
+    drawLines();
+}
+
+// ============ EVENT LISTENERS ============
+
+function setupEventListeners() {
+    document.getElementById('backBtn').addEventListener('click', () => {
+        if (currentAulaId) {
+            window.location.href = `Aula.html?aula=${currentAulaId}&materia=${currentMateria}`;
+        } else {
+            window.location.href = 'Clases.html';
+        }
+    });
+    
+    document.getElementById('closeDesafioModal').addEventListener('click', closeDesafioModal);
+    document.getElementById('cancelDesafio').addEventListener('click', closeDesafioModal);
+    document.getElementById('startDesafio').addEventListener('click', startDesafio);
+    
+    document.getElementById('closePreguntaModal').addEventListener('click', closePreguntaModal);
+    document.getElementById('verificarBtn').addEventListener('click', verificarRespuesta);
+    
+    document.getElementById('continuarBtn').addEventListener('click', closeResultadoModal);
+    
+    // Modal de alerta
+    document.getElementById('alertBtn').addEventListener('click', closeAlertModal);
+    
+    // Botón de reinicio de progreso
+    document.getElementById('resetProgressBtn').addEventListener('click', openResetModal);
+    document.getElementById('cancelResetBtn').addEventListener('click', closeResetModal);
+    document.getElementById('confirmResetBtn').addEventListener('click', confirmResetProgress);
+    
+    // Validar input de confirmación
+    document.getElementById('resetConfirmInput').addEventListener('input', validateResetInput);
+    
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+    });
+}
+
+// ============ UTILITY FUNCTIONS ============
+
+function showAlert(title, message, type = 'warning') {
+    const modal = document.getElementById('alertModal');
+    const icon = document.getElementById('alertIcon');
+    
+    document.getElementById('alertTitulo').textContent = title;
+    document.getElementById('alertMensaje').textContent = message;
+    
+    // Cambiar icono según tipo
+    icon.className = 'alert-icon';
+    if (type === 'error') {
+        icon.classList.add('error');
+        icon.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
+    } else if (type === 'info') {
+        icon.classList.add('info');
+        icon.innerHTML = '<i class="bi bi-info-circle-fill"></i>';
+    } else {
+        icon.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i>';
+    }
+    
+    modal.classList.add('active');
+}
+
+function closeAlertModal() {
+    document.getElementById('alertModal').classList.remove('active');
+}
+
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}
+
+
+// ============ RESET PROGRESS FUNCTIONS ============
+
+function openResetModal() {
+    const modal = document.getElementById('resetModal');
+    const input = document.getElementById('resetConfirmInput');
+    const confirmBtn = document.getElementById('confirmResetBtn');
+    
+    // Limpiar input y deshabilitar botón
+    input.value = '';
+    input.classList.remove('valid');
+    confirmBtn.disabled = true;
+    
+    modal.classList.add('active');
+}
+
+function closeResetModal() {
+    document.getElementById('resetModal').classList.remove('active');
+}
+
+function validateResetInput() {
+    const input = document.getElementById('resetConfirmInput');
+    const confirmBtn = document.getElementById('confirmResetBtn');
+    const value = input.value.trim().toUpperCase();
+    
+    if (value === 'REINICIAR') {
+        input.classList.add('valid');
+        confirmBtn.disabled = false;
+    } else {
+        input.classList.remove('valid');
+        confirmBtn.disabled = true;
+    }
+}
+
+async function confirmResetProgress() {
+    const input = document.getElementById('resetConfirmInput');
+    if (input.value.trim().toUpperCase() !== 'REINICIAR') return;
+    
+    try {
+        const db = window.firebaseDB;
+        const progresoKey = `progreso_${currentMateria}`;
+        
+        // Reiniciar progreso de esta materia
+        await db.collection('usuarios').doc(currentUser.id).update({
+            [progresoKey]: {
+                xp: 0,
+                nivel: 1,
+                nivelesCompletados: {},
+                nivelDesbloqueado: 1
+            }
+        });
+        
+        // Actualizar datos locales
+        userGameData.xp = 0;
+        userGameData.nivel = 1;
+        userGameData.nivelesCompletados = {};
+        nivelDesbloqueado = 1;
+        
+        // Cerrar modal
+        closeResetModal();
+        
+        // Actualizar UI
+        updateHeaderStats();
+        generatePath();
+        
+        // Mostrar mensaje de éxito
+        showAlert('Progreso Reiniciado', `Tu progreso en ${currentMateria} ha sido reiniciado. ¡Buena suerte empezando de nuevo!`, 'info');
+        
+        console.log(`Progreso de ${currentMateria} reiniciado completamente`);
+    } catch (error) {
+        console.error('Error reiniciando progreso:', error);
+        showAlert('Error', 'No se pudo reiniciar el progreso. Intenta de nuevo.', 'error');
+    }
 }

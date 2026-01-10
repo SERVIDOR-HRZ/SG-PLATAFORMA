@@ -90,10 +90,36 @@
             </div>
 
             <!-- Tests List -->
-            <div class="tests-container">
+            <div class="tests-container" id="testsContainer">
                 <h2><i class="bi bi-clipboard-check"></i> Pruebas Creadas</h2>
                 <div class="tests-list" id="testsList">
                     <!-- Tests will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Desafios Admin View -->
+            <div class="desafios-admin-container" id="desafiosAdminView" style="display: none;">
+                <div class="desafios-admin-header">
+                    <div class="desafios-header-left">
+                        <h2><i class="bi bi-trophy-fill"></i> Gestión de Desafíos</h2>
+                        <p>Crea niveles con preguntas para que los estudiantes practiquen</p>
+                    </div>
+                    <div class="desafios-header-right">
+                        <select id="desafioMateriaSelect" class="materia-select">
+                            <option value="matematicas">Matemáticas</option>
+                            <option value="lectura">Lectura Crítica</option>
+                            <option value="sociales">Ciencias Sociales</option>
+                            <option value="naturales">Ciencias Naturales</option>
+                            <option value="ingles">Inglés</option>
+                        </select>
+                        <button class="btn btn-primary" id="createNivelBtn">
+                            <i class="bi bi-plus-circle"></i>
+                            Crear Nivel
+                        </button>
+                    </div>
+                </div>
+                <div class="desafios-niveles-grid" id="desafiosNivelesList">
+                    <!-- Niveles will be loaded here -->
                 </div>
             </div>
         </div>
@@ -415,6 +441,59 @@
         </div>
     </div>
 
+    <!-- Create/Edit Nivel Modal -->
+    <div class="modal-overlay" id="nivelModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 id="nivelModalTitle"><i class="bi bi-trophy"></i> Crear Nuevo Nivel</h3>
+                <button class="close-btn" id="closeNivelModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="nivelForm">
+                    <input type="hidden" id="nivelId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nivelNumero"><i class="bi bi-hash"></i> Número de Nivel *</label>
+                            <input type="number" id="nivelNumero" min="1" max="1000" required placeholder="1-1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="nivelRecompensaMonedas"><i class="bi bi-coin"></i> Recompensa Monedas</label>
+                            <input type="number" id="nivelRecompensaMonedas" min="1" max="1000" value="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="nivelRecompensaXP"><i class="bi bi-star"></i> Recompensa XP</label>
+                            <input type="number" id="nivelRecompensaXP" min="1" max="1000" value="20">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nivelDescripcion"><i class="bi bi-text-paragraph"></i> Descripción (opcional)</label>
+                        <textarea id="nivelDescripcion" rows="2" placeholder="Descripción del nivel..."></textarea>
+                    </div>
+                    
+                    <div class="preguntas-section">
+                        <div class="preguntas-header">
+                            <h4><i class="bi bi-question-circle"></i> Preguntas del Nivel (5 preguntas)</h4>
+                        </div>
+                        <div class="preguntas-container" id="preguntasContainer">
+                            <!-- Las 5 preguntas se generan automáticamente -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelNivel">Cancelar</button>
+                <button type="submit" form="nivelForm" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i>
+                    <span id="nivelButtonText">Crear Nivel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -425,6 +504,7 @@
     <script src="../Elementos/js/pruebas-menu.js"></script>
     <script src="../Elementos/js/pruebas-admin.js"></script>
     <script src="../Elementos/js/pruebas-institution-filter.js"></script>
+    <script src="../Elementos/js/desafios-admin.js"></script>
 
 </body>
 

@@ -187,6 +187,55 @@
                                 <button class="tienda-comprar-btn premium-btn">Comprar</button>
                             </div>
                         </div>
+                        
+                        <h4 class="tienda-section-title"><i class="bi bi-lightbulb-fill"></i> Pistas</h4>
+                        <div class="tienda-items-grid">
+                            <div class="tienda-item" data-item="pista1" data-precio="100">
+                                <div class="tienda-item-icon pista">
+                                    <i class="bi bi-lightbulb-fill"></i>
+                                    <span class="cantidad">+1</span>
+                                </div>
+                                <div class="tienda-item-info">
+                                    <span class="tienda-item-nombre">1 Pista</span>
+                                    <span class="tienda-item-precio"><i class="bi bi-coin"></i> 100</span>
+                                </div>
+                                <button class="tienda-comprar-btn pista-btn">Comprar</button>
+                            </div>
+                            <div class="tienda-item" data-item="pista3" data-precio="250">
+                                <div class="tienda-item-icon pista">
+                                    <i class="bi bi-lightbulb-fill"></i>
+                                    <span class="cantidad">+3</span>
+                                </div>
+                                <div class="tienda-item-info">
+                                    <span class="tienda-item-nombre">3 Pistas</span>
+                                    <span class="tienda-item-precio"><i class="bi bi-coin"></i> 250</span>
+                                </div>
+                                <button class="tienda-comprar-btn pista-btn">Comprar</button>
+                            </div>
+                            <div class="tienda-item" data-item="pista5" data-precio="500">
+                                <div class="tienda-item-icon pista destacado">
+                                    <i class="bi bi-lightbulb-fill"></i>
+                                    <span class="cantidad">+5</span>
+                                </div>
+                                <div class="tienda-item-info">
+                                    <span class="tienda-item-nombre">5 Pistas</span>
+                                    <span class="tienda-item-precio"><i class="bi bi-coin"></i> 500</span>
+                                </div>
+                                <button class="tienda-comprar-btn pista-btn">Comprar</button>
+                            </div>
+                            <div class="tienda-item" data-item="pista10" data-precio="900">
+                                <div class="tienda-item-icon pista destacado">
+                                    <i class="bi bi-lightbulb-fill"></i>
+                                    <span class="cantidad">+10</span>
+                                </div>
+                                <div class="tienda-item-info">
+                                    <span class="tienda-item-nombre">10 Pistas</span>
+                                    <span class="tienda-item-descuento">¡Ahorra 100!</span>
+                                    <span class="tienda-item-precio"><i class="bi bi-coin"></i> 900</span>
+                                </div>
+                                <button class="tienda-comprar-btn pista-btn">Comprar</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -905,6 +954,39 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de Alerta Tienda -->
+    <div id="tiendaAlertModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 16px; padding: 2rem; text-align: center; max-width: 350px; margin: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div id="tiendaAlertIcon" style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);">
+                <i class="bi bi-check-circle-fill" style="font-size: 2.5rem; color: white;"></i>
+            </div>
+            <h3 id="tiendaAlertTitulo" style="font-size: 1.4rem; color: #333; margin-bottom: 0.5rem;">Título</h3>
+            <p id="tiendaAlertMensaje" style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5;">Mensaje</p>
+            <button id="tiendaAlertBtn" style="padding: 0.8rem 2rem; border-radius: 10px; font-weight: 600; background: #2196F3; color: white; border: none; cursor: pointer; font-size: 1rem;">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Compra -->
+    <div id="confirmarCompraModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 16px; padding: 2rem; text-align: center; max-width: 350px; margin: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; background: linear-gradient(180deg, #2196F3 0%, #1976D2 100%);">
+                <i class="bi bi-cart-check-fill" style="font-size: 2.5rem; color: white;"></i>
+            </div>
+            <h3 style="font-size: 1.4rem; color: #333; margin-bottom: 0.5rem;">Confirmar Compra</h3>
+            <p id="confirmarCompraMensaje" style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5;">¿Deseas comprar este artículo?</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="cancelarCompraBtn" style="padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 600; background: #e0e0e0; color: #333; border: none; cursor: pointer; font-size: 1rem;">
+                    Cancelar
+                </button>
+                <button id="confirmarCompraBtn" style="padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 600; background: #4CAF50; color: white; border: none; cursor: pointer; font-size: 1rem;">
+                    Comprar
+                </button>
+            </div>
         </div>
     </div>
 
