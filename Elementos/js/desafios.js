@@ -420,7 +420,6 @@ function generatePath() {
                 <i class="bi bi-emoji-frown"></i>
                 <h3>No hay niveles disponibles</h3>
                 <p>Aún no se han creado desafíos para esta materia.</p>
-                <p>Los profesores pueden crear niveles desde el panel de administración.</p>
             </div>
         `;
         return;
