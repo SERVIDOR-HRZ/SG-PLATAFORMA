@@ -95,7 +95,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 username = username.split('@')[0];
             }
             
-            // Actualizar el campo con el usuario (sin convertir a minúsculas)
+            // Convertir a minúsculas para evitar problemas de mayúsculas
+            username = username.toLowerCase();
+            
+            // Actualizar el campo con el usuario en minúsculas
             this.value = username;
             
             usuarioInput.value = username ? username + '@seamosgenios.com' : '';
