@@ -329,6 +329,22 @@ function setupEventListeners() {
     // Actualizar tarifas
     document.getElementById('btnActualizarTarifas').addEventListener('click', loadTarifas);
 
+    // Buscador de profesores en Tarifas
+    document.getElementById('buscarProfesorTarifas').addEventListener('input', filtrarTablaTarifas);
+    document.getElementById('btnClearSearchTarifas').addEventListener('click', () => {
+        document.getElementById('buscarProfesorTarifas').value = '';
+        document.getElementById('btnClearSearchTarifas').style.display = 'none';
+        filtrarTablaTarifas();
+    });
+
+    // Buscador de profesores en Pagos
+    document.getElementById('buscarProfesorPagos').addEventListener('input', filtrarTablaPagos);
+    document.getElementById('btnClearSearchPagos').addEventListener('click', () => {
+        document.getElementById('buscarProfesorPagos').value = '';
+        document.getElementById('btnClearSearchPagos').style.display = 'none';
+        filtrarTablaPagos();
+    });
+
     // Modal tarifa
     document.getElementById('closeModalTarifa').addEventListener('click', closeModalTarifa);
     document.getElementById('cancelarTarifa').addEventListener('click', closeModalTarifa);
@@ -1938,3 +1954,106 @@ function generarDescripcionPago(clasesData) {
 }
 
 window.copiarAlPortapapeles = copiarAlPortapapeles;
+
+// ========== FUNCIONES DE BÚSQUEDA DE PROFESORES ==========
+
+// Filtrar tabla de Tarifas
+function filtrarTablaTarifas() {
+    const searchInput = document.getElementById('buscarProfesorTarifas');
+    const btnClear = document.getElementById('btnClearSearchTarifas');
+    const countSpan = document.getElementById('countTarifas');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    
+    // Mostrar/ocultar botón de limpiar
+    btnClear.style.display = searchTerm ? 'flex' : 'none';
+    
+    const rows = document.querySelectorAll('#tarifasTableBody tr');
+    let visibleCount = 0;
+    let totalCount = rows.length;
+    
+    rows.forEach(row => {
+        // Ignorar filas de estado vacío o cargando
+        if (row.querySelector('.empty-state') || row.querySelector('.loading')) {
+            return;
+        }
+        
+        const nombre = row.querySelector('.profesor-cell strong')?.textContent.toLowerCase() || '';
+        const email = row.cells[1]?.textContent.toLowerCase() || '';
+        
+        const matches = nombre.includes(searchTerm) || email.includes(searchTerm);
+        
+        row.style.display = matches ? '' : 'none';
+        if (matches) visibleCount++;
+    });
+    
+    // Actualizar contador
+    if (searchTerm) {
+        countSpan.innerHTML = `<strong>${visibleCount}</strong> de ${totalCount} profesores`;
+    } else {
+        countSpan.textContent = '';
+    }
+}
+
+// Filtrar tabla de Pagos
+function filtrarTablaPagos() {
+    const searchInput = document.getElementById('buscarProfesorPagos');
+    const btnClear = document.getElementById('btnClearSearchPagos');
+    const countSpan = document.getElementById('countPagos');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    
+    // Mostrar/ocultar botón de limpiar
+    btnClear.style.display = searchTerm ? 'flex' : 'none';
+    
+    const rows = document.querySelectorAll('#pagosTableBody tr');
+    let visibleCount = 0;
+    let totalCount = rows.length;
+    
+    rows.forEach(row => {
+        // Ignorar filas de estado vacío o cargando
+        if (row.querySelector('.empty-state') || row.querySelector('.loading')) {
+            return;
+        }
+        
+        const nombre = row.querySelector('.profesor-cell strong')?.textContent.toLowerCase() || '';
+        const email = row.cells[1]?.textContent.toLowerCase() || '';
+        
+        const matches = nombre.includes(searchTerm) || email.includes(searchTerm);
+        
+        row.style.display = matches ? '' : 'none';
+        if (matches) visibleCount++;
+    });
+    
+    // Actualizar contador
+    if (searchTerm) {
+        countSpan.innerHTML = `<strong>${visibleCount}</strong> de ${totalCount} profesores`;
+    } else {
+        countSpan.textContent = '';
+    }
+}
+
+// Limpiar búsqueda al cambiar de tab o recargar datos
+function limpiarBusquedaTarifas() {
+    const searchInput = document.getElementById('buscarProfesorTarifas');
+    const btnClear = document.getElementById('btnClearSearchTarifas');
+    const countSpan = document.getElementById('countTarifas');
+    
+    if (searchInput) searchInput.value = '';
+    if (btnClear) btnClear.style.display = 'none';
+    if (countSpan) countSpan.textContent = '';
+}
+
+function limpiarBusquedaPagos() {
+    const searchInput = document.getElementById('buscarProfesorPagos');
+    const btnClear = document.getElementById('btnClearSearchPagos');
+    const countSpan = document.getElementById('countPagos');
+    
+    if (searchInput) searchInput.value = '';
+    if (btnClear) btnClear.style.display = 'none';
+    if (countSpan) countSpan.textContent = '';
+}
+
+// Hacer funciones globales
+window.filtrarTablaTarifas = filtrarTablaTarifas;
+window.filtrarTablaPagos = filtrarTablaPagos;
+window.limpiarBusquedaTarifas = limpiarBusquedaTarifas;
+window.limpiarBusquedaPagos = limpiarBusquedaPagos;

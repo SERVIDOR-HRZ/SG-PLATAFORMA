@@ -2045,6 +2045,20 @@ body {
         padding: 0 1rem;
     }
 
+    .profesor-search-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-input-wrapper {
+        max-width: 100%;
+        min-width: auto;
+    }
+
+    .search-results-count {
+        text-align: center;
+    }
+
     .tabs {
         flex-direction: column;
     }
@@ -2221,6 +2235,83 @@ body {
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     border: 1px solid #f0f0f0;
+}
+
+/* Buscador de Profesores */
+.profesor-search-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.search-input-wrapper i.bi-search {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 1rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 2.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+}
+
+.search-input::placeholder {
+    color: #aaa;
+}
+
+.btn-clear-search {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.btn-clear-search:hover {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.search-results-count {
+    font-size: 0.85rem;
+    color: #666;
+    white-space: nowrap;
+}
+
+.search-results-count strong {
+    color: #ff0000;
 }
 
 /* Tabla de Tarifas */
