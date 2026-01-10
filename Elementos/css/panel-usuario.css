@@ -2134,3 +2134,356 @@ input[type="file"] {
         margin-top: 10px;
     }
 }
+
+
+/* ========== SECCIÓN MIS RECURSOS ========== */
+
+/* Stats Grid de Recursos */
+.recursos-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.recurso-stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.recurso-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.recurso-stat-card.monedas {
+    border-color: #ffc107;
+}
+
+.recurso-stat-card.monedas .recurso-stat-icon {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.recurso-stat-card.insignias {
+    border-color: #9c27b0;
+}
+
+.recurso-stat-card.insignias .recurso-stat-icon {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+}
+
+.recurso-stat-card.aulas {
+    border-color: #28a745;
+}
+
+.recurso-stat-card.aulas .recurso-stat-icon {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.recurso-stat-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.75rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.recurso-stat-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+    line-height: 1;
+}
+
+.recurso-stat-content p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+    font-weight: 500;
+}
+
+/* Secciones de Recursos */
+.recursos-seccion {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.recursos-seccion h2 {
+    color: #333;
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.recursos-seccion h2 i {
+    color: #ff0000;
+}
+
+/* Grid de Insignias del Usuario */
+.insignias-usuario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.insignia-usuario-card {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.insignia-usuario-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.insignia-usuario-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+    font-size: 1.5rem;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.insignia-usuario-card .insignia-nombre {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.insignia-usuario-card .insignia-categoria {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+/* Grid de Aulas del Usuario */
+.aulas-usuario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.aula-usuario-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.aula-usuario-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.aula-usuario-header {
+    padding: 1rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.aula-usuario-header i {
+    font-size: 1.5rem;
+}
+
+.aula-usuario-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.aula-usuario-body {
+    padding: 1rem;
+}
+
+.aula-usuario-body p {
+    color: #666;
+    font-size: 0.85rem;
+    margin: 0 0 0.75rem;
+}
+
+.aula-materias-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.materia-mini-tag {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: #f0f0f0;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.materia-mini-tag.matematicas { background: #e8eaf6; color: #3f51b5; }
+.materia-mini-tag.lectura { background: #ffebee; color: #c62828; }
+.materia-mini-tag.sociales { background: #fff8e1; color: #f57f17; }
+.materia-mini-tag.naturales { background: #e8f5e9; color: #2e7d32; }
+.materia-mini-tag.ingles { background: #f3e5f5; color: #7b1fa2; }
+.materia-mini-tag.anuncios { background: #e3f2fd; color: #1565c0; }
+
+/* Historial de Monedas */
+.historial-monedas-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.historial-moneda-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+}
+
+.historial-moneda-item:hover {
+    background: #f8f9fa;
+}
+
+.historial-moneda-item:last-child {
+    border-bottom: none;
+}
+
+.historial-moneda-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.historial-moneda-icon.positivo {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.historial-moneda-icon.negativo {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+
+.historial-moneda-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.historial-moneda-info .descripcion {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.historial-moneda-info .fecha {
+    color: #999;
+    font-size: 0.75rem;
+    margin-top: 0.15rem;
+}
+
+.historial-moneda-cantidad {
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.historial-moneda-cantidad.positivo {
+    color: #28a745;
+}
+
+.historial-moneda-cantidad.negativo {
+    color: #dc3545;
+}
+
+/* Estados vacíos y carga */
+.loading-recursos,
+.no-recursos {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+}
+
+.loading-recursos i,
+.no-recursos i {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.no-recursos small {
+    display: block;
+    margin-top: 0.5rem;
+    color: #bbb;
+}
+
+/* Responsive para Recursos */
+@media (max-width: 768px) {
+    .recursos-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .insignias-usuario-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+
+    .aulas-usuario-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .recurso-stat-card {
+        padding: 1rem;
+    }
+
+    .recurso-stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+
+    .recurso-stat-content h3 {
+        font-size: 1.5rem;
+    }
+}

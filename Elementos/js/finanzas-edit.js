@@ -127,6 +127,39 @@
         document.getElementById('editingMovimientoCuentaIdOriginal').value = movimiento.cuentaId;
         document.getElementById('editingMovimientoMontoOriginal').value = movimiento.monto;
 
+        // Mostrar/ocultar sección de gamificación según el tipo
+        const gamificacionSection = document.getElementById('gamificacionSectionEdit');
+        if (gamificacionSection) {
+            if (movimiento.tipo === 'ingreso') {
+                gamificacionSection.style.display = 'block';
+                
+                // Cargar instituciones primero
+                await loadInstitucionesForEditModal();
+                
+                // Cargar estudiantes en el select
+                await loadEstudiantesSelectEdit();
+                
+                // Si el movimiento ya tiene un estudiante asociado, seleccionarlo
+                const selectEstudiante = document.getElementById('editEstudianteComprador');
+                if (selectEstudiante && movimiento.estudianteId) {
+                    selectEstudiante.value = movimiento.estudianteId;
+                    // Mostrar contenedor de recompensas
+                    const recompensasContainer = document.getElementById('recompensasContainerEdit');
+                    if (recompensasContainer) {
+                        recompensasContainer.style.display = 'block';
+                    }
+                }
+                
+                // Establecer puntos otorgados si existen
+                const puntosInput = document.getElementById('editPuntosOtorgados');
+                if (puntosInput) {
+                    puntosInput.value = movimiento.puntosOtorgados || 0;
+                }
+            } else {
+                gamificacionSection.style.display = 'none';
+            }
+        }
+
         // Cargar cuentas desde Firebase si no están cargadas
         const selectCuenta = document.getElementById('editCuentaMovimiento');
         selectCuenta.innerHTML = '<option value="">Seleccionar cuenta</option>';
@@ -321,7 +354,7 @@
             });
 
             // Actualizar el movimiento
-            await db.collection('movimientos').doc(movimientoId).update({
+            const updateData = {
                 cuentaId: cuentaIdNueva,
                 monto: montoNuevo,
                 categoria: categoria,
@@ -329,7 +362,38 @@
                 fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
                 notas: notas,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            };
+
+            // Agregar datos de gamificación si es un ingreso
+            if (tipo === 'ingreso') {
+                const estudianteId = document.getElementById('editEstudianteComprador')?.value || '';
+                const puntosOtorgados = parseInt(document.getElementById('editPuntosOtorgados')?.value) || 0;
+
+                if (estudianteId) {
+                    const selectEstudiante = document.getElementById('editEstudianteComprador');
+                    const estudianteNombre = selectEstudiante?.options[selectEstudiante.selectedIndex]?.dataset?.nombre || '';
+
+                    updateData.estudianteId = estudianteId;
+                    updateData.estudianteNombre = estudianteNombre;
+                    updateData.puntosOtorgados = puntosOtorgados;
+
+                    // Otorgar recompensas al estudiante si hay puntos
+                    if (puntosOtorgados > 0 && window.otorgarRecompensas) {
+                        const recompensasData = {
+                            puntos: puntosOtorgados,
+                            descripcion: descripcion
+                        };
+                        await window.otorgarRecompensas(estudianteId, recompensasData, movimientoId);
+                    }
+                } else {
+                    // Limpiar datos de gamificación si no hay estudiante
+                    updateData.estudianteId = null;
+                    updateData.estudianteNombre = null;
+                    updateData.puntosOtorgados = 0;
+                }
+            }
+
+            await db.collection('movimientos').doc(movimientoId).update(updateData);
 
             showNotification('success', 'Movimiento Actualizado', 'El movimiento se ha actualizado correctamente');
             closeModalEditarMovimiento();
@@ -362,7 +426,102 @@
         if (form) {
             form.addEventListener('submit', handleSaveEditMovimiento);
         }
+
+        // Event listener para el select de estudiante en edición
+        const selectEstudianteEdit = document.getElementById('editEstudianteComprador');
+        if (selectEstudianteEdit) {
+            selectEstudianteEdit.addEventListener('change', function() {
+                const recompensasContainer = document.getElementById('recompensasContainerEdit');
+                if (recompensasContainer) {
+                    recompensasContainer.style.display = this.value ? 'block' : 'none';
+                }
+            });
+        }
+
+        // Event listener para filtro de institución en edición
+        const filtroInstitucionEdit = document.getElementById('filtroInstitucionEstudianteEdit');
+        if (filtroInstitucionEdit) {
+            filtroInstitucionEdit.addEventListener('change', function() {
+                loadEstudiantesSelectEdit(this.value);
+            });
+        }
     }
+
+    // Cargar estudiantes en el select del modal de edición
+    window.loadEstudiantesSelectEdit = async function(institucionFiltro = '') {
+        const select = document.getElementById('editEstudianteComprador');
+        if (!select) return;
+
+        select.innerHTML = '<option value="">Cargando estudiantes...</option>';
+
+        try {
+            const db = getDB();
+            const snapshot = await db.collection('usuarios')
+                .where('tipoUsuario', '==', 'estudiante')
+                .where('activo', '==', true)
+                .get();
+
+            const estudiantes = [];
+            snapshot.forEach(doc => {
+                estudiantes.push({ id: doc.id, ...doc.data() });
+            });
+
+            // Ordenar por nombre
+            estudiantes.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+
+            // Filtrar por institución si hay filtro
+            const estudiantesFiltrados = institucionFiltro 
+                ? estudiantes.filter(e => e.institucion === institucionFiltro)
+                : estudiantes;
+
+            select.innerHTML = '<option value="">Sin estudiante asociado</option>';
+
+            estudiantesFiltrados.forEach(estudiante => {
+                const option = document.createElement('option');
+                option.value = estudiante.id;
+                option.textContent = `${estudiante.nombre || 'Sin nombre'} - ${estudiante.institucion || 'Sin institución'}`;
+                option.dataset.nombre = estudiante.nombre || '';
+                select.appendChild(option);
+            });
+
+            if (estudiantesFiltrados.length === 0 && institucionFiltro) {
+                const emptyOption = document.createElement('option');
+                emptyOption.value = '';
+                emptyOption.textContent = 'No hay estudiantes en esta institución';
+                emptyOption.disabled = true;
+                select.appendChild(emptyOption);
+            }
+        } catch (error) {
+            console.error('Error cargando estudiantes:', error);
+            select.innerHTML = '<option value="">Sin estudiante asociado</option>';
+        }
+    };
+
+    // Cargar instituciones en el filtro del modal de edición
+    window.loadInstitucionesForEditModal = async function() {
+        const select = document.getElementById('filtroInstitucionEstudianteEdit');
+        if (!select) return;
+
+        select.innerHTML = '<option value="">Cargando instituciones...</option>';
+
+        try {
+            const db = getDB();
+            const snapshot = await db.collection('instituciones').orderBy('nombre').get();
+
+            select.innerHTML = '<option value="">Todas las instituciones</option>';
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const option = document.createElement('option');
+                option.value = data.nombre;
+                option.textContent = data.nombre;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error cargando instituciones:', error);
+            select.innerHTML = '<option value="">Todas las instituciones</option>';
+        }
+    };
 
     // Inicializar cuando el DOM esté listo
     if (document.readyState === 'loading') {

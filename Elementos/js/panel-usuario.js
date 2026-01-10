@@ -895,7 +895,354 @@ function cambiarPestana(tabName) {
     // Cargar datos según la pestaña
     if (tabName === 'playlists') {
         cargarPlaylists();
+    } else if (tabName === 'musica') {
+        cargarPlaylists();
+    } else if (tabName === 'recursos') {
+        console.log('Cargando pestaña de recursos...');
+        cargarRecursosUsuario();
     }
+}
+
+// ========================================
+// GESTIÓN DE RECURSOS DEL USUARIO
+// ========================================
+
+async function cargarRecursosUsuario() {
+    if (!usuarioActual || !usuarioActual.id) {
+        console.warn('No hay usuario actual para cargar recursos');
+        return;
+    }
+
+    try {
+        // Esperar a que Firebase esté listo
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+        
+        const db = window.firebaseDB;
+        
+        // Obtener datos actualizados del usuario
+        const userDoc = await db.collection('usuarios').doc(usuarioActual.id).get();
+        if (!userDoc.exists) {
+            console.warn('Usuario no encontrado en Firebase');
+            return;
+        }
+        
+        const userData = userDoc.data();
+        console.log('Datos del usuario cargados:', { 
+            monedas: userData.puntosAcumulados || userData.puntos || 0,
+            insignias: (userData.insignias || []).length,
+            aulas: (userData.aulasAsignadas || []).length,
+            historial: (userData.historialRecompensas || []).length
+        });
+        
+        // Actualizar stats
+        const monedas = userData.puntosAcumulados || userData.puntos || 0;
+        const insignias = userData.insignias || [];
+        const aulasAsignadas = userData.aulasAsignadas || [];
+        const historialRecompensas = userData.historialRecompensas || [];
+        
+        document.getElementById('totalMonedasUsuario').textContent = monedas.toLocaleString('es-CO');
+        document.getElementById('totalInsigniasUsuario').textContent = insignias.length;
+        document.getElementById('totalAulasUsuario').textContent = aulasAsignadas.length;
+        
+        // Cargar insignias
+        await cargarInsigniasUsuario(insignias);
+        
+        // Cargar aulas
+        await cargarAulasUsuario(aulasAsignadas);
+        
+        // Cargar historial de monedas
+        cargarHistorialMonedasUsuario(historialRecompensas);
+        
+    } catch (error) {
+        console.error('Error cargando recursos:', error);
+        mostrarNotificacion('Error al cargar los recursos del usuario', 'error');
+    }
+}
+
+async function cargarInsigniasUsuario(insigniasIds) {
+    const container = document.getElementById('insigniasUsuarioGrid');
+    const noInsignias = document.getElementById('noInsigniasUsuario');
+    
+    if (!container) {
+        console.error('Contenedor de insignias no encontrado');
+        return;
+    }
+    
+    console.log('IDs de insignias del usuario:', insigniasIds);
+    
+    if (!insigniasIds || insigniasIds.length === 0) {
+        container.innerHTML = '';
+        if (noInsignias) noInsignias.style.display = 'block';
+        return;
+    }
+    
+    if (noInsignias) noInsignias.style.display = 'none';
+    container.innerHTML = '<div class="loading-recursos"><i class="bi bi-arrow-clockwise spin"></i><p>Cargando insignias...</p></div>';
+    
+    try {
+        // Esperar a que Firebase esté listo
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+        
+        const db = window.firebaseDB;
+        const insigniasSnapshot = await db.collection('insignias').get();
+        
+        const todasInsignias = {};
+        insigniasSnapshot.forEach(doc => {
+            todasInsignias[doc.id] = { id: doc.id, ...doc.data() };
+        });
+        
+        console.log('Insignias disponibles en Firebase:', Object.keys(todasInsignias));
+        console.log('Datos de insignias en Firebase:', Object.values(todasInsignias).map(i => ({ id: i.id, nombre: i.nombre, icono: i.icono })));
+        console.log('Buscando insignias con IDs:', insigniasIds);
+        
+        let html = '';
+        let insigniasEncontradas = 0;
+        insigniasIds.forEach(insigniaRef => {
+            // La insignia puede ser un string (ID) o un objeto {id, nombre}
+            const insigniaId = typeof insigniaRef === 'object' ? insigniaRef.id : insigniaRef;
+            const insigniaNombre = typeof insigniaRef === 'object' ? insigniaRef.nombre : null;
+            
+            console.log('Buscando insignia con ID:', insigniaId, '- Encontrada:', !!todasInsignias[insigniaId]);
+            
+            let insignia = todasInsignias[insigniaId];
+            
+            // Si no encontramos por ID, buscar por nombre
+            if (!insignia && insigniaNombre) {
+                console.log('Buscando insignia por nombre:', insigniaNombre);
+                insignia = Object.values(todasInsignias).find(i => i.nombre === insigniaNombre);
+                if (insignia) {
+                    console.log('Insignia encontrada por nombre:', insignia);
+                }
+            }
+            
+            if (insignia) {
+                insigniasEncontradas++;
+                const color = insignia.color || '#667eea';
+                // Asegurar que el ícono tenga el prefijo bi-
+                let icono = insignia.icono || 'award-fill';
+                if (!icono.startsWith('bi-')) {
+                    icono = 'bi-' + icono;
+                }
+                console.log('Insignia encontrada:', { nombre: insignia.nombre, icono: insignia.icono, iconoUsado: icono });
+                html += `
+                    <div class="insignia-usuario-card">
+                        <div class="insignia-usuario-icon" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -30)});">
+                            <i class="bi ${icono}"></i>
+                        </div>
+                        <p class="insignia-nombre">${insignia.nombre || 'Insignia'}</p>
+                        <span class="insignia-categoria">${getCategoriaName(insignia.categoria)}</span>
+                    </div>
+                `;
+            } else if (typeof insigniaRef === 'object' && insigniaRef.nombre) {
+                // Si no encontramos la insignia en Firebase pero tenemos datos del objeto
+                insigniasEncontradas++;
+                const color = insigniaRef.color || '#667eea';
+                // Asegurar que el ícono tenga el prefijo bi-
+                let icono = insigniaRef.icono || 'award-fill';
+                if (!icono.startsWith('bi-')) {
+                    icono = 'bi-' + icono;
+                }
+                html += `
+                    <div class="insignia-usuario-card">
+                        <div class="insignia-usuario-icon" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -30)});">
+                            <i class="bi ${icono}"></i>
+                        </div>
+                        <p class="insignia-nombre">${insigniaRef.nombre || 'Insignia'}</p>
+                        <span class="insignia-categoria">${getCategoriaName(insigniaRef.categoria)}</span>
+                    </div>
+                `;
+            }
+        });
+        
+        console.log('Insignias encontradas:', insigniasEncontradas, 'de', insigniasIds.length);
+        
+        if (html) {
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '';
+            if (noInsignias) noInsignias.style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('Error cargando insignias:', error);
+        container.innerHTML = '<div class="no-recursos"><i class="bi bi-exclamation-circle"></i><p>Error al cargar insignias</p></div>';
+    }
+}
+
+async function cargarAulasUsuario(aulasIds) {
+    const container = document.getElementById('aulasUsuarioGrid');
+    const noAulas = document.getElementById('noAulasUsuario');
+    
+    if (!container) {
+        console.error('Contenedor de aulas no encontrado');
+        return;
+    }
+    
+    if (!aulasIds || aulasIds.length === 0) {
+        container.innerHTML = '';
+        if (noAulas) noAulas.style.display = 'block';
+        return;
+    }
+    
+    if (noAulas) noAulas.style.display = 'none';
+    container.innerHTML = '<div class="loading-recursos"><i class="bi bi-arrow-clockwise spin"></i><p>Cargando aulas...</p></div>';
+    
+    try {
+        // Esperar a que Firebase esté listo
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+        
+        const db = window.firebaseDB;
+        
+        let html = '';
+        for (const aulaRef of aulasIds) {
+            // El aula puede ser un string (ID) o un objeto {aulaId, materias}
+            const aulaId = typeof aulaRef === 'object' ? aulaRef.aulaId : aulaRef;
+            
+            const aulaDoc = await db.collection('aulas').doc(aulaId).get();
+            if (aulaDoc.exists) {
+                const aula = aulaDoc.data();
+                const color = aula.color || '#667eea';
+                const materias = aula.materias || [];
+                
+                const materiasHTML = materias.map(m => {
+                    const config = getMateriasConfig()[m];
+                    if (!config) return '';
+                    return `<span class="materia-mini-tag ${m}"><i class="bi ${config.icon}"></i> ${config.nombre}</span>`;
+                }).join('');
+                
+                html += `
+                    <div class="aula-usuario-card">
+                        <div class="aula-usuario-header" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -30)});">
+                            <i class="bi bi-door-open-fill"></i>
+                            <h4>${aula.nombre || 'Aula'}</h4>
+                        </div>
+                        <div class="aula-usuario-body">
+                            ${aula.descripcion ? `<p>${aula.descripcion}</p>` : ''}
+                            <div class="aula-materias-tags">
+                                ${materiasHTML || '<span class="text-muted">Sin materias</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        if (html) {
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '';
+            if (noAulas) noAulas.style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('Error cargando aulas:', error);
+        container.innerHTML = '<div class="no-recursos"><i class="bi bi-exclamation-circle"></i><p>Error al cargar aulas</p></div>';
+    }
+}
+
+function cargarHistorialMonedasUsuario(historial) {
+    const container = document.getElementById('historialMonedasUsuario');
+    const noHistorial = document.getElementById('noHistorialMonedas');
+    
+    if (!container) {
+        console.error('Contenedor de historial de monedas no encontrado');
+        return;
+    }
+    
+    console.log('Cargando historial de monedas:', historial?.length || 0, 'registros');
+    
+    if (!historial || historial.length === 0) {
+        container.innerHTML = '';
+        if (noHistorial) noHistorial.style.display = 'block';
+        return;
+    }
+    
+    if (noHistorial) noHistorial.style.display = 'none';
+    
+    // Ordenar por fecha descendente
+    const historialOrdenado = [...historial].sort((a, b) => {
+        let fechaA, fechaB;
+        try {
+            fechaA = a.fecha?.toDate ? a.fecha.toDate() : (a.fecha ? new Date(a.fecha) : new Date(0));
+            fechaB = b.fecha?.toDate ? b.fecha.toDate() : (b.fecha ? new Date(b.fecha) : new Date(0));
+        } catch (e) {
+            fechaA = new Date(0);
+            fechaB = new Date(0);
+        }
+        return fechaB - fechaA;
+    }).slice(0, 20); // Mostrar últimos 20
+    
+    let html = '';
+    historialOrdenado.forEach(item => {
+        let fecha;
+        try {
+            fecha = item.fecha?.toDate ? item.fecha.toDate() : (item.fecha ? new Date(item.fecha) : new Date());
+        } catch (e) {
+            fecha = new Date();
+        }
+        const fechaStr = fecha.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+        const puntos = item.puntos || 0;
+        const esPositivo = puntos >= 0;
+        const signo = esPositivo ? '+' : '';
+        const iconClass = esPositivo ? 'bi-plus-circle' : 'bi-dash-circle';
+        const colorClass = esPositivo ? 'positivo' : 'negativo';
+        
+        html += `
+            <div class="historial-moneda-item">
+                <div class="historial-moneda-icon ${colorClass}">
+                    <i class="bi ${iconClass}"></i>
+                </div>
+                <div class="historial-moneda-info">
+                    <p class="descripcion">${item.descripcion || 'Movimiento de monedas'}</p>
+                    <span class="fecha">${fechaStr}</span>
+                </div>
+                <div class="historial-moneda-cantidad ${colorClass}">
+                    <i class="bi bi-coin"></i>
+                    ${signo}${puntos}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Funciones auxiliares para recursos
+function adjustColor(color, amount) {
+    const hex = color.replace('#', '');
+    const num = parseInt(hex, 16);
+    const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+    const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+    const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+    return '#' + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+function getCategoriaName(categoria) {
+    const categorias = {
+        'matematicas': 'Matemáticas',
+        'lectura': 'Lectura Crítica',
+        'sociales': 'Ciencias Sociales',
+        'ciencias': 'Ciencias Naturales',
+        'ingles': 'Inglés'
+    };
+    return categorias[categoria] || categoria || 'General';
+}
+
+function getMateriasConfig() {
+    return {
+        'anuncios': { nombre: 'Anuncios', icon: 'bi-megaphone' },
+        'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator' },
+        'lectura': { nombre: 'Lectura', icon: 'bi-book' },
+        'sociales': { nombre: 'Sociales', icon: 'bi-globe' },
+        'naturales': { nombre: 'Naturales', icon: 'bi-tree' },
+        'ingles': { nombre: 'Inglés', icon: 'bi-translate' }
+    };
 }
 
 // ========================================

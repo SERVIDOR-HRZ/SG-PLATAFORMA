@@ -92,6 +92,10 @@
                     <i class="bi bi-clock-history"></i>
                     Historial de Pagos
                 </button>
+                <button class="tab-btn" data-tab="recompensas">
+                    <i class="bi bi-coin"></i>
+                    Otorgar Monedas
+                </button>
             </div>
 
         <!-- Tab: Cuentas Bancarias -->
@@ -247,6 +251,56 @@
 
             <div class="historial-list" id="historialList">
                 <!-- Se generará dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Tab: Otorgar Monedas a Estudiantes -->
+        <div class="tab-content" id="recompensasTab">
+            <div class="section-header">
+                <h2><i class="bi bi-coin"></i> Otorgar Monedas a Estudiantes</h2>
+            </div>
+
+            <div class="recompensas-main-container">
+                <!-- Panel de búsqueda y lista de estudiantes -->
+                <div class="estudiantes-panel">
+                    <div class="filtros-estudiantes">
+                        <div class="filtro-grupo">
+                            <label><i class="bi bi-building"></i> Institución</label>
+                            <select id="filtroInstitucionRecompensa">
+                                <option value="">Todas las instituciones</option>
+                            </select>
+                        </div>
+                        <div class="filtro-grupo buscador-grupo">
+                            <label><i class="bi bi-search"></i> Buscar</label>
+                            <input type="text" id="buscarEstudianteRecompensa" placeholder="Nombre del estudiante...">
+                        </div>
+                    </div>
+                    
+                    <div class="estudiantes-lista" id="estudiantesListaRecompensa">
+                        <!-- Lista de estudiantes se genera dinámicamente -->
+                        <div class="loading-estudiantes">
+                            <i class="bi bi-arrow-clockwise spin"></i>
+                            <p>Cargando estudiantes...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historial de Recompensas Recientes -->
+                <div class="recompensas-historial-card">
+                    <div class="form-card-header">
+                        <i class="bi bi-clock-history"></i>
+                        <h3>Recompensas Recientes</h3>
+                        <button class="btn-limpiar-historial" id="btnLimpiarHistorialRecompensas" title="Limpiar historial">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                    <div class="recompensas-historial-list" id="recompensasHistorialList">
+                        <div class="empty-historial">
+                            <i class="bi bi-inbox"></i>
+                            <p>No hay recompensas recientes</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -660,7 +714,17 @@
                     <div class="gamificacion-section" id="gamificacionSection" style="display: none;">
                         <div class="section-divider">
                             <i class="bi bi-trophy"></i>
-                            <span>Gamificación y Recompensas</span>
+                            <span>Gamificación y Recompensas (Opcional)</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filtroInstitucionEstudiante">
+                                <i class="bi bi-building"></i>
+                                Filtrar por Institución
+                            </label>
+                            <select id="filtroInstitucionEstudiante">
+                                <option value="">Todas las instituciones</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
@@ -677,11 +741,11 @@
                         <div class="recompensas-container" id="recompensasContainer" style="display: none;">
                             <div class="form-group">
                                 <label for="puntosOtorgadosForm">
-                                    <i class="bi bi-star-fill"></i>
-                                    Puntos a Otorgar
+                                    <i class="bi bi-coin"></i>
+                                    Monedas a Otorgar
                                 </label>
                                 <input type="number" id="puntosOtorgadosForm" min="0" value="0" placeholder="0">
-                                <small class="form-help">Puntos que recibirá el estudiante por esta compra</small>
+                                <small class="form-help">Monedas que recibirá el estudiante por esta compra</small>
                             </div>
                         </div>
                     </div>
@@ -811,6 +875,46 @@
                         <input type="date" id="editFechaMovimiento" required>
                     </div>
 
+                    <!-- Sección de Gamificación (solo para ingresos) -->
+                    <div class="gamificacion-section" id="gamificacionSectionEdit" style="display: none;">
+                        <div class="section-divider">
+                            <i class="bi bi-trophy"></i>
+                            <span>Gamificación y Recompensas (Opcional)</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filtroInstitucionEstudianteEdit">
+                                <i class="bi bi-building"></i>
+                                Filtrar por Institución
+                            </label>
+                            <select id="filtroInstitucionEstudianteEdit">
+                                <option value="">Todas las instituciones</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editEstudianteComprador">
+                                <i class="bi bi-person-check"></i>
+                                Estudiante Comprador (opcional)
+                            </label>
+                            <select id="editEstudianteComprador">
+                                <option value="">Sin estudiante asociado</option>
+                            </select>
+                            <small class="form-help">Selecciona el estudiante que realizó la compra para otorgarle recompensas</small>
+                        </div>
+
+                        <div class="recompensas-container" id="recompensasContainerEdit" style="display: none;">
+                            <div class="form-group">
+                                <label for="editPuntosOtorgados">
+                                    <i class="bi bi-coin"></i>
+                                    Monedas a Otorgar
+                                </label>
+                                <input type="number" id="editPuntosOtorgados" min="0" value="0" placeholder="0">
+                                <small class="form-help">Monedas que recibirá el estudiante por esta compra</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="editNotasMovimiento">Descripción</label>
                         <textarea id="editNotasMovimiento" rows="3" placeholder="Detalles adicionales del movimiento (puedes usar saltos de línea)"></textarea>
@@ -838,6 +942,39 @@
             <p id="notificationMessage">Mensaje</p>
             <div class="notification-actions">
                 <button class="btn-notification-primary" id="notificationBtn">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmar Limpiar Historial -->
+    <div class="modal" id="modalConfirmarLimpiarHistorial">
+        <div class="modal-content modal-confirmar">
+            <div class="modal-header modal-header-danger">
+                <h3><i class="bi bi-exclamation-triangle"></i> Confirmar Acción</h3>
+                <button class="close-btn" id="closeModalConfirmarLimpiar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmar-content">
+                    <div class="confirmar-icon">
+                        <i class="bi bi-trash3"></i>
+                    </div>
+                    <h4>¿Limpiar todo el historial de recompensas?</h4>
+                    <p>Esta acción eliminará el historial de recompensas de <strong>todos los estudiantes</strong>.</p>
+                    <div class="confirmar-warning">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Las monedas actuales de los estudiantes NO se verán afectadas, solo se borra el registro histórico.</span>
+                    </div>
+                    <p class="confirmar-alert"><i class="bi bi-exclamation-circle"></i> Esta acción NO se puede deshacer.</p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelarLimpiarHistorial">Cancelar</button>
+                    <button type="button" class="btn-danger" id="confirmarLimpiarHistorial">
+                        <i class="bi bi-trash3"></i>
+                        Sí, Limpiar Historial
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -403,6 +403,9 @@ function handleCardClick(event) {
             case 'chat':
                 window.location.href = 'Chat.html';
                 break;
+            case 'perfil':
+                window.location.href = 'panelUsuario.html';
+                break;
             default:
                 console.log('Sección no encontrada:', section);
         }

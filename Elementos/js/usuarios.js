@@ -556,9 +556,8 @@ function filterUsersByDashboardView() {
         // Status filter
         const matchesStatus = !statusFilter || user.activo.toString() === statusFilter;
 
-        // Institucion filter (only for students)
-        const matchesInstitucion = !institucionFilter ||
-            (user.tipoUsuario === 'estudiante' && user.institucion === institucionFilter);
+        // Institucion filter (funciona para todos los usuarios que tengan institución)
+        const matchesInstitucion = !institucionFilter || user.institucion === institucionFilter;
 
         return matchesSearch && matchesType && matchesStatus && matchesInstitucion;
     });
@@ -597,8 +596,13 @@ function populateInstitucionFilter() {
 
 // Update institucion filter visibility based on dashboard view
 function updateInstitucionFilterVisibility() {
+    // Mostrar el filtro de institución en todas las vistas principales de usuarios
     const shouldShowInstitucionFilter = currentDashboardView === 'estudiantes' ||
-        currentDashboardView === 'dashboard';
+        currentDashboardView === 'dashboard' ||
+        currentDashboardView === 'profesores' ||
+        currentDashboardView === 'superusuarios' ||
+        currentDashboardView === 'codigos' ||
+        currentDashboardView === 'insignias';
 
     if (shouldShowInstitucionFilter && elements.institucionFilter) {
         elements.institucionFilter.style.display = '';
@@ -1674,10 +1678,10 @@ async function handleCreateUser(e) {
         return;
     }
 
-    // Validate email format
+    // Validate email format (solo para email de recuperación, el usuario ya tiene el dominio)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(usuario) || !emailRegex.test(emailRecuperacion)) {
-        showMessage('Por favor ingresa emails válidos', 'error');
+    if (!emailRegex.test(emailRecuperacion)) {
+        showMessage('Por favor ingresa un correo de recuperación válido', 'error');
         return;
     }
 
@@ -1815,7 +1819,7 @@ async function handleEditUser(e) {
     if (!currentUserForEdit) return;
 
     const nombre = elements.editNombre.value.trim();
-    const usuario = elements.editUsuario.value.trim();
+    let usuario = elements.editUsuario.value.trim();
     const telefono = elements.editTelefono.value.trim();
     const emailRecuperacion = elements.editEmailRecuperacion.value.trim();
 
@@ -1825,10 +1829,15 @@ async function handleEditUser(e) {
         return;
     }
 
-    // Validate email format
+    // Agregar dominio si no lo tiene
+    if (!usuario.includes('@')) {
+        usuario = usuario + '@seamosgenios.com';
+    }
+
+    // Validate email format (solo para email de recuperación, el usuario ya tiene el dominio)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(usuario) || !emailRegex.test(emailRecuperacion)) {
-        showMessage('Por favor ingresa emails válidos', 'error');
+    if (!emailRegex.test(emailRecuperacion)) {
+        showMessage('Por favor ingresa un correo de recuperación válido', 'error');
         return;
     }
 

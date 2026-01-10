@@ -444,6 +444,9 @@ function handleCardClick(event) {
             case 'finanzas':
                 window.location.href = 'Finanzas.html';
                 break;
+            case 'perfil':
+                window.location.href = 'panelUsuario.html';
+                break;
             default:
                 console.log('Sección no encontrada:', section);
         }

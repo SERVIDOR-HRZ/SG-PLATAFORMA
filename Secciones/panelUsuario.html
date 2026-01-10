@@ -65,6 +65,10 @@
                     <i class="bi bi-person-circle"></i>
                     Perfil
                 </button>
+                <button class="tab-btn" data-tab="recursos">
+                    <i class="bi bi-trophy"></i>
+                    Mis Recursos
+                </button>
                 <button class="tab-btn" data-tab="informacion">
                     <i class="bi bi-file-person"></i>
                     Información
@@ -105,6 +109,98 @@
                                 Tamaño máximo: 5MB. Formatos: JPG, PNG, GIF
                             </p>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Mis Recursos -->
+            <div class="tab-content" data-content="recursos">
+                <!-- Stats Cards de Recursos -->
+                <div class="recursos-stats-grid">
+                    <div class="recurso-stat-card monedas">
+                        <div class="recurso-stat-icon">
+                            <i class="bi bi-coin"></i>
+                        </div>
+                        <div class="recurso-stat-content">
+                            <h3 id="totalMonedasUsuario">0</h3>
+                            <p>Monedas</p>
+                        </div>
+                    </div>
+
+                    <div class="recurso-stat-card insignias">
+                        <div class="recurso-stat-icon">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <div class="recurso-stat-content">
+                            <h3 id="totalInsigniasUsuario">0</h3>
+                            <p>Insignias</p>
+                        </div>
+                    </div>
+
+                    <div class="recurso-stat-card aulas">
+                        <div class="recurso-stat-icon">
+                            <i class="bi bi-door-open-fill"></i>
+                        </div>
+                        <div class="recurso-stat-content">
+                            <h3 id="totalAulasUsuario">0</h3>
+                            <p>Aulas Inscritas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de Insignias -->
+                <div class="recursos-seccion">
+                    <h2>
+                        <i class="bi bi-award-fill"></i>
+                        Mis Insignias
+                    </h2>
+                    <div class="insignias-usuario-grid" id="insigniasUsuarioGrid">
+                        <div class="loading-recursos">
+                            <i class="bi bi-arrow-clockwise spin"></i>
+                            <p>Cargando insignias...</p>
+                        </div>
+                    </div>
+                    <div class="no-recursos" id="noInsigniasUsuario" style="display: none;">
+                        <i class="bi bi-award"></i>
+                        <p>Aún no tienes insignias</p>
+                        <small>Completa actividades para ganar insignias</small>
+                    </div>
+                </div>
+
+                <!-- Sección de Aulas Inscritas -->
+                <div class="recursos-seccion">
+                    <h2>
+                        <i class="bi bi-door-open-fill"></i>
+                        Mis Aulas
+                    </h2>
+                    <div class="aulas-usuario-grid" id="aulasUsuarioGrid">
+                        <div class="loading-recursos">
+                            <i class="bi bi-arrow-clockwise spin"></i>
+                            <p>Cargando aulas...</p>
+                        </div>
+                    </div>
+                    <div class="no-recursos" id="noAulasUsuario" style="display: none;">
+                        <i class="bi bi-door-closed"></i>
+                        <p>No estás inscrito en ningún aula</p>
+                        <small>Contacta a un administrador para inscribirte</small>
+                    </div>
+                </div>
+
+                <!-- Historial de Monedas -->
+                <div class="recursos-seccion">
+                    <h2>
+                        <i class="bi bi-clock-history"></i>
+                        Historial de Monedas
+                    </h2>
+                    <div class="historial-monedas-list" id="historialMonedasUsuario">
+                        <div class="loading-recursos">
+                            <i class="bi bi-arrow-clockwise spin"></i>
+                            <p>Cargando historial...</p>
+                        </div>
+                    </div>
+                    <div class="no-recursos" id="noHistorialMonedas" style="display: none;">
+                        <i class="bi bi-inbox"></i>
+                        <p>No hay movimientos de monedas</p>
                     </div>
                 </div>
             </div>

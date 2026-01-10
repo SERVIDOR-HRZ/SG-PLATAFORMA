@@ -3724,3 +3724,593 @@ body {
         justify-content: center;
     }
 }
+
+/* ============================================
+   SECCIÓN: OTORGAR MONEDAS A ESTUDIANTES
+   ============================================ */
+
+.recompensas-main-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* Panel de estudiantes */
+.estudiantes-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.filtros-estudiantes {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    flex-wrap: wrap;
+}
+
+.filtro-grupo {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filtro-grupo label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.filtro-grupo select,
+.filtro-grupo input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: white;
+}
+
+.filtro-grupo select:focus,
+.filtro-grupo input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.buscador-grupo {
+    flex: 1.5;
+}
+
+/* Lista de estudiantes */
+.estudiantes-lista {
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.estudiante-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.estudiante-item:hover {
+    background: #fff3f3;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.1);
+}
+
+.estudiante-avatar-mini {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.estudiante-avatar-mini img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.estudiante-info-mini {
+    flex: 1;
+    min-width: 0;
+}
+
+.estudiante-nombre-mini {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.estudiante-institucion-mini {
+    display: block;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.estudiante-monedas-actual {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: #fff3cd;
+    color: #856404;
+    padding: 0.35rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.estudiante-monedas-actual i {
+    color: #ffc107;
+}
+
+/* Controles para dar monedas */
+.dar-monedas-control {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.btn-menos-monedas,
+.btn-mas-monedas {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 6px;
+    background: #e9ecef;
+    color: #495057;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-menos-monedas:hover,
+.btn-mas-monedas:hover {
+    background: #dee2e6;
+}
+
+.input-monedas {
+    width: 55px;
+    height: 30px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.input-monedas:focus {
+    outline: none;
+    border-color: #ff0000;
+}
+
+.btn-dar-monedas {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.2s ease;
+    margin-left: 0.5rem;
+}
+
+.btn-dar-monedas:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+}
+
+.btn-dar-monedas:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Botón quitar monedas */
+.btn-quitar-monedas {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.2s ease;
+    margin-left: 0.35rem;
+}
+
+.btn-quitar-monedas:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+}
+
+.btn-quitar-monedas:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Estados vacíos y carga */
+.loading-estudiantes,
+.empty-estudiantes {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #999;
+}
+
+.loading-estudiantes i,
+.empty-estudiantes i {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.form-card-header {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-card-header i {
+    font-size: 1.5rem;
+}
+
+.form-card-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Historial de Recompensas */
+.recompensas-historial-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    height: fit-content;
+}
+
+.recompensas-historial-card .form-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.recompensas-historial-card .form-card-header h3 {
+    flex: 1;
+}
+
+.btn-limpiar-historial {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.btn-limpiar-historial:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.btn-limpiar-historial:active {
+    transform: scale(0.95);
+}
+
+.recompensas-historial-list {
+    padding: 1rem;
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.recompensa-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s ease;
+}
+
+.recompensa-item:hover {
+    background: #f8f9fa;
+}
+
+.recompensa-item:last-child {
+    border-bottom: none;
+}
+
+.recompensa-item.descuento {
+    background: #fff5f5;
+}
+
+.recompensa-item.descuento:hover {
+    background: #ffe8e8;
+}
+
+.recompensa-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.recompensa-icon.descuento {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+.recompensa-icon.recompensa {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.recompensa-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.recompensa-info .estudiante-nombre {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.recompensa-info .recompensa-motivo {
+    color: #666;
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recompensa-monedas {
+    font-weight: 700;
+    color: #28a745;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.recompensa-monedas.descuento {
+    color: #dc3545;
+}
+
+.recompensa-monedas.recompensa {
+    color: #28a745;
+}
+
+.recompensa-fecha {
+    color: #999;
+    font-size: 0.75rem;
+}
+
+.empty-historial {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+}
+
+.empty-historial i {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.loading-historial {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+/* Responsive para Otorgar Monedas */
+@media (max-width: 1200px) {
+    .dar-monedas-control {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+    
+    .btn-dar-monedas,
+    .btn-quitar-monedas {
+        margin-left: 0;
+        margin-top: 0.5rem;
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 992px) {
+    .recompensas-main-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .estudiante-item {
+        flex-wrap: wrap;
+    }
+    
+    .dar-monedas-control {
+        width: 100%;
+        margin-top: 0.5rem;
+        justify-content: flex-start;
+    }
+    
+    .btn-dar-monedas,
+    .btn-quitar-monedas {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .filtros-estudiantes {
+        flex-direction: column;
+    }
+    
+    .filtro-grupo {
+        min-width: 100%;
+    }
+    
+    .estudiante-info-mini {
+        flex: 1;
+    }
+    
+    .estudiante-monedas-actual {
+        order: 3;
+    }
+    
+    .btn-dar-monedas,
+    .btn-quitar-monedas {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+
+/* ========== MODAL CONFIRMAR LIMPIAR HISTORIAL ========== */
+.modal-confirmar {
+    max-width: 480px;
+}
+
+.modal-header-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+
+.modal-header-danger h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+}
+
+.modal-header-danger .close-btn {
+    color: white;
+}
+
+.modal-header-danger .close-btn:hover {
+    color: #ffcccc;
+}
+
+.confirmar-content {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.confirmar-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #fff5f5, #ffe8e8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    border: 3px solid #ffcccc;
+}
+
+.confirmar-icon i {
+    font-size: 2.5rem;
+    color: #dc3545;
+}
+
+.confirmar-content h4 {
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+}
+
+.confirmar-content p {
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.confirmar-warning {
+    background: #e7f3ff;
+    border: 1px solid #b8daff;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    text-align: left;
+    margin-bottom: 1rem;
+}
+
+.confirmar-warning i {
+    color: #0056b3;
+    font-size: 1.1rem;
+    margin-top: 0.1rem;
+}
+
+.confirmar-warning span {
+    color: #004085;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.confirmar-alert {
+    color: #dc3545 !important;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.confirmar-alert i {
+    font-size: 1rem;
+}

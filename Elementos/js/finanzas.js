@@ -374,6 +374,8 @@ function switchTab(tab) {
         loadMovimientos();
         loadCuentasFilterMovimientos();
         loadCategoriasFilterMovimientos();
+    } else if (tab === 'recompensas') {
+        loadRecompensasTab();
     }
 }
 

@@ -888,7 +888,7 @@ async function handleSaveMovimiento(e) {
                     console.log('Recompensas otorgadas exitosamente');
                     if (window.showNotification) {
                         showNotification('success', '¡Recompensas Otorgadas!', 
-                            `Se otorgaron ${movimientoData.puntosOtorgados} puntos a ${movimientoData.estudianteNombre}`);
+                            `Se otorgaron ${movimientoData.puntosOtorgados} monedas a ${movimientoData.estudianteNombre}`);
                     }
                 } else {
                     console.error('No se pudieron otorgar las recompensas');
@@ -1202,51 +1202,132 @@ window.calcularResumenCategorias = calcularResumenCategorias;
 
 // ========== SISTEMA DE GAMIFICACIÓN ==========
 
+// Variable para almacenar todos los estudiantes cargados
+let allEstudiantesGamificacion = [];
+
+// Cargar instituciones en los filtros de gamificación
+async function loadInstitucionesGamificacion() {
+    try {
+        const db = getDB();
+        const institucionesSnapshot = await db.collection('instituciones').orderBy('nombre').get();
+        
+        const instituciones = [];
+        institucionesSnapshot.forEach(doc => {
+            instituciones.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Poblar todos los selects de filtro de institución
+        const filtroSelects = [
+            'filtroInstitucionEstudiante',
+            'filtroInstitucionEstudianteEdit', 
+            'filtroInstitucionRecompensa'
+        ];
+
+        filtroSelects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.innerHTML = '<option value="">Todas las instituciones</option>';
+                instituciones.forEach(inst => {
+                    const option = document.createElement('option');
+                    option.value = inst.nombre;
+                    option.textContent = inst.nombre;
+                    select.appendChild(option);
+                });
+            }
+        });
+
+        return instituciones;
+    } catch (error) {
+        console.error('Error loading instituciones:', error);
+        return [];
+    }
+}
+
 // Cargar estudiantes en el select
 async function loadEstudiantesSelect() {
     const select = document.getElementById('estudianteCompradorForm');
-    select.innerHTML = '<option value="">Sin estudiante asociado</option>';
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Cargando estudiantes...</option>';
 
     try {
         const db = getDB();
+        
+        // Cargar instituciones primero
+        await loadInstitucionesGamificacion();
+        
         const estudiantesSnapshot = await db.collection('usuarios')
             .where('tipoUsuario', '==', 'estudiante')
             .get();
 
         // Filtrar y ordenar en cliente
-        const estudiantes = [];
+        allEstudiantesGamificacion = [];
         estudiantesSnapshot.forEach(doc => {
             const estudiante = doc.data();
-            if (estudiante.activo !== false) { // Incluir activos y sin definir
-                estudiantes.push({ id: doc.id, ...estudiante });
+            if (estudiante.activo !== false) {
+                allEstudiantesGamificacion.push({ id: doc.id, ...estudiante });
             }
         });
 
         // Ordenar por nombre
-        estudiantes.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+        allEstudiantesGamificacion.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
 
-        // Agregar al select
-        estudiantes.forEach(estudiante => {
-            const option = document.createElement('option');
-            option.value = estudiante.id;
-            option.textContent = `${estudiante.nombre} - ${estudiante.usuario}`;
-            option.dataset.nombre = estudiante.nombre;
-            select.appendChild(option);
-        });
+        // Mostrar todos los estudiantes inicialmente
+        filterEstudiantesByInstitucion('');
+
+        // Listener para filtro de institución
+        const filtroInstitucion = document.getElementById('filtroInstitucionEstudiante');
+        if (filtroInstitucion) {
+            filtroInstitucion.removeEventListener('change', handleFiltroInstitucionChange);
+            filtroInstitucion.addEventListener('change', handleFiltroInstitucionChange);
+        }
 
         // Listener para mostrar/ocultar campos de recompensa
-        select.addEventListener('change', function() {
-            const recompensasContainer = document.getElementById('recompensasContainer');
-            if (this.value) {
-                recompensasContainer.style.display = 'block';
-            } else {
-                recompensasContainer.style.display = 'none';
-            }
-        });
+        select.removeEventListener('change', handleEstudianteSelectChange);
+        select.addEventListener('change', handleEstudianteSelectChange);
 
     } catch (error) {
         console.error('Error loading estudiantes:', error);
+        select.innerHTML = '<option value="">Error al cargar estudiantes</option>';
     }
+}
+
+// Manejar cambio en filtro de institución
+function handleFiltroInstitucionChange(e) {
+    filterEstudiantesByInstitucion(e.target.value);
+}
+
+// Manejar cambio en select de estudiante
+function handleEstudianteSelectChange() {
+    const recompensasContainer = document.getElementById('recompensasContainer');
+    if (recompensasContainer) {
+        recompensasContainer.style.display = this.value ? 'block' : 'none';
+    }
+}
+
+// Filtrar estudiantes por institución
+function filterEstudiantesByInstitucion(institucion, selectId = 'estudianteCompradorForm') {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Sin estudiante asociado</option>';
+
+    const estudiantesFiltrados = institucion 
+        ? allEstudiantesGamificacion.filter(e => e.institucion === institucion)
+        : allEstudiantesGamificacion;
+
+    estudiantesFiltrados.forEach(estudiante => {
+        const option = document.createElement('option');
+        option.value = estudiante.id;
+        option.textContent = `${estudiante.nombre} - ${estudiante.institucion || 'Sin institución'}`;
+        option.dataset.nombre = estudiante.nombre || '';
+        option.dataset.institucion = estudiante.institucion || '';
+        option.dataset.email = estudiante.usuario || estudiante.email || '';
+        option.dataset.monedas = estudiante.puntosAcumulados || estudiante.puntos || 0;
+        option.dataset.insignias = estudiante.insignias ? estudiante.insignias.length : 0;
+        option.dataset.foto = estudiante.fotoPerfil || '';
+        select.appendChild(option);
+    });
 }
 
 // Otorgar recompensas al estudiante
@@ -1292,5 +1373,460 @@ async function otorgarRecompensas(estudianteId, movimientoId, recompensasData) {
 
 window.loadEstudiantesSelect = loadEstudiantesSelect;
 window.otorgarRecompensas = otorgarRecompensas;
+window.loadInstitucionesGamificacion = loadInstitucionesGamificacion;
+window.filterEstudiantesByInstitucion = filterEstudiantesByInstitucion;
 
 
+
+// ============================================
+// SECCIÓN: OTORGAR MONEDAS A ESTUDIANTES
+// ============================================
+
+// Variable para almacenar todos los estudiantes cargados
+let todosLosEstudiantesRecompensa = [];
+
+// Cargar la pestaña de recompensas
+async function loadRecompensasTab() {
+    await loadInstitucionesGamificacion();
+    await cargarYRenderizarEstudiantes();
+    await loadRecompensasHistorial();
+    initRecompensasEvents();
+    initLimpiarHistorialEvent();
+}
+
+// Cargar y renderizar estudiantes en lista
+async function cargarYRenderizarEstudiantes() {
+    const container = document.getElementById('estudiantesListaRecompensa');
+    if (!container) return;
+
+    // Solo cargar de Firebase si no tenemos datos
+    if (todosLosEstudiantesRecompensa.length === 0) {
+        container.innerHTML = '<div class="loading-estudiantes"><i class="bi bi-arrow-clockwise spin"></i><p>Cargando estudiantes...</p></div>';
+
+        try {
+            const db = getDB();
+            const snapshot = await db.collection('usuarios')
+                .where('tipoUsuario', '==', 'estudiante')
+                .where('activo', '==', true)
+                .get();
+
+            todosLosEstudiantesRecompensa = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                todosLosEstudiantesRecompensa.push({ id: doc.id, ...data });
+            });
+
+            // Ordenar por nombre
+            todosLosEstudiantesRecompensa.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+        } catch (error) {
+            console.error('Error cargando estudiantes:', error);
+            container.innerHTML = '<div class="empty-estudiantes"><i class="bi bi-exclamation-circle"></i><p>Error al cargar estudiantes</p></div>';
+            return;
+        }
+    }
+
+    renderizarListaEstudiantes();
+}
+
+// Renderizar lista de estudiantes con filtros aplicados
+function renderizarListaEstudiantes() {
+    const container = document.getElementById('estudiantesListaRecompensa');
+    if (!container) return;
+
+    const institucionFiltro = document.getElementById('filtroInstitucionRecompensa')?.value || '';
+    const busqueda = document.getElementById('buscarEstudianteRecompensa')?.value?.trim().toLowerCase() || '';
+
+    // Aplicar filtros
+    let estudiantesFiltrados = [...todosLosEstudiantesRecompensa];
+    
+    if (institucionFiltro) {
+        estudiantesFiltrados = estudiantesFiltrados.filter(e => e.institucion === institucionFiltro);
+    }
+    
+    if (busqueda) {
+        estudiantesFiltrados = estudiantesFiltrados.filter(e => 
+            (e.nombre || '').toLowerCase().includes(busqueda) ||
+            (e.usuario || '').toLowerCase().includes(busqueda)
+        );
+    }
+
+    if (estudiantesFiltrados.length === 0) {
+        container.innerHTML = '<div class="empty-estudiantes"><i class="bi bi-person-x"></i><p>No se encontraron estudiantes</p></div>';
+        return;
+    }
+
+    container.innerHTML = estudiantesFiltrados.map(est => {
+        const monedas = est.puntosAcumulados || est.puntos || 0;
+        const foto = est.fotoPerfil ? `<img src="${est.fotoPerfil}" alt="${est.nombre}">` : `<i class="bi bi-person-fill"></i>`;
+        
+        return `
+            <div class="estudiante-item" data-id="${est.id}">
+                <div class="estudiante-avatar-mini">${foto}</div>
+                <div class="estudiante-info-mini">
+                    <span class="estudiante-nombre-mini">${est.nombre || 'Sin nombre'}</span>
+                    <span class="estudiante-institucion-mini">${est.institucion || 'Sin institución'}</span>
+                </div>
+                <div class="estudiante-monedas-actual">
+                    <i class="bi bi-coin"></i>
+                    <span id="monedas-display-${est.id}">${monedas}</span>
+                </div>
+                <div class="dar-monedas-control">
+                    <button class="btn-menos-monedas" onclick="ajustarMonedas('${est.id}', -10)">
+                        <i class="bi bi-dash"></i>
+                    </button>
+                    <input type="number" id="monedas-${est.id}" class="input-monedas" value="10" min="1" max="1000">
+                    <button class="btn-mas-monedas" onclick="ajustarMonedas('${est.id}', 10)">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                    <button class="btn-dar-monedas" onclick="otorgarMonedasRapido('${est.id}', '${(est.nombre || '').replace(/'/g, "\\'")}')">
+                        <i class="bi bi-plus-circle"></i>
+                        Dar
+                    </button>
+                    <button class="btn-quitar-monedas" onclick="quitarMonedasRapido('${est.id}', '${(est.nombre || '').replace(/'/g, "\\'")}')">
+                        <i class="bi bi-dash-circle"></i>
+                        Quitar
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Ajustar cantidad de monedas con botones +/-
+function ajustarMonedas(estudianteId, delta) {
+    const input = document.getElementById(`monedas-${estudianteId}`);
+    if (input) {
+        let valor = parseInt(input.value) || 10;
+        valor = Math.max(1, Math.min(1000, valor + delta));
+        input.value = valor;
+    }
+}
+
+// Otorgar monedas rápidamente
+async function otorgarMonedasRapido(estudianteId, estudianteNombre) {
+    const input = document.getElementById(`monedas-${estudianteId}`);
+    const monedas = parseInt(input?.value) || 10;
+
+    if (monedas <= 0) {
+        showNotification('error', 'Error', 'La cantidad debe ser mayor a 0');
+        return;
+    }
+
+    // Deshabilitar botón mientras procesa
+    const btn = input?.parentElement?.querySelector('.btn-dar-monedas');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
+    }
+
+    try {
+        const recompensasData = {
+            puntos: monedas,
+            descripcion: 'Recompensa otorgada manualmente'
+        };
+
+        const success = await otorgarRecompensas(estudianteId, `recompensa_manual_${Date.now()}`, recompensasData);
+
+        if (success) {
+            showNotification('success', '¡Listo!', `+${monedas} monedas para ${estudianteNombre}`);
+            
+            // Actualizar monedas en la lista sin recargar todo
+            const estudianteIndex = todosLosEstudiantesRecompensa.findIndex(e => e.id === estudianteId);
+            if (estudianteIndex !== -1) {
+                const actual = todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados || 0;
+                todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados = actual + monedas;
+            }
+            
+            // Re-renderizar lista y historial
+            renderizarListaEstudiantes();
+            await loadRecompensasHistorial();
+        } else {
+            showNotification('error', 'Error', 'No se pudieron otorgar las monedas');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('error', 'Error', 'Ocurrió un error');
+    }
+
+    // Restaurar botón
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send-check"></i> Dar';
+    }
+}
+
+// Quitar monedas rápidamente
+async function quitarMonedasRapido(estudianteId, estudianteNombre) {
+    const input = document.getElementById(`monedas-${estudianteId}`);
+    const monedas = parseInt(input?.value) || 10;
+
+    if (monedas <= 0) {
+        showNotification('error', 'Error', 'La cantidad debe ser mayor a 0');
+        return;
+    }
+
+    // Verificar que el estudiante tenga suficientes monedas
+    const estudiante = todosLosEstudiantesRecompensa.find(e => e.id === estudianteId);
+    const monedasActuales = estudiante?.puntosAcumulados || 0;
+    
+    if (monedasActuales < monedas) {
+        showNotification('error', 'Error', `${estudianteNombre} solo tiene ${monedasActuales} monedas`);
+        return;
+    }
+
+    // Deshabilitar botón mientras procesa
+    const btn = input?.parentElement?.querySelector('.btn-quitar-monedas');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
+    }
+
+    try {
+        const db = getDB();
+        
+        // Actualizar en Firebase
+        await db.collection('usuarios').doc(estudianteId).update({
+            puntosAcumulados: firebase.firestore.FieldValue.increment(-monedas),
+            historialRecompensas: firebase.firestore.FieldValue.arrayUnion({
+                fecha: new Date(),
+                puntos: -monedas,
+                tipo: 'descuento',
+                descripcion: 'Monedas descontadas manualmente',
+                movimientoId: `descuento_manual_${Date.now()}`
+            })
+        });
+
+        showNotification('success', '¡Listo!', `-${monedas} monedas para ${estudianteNombre}`);
+        
+        // Actualizar monedas en la lista sin recargar todo
+        const estudianteIndex = todosLosEstudiantesRecompensa.findIndex(e => e.id === estudianteId);
+        if (estudianteIndex !== -1) {
+            const actual = todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados || 0;
+            todosLosEstudiantesRecompensa[estudianteIndex].puntosAcumulados = Math.max(0, actual - monedas);
+        }
+        
+        // Re-renderizar lista y historial
+        renderizarListaEstudiantes();
+        await loadRecompensasHistorial();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('error', 'Error', 'Ocurrió un error al quitar monedas');
+    }
+
+    // Restaurar botón
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-dash-circle"></i> Quitar';
+    }
+}
+
+// Exponer funciones globalmente
+window.ajustarMonedas = ajustarMonedas;
+window.otorgarMonedasRapido = otorgarMonedasRapido;
+window.quitarMonedasRapido = quitarMonedasRapido;
+
+// Inicializar eventos de la pestaña de recompensas
+function initRecompensasEvents() {
+    const filtroInstitucion = document.getElementById('filtroInstitucionRecompensa');
+    const buscarInput = document.getElementById('buscarEstudianteRecompensa');
+
+    if (filtroInstitucion) {
+        filtroInstitucion.removeEventListener('change', renderizarListaEstudiantes);
+        filtroInstitucion.addEventListener('change', renderizarListaEstudiantes);
+    }
+
+    if (buscarInput) {
+        buscarInput.removeEventListener('input', renderizarListaEstudiantes);
+        buscarInput.addEventListener('input', renderizarListaEstudiantes);
+    }
+}
+
+// Cargar historial de recompensas recientes
+async function loadRecompensasHistorial() {
+    const container = document.getElementById('recompensasHistorialList');
+    if (!container) return;
+
+    container.innerHTML = '<div class="loading-historial"><i class="bi bi-arrow-clockwise spin"></i> Cargando...</div>';
+
+    try {
+        const db = getDB();
+        
+        // Obtener estudiantes con historial de recompensas
+        const estudiantesSnapshot = await db.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        let todasLasRecompensas = [];
+
+        estudiantesSnapshot.forEach(doc => {
+            const data = doc.data();
+            const historial = data.historialRecompensas || [];
+            
+            historial.forEach(item => {
+                todasLasRecompensas.push({
+                    estudianteId: doc.id,
+                    estudianteNombre: data.nombre || 'Estudiante',
+                    estudianteFoto: data.fotoPerfil || null,
+                    puntos: item.puntos || 0,
+                    descripcion: item.descripcion || 'Sin descripción',
+                    fecha: item.fecha?.toDate ? item.fecha.toDate() : (item.fecha ? new Date(item.fecha) : new Date()),
+                    tipo: item.tipo || (item.puntos >= 0 ? 'recompensa' : 'descuento')
+                });
+            });
+        });
+
+        // Ordenar por fecha descendente y tomar los últimos 30
+        todasLasRecompensas.sort((a, b) => b.fecha - a.fecha);
+        todasLasRecompensas = todasLasRecompensas.slice(0, 30);
+
+        if (todasLasRecompensas.length === 0) {
+            container.innerHTML = `
+                <div class="empty-historial">
+                    <i class="bi bi-inbox"></i>
+                    <p>No hay recompensas recientes</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        todasLasRecompensas.forEach(item => {
+            const fecha = item.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+            const esDescuento = item.puntos < 0;
+            const iconClass = esDescuento ? 'bi-dash-circle' : 'bi-coin';
+            const colorClass = esDescuento ? 'descuento' : 'recompensa';
+            const signo = esDescuento ? '' : '+';
+            
+            html += `
+                <div class="recompensa-item ${colorClass}">
+                    <div class="recompensa-icon ${colorClass}">
+                        <i class="bi ${iconClass}"></i>
+                    </div>
+                    <div class="recompensa-info">
+                        <div class="estudiante-nombre">${item.estudianteNombre}</div>
+                        <div class="recompensa-motivo">${item.descripcion}</div>
+                        <div class="recompensa-fecha">${fecha}</div>
+                    </div>
+                    <div class="recompensa-monedas ${colorClass}">
+                        <i class="bi bi-coin"></i>
+                        ${signo}${item.puntos}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Error cargando historial de recompensas:', error);
+        container.innerHTML = `
+            <div class="empty-historial">
+                <i class="bi bi-exclamation-circle"></i>
+                <p>Error al cargar historial</p>
+            </div>
+        `;
+    }
+}
+
+// Inicializar eventos de la pestaña de recompensas
+function initRecompensasEvents() {
+    const filtroInstitucion = document.getElementById('filtroInstitucionRecompensa');
+    const buscarInput = document.getElementById('buscarEstudianteRecompensa');
+
+    if (filtroInstitucion) {
+        filtroInstitucion.removeEventListener('change', renderizarListaEstudiantes);
+        filtroInstitucion.addEventListener('change', renderizarListaEstudiantes);
+    }
+
+    if (buscarInput) {
+        buscarInput.removeEventListener('input', renderizarListaEstudiantes);
+        buscarInput.addEventListener('input', renderizarListaEstudiantes);
+    }
+}
+
+// Exponer funciones globalmente
+window.loadRecompensasTab = loadRecompensasTab;
+window.loadRecompensasHistorial = loadRecompensasHistorial;
+
+// Limpiar historial de recompensas de todos los estudiantes
+async function limpiarHistorialRecompensas() {
+    // Mostrar modal de confirmación
+    document.getElementById('modalConfirmarLimpiarHistorial').classList.add('active');
+}
+
+// Ejecutar limpieza del historial
+async function ejecutarLimpiezaHistorial() {
+    // Cerrar modal
+    document.getElementById('modalConfirmarLimpiarHistorial').classList.remove('active');
+
+    const container = document.getElementById('recompensasHistorialList');
+    if (container) {
+        container.innerHTML = '<div class="loading-historial"><i class="bi bi-arrow-clockwise spin"></i> Limpiando historial...</div>';
+    }
+
+    try {
+        const db = getDB();
+        
+        // Obtener todos los estudiantes
+        const estudiantesSnapshot = await db.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        // Crear batch para actualizar múltiples documentos
+        const batch = db.batch();
+        let count = 0;
+
+        estudiantesSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.historialRecompensas && data.historialRecompensas.length > 0) {
+                batch.update(doc.ref, { historialRecompensas: [] });
+                count++;
+            }
+        });
+
+        if (count > 0) {
+            await batch.commit();
+            showNotification('success', '¡Historial Limpiado!', `Se limpió el historial de ${count} estudiante(s)`);
+        } else {
+            showNotification('info', 'Sin cambios', 'No había historial que limpiar');
+        }
+
+        // Recargar historial
+        await loadRecompensasHistorial();
+
+    } catch (error) {
+        console.error('Error limpiando historial:', error);
+        showNotification('error', 'Error', 'No se pudo limpiar el historial');
+        await loadRecompensasHistorial();
+    }
+}
+
+// Cerrar modal de confirmación
+function cerrarModalConfirmarLimpiar() {
+    document.getElementById('modalConfirmarLimpiarHistorial').classList.remove('active');
+}
+
+// Inicializar evento del botón limpiar historial
+function initLimpiarHistorialEvent() {
+    const btnLimpiar = document.getElementById('btnLimpiarHistorialRecompensas');
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', limpiarHistorialRecompensas);
+    }
+
+    // Eventos del modal de confirmación
+    const btnConfirmar = document.getElementById('confirmarLimpiarHistorial');
+    const btnCancelar = document.getElementById('cancelarLimpiarHistorial');
+    const btnCerrar = document.getElementById('closeModalConfirmarLimpiar');
+
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener('click', ejecutarLimpiezaHistorial);
+    }
+    if (btnCancelar) {
+        btnCancelar.addEventListener('click', cerrarModalConfirmarLimpiar);
+    }
+    if (btnCerrar) {
+        btnCerrar.addEventListener('click', cerrarModalConfirmarLimpiar);
+    }
+}
+
+window.limpiarHistorialRecompensas = limpiarHistorialRecompensas;
