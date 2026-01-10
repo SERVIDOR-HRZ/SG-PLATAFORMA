@@ -279,6 +279,9 @@ async function seleccionarAula(aulaId) {
     // Mostrar calendario y ocultar selector
     document.getElementById('aulaSelectorContainer').style.display = 'none';
     document.getElementById('calendarioContainer').style.display = 'block';
+    
+    // Mostrar botón de historial de pagos
+    document.getElementById('btnHistorialPagos').style.display = 'flex';
 
     // Actualizar info del aula actual
     document.getElementById('aulaActualNombre').textContent = currentAulaData.nombre;
@@ -298,6 +301,9 @@ function volverASelectorAulas() {
 
     document.getElementById('calendarioContainer').style.display = 'none';
     document.getElementById('aulaSelectorContainer').style.display = 'block';
+    
+    // Ocultar botón de historial de pagos
+    document.getElementById('btnHistorialPagos').style.display = 'none';
 }
 
 // Cargar materias del aula según permisos del usuario
@@ -1700,6 +1706,7 @@ function setupEventListeners() {
         loadHistorialPagos();
     });
     document.getElementById('closeModalComprobanteCalendario').addEventListener('click', closeComprobanteCalendario);
+    document.getElementById('btnDescargarComprobanteCalendario').addEventListener('click', descargarComprobanteCalendario);
 
     document.getElementById('modalHistorialPagos').addEventListener('click', (e) => {
         if (e.target.id === 'modalHistorialPagos') closeHistorialPagos();
@@ -1780,10 +1787,8 @@ async function loadHistorialPagos() {
         await esperarFirebase();
         const db = window.firebaseDB;
 
-        const startDateStr = historialWeekStart.toISOString().split('T')[0];
-        const endDateStr = historialWeekEnd.toISOString().split('T')[0];
-
-        const pagosSnapshot = await db.collection('pagos_profesores')
+        // Buscar pagos en la colección 'pagos' (donde finanzas.js los guarda)
+        const pagosSnapshot = await db.collection('pagos')
             .where('profesorId', '==', currentUser.id)
             .get();
 
@@ -1792,17 +1797,34 @@ async function loadHistorialPagos() {
             const pago = doc.data();
             pago.id = doc.id;
 
-            let fechaPago = '';
-            if (pago.fechaPago) {
-                if (pago.fechaPago.toDate) {
-                    fechaPago = pago.fechaPago.toDate().toISOString().split('T')[0];
-                } else if (typeof pago.fechaPago === 'string') {
-                    fechaPago = pago.fechaPago.split('T')[0];
-                }
+            // Filtrar por aula seleccionada
+            if (currentAulaId && pago.aulaId && pago.aulaId !== currentAulaId) {
+                return; // Saltar pagos de otras aulas
+            }
+            
+            // Si el pago no tiene aulaId (pago antiguo), incluirlo solo si no hay aula seleccionada
+            if (currentAulaId && !pago.aulaId) {
+                return; // Saltar pagos antiguos sin aula cuando hay un aula seleccionada
             }
 
-            if (fechaPago >= startDateStr && fechaPago <= endDateStr) {
-                pagos.push(pago);
+            // Verificar si el pago está dentro del rango de la semana seleccionada
+            let semanaInicio = null;
+            let semanaFin = null;
+            
+            if (pago.semanaInicio) {
+                semanaInicio = pago.semanaInicio.toDate ? pago.semanaInicio.toDate() : new Date(pago.semanaInicio);
+            }
+            if (pago.semanaFin) {
+                semanaFin = pago.semanaFin.toDate ? pago.semanaFin.toDate() : new Date(pago.semanaFin);
+            }
+
+            // Comparar si la semana del pago coincide con la semana seleccionada
+            if (semanaInicio && semanaFin) {
+                const inicioMatch = semanaInicio.toDateString() === historialWeekStart.toDateString();
+                const finMatch = semanaFin.toDateString() === historialWeekEnd.toDateString();
+                if (inicioMatch && finMatch) {
+                    pagos.push(pago);
+                }
             }
         });
 
@@ -1836,19 +1858,32 @@ async function loadHistorialPagos() {
                         </div>
                         <div class="historial-pago-monto">
                             <div class="monto-label">Monto</div>
-                            <div class="monto-valor">$${(pago.monto || 0).toLocaleString()}</div>
+                            <div class="monto-valor">$${(pago.totalPagado || 0).toLocaleString('es-CO')}</div>
                         </div>
                     </div>
                     <div class="historial-pago-detalles">
                         <div class="historial-detalle-item">
                             <div class="label">Clases</div>
-                            <div class="value">${pago.cantidadClases || 0}</div>
+                            <div class="value">${pago.clasesTotales || 0}</div>
+                        </div>
+                        <div class="historial-detalle-item">
+                            <div class="label">Horas</div>
+                            <div class="value">${pago.horasTotales || 0}h</div>
+                        </div>
+                        <div class="historial-detalle-item">
+                            <div class="label">Tarifa/Hora</div>
+                            <div class="value">$${(pago.tarifaPorHora || 0).toLocaleString('es-CO')}</div>
                         </div>
                         <div class="historial-detalle-item">
                             <div class="label">Período</div>
-                            <div class="value">${pago.periodo || 'N/A'}</div>
+                            <div class="value">${(() => {
+                                const semanaInicio = pago.semanaInicio?.toDate ? pago.semanaInicio.toDate() : new Date(pago.semanaInicio);
+                                const semanaFin = pago.semanaFin?.toDate ? pago.semanaFin.toDate() : new Date(pago.semanaFin);
+                                return semanaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) + ' - ' + semanaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                            })()}</div>
                         </div>
                     </div>
+                    ${pago.aulaNombre ? `<div class="historial-pago-aula"><i class="bi bi-door-open"></i> ${pago.aulaNombre}</div>` : ''}
                     ${pago.notas ? `<div class="historial-pago-notas"><strong>Notas:</strong> ${pago.notas}</div>` : ''}
                     ${pago.comprobanteUrl ? `
                         <div class="historial-pago-actions">
@@ -1874,14 +1909,38 @@ async function loadHistorialPagos() {
     }
 }
 
+let currentComprobanteUrl = null;
+
 function verComprobanteCalendario(url) {
+    currentComprobanteUrl = url;
     document.getElementById('comprobanteImageCalendario').src = url;
-    document.getElementById('comprobanteLinkCalendario').href = url;
     document.getElementById('modalVerComprobanteCalendario').classList.add('active');
 }
 
 function closeComprobanteCalendario() {
     document.getElementById('modalVerComprobanteCalendario').classList.remove('active');
+    currentComprobanteUrl = null;
+}
+
+async function descargarComprobanteCalendario() {
+    if (!currentComprobanteUrl) return;
+    
+    try {
+        const response = await fetch(currentComprobanteUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `comprobante_pago_${Date.now()}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error al descargar:', error);
+        // Fallback: abrir en nueva pestaña si falla la descarga
+        window.open(currentComprobanteUrl, '_blank');
+    }
 }
 
 window.verComprobanteCalendario = verComprobanteCalendario;

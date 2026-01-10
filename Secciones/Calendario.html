@@ -27,7 +27,7 @@
             <h1>Calendario de Clases</h1>
         </div>
         <div class="header-right">
-            <button class="btn-historial-pagos" id="btnHistorialPagos" title="Ver Historial de Pagos">
+            <button class="btn-historial-pagos" id="btnHistorialPagos" title="Ver Historial de Pagos" style="display: none;">
                 <i class="bi bi-cash-stack"></i>
                 <span>Mis Pagos</span>
             </button>
@@ -451,10 +451,10 @@
             </div>
             <div class="modal-body">
                 <img id="comprobanteImageCalendario" src="" alt="Comprobante">
-                <a id="comprobanteLinkCalendario" href="" target="_blank" class="btn-primary">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    Abrir en nueva pestaña
-                </a>
+                <button id="btnDescargarComprobanteCalendario" class="btn-primary">
+                    <i class="bi bi-download"></i>
+                    Descargar Comprobante
+                </button>
             </div>
         </div>
     </div>
