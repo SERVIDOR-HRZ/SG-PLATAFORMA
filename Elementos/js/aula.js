@@ -817,10 +817,10 @@ function setupDesafiosSubmenu() {
 }
 
 // ============================================
-// SISTEMA DE RACHAS
+// SISTEMA DE RACHAS (por materia)
 // ============================================
 
-// Cargar datos de racha del usuario
+// Cargar datos de racha del usuario (por materia)
 async function loadRachaData() {
     try {
         await esperarFirebase();
@@ -829,32 +829,66 @@ async function loadRachaData() {
         
         if (userDoc.exists) {
             const data = userDoc.data();
-            const racha = data.racha || 0;
-            const mejorRacha = data.mejorRacha || 0;
-            const diasTotales = data.diasDesafios || 0;
-            const ultimoDesafio = data.ultimoDesafio ? (data.ultimoDesafio.toDate ? data.ultimoDesafio.toDate() : new Date(data.ultimoDesafio)) : null;
+            
+            // Obtener progreso de la materia actual
+            const progresoKey = `progreso_${currentMateria}`;
+            const progresoMateria = data[progresoKey] || {};
+            
+            // Leer racha desde el progreso de la materia
+            let racha = progresoMateria.racha || 0;
+            const mejorRacha = progresoMateria.mejorRacha || 0;
+            const diasTotales = progresoMateria.diasDesafios || 0;
+            const ultimoDesafio = progresoMateria.ultimoDesafio ? (progresoMateria.ultimoDesafio.toDate ? progresoMateria.ultimoDesafio.toDate() : new Date(progresoMateria.ultimoDesafio)) : null;
+            
+            // Verificar si la racha se perdió (no completó ayer ni hoy)
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const ayer = new Date(hoy);
+            ayer.setDate(ayer.getDate() - 1);
+            
+            let completadoHoy = false;
+            let completadoAyer = false;
+            
+            if (ultimoDesafio) {
+                const fechaUltimo = new Date(ultimoDesafio);
+                fechaUltimo.setHours(0, 0, 0, 0);
+                
+                completadoHoy = fechaUltimo.getTime() === hoy.getTime();
+                completadoAyer = fechaUltimo.getTime() === ayer.getTime();
+            }
+            
+            // Si no completó hoy ni ayer, la racha se perdió
+            if (!completadoHoy && !completadoAyer && racha > 0) {
+                racha = 0;
+                // Actualizar en Firebase (dentro del progreso de la materia)
+                await db.collection('usuarios').doc(currentUser.id).update({
+                    [`${progresoKey}.racha`]: 0
+                });
+            }
             
             // Actualizar UI
             document.getElementById('rachaCount').textContent = racha;
             document.getElementById('rachaMejor').textContent = mejorRacha;
             document.getElementById('rachaTotalDias').textContent = diasTotales;
             
-            // Verificar si ya completó hoy
-            const hoy = new Date();
-            hoy.setHours(0, 0, 0, 0);
-            const completadoHoy = ultimoDesafio && ultimoDesafio >= hoy;
-            
             const rachaMessage = document.getElementById('rachaMessage');
             if (completadoHoy) {
                 rachaMessage.classList.add('completed');
                 rachaMessage.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>¡Genial! Ya completaste tu desafío de hoy</span>';
+            } else if (completadoAyer) {
+                rachaMessage.classList.remove('completed');
+                rachaMessage.innerHTML = '<i class="bi bi-fire"></i><span>¡Completa un desafío hoy para mantener tu racha de ' + racha + ' días!</span>';
             } else {
                 rachaMessage.classList.remove('completed');
-                rachaMessage.innerHTML = '<i class="bi bi-info-circle"></i><span>Completa al menos un desafío hoy para mantener tu racha</span>';
+                if (racha === 0) {
+                    rachaMessage.innerHTML = '<i class="bi bi-info-circle"></i><span>Completa un desafío para comenzar tu racha</span>';
+                } else {
+                    rachaMessage.innerHTML = '<i class="bi bi-info-circle"></i><span>Completa al menos un desafío hoy para mantener tu racha</span>';
+                }
             }
             
-            // Renderizar calendario
-            renderRachaCalendar(data.diasCompletados || []);
+            // Renderizar calendario (desde el progreso de la materia)
+            renderRachaCalendar(progresoMateria.diasCompletados || []);
         }
     } catch (error) {
         console.error('Error cargando datos de racha:', error);
@@ -942,25 +976,47 @@ async function loadRankingData() {
         await esperarFirebase();
         const db = window.firebaseDB;
         
-        // Obtener estudiantes del aula actual
-        let estudiantesQuery = db.collection('usuarios').where('tipoUsuario', '==', 'estudiante');
+        // Obtener estudiantes que tienen acceso a la materia actual
+        let snapshot;
         
         if (currentAulaId) {
-            estudiantesQuery = estudiantesQuery.where('aulaId', '==', currentAulaId);
+            // Si hay aula, buscar por aulasAsignadas (array-contains)
+            snapshot = await db.collection('usuarios')
+                .where('tipoUsuario', '==', 'estudiante')
+                .where('aulasAsignadas', 'array-contains', currentAulaId)
+                .get();
+        } else if (currentMateria) {
+            // Si hay materia, buscar por clasesPermitidas
+            snapshot = await db.collection('usuarios')
+                .where('tipoUsuario', '==', 'estudiante')
+                .where('clasesPermitidas', 'array-contains', currentMateria)
+                .get();
+        } else {
+            // Fallback: todos los estudiantes
+            snapshot = await db.collection('usuarios')
+                .where('tipoUsuario', '==', 'estudiante')
+                .get();
         }
         
-        const snapshot = await estudiantesQuery.get();
-        
         let estudiantes = [];
+        const progresoKey = `progreso_${currentMateria}`;
+        
         snapshot.forEach(doc => {
             const data = doc.data();
+            
+            // Obtener XP, nivel y racha de la materia actual (todo por materia)
+            const progresoMateria = data[progresoKey] || {};
+            const xpMateria = progresoMateria.xp || 0;
+            const nivelMateria = progresoMateria.nivel || 1;
+            const rachaMateria = progresoMateria.racha || 0;
+            
             estudiantes.push({
                 id: doc.id,
                 nombre: data.nombre || 'Usuario',
-                foto: data.foto || null,
-                racha: data.racha || 0,
-                xp: data.xp || 0,
-                nivel: data.nivel || 1
+                foto: data.fotoPerfil || null,
+                racha: rachaMateria,
+                xp: xpMateria,
+                nivel: nivelMateria
             });
         });
         
@@ -993,6 +1049,7 @@ function renderRankingPodium(top3) {
     
     const positions = ['second', 'first', 'third'];
     const order = [1, 0, 2]; // Segundo, Primero, Tercero (para el display)
+    const medals = ['🥈', '🥇', '🥉'];
     
     let html = '';
     order.forEach((idx, displayIdx) => {
@@ -1005,12 +1062,13 @@ function renderRankingPodium(top3) {
         
         html += `
             <div class="podium-item ${positions[displayIdx]}">
+                <div class="podium-medal">${medals[displayIdx]}</div>
                 <div class="podium-avatar">
                     ${estudiante.foto ? `<img src="${estudiante.foto}" alt="${estudiante.nombre}">` : '<i class="bi bi-person-fill"></i>'}
                 </div>
-                <span class="podium-name">${estudiante.nombre.split(' ')[0]}</span>
-                <span class="podium-score"><i class="bi ${scoreIcon}"></i> ${score}</span>
-                <div class="podium-base">${idx + 1}</div>
+                <span class="podium-name">${estudiante.nombre}</span>
+                <span class="podium-score"><i class="bi ${scoreIcon}"></i> ${score} ${scoreLabel}</span>
+                <div class="podium-base">${idx + 1}°</div>
             </div>
         `;
     });

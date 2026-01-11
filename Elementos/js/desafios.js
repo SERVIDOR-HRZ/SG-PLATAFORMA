@@ -920,8 +920,8 @@ async function showResultado() {
         </div>
     `;
 
-    // Guardar progreso
-    await saveUserProgress();
+    // Guardar progreso (solo actualiza racha si aprobó)
+    await saveUserProgress(porcentaje >= 60);
 
     // Actualizar UI
     updateHeaderStats();
@@ -937,7 +937,7 @@ function closeResultadoModal() {
 
 // ============ FIREBASE OPERATIONS ============
 
-async function saveUserProgress() {
+async function saveUserProgress(aprobo = false) {
     try {
         const db = window.firebaseDB;
         const progresoKey = `progreso_${currentMateria}`;
@@ -946,27 +946,124 @@ async function saveUserProgress() {
         const nuevoNivel = calculateLevelFromXP(userGameData.xp);
         userGameData.nivel = nuevoNivel;
 
-        // Guardar XP y nivel POR MATERIA (dentro del progreso de la materia)
-        // Las monedas son globales (compartidas entre materias)
-        await db.collection('usuarios').doc(currentUser.id).update({
+        // Obtener datos actuales del usuario
+        const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        const progresoActual = userData[progresoKey] || {};
+
+        // Preparar datos del progreso de esta materia
+        let progresoData = {
+            xp: userGameData.xp,
+            nivel: nuevoNivel,
+            nivelesCompletados: userGameData.nivelesCompletados,
+            nivelDesbloqueado: nivelDesbloqueado,
+            // Mantener racha existente
+            racha: progresoActual.racha || 0,
+            mejorRacha: progresoActual.mejorRacha || 0,
+            ultimoDesafio: progresoActual.ultimoDesafio || null,
+            diasDesafios: progresoActual.diasDesafios || 0,
+            diasCompletados: progresoActual.diasCompletados || []
+        };
+
+        // Solo actualizar racha si aprobó el nivel (>=60%)
+        if (aprobo) {
+            // Calcular actualización de racha (por materia)
+            const rachaUpdate = calcularActualizacionRacha(progresoActual);
+            progresoData = { ...progresoData, ...rachaUpdate };
+            
+            console.log(`Racha de ${currentMateria} actualizada:`, rachaUpdate);
+        }
+
+        // Preparar datos para actualizar
+        let updateData = {
             puntos: userGameData.monedas,
             puntosAcumulados: userGameData.monedas,
-            [progresoKey]: {
-                xp: userGameData.xp,
-                nivel: nuevoNivel,
-                nivelesCompletados: userGameData.nivelesCompletados,
-                nivelDesbloqueado: nivelDesbloqueado
-            }
-        });
+            [progresoKey]: progresoData
+        };
+
+        // Guardar en Firebase
+        await db.collection('usuarios').doc(currentUser.id).update(updateData);
 
         console.log(`Progreso guardado para ${currentMateria}:`, {
             xp: userGameData.xp,
             nivel: nuevoNivel,
-            nivelDesbloqueado: nivelDesbloqueado
+            nivelDesbloqueado: nivelDesbloqueado,
+            aprobo: aprobo
         });
     } catch (error) {
         console.error('Error guardando progreso:', error);
     }
+}
+
+// Calcular actualización de racha (por materia)
+function calcularActualizacionRacha(progresoMateria) {
+    const ahora = new Date();
+    const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+    const ayer = new Date(hoy);
+    ayer.setDate(ayer.getDate() - 1);
+    
+    // Obtener datos de racha de esta materia
+    let rachaActual = progresoMateria.racha || 0;
+    let mejorRacha = progresoMateria.mejorRacha || 0;
+    let diasDesafios = progresoMateria.diasDesafios || 0;
+    let diasCompletados = progresoMateria.diasCompletados || [];
+    
+    // Convertir último desafío a fecha
+    let ultimoDesafio = null;
+    if (progresoMateria.ultimoDesafio) {
+        ultimoDesafio = progresoMateria.ultimoDesafio.toDate ? progresoMateria.ultimoDesafio.toDate() : new Date(progresoMateria.ultimoDesafio);
+    }
+    
+    // Normalizar fecha del último desafío (solo día, sin hora)
+    let fechaUltimoDesafio = null;
+    if (ultimoDesafio) {
+        fechaUltimoDesafio = new Date(ultimoDesafio.getFullYear(), ultimoDesafio.getMonth(), ultimoDesafio.getDate());
+    }
+    
+    // Verificar si ya completó un desafío hoy en esta materia
+    const yaCompletoHoy = fechaUltimoDesafio && fechaUltimoDesafio.getTime() === hoy.getTime();
+    
+    if (!yaCompletoHoy) {
+        // Es el primer desafío del día en esta materia
+        
+        // Verificar si la racha continúa (completó ayer) o se reinicia
+        const completoAyer = fechaUltimoDesafio && fechaUltimoDesafio.getTime() === ayer.getTime();
+        
+        if (completoAyer || rachaActual === 0) {
+            // Continúa la racha o empieza una nueva
+            rachaActual++;
+        } else if (fechaUltimoDesafio && fechaUltimoDesafio.getTime() < ayer.getTime()) {
+            // Perdió la racha (no completó ayer)
+            rachaActual = 1; // Reinicia con 1 (el de hoy)
+        } else {
+            // Primera vez
+            rachaActual = 1;
+        }
+        
+        // Actualizar mejor racha si es necesario
+        if (rachaActual > mejorRacha) {
+            mejorRacha = rachaActual;
+        }
+        
+        // Incrementar días totales
+        diasDesafios++;
+        
+        // Agregar hoy a los días completados (para el calendario)
+        diasCompletados.push(firebase.firestore.Timestamp.fromDate(hoy));
+        
+        // Limitar a los últimos 60 días para no sobrecargar
+        if (diasCompletados.length > 60) {
+            diasCompletados = diasCompletados.slice(-60);
+        }
+    }
+    
+    return {
+        racha: rachaActual,
+        mejorRacha: mejorRacha,
+        diasDesafios: diasDesafios,
+        diasCompletados: diasCompletados,
+        ultimoDesafio: firebase.firestore.Timestamp.fromDate(ahora)
+    };
 }
 
 async function updateUserEnergy() {
@@ -1171,13 +1268,19 @@ async function confirmResetProgress() {
         const db = window.firebaseDB;
         const progresoKey = `progreso_${currentMateria}`;
 
-        // Reiniciar progreso de esta materia
+        // Reiniciar progreso de esta materia incluyendo la racha (por materia)
         await db.collection('usuarios').doc(currentUser.id).update({
             [progresoKey]: {
                 xp: 0,
                 nivel: 1,
                 nivelesCompletados: {},
-                nivelDesbloqueado: 1
+                nivelDesbloqueado: 1,
+                // Racha por materia
+                racha: 0,
+                mejorRacha: 0,
+                ultimoDesafio: null,
+                diasDesafios: 0,
+                diasCompletados: []
             }
         });
 
@@ -1195,7 +1298,7 @@ async function confirmResetProgress() {
         generatePath();
 
         // Mostrar mensaje de éxito
-        showAlert('Progreso Reiniciado', `Tu progreso en ${currentMateria} ha sido reiniciado. ¡Buena suerte empezando de nuevo!`, 'info');
+        showAlert('Progreso Reiniciado', `Tu progreso y racha en ${currentMateria} han sido reiniciados. ¡Buena suerte empezando de nuevo!`, 'info');
 
         console.log(`Progreso de ${currentMateria} reiniciado completamente`);
     } catch (error) {
