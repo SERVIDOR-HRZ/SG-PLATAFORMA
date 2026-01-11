@@ -111,6 +111,14 @@
                         <i class="bi bi-trophy-fill"></i>
                         Desafíos
                     </button>
+                    <button class="desafios-submenu-btn" data-subtab="racha">
+                        <i class="bi bi-fire"></i>
+                        Racha
+                    </button>
+                    <button class="desafios-submenu-btn" data-subtab="ranking">
+                        <i class="bi bi-bar-chart-fill"></i>
+                        Ranking
+                    </button>
                     <button class="desafios-submenu-btn" data-subtab="tienda">
                         <i class="bi bi-shop"></i>
                         Tienda
@@ -235,6 +243,60 @@
                                 </div>
                                 <button class="tienda-comprar-btn pista-btn">Comprar</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contenido de Racha -->
+                <div class="desafios-subtab" id="rachaSubtab">
+                    <div class="racha-container">
+                        <div class="racha-hero">
+                            <div class="racha-fire-icon">
+                                <i class="bi bi-fire"></i>
+                            </div>
+                            <div class="racha-count" id="rachaCount">0</div>
+                            <div class="racha-label">días de racha</div>
+                        </div>
+                        <div class="racha-calendar" id="rachaCalendar">
+                            <!-- Calendario de racha se carga dinámicamente -->
+                        </div>
+                        <div class="racha-stats">
+                            <div class="racha-stat-item">
+                                <i class="bi bi-trophy-fill"></i>
+                                <span class="racha-stat-value" id="rachaMejor">0</span>
+                                <span class="racha-stat-label">Mejor racha</span>
+                            </div>
+                            <div class="racha-stat-item">
+                                <i class="bi bi-calendar-check"></i>
+                                <span class="racha-stat-value" id="rachaTotalDias">0</span>
+                                <span class="racha-stat-label">Días totales</span>
+                            </div>
+                        </div>
+                        <div class="racha-message" id="rachaMessage">
+                            <i class="bi bi-info-circle"></i>
+                            <span>Completa al menos un desafío hoy para mantener tu racha</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contenido de Ranking -->
+                <div class="desafios-subtab" id="rankingSubtab">
+                    <div class="ranking-container">
+                        <div class="ranking-header">
+                            <h3><i class="bi bi-bar-chart-fill"></i> Ranking Semanal</h3>
+                            <div class="ranking-filter">
+                                <button class="ranking-filter-btn active" data-filter="racha">Por Racha</button>
+                                <button class="ranking-filter-btn" data-filter="xp">Por XP</button>
+                            </div>
+                        </div>
+                        <div class="ranking-podium" id="rankingPodium">
+                            <!-- Podio se carga dinámicamente -->
+                        </div>
+                        <div class="ranking-list" id="rankingList">
+                            <!-- Lista de ranking se carga dinámicamente -->
+                        </div>
+                        <div class="ranking-user-position" id="rankingUserPosition">
+                            <!-- Posición del usuario actual -->
                         </div>
                     </div>
                 </div>

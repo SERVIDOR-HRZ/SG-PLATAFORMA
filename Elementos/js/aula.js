@@ -582,33 +582,6 @@ async function showMateriaStatsCard(materiaId, config) {
         console.error('Error al obtener datos del usuario:', error);
     }
 
-    // Contar tareas completadas para esta materia y aula
-    let tareasCompletadas = 0;
-    try {
-        if (window.firebaseDB && currentUser.tipoUsuario === 'estudiante') {
-            // Obtener todas las tareas de esta materia y aula
-            let tareasQuery = window.firebaseDB.collection('tareas').where('materia', '==', materiaId);
-            if (currentAulaId) {
-                tareasQuery = tareasQuery.where('aulaId', '==', currentAulaId);
-            }
-            const tareasSnapshot = await tareasQuery.get();
-
-            // Contar entregas del estudiante
-            for (const tareaDoc of tareasSnapshot.docs) {
-                const entregaSnapshot = await window.firebaseDB.collection('entregas')
-                    .where('tareaId', '==', tareaDoc.id)
-                    .where('estudianteId', '==', currentUser.id)
-                    .get();
-
-                if (!entregaSnapshot.empty) {
-                    tareasCompletadas++;
-                }
-            }
-        }
-    } catch (error) {
-        console.error('Error al contar tareas completadas:', error);
-    }
-
     // Crear color más oscuro para el gradiente
     const darkerColor = adjustColorBrightness(config.color, -40);
     
@@ -631,26 +604,18 @@ async function showMateriaStatsCard(materiaId, config) {
                     <h2>¡Hola, ${currentUser.nombre || 'Usuario'}!</h2>
                     <p><i class="bi bi-book"></i> ${config.nombre} - ${currentAulaData?.nombre || 'Aula'}</p>
                 </div>
-                <div class="materia-energy-badge">
-                    <i class="bi bi-lightning-fill"></i>
-                    <span>${energiaDisplay}</span>
-                </div>
-                <div class="materia-monedas-badge">
-                    <i class="bi bi-coin"></i>
-                    <span id="monedasHeader">${monedas}</span>
-                </div>
-            </div>
-            <div class="materia-stats-boxes">
-                <div class="materia-stat-box">
-                    <div class="stat-icon">
-                        <i class="bi bi-check-circle-fill"></i>
+                <div class="materia-stats-badges-row">
+                    <div class="materia-energy-badge">
+                        <i class="bi bi-lightning-fill"></i>
+                        <span>${energiaDisplay}</span>
                     </div>
-                    <div class="stat-content">
-                        <span class="stat-value">${tareasCompletadas}</span>
-                        <span class="stat-label">Tareas Completadas</span>
+                    <div class="materia-monedas-badge">
+                        <i class="bi bi-coin"></i>
+                        <span id="monedasHeader">${monedas}</span>
                     </div>
                 </div>
             </div>
+
             <div class="materia-level-container">
                 <div class="level-info">
                     <span class="level-label">Nivel</span>
@@ -808,7 +773,7 @@ function setupTabs() {
     setupDesafiosSubmenu();
 }
 
-// Setup desafíos submenu (Retos / Tienda)
+// Setup desafíos submenu (Retos / Tienda / Racha / Ranking)
 function setupDesafiosSubmenu() {
     const submenuBtns = document.querySelectorAll('.desafios-submenu-btn');
     
@@ -824,12 +789,19 @@ function setupDesafiosSubmenu() {
             btn.classList.add('active');
             document.getElementById(`${subtab}Subtab`).classList.add('active');
             
-            // Si es tienda, cargar datos del usuario
+            // Cargar datos según la pestaña
             if (subtab === 'tienda') {
                 loadTiendaData();
+            } else if (subtab === 'racha') {
+                loadRachaData();
+            } else if (subtab === 'ranking') {
+                loadRankingData();
             }
         });
     });
+    
+    // Setup ranking filter buttons
+    setupRankingFilter();
     
     // Botón iniciar desafío
     const iniciarDesafioBtn = document.getElementById('iniciarDesafioBtn');
@@ -843,6 +815,278 @@ function setupDesafiosSubmenu() {
     // Setup tienda buttons
     setupTiendaButtons();
 }
+
+// ============================================
+// SISTEMA DE RACHAS
+// ============================================
+
+// Cargar datos de racha del usuario
+async function loadRachaData() {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+        const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
+        
+        if (userDoc.exists) {
+            const data = userDoc.data();
+            const racha = data.racha || 0;
+            const mejorRacha = data.mejorRacha || 0;
+            const diasTotales = data.diasDesafios || 0;
+            const ultimoDesafio = data.ultimoDesafio ? (data.ultimoDesafio.toDate ? data.ultimoDesafio.toDate() : new Date(data.ultimoDesafio)) : null;
+            
+            // Actualizar UI
+            document.getElementById('rachaCount').textContent = racha;
+            document.getElementById('rachaMejor').textContent = mejorRacha;
+            document.getElementById('rachaTotalDias').textContent = diasTotales;
+            
+            // Verificar si ya completó hoy
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const completadoHoy = ultimoDesafio && ultimoDesafio >= hoy;
+            
+            const rachaMessage = document.getElementById('rachaMessage');
+            if (completadoHoy) {
+                rachaMessage.classList.add('completed');
+                rachaMessage.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>¡Genial! Ya completaste tu desafío de hoy</span>';
+            } else {
+                rachaMessage.classList.remove('completed');
+                rachaMessage.innerHTML = '<i class="bi bi-info-circle"></i><span>Completa al menos un desafío hoy para mantener tu racha</span>';
+            }
+            
+            // Renderizar calendario
+            renderRachaCalendar(data.diasCompletados || []);
+        }
+    } catch (error) {
+        console.error('Error cargando datos de racha:', error);
+    }
+}
+
+// Renderizar calendario de racha
+function renderRachaCalendar(diasCompletados = []) {
+    const container = document.getElementById('rachaCalendar');
+    if (!container) return;
+    
+    const hoy = new Date();
+    const mesActual = hoy.getMonth();
+    const anioActual = hoy.getFullYear();
+    
+    const primerDia = new Date(anioActual, mesActual, 1);
+    const ultimoDia = new Date(anioActual, mesActual + 1, 0);
+    const diasEnMes = ultimoDia.getDate();
+    const primerDiaSemana = primerDia.getDay();
+    
+    const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    // Convertir días completados a formato comparable
+    const diasSet = new Set(diasCompletados.map(d => {
+        const fecha = d.toDate ? d.toDate() : new Date(d);
+        return `${fecha.getFullYear()}-${fecha.getMonth()}-${fecha.getDate()}`;
+    }));
+    
+    let html = `
+        <div class="racha-calendar-header">
+            <span class="racha-calendar-title">${nombresMeses[mesActual]} ${anioActual}</span>
+        </div>
+        <div class="racha-week-days">
+            <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+        </div>
+        <div class="racha-days-grid">
+    `;
+    
+    // Días vacíos al inicio
+    for (let i = 0; i < primerDiaSemana; i++) {
+        html += '<div class="racha-day empty"></div>';
+    }
+    
+    // Días del mes
+    for (let dia = 1; dia <= diasEnMes; dia++) {
+        const fechaKey = `${anioActual}-${mesActual}-${dia}`;
+        const esHoy = dia === hoy.getDate();
+        const esFuturo = dia > hoy.getDate();
+        const completado = diasSet.has(fechaKey);
+        
+        let clases = 'racha-day';
+        if (completado) clases += ' completed';
+        if (esHoy) clases += ' today';
+        if (esFuturo) clases += ' future';
+        
+        html += `<div class="${clases}">${dia}</div>`;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// ============================================
+// SISTEMA DE RANKING
+// ============================================
+
+let currentRankingFilter = 'racha';
+
+// Setup filtros de ranking
+function setupRankingFilter() {
+    const filterBtns = document.querySelectorAll('.ranking-filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRankingFilter = btn.dataset.filter;
+            loadRankingData();
+        });
+    });
+}
+
+// Cargar datos del ranking
+async function loadRankingData() {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+        
+        // Obtener estudiantes del aula actual
+        let estudiantesQuery = db.collection('usuarios').where('tipoUsuario', '==', 'estudiante');
+        
+        if (currentAulaId) {
+            estudiantesQuery = estudiantesQuery.where('aulaId', '==', currentAulaId);
+        }
+        
+        const snapshot = await estudiantesQuery.get();
+        
+        let estudiantes = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            estudiantes.push({
+                id: doc.id,
+                nombre: data.nombre || 'Usuario',
+                foto: data.foto || null,
+                racha: data.racha || 0,
+                xp: data.xp || 0,
+                nivel: data.nivel || 1
+            });
+        });
+        
+        // Ordenar según el filtro
+        if (currentRankingFilter === 'racha') {
+            estudiantes.sort((a, b) => b.racha - a.racha);
+        } else {
+            estudiantes.sort((a, b) => b.xp - a.xp);
+        }
+        
+        // Renderizar podio y lista
+        renderRankingPodium(estudiantes.slice(0, 3));
+        renderRankingList(estudiantes.slice(3, 10));
+        renderUserPosition(estudiantes);
+        
+    } catch (error) {
+        console.error('Error cargando ranking:', error);
+    }
+}
+
+// Renderizar podio (top 3)
+function renderRankingPodium(top3) {
+    const container = document.getElementById('rankingPodium');
+    if (!container) return;
+    
+    if (top3.length === 0) {
+        container.innerHTML = '<div class="ranking-empty"><i class="bi bi-trophy"></i><p>No hay datos de ranking aún</p></div>';
+        return;
+    }
+    
+    const positions = ['second', 'first', 'third'];
+    const order = [1, 0, 2]; // Segundo, Primero, Tercero (para el display)
+    
+    let html = '';
+    order.forEach((idx, displayIdx) => {
+        const estudiante = top3[idx];
+        if (!estudiante) return;
+        
+        const score = currentRankingFilter === 'racha' ? estudiante.racha : estudiante.xp;
+        const scoreIcon = currentRankingFilter === 'racha' ? 'bi-fire' : 'bi-star-fill';
+        const scoreLabel = currentRankingFilter === 'racha' ? 'días' : 'XP';
+        
+        html += `
+            <div class="podium-item ${positions[displayIdx]}">
+                <div class="podium-avatar">
+                    ${estudiante.foto ? `<img src="${estudiante.foto}" alt="${estudiante.nombre}">` : '<i class="bi bi-person-fill"></i>'}
+                </div>
+                <span class="podium-name">${estudiante.nombre.split(' ')[0]}</span>
+                <span class="podium-score"><i class="bi ${scoreIcon}"></i> ${score}</span>
+                <div class="podium-base">${idx + 1}</div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Renderizar lista de ranking (posiciones 4-10)
+function renderRankingList(estudiantes) {
+    const container = document.getElementById('rankingList');
+    if (!container) return;
+    
+    if (estudiantes.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    estudiantes.forEach((est, idx) => {
+        const posicion = idx + 4;
+        const score = currentRankingFilter === 'racha' ? est.racha : est.xp;
+        const scoreIcon = currentRankingFilter === 'racha' ? 'bi-fire' : 'bi-star-fill';
+        const isCurrentUser = est.id === currentUser.id;
+        
+        html += `
+            <div class="ranking-item ${isCurrentUser ? 'current-user' : ''}">
+                <div class="ranking-position">${posicion}</div>
+                <div class="ranking-avatar">
+                    ${est.foto ? `<img src="${est.foto}" alt="${est.nombre}">` : '<i class="bi bi-person-fill"></i>'}
+                </div>
+                <div class="ranking-info">
+                    <div class="ranking-name">${est.nombre}</div>
+                    <div class="ranking-level">Nivel ${est.nivel}</div>
+                </div>
+                <div class="ranking-score ${currentRankingFilter === 'xp' ? 'xp' : ''}">
+                    <i class="bi ${scoreIcon}"></i>
+                    ${score}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Renderizar posición del usuario actual
+function renderUserPosition(todosEstudiantes) {
+    const container = document.getElementById('rankingUserPosition');
+    if (!container) return;
+    
+    const miPosicion = todosEstudiantes.findIndex(e => e.id === currentUser.id) + 1;
+    
+    if (miPosicion === 0 || miPosicion <= 10) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    const miData = todosEstudiantes.find(e => e.id === currentUser.id);
+    const score = currentRankingFilter === 'racha' ? miData.racha : miData.xp;
+    
+    container.style.display = 'flex';
+    container.innerHTML = `
+        <div class="user-pos-left">
+            <span class="user-pos-rank">#${miPosicion}</span>
+            <span class="user-pos-label">Tu posición actual</span>
+        </div>
+        <div class="ranking-score" style="color: white;">
+            <i class="bi ${currentRankingFilter === 'racha' ? 'bi-fire' : 'bi-star-fill'}"></i>
+            ${score}
+        </div>
+    `;
+}
+
+// ============================================
+// TIENDA
+// ============================================
 
 // Cargar datos de la tienda
 async function loadTiendaData() {
