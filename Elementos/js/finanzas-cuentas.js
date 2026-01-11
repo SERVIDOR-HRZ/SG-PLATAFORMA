@@ -1385,31 +1385,32 @@ window.filterEstudiantesByInstitucion = filterEstudiantesByInstitucion;
 // SECCIÓN: OTORGAR MONEDAS A ESTUDIANTES
 // ============================================
 
-// Variable para almacenar todos los estudiantes cargados
+// Variable para almacenar todos los usuarios cargados (estudiantes, admins, superusuarios)
 let todosLosEstudiantesRecompensa = [];
 
 // Cargar la pestaña de recompensas
 async function loadRecompensasTab() {
     await loadInstitucionesGamificacion();
-    await cargarYRenderizarEstudiantes();
+    await cargarYRenderizarUsuarios();
     await loadRecompensasHistorial();
     initRecompensasEvents();
     initLimpiarHistorialEvent();
 }
 
-// Cargar y renderizar estudiantes en lista
-async function cargarYRenderizarEstudiantes() {
+// Cargar y renderizar usuarios en lista (estudiantes, admins, superusuarios)
+async function cargarYRenderizarUsuarios() {
     const container = document.getElementById('estudiantesListaRecompensa');
     if (!container) return;
 
     // Solo cargar de Firebase si no tenemos datos
     if (todosLosEstudiantesRecompensa.length === 0) {
-        container.innerHTML = '<div class="loading-estudiantes"><i class="bi bi-arrow-clockwise spin"></i><p>Cargando estudiantes...</p></div>';
+        container.innerHTML = '<div class="loading-estudiantes"><i class="bi bi-arrow-clockwise spin"></i><p>Cargando usuarios...</p></div>';
 
         try {
             const db = getDB();
+            
+            // Cargar TODOS los usuarios activos (estudiantes, admins, superusuarios)
             const snapshot = await db.collection('usuarios')
-                .where('tipoUsuario', '==', 'estudiante')
                 .where('activo', '==', true)
                 .get();
 
@@ -1422,8 +1423,8 @@ async function cargarYRenderizarEstudiantes() {
             // Ordenar por nombre
             todosLosEstudiantesRecompensa.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
         } catch (error) {
-            console.error('Error cargando estudiantes:', error);
-            container.innerHTML = '<div class="empty-estudiantes"><i class="bi bi-exclamation-circle"></i><p>Error al cargar estudiantes</p></div>';
+            console.error('Error cargando usuarios:', error);
+            container.innerHTML = '<div class="empty-estudiantes"><i class="bi bi-exclamation-circle"></i><p>Error al cargar usuarios</p></div>';
             return;
         }
     }
@@ -1431,44 +1432,75 @@ async function cargarYRenderizarEstudiantes() {
     renderizarListaEstudiantes();
 }
 
-// Renderizar lista de estudiantes con filtros aplicados
+// Alias para compatibilidad
+async function cargarYRenderizarEstudiantes() {
+    return cargarYRenderizarUsuarios();
+}
+
+// Renderizar lista de usuarios con filtros aplicados
 function renderizarListaEstudiantes() {
     const container = document.getElementById('estudiantesListaRecompensa');
     if (!container) return;
 
+    const tipoUsuarioFiltro = document.getElementById('filtroTipoUsuarioRecompensa')?.value || '';
     const institucionFiltro = document.getElementById('filtroInstitucionRecompensa')?.value || '';
     const busqueda = document.getElementById('buscarEstudianteRecompensa')?.value?.trim().toLowerCase() || '';
 
     // Aplicar filtros
-    let estudiantesFiltrados = [...todosLosEstudiantesRecompensa];
+    let usuariosFiltrados = [...todosLosEstudiantesRecompensa];
+    
+    // Filtrar por tipo de usuario
+    if (tipoUsuarioFiltro) {
+        if (tipoUsuarioFiltro === 'superusuario') {
+            usuariosFiltrados = usuariosFiltrados.filter(e => e.rol === 'superusuario');
+        } else if (tipoUsuarioFiltro === 'admin') {
+            usuariosFiltrados = usuariosFiltrados.filter(e => e.tipoUsuario === 'admin' && e.rol !== 'superusuario');
+        } else {
+            usuariosFiltrados = usuariosFiltrados.filter(e => e.tipoUsuario === tipoUsuarioFiltro);
+        }
+    }
     
     if (institucionFiltro) {
-        estudiantesFiltrados = estudiantesFiltrados.filter(e => e.institucion === institucionFiltro);
+        usuariosFiltrados = usuariosFiltrados.filter(e => e.institucion === institucionFiltro);
     }
     
     if (busqueda) {
-        estudiantesFiltrados = estudiantesFiltrados.filter(e => 
+        usuariosFiltrados = usuariosFiltrados.filter(e => 
             (e.nombre || '').toLowerCase().includes(busqueda) ||
             (e.usuario || '').toLowerCase().includes(busqueda)
         );
     }
 
-    if (estudiantesFiltrados.length === 0) {
-        container.innerHTML = '<div class="empty-estudiantes"><i class="bi bi-person-x"></i><p>No se encontraron estudiantes</p></div>';
+    if (usuariosFiltrados.length === 0) {
+        container.innerHTML = '<div class="empty-estudiantes"><i class="bi bi-person-x"></i><p>No se encontraron usuarios</p></div>';
         return;
     }
 
-    container.innerHTML = estudiantesFiltrados.map(est => {
+    container.innerHTML = usuariosFiltrados.map(est => {
         // Leer de ambos campos para consistencia
         const monedas = est.puntos || est.puntosAcumulados || 0;
         const foto = est.fotoPerfil ? `<img src="${est.fotoPerfil}" alt="${est.nombre}">` : `<i class="bi bi-person-fill"></i>`;
+        
+        // Determinar el tipo de usuario para mostrar
+        let tipoLabel = 'Estudiante';
+        let tipoClass = 'tipo-estudiante';
+        if (est.rol === 'superusuario') {
+            tipoLabel = 'Super Admin';
+            tipoClass = 'tipo-superadmin';
+        } else if (est.tipoUsuario === 'admin') {
+            tipoLabel = 'Admin';
+            tipoClass = 'tipo-admin';
+        }
         
         return `
             <div class="estudiante-item" data-id="${est.id}">
                 <div class="estudiante-avatar-mini">${foto}</div>
                 <div class="estudiante-info-mini">
                     <span class="estudiante-nombre-mini">${est.nombre || 'Sin nombre'}</span>
-                    <span class="estudiante-institucion-mini">${est.institucion || 'Sin institución'}</span>
+                    <span class="estudiante-institucion-mini">
+                        <span class="tipo-usuario-badge ${tipoClass}">${tipoLabel}</span>
+                        ${est.institucion || ''}
+                    </span>
                 </div>
                 <div class="estudiante-monedas-actual">
                     <i class="bi bi-coin"></i>
@@ -1633,23 +1665,7 @@ window.ajustarMonedas = ajustarMonedas;
 window.otorgarMonedasRapido = otorgarMonedasRapido;
 window.quitarMonedasRapido = quitarMonedasRapido;
 
-// Inicializar eventos de la pestaña de recompensas
-function initRecompensasEvents() {
-    const filtroInstitucion = document.getElementById('filtroInstitucionRecompensa');
-    const buscarInput = document.getElementById('buscarEstudianteRecompensa');
-
-    if (filtroInstitucion) {
-        filtroInstitucion.removeEventListener('change', renderizarListaEstudiantes);
-        filtroInstitucion.addEventListener('change', renderizarListaEstudiantes);
-    }
-
-    if (buscarInput) {
-        buscarInput.removeEventListener('input', renderizarListaEstudiantes);
-        buscarInput.addEventListener('input', renderizarListaEstudiantes);
-    }
-}
-
-// Cargar historial de recompensas recientes
+// Cargar historial de recompensas recientes (todos los usuarios)
 async function loadRecompensasHistorial() {
     const container = document.getElementById('recompensasHistorialList');
     if (!container) return;
@@ -1659,22 +1675,29 @@ async function loadRecompensasHistorial() {
     try {
         const db = getDB();
         
-        // Obtener estudiantes con historial de recompensas
-        const estudiantesSnapshot = await db.collection('usuarios')
-            .where('tipoUsuario', '==', 'estudiante')
-            .get();
+        // Obtener TODOS los usuarios con historial de recompensas
+        const usuariosSnapshot = await db.collection('usuarios').get();
 
         let todasLasRecompensas = [];
 
-        estudiantesSnapshot.forEach(doc => {
+        usuariosSnapshot.forEach(doc => {
             const data = doc.data();
             const historial = data.historialRecompensas || [];
+            
+            // Determinar tipo de usuario
+            let tipoUsuario = 'Estudiante';
+            if (data.rol === 'superusuario') {
+                tipoUsuario = 'Super Admin';
+            } else if (data.tipoUsuario === 'admin') {
+                tipoUsuario = 'Admin';
+            }
             
             historial.forEach(item => {
                 todasLasRecompensas.push({
                     estudianteId: doc.id,
-                    estudianteNombre: data.nombre || 'Estudiante',
+                    estudianteNombre: data.nombre || 'Usuario',
                     estudianteFoto: data.fotoPerfil || null,
+                    tipoUsuario: tipoUsuario,
                     puntos: item.puntos || 0,
                     descripcion: item.descripcion || 'Sin descripción',
                     fecha: item.fecha?.toDate ? item.fecha.toDate() : (item.fecha ? new Date(item.fecha) : new Date()),
@@ -1737,8 +1760,14 @@ async function loadRecompensasHistorial() {
 
 // Inicializar eventos de la pestaña de recompensas
 function initRecompensasEvents() {
+    const filtroTipoUsuario = document.getElementById('filtroTipoUsuarioRecompensa');
     const filtroInstitucion = document.getElementById('filtroInstitucionRecompensa');
     const buscarInput = document.getElementById('buscarEstudianteRecompensa');
+
+    if (filtroTipoUsuario) {
+        filtroTipoUsuario.removeEventListener('change', renderizarListaEstudiantes);
+        filtroTipoUsuario.addEventListener('change', renderizarListaEstudiantes);
+    }
 
     if (filtroInstitucion) {
         filtroInstitucion.removeEventListener('change', renderizarListaEstudiantes);

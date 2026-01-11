@@ -4405,3 +4405,29 @@ body {
 .confirmar-alert i {
     font-size: 1rem;
 }
+
+
+/* Badges de tipo de usuario */
+.tipo-usuario-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.tipo-usuario-badge.tipo-estudiante {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.tipo-usuario-badge.tipo-admin {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.tipo-usuario-badge.tipo-superadmin {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}

@@ -281,13 +281,22 @@
         <!-- Tab: Otorgar Monedas a Estudiantes -->
         <div class="tab-content" id="recompensasTab">
             <div class="section-header">
-                <h2><i class="bi bi-coin"></i> Otorgar Monedas a Estudiantes</h2>
+                <h2><i class="bi bi-coin"></i> Otorgar Monedas</h2>
             </div>
 
             <div class="recompensas-main-container">
-                <!-- Panel de búsqueda y lista de estudiantes -->
+                <!-- Panel de búsqueda y lista de usuarios -->
                 <div class="estudiantes-panel">
                     <div class="filtros-estudiantes">
+                        <div class="filtro-grupo">
+                            <label><i class="bi bi-person-badge"></i> Tipo de Usuario</label>
+                            <select id="filtroTipoUsuarioRecompensa">
+                                <option value="">Todos los usuarios</option>
+                                <option value="estudiante">Estudiantes</option>
+                                <option value="admin">Administradores</option>
+                                <option value="superusuario">Super Administradores</option>
+                            </select>
+                        </div>
                         <div class="filtro-grupo">
                             <label><i class="bi bi-building"></i> Institución</label>
                             <select id="filtroInstitucionRecompensa">
@@ -296,15 +305,15 @@
                         </div>
                         <div class="filtro-grupo buscador-grupo">
                             <label><i class="bi bi-search"></i> Buscar</label>
-                            <input type="text" id="buscarEstudianteRecompensa" placeholder="Nombre del estudiante...">
+                            <input type="text" id="buscarEstudianteRecompensa" placeholder="Nombre del usuario...">
                         </div>
                     </div>
                     
                     <div class="estudiantes-lista" id="estudiantesListaRecompensa">
-                        <!-- Lista de estudiantes se genera dinámicamente -->
+                        <!-- Lista de usuarios se genera dinámicamente -->
                         <div class="loading-estudiantes">
                             <i class="bi bi-arrow-clockwise spin"></i>
-                            <p>Cargando estudiantes...</p>
+                            <p>Cargando usuarios...</p>
                         </div>
                     </div>
                 </div>

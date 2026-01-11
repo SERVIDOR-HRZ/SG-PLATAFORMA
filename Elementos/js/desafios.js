@@ -92,11 +92,11 @@ async function initDesafios() {
         return;
     }
     currentUser = JSON.parse(userStr);
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     currentMateria = urlParams.get('materia') || 'matematicas';
     currentAulaId = urlParams.get('aula') || '';
-    
+
     // Aplicar colores de la materia
     const colores = coloresMaterias[currentMateria] || coloresMaterias.matematicas;
     document.documentElement.style.setProperty('--materia-color', colores.main);
@@ -104,25 +104,25 @@ async function initDesafios() {
     document.documentElement.style.setProperty('--bg-dark', colores.bg);
     document.documentElement.style.setProperty('--bg-light', colores.bgLight);
     document.body.style.background = `linear-gradient(180deg, ${colores.bg} 0%, ${colores.bgLight} 50%, ${colores.bg} 100%)`;
-    
+
     const nombreMateria = currentMateria.charAt(0).toUpperCase() + currentMateria.slice(1);
     document.getElementById('materiaTitle').textContent = nombreMateria;
-    
+
     // Esperar Firebase
     await esperarFirebase();
-    
+
     // Cargar datos del usuario
     await loadUserGameData();
-    
+
     // Cargar niveles desde Firebase
     await loadNiveles();
-    
+
     // Actualizar UI
     updateHeaderStats();
-    
+
     // Generar camino
     generatePath();
-    
+
     setupEventListeners();
 }
 
@@ -143,14 +143,14 @@ async function loadUserGameData() {
     try {
         const db = window.firebaseDB;
         const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
-        
+
         if (userDoc.exists) {
             const data = userDoc.data();
             userGameData.monedas = data.puntos || data.puntosAcumulados || 0;
             userGameData.pistas = data.pistas || 0;
             userGameData.energia = data.energia !== undefined ? data.energia : 10;
             userGameData.energiaMax = data.energiaMax || 10;
-            
+
             // Cargar XP y nivel POR MATERIA
             const progresoKey = `progreso_${currentMateria}`;
             if (data[progresoKey]) {
@@ -162,10 +162,10 @@ async function loadUserGameData() {
                 userGameData.nivelesCompletados = {};
                 nivelDesbloqueado = 1;
             }
-            
+
             // Calcular nivel basado en XP de esta materia (sistema progresivo)
             userGameData.nivel = calculateLevelFromXP(userGameData.xp);
-            
+
             // Debug: mostrar datos cargados
             console.log(`Datos del usuario para ${currentMateria}:`, {
                 monedas: userGameData.monedas,
@@ -174,10 +174,10 @@ async function loadUserGameData() {
                 energia: userGameData.energia,
                 nivelDesbloqueado: nivelDesbloqueado
             });
-            
+
             // Guardar última regeneración para el timer
             ultimaRegeneracionGlobal = data.ultimaRegeneracionEnergia?.toDate() || new Date();
-            
+
             // Verificar energía infinita
             userGameData.energiaInfinita = false;
             userGameData.energiaInfinitaExpira = null;
@@ -188,10 +188,10 @@ async function loadUserGameData() {
                     userGameData.energiaInfinitaExpira = expira;
                 }
             }
-            
+
             // Verificar y regenerar energía si es necesario
             await checkAndRegenerateEnergy(data);
-            
+
             // Iniciar timer de energía
             startEnergyTimer();
         }
@@ -205,23 +205,23 @@ async function checkAndRegenerateEnergy(userData) {
     try {
         // Si tiene energía infinita activa, no regenerar
         if (userGameData.energiaInfinita) return;
-        
+
         const energiaActual = userGameData.energia;
         const energiaMax = userGameData.energiaMax;
-        
+
         // Si ya tiene energía máxima, no hacer nada
         if (energiaActual >= energiaMax) return;
-        
+
         const ultimaRegeneracion = userData.ultimaRegeneracionEnergia?.toDate() || new Date(0);
         const ahora = new Date();
         const minutosTranscurridos = Math.floor((ahora - ultimaRegeneracion) / (1000 * 60));
         const energiasARegenerar = Math.floor(minutosTranscurridos / 10);
-        
+
         if (energiasARegenerar > 0) {
             const nuevaEnergia = Math.min(energiaActual + energiasARegenerar, energiaMax);
             userGameData.energia = nuevaEnergia;
             ultimaRegeneracionGlobal = ahora;
-            
+
             const db = window.firebaseDB;
             await db.collection('usuarios').doc(currentUser.id).update({
                 energia: nuevaEnergia,
@@ -239,10 +239,10 @@ function startEnergyTimer() {
     if (energyTimerInterval) {
         clearInterval(energyTimerInterval);
     }
-    
+
     // Actualizar inmediatamente
     updateEnergyTimer();
-    
+
     // Actualizar cada segundo
     energyTimerInterval = setInterval(updateEnergyTimer, 1000);
 }
@@ -250,14 +250,14 @@ function startEnergyTimer() {
 function updateEnergyTimer() {
     const timerElement = document.getElementById('energyTimer');
     const timerText = document.getElementById('timerText');
-    
+
     if (!timerElement || !timerText) return;
-    
+
     // Si tiene energía infinita, mostrar tiempo restante
     if (userGameData.energiaInfinita && userGameData.energiaInfinitaExpira) {
         const ahora = new Date();
         const tiempoRestante = userGameData.energiaInfinitaExpira - ahora;
-        
+
         // Si expiró, desactivar energía infinita
         if (tiempoRestante <= 0) {
             userGameData.energiaInfinita = false;
@@ -265,15 +265,15 @@ function updateEnergyTimer() {
             updateHeaderStats();
             return;
         }
-        
+
         // Mostrar timer con tiempo restante de energía infinita
         timerElement.style.display = 'flex';
         timerElement.classList.add('infinite-timer');
-        
+
         const horas = Math.floor(tiempoRestante / (1000 * 60 * 60));
         const minutos = Math.floor((tiempoRestante % (1000 * 60 * 60)) / (1000 * 60));
         const segundos = Math.floor((tiempoRestante % (1000 * 60)) / 1000);
-        
+
         if (horas > 0) {
             timerText.textContent = `${horas}h ${minutos.toString().padStart(2, '0')}m`;
         } else {
@@ -281,43 +281,43 @@ function updateEnergyTimer() {
         }
         return;
     }
-    
+
     // Quitar clase de infinito si no tiene
     timerElement.classList.remove('infinite-timer');
-    
+
     // Si tiene energía máxima, ocultar timer
     if (userGameData.energia >= userGameData.energiaMax) {
         timerElement.style.display = 'none';
         return;
     }
-    
+
     // Calcular tiempo restante para la próxima regeneración
     const ahora = new Date();
     const ultimaRegen = ultimaRegeneracionGlobal || ahora;
     const tiempoTranscurrido = ahora - ultimaRegen;
     const tiempoParaProxima = (10 * 60 * 1000) - (tiempoTranscurrido % (10 * 60 * 1000));
-    
+
     // Si ya pasó el tiempo, regenerar
     if (tiempoParaProxima <= 0 || tiempoTranscurrido >= 10 * 60 * 1000) {
         regenerateOneEnergy();
         return;
     }
-    
+
     // Mostrar timer
     timerElement.style.display = 'flex';
-    
+
     const minutosRestantes = Math.floor(tiempoParaProxima / (1000 * 60));
     const segundosRestantes = Math.floor((tiempoParaProxima % (1000 * 60)) / 1000);
-    
+
     timerText.textContent = `${minutosRestantes.toString().padStart(2, '0')}:${segundosRestantes.toString().padStart(2, '0')}`;
 }
 
 async function regenerateOneEnergy() {
     if (userGameData.energia >= userGameData.energiaMax) return;
-    
+
     userGameData.energia++;
     ultimaRegeneracionGlobal = new Date();
-    
+
     try {
         const db = window.firebaseDB;
         await db.collection('usuarios').doc(currentUser.id).update({
@@ -327,17 +327,17 @@ async function regenerateOneEnergy() {
     } catch (error) {
         console.error('Error actualizando energía:', error);
     }
-    
+
     updateHeaderStats();
 }
 
 async function loadNiveles() {
     try {
         const db = window.firebaseDB;
-        
+
         // Obtener TODOS los niveles y filtrar en cliente (evita índices)
         const nivelesSnapshot = await db.collection('desafios_niveles').get();
-        
+
         nivelesData = [];
         nivelesSnapshot.forEach(doc => {
             const data = doc.data();
@@ -349,10 +349,10 @@ async function loadNiveles() {
                 });
             }
         });
-        
+
         // Ordenar en el cliente por número
         nivelesData.sort((a, b) => (a.numero || 0) - (b.numero || 0));
-        
+
         console.log(`Cargados ${nivelesData.length} niveles para ${currentMateria}`);
     } catch (error) {
         console.error('Error cargando niveles:', error);
@@ -366,13 +366,13 @@ function updateHeaderStats() {
     document.getElementById('energiaActual').textContent = energiaDisplay;
     document.getElementById('monedasActual').textContent = userGameData.monedas;
     document.getElementById('nivelActual').textContent = userGameData.nivel;
-    
+
     // Mostrar pistas
     const pistasElement = document.getElementById('pistasActual');
     if (pistasElement) {
         pistasElement.textContent = userGameData.pistas;
     }
-    
+
     // Actualizar badge de pistas
     const hintsBadge = document.getElementById('hintsBadge');
     if (hintsBadge) {
@@ -384,7 +384,7 @@ function updateHeaderStats() {
             hintsBadge.classList.add('has-hints');
         }
     }
-    
+
     // Actualizar badge de energía con clase especial si es infinita
     const energyBadge = document.getElementById('energyBadge');
     if (energyBadge) {
@@ -394,7 +394,7 @@ function updateHeaderStats() {
             energyBadge.classList.remove('infinite');
         }
     }
-    
+
     // Actualizar visibilidad del timer - mostrar si tiene energía infinita o si necesita regenerar
     const timerElement = document.getElementById('energyTimer');
     if (timerElement) {
@@ -412,7 +412,7 @@ function updateHeaderStats() {
 function generatePath() {
     const container = document.getElementById('pathContainer');
     container.innerHTML = '';
-    
+
     // Si no hay niveles creados, mostrar mensaje
     if (nivelesData.length === 0) {
         container.innerHTML = `
@@ -424,45 +424,45 @@ function generatePath() {
         `;
         return;
     }
-    
+
     const nodesContainer = document.createElement('div');
     nodesContainer.className = 'nodes-container';
     nodesContainer.id = 'nodesContainer';
-    
+
     let nodeIndex = 0;
-    
+
     // Generar nodos basados en los niveles de Firebase
     nivelesData.forEach((nivel, index) => {
         const patternIndex = nodeIndex % pathPattern.length;
         const offsetPercent = pathPattern[patternIndex];
-        
+
         const row = document.createElement('div');
         row.className = 'level-row';
         row.dataset.offset = offsetPercent;
-        
+
         const node = createLevelNode(nivel, index + 1);
         row.appendChild(node);
         nodesContainer.appendChild(row);
         nodeIndex++;
-        
+
         // Cofre cada 10 niveles
         if ((index + 1) % 10 === 0) {
             const chestPatternIndex = nodeIndex % pathPattern.length;
             const chestOffset = pathPattern[chestPatternIndex];
-            
+
             const chestRow = document.createElement('div');
             chestRow.className = 'level-row';
             chestRow.dataset.offset = chestOffset;
-            
+
             const chestNode = createChestNode(index + 1);
             chestRow.appendChild(chestNode);
             nodesContainer.appendChild(chestRow);
             nodeIndex++;
         }
     });
-    
+
     container.appendChild(nodesContainer);
-    
+
     setTimeout(drawLines, 100);
 }
 
@@ -471,17 +471,17 @@ function createLevelNode(nivelData, numero) {
     node.className = 'level-node';
     node.dataset.nivel = numero;
     node.dataset.nivelId = nivelData.id;
-    
+
     const completedData = userGameData.nivelesCompletados[nivelData.id];
     const isCompleted = !!completedData;
     const isAvailable = numero <= nivelDesbloqueado;
-    
+
     // Obtener estrellas (puede ser un número o true para compatibilidad)
     let stars = 0;
     if (completedData) {
         stars = typeof completedData === 'object' ? (completedData.stars || 1) : 1;
     }
-    
+
     if (isCompleted) {
         node.classList.add('completed');
         node.dataset.stars = stars;
@@ -490,7 +490,7 @@ function createLevelNode(nivelData, numero) {
     } else {
         node.classList.add('locked');
     }
-    
+
     // Generar HTML de estrellas
     const starsHTML = isCompleted ? `
         <div class="node-stars" data-stars="${stars}">
@@ -499,18 +499,18 @@ function createLevelNode(nivelData, numero) {
             <i class="bi bi-star-fill ${stars >= 3 ? 'active' : ''}"></i>
         </div>
     ` : '';
-    
+
     node.innerHTML = `
         <span class="node-number">${numero}</span>
         <span class="node-check"><i class="bi bi-check-lg"></i></span>
         <span class="node-icon"><i class="bi bi-lock-fill"></i></span>
         ${starsHTML}
     `;
-    
+
     if (isAvailable) {
         node.addEventListener('click', () => openDesafioModal(nivelData, numero));
     }
-    
+
     return node;
 }
 
@@ -518,11 +518,11 @@ function createChestNode(afterLevel) {
     const node = document.createElement('div');
     node.className = 'level-node chest';
     node.dataset.chestAfter = afterLevel;
-    
+
     const chestKey = `chest_${currentMateria}_${afterLevel}`;
     const isOpened = userGameData.nivelesCompletados[chestKey];
     const isAvailable = nivelDesbloqueado > afterLevel && !isOpened;
-    
+
     if (isOpened) {
         node.classList.add('completed');
     } else if (isAvailable) {
@@ -530,23 +530,23 @@ function createChestNode(afterLevel) {
     } else {
         node.classList.add('locked');
     }
-    
+
     node.innerHTML = `
         <i class="bi bi-gift-fill chest-icon"></i>
         <span class="chest-coins">+100 <i class="bi bi-coin"></i></span>
     `;
-    
+
     if (isAvailable) {
         node.addEventListener('click', () => openChestModal(afterLevel));
     }
-    
+
     return node;
 }
 
 
 async function openChestModal(nivel) {
     currentNivel = nivel;
-    
+
     const modal = document.getElementById('desafioModal');
     document.getElementById('desafioTitulo').textContent = `¡Cofre de Recompensa!`;
     modal.querySelector('.desafio-icon').innerHTML = '<i class="bi bi-box2-heart-fill"></i>';
@@ -565,35 +565,35 @@ async function openDesafioModal(nivelData, numero) {
     currentNivel = numero;
     currentNivelData = nivelData; // Guardar datos del nivel para usar en recompensas
     preguntasActuales = nivelData.preguntas || [];
-    
+
     const modal = document.getElementById('desafioModal');
     document.getElementById('desafioTitulo').textContent = `Nivel ${numero}`;
-    
+
     // Restaurar estilo del ícono
     const colores = coloresMaterias[currentMateria] || coloresMaterias.matematicas;
     modal.querySelector('.desafio-icon').innerHTML = '<i class="bi bi-trophy-fill"></i>';
     modal.querySelector('.desafio-icon').style.background = `linear-gradient(180deg, ${colores.main} 0%, ${colores.dark} 100%)`;
-    
+
     modal.querySelector('.desafio-descripcion').textContent = nivelData.descripcion || 'Responde correctamente las preguntas para ganar monedas y experiencia.';
-    
+
     const monedasRecompensa = nivelData.recompensaMonedas || 10;
     const xpRecompensa = nivelData.recompensaXP || 20;
-    
+
     modal.querySelector('.desafio-recompensas').innerHTML = `
         <div class="recompensa"><i class="bi bi-coin"></i> +${monedasRecompensa} Monedas</div>
         <div class="recompensa"><i class="bi bi-star-fill"></i> +${xpRecompensa} XP</div>
     `;
-    
+
     modal.querySelector('.desafio-costo').style.display = 'flex';
     modal.querySelector('.desafio-costo').innerHTML = `
         <i class="bi bi-lightning-fill"></i>
         <span>Costo: 1 Energía</span>
     `;
-    
+
     document.getElementById('startDesafio').innerHTML = '<i class="bi bi-play-fill"></i> Comenzar';
     document.getElementById('startDesafio').dataset.isChest = 'false';
     document.getElementById('startDesafio').dataset.nivelId = nivelData.id;
-    
+
     modal.classList.add('active');
 }
 
@@ -604,54 +604,54 @@ function closeDesafioModal() {
 async function startDesafio() {
     const startBtn = document.getElementById('startDesafio');
     const isChest = startBtn.dataset.isChest === 'true';
-    
+
     if (isChest) {
         await openChest();
         return;
     }
-    
+
     // Verificar energía (si no tiene energía infinita)
     if (!userGameData.energiaInfinita && userGameData.energia < 1) {
         showAlert('Sin Energía', 'No tienes suficiente energía. Compra más en la tienda o espera 10 minutos para regenerar 1 energía.');
         return;
     }
-    
+
     // Verificar que hay preguntas
     if (!preguntasActuales || preguntasActuales.length === 0) {
         showAlert('Error', 'Este nivel no tiene preguntas configuradas.');
         return;
     }
-    
+
     // Consumir energía (solo si no tiene energía infinita)
     if (!userGameData.energiaInfinita) {
         userGameData.energia--;
         await updateUserEnergy();
     }
     updateHeaderStats();
-    
+
     closeDesafioModal();
-    
+
     currentPreguntaIndex = 0;
     respuestasCorrectas = 0;
-    
+
     showPregunta();
 }
 
 async function openChest() {
     const chestKey = `chest_${currentMateria}_${currentNivel}`;
-    
+
     // Dar recompensa
     userGameData.monedas += 100;
     userGameData.nivelesCompletados[chestKey] = true;
-    
+
     // Guardar en Firebase
     await saveUserProgress();
-    
+
     closeDesafioModal();
-    
+
     // Mostrar resultado
     showChestResult();
-    
+
     // Regenerar camino
     generatePath();
     updateHeaderStats();
@@ -661,34 +661,34 @@ function showChestResult() {
     const resultadoIcon = document.getElementById('resultadoIcon');
     resultadoIcon.className = 'resultado-icon success';
     resultadoIcon.innerHTML = '<i class="bi bi-gift-fill"></i>';
-    
+
     document.getElementById('resultadoTitulo').textContent = '¡Cofre Abierto!';
     document.getElementById('resultadoMensaje').textContent = 'Has obtenido tu recompensa';
-    
+
     document.getElementById('resultadoStats').innerHTML = `
         <div class="resultado-stat">
             <i class="bi bi-coin"></i>
             <span>+100 Monedas</span>
         </div>
     `;
-    
+
     document.getElementById('resultadoModal').classList.add('active');
 }
 
 function showPregunta() {
     const pregunta = preguntasActuales[currentPreguntaIndex];
-    
+
     // Calcular progreso: (pregunta actual) / total * 100
     // Para que en 5/5 muestre 100%, usamos (índice + 1) / total
     const progreso = ((currentPreguntaIndex + 1) / preguntasActuales.length) * 100;
     document.getElementById('progresoFill').style.width = `${progreso}%`;
     document.getElementById('preguntaNumero').textContent = `${currentPreguntaIndex + 1}/${preguntasActuales.length}`;
-    
+
     document.getElementById('preguntaTexto').textContent = pregunta.pregunta;
-    
+
     const opcionesContainer = document.getElementById('opcionesContainer');
     opcionesContainer.innerHTML = '';
-    
+
     // Agregar botón de pista si hay pista disponible
     if (pregunta.pista) {
         const pistaBtn = document.createElement('button');
@@ -725,14 +725,14 @@ function showPregunta() {
         }
         opcionesContainer.appendChild(pistaBtn);
     }
-    
+
     // Contenedor para la pista mostrada
     const pistaContainer = document.createElement('div');
     pistaContainer.className = 'pista-mostrada';
     pistaContainer.id = 'pistaMostrada';
     pistaContainer.style.display = 'none';
     opcionesContainer.appendChild(pistaContainer);
-    
+
     const letras = ['A', 'B', 'C', 'D'];
     pregunta.opciones.forEach((opcion, index) => {
         const btn = document.createElement('button');
@@ -745,22 +745,22 @@ function showPregunta() {
         btn.addEventListener('click', () => selectOption(btn, index));
         opcionesContainer.appendChild(btn);
     });
-    
+
     selectedOption = null;
     const verificarBtn = document.getElementById('verificarBtn');
     verificarBtn.disabled = true;
     verificarBtn.textContent = 'VERIFICAR';
     verificarBtn.classList.remove('next');
-    
+
     document.getElementById('preguntaModal').classList.add('active');
 }
 
 async function usarPista(pista) {
     if (userGameData.pistas <= 0) return;
-    
+
     userGameData.pistas--;
     await updateUserPistas();
-    
+
     // Mostrar la pista
     const pistaContainer = document.getElementById('pistaMostrada');
     pistaContainer.innerHTML = `
@@ -768,7 +768,7 @@ async function usarPista(pista) {
         <span>${pista}</span>
     `;
     pistaContainer.style.display = 'flex';
-    
+
     // Ocultar botón de pista
     const pistaBtn = document.querySelector('.pista-btn');
     if (pistaBtn) pistaBtn.style.display = 'none';
@@ -776,7 +776,7 @@ async function usarPista(pista) {
 
 function selectOption(btn, index) {
     if (document.querySelector('.opcion-btn.correct') || document.querySelector('.opcion-btn.incorrect')) return;
-    
+
     document.querySelectorAll('.opcion-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     selectedOption = index;
@@ -785,15 +785,15 @@ function selectOption(btn, index) {
 
 function verificarRespuesta() {
     const verificarBtn = document.getElementById('verificarBtn');
-    
+
     if (verificarBtn.classList.contains('next')) {
         nextPregunta();
         return;
     }
-    
+
     const pregunta = preguntasActuales[currentPreguntaIndex];
     const opciones = document.querySelectorAll('.opcion-btn');
-    
+
     opciones.forEach((btn, index) => {
         if (index === pregunta.correcta) {
             btn.classList.add('correct');
@@ -801,11 +801,11 @@ function verificarRespuesta() {
             btn.classList.add('incorrect');
         }
     });
-    
+
     if (selectedOption === pregunta.correcta) {
         respuestasCorrectas++;
     }
-    
+
     verificarBtn.textContent = currentPreguntaIndex < preguntasActuales.length - 1 ? 'CONTINUAR' : 'VER RESULTADO';
     verificarBtn.classList.add('next');
     verificarBtn.disabled = false;
@@ -813,7 +813,7 @@ function verificarRespuesta() {
 
 function nextPregunta() {
     currentPreguntaIndex++;
-    
+
     if (currentPreguntaIndex < preguntasActuales.length) {
         showPregunta();
     } else {
@@ -829,17 +829,17 @@ function closePreguntaModal() {
 async function showResultado() {
     const porcentaje = (respuestasCorrectas / preguntasActuales.length) * 100;
     const nivelId = document.getElementById('startDesafio').dataset.nivelId;
-    
+
     const resultadoIcon = document.getElementById('resultadoIcon');
     const resultadoTitulo = document.getElementById('resultadoTitulo');
     const resultadoMensaje = document.getElementById('resultadoMensaje');
-    
+
     resultadoIcon.className = 'resultado-icon';
-    
+
     // Obtener recompensas configuradas del nivel
     const monedasBase = currentNivelData?.recompensaMonedas || 10;
     const xpBase = currentNivelData?.recompensaXP || 20;
-    
+
     // Calcular estrellas basado en respuestas correctas
     // 5/5 = 3 estrellas, 4/5 = 2 estrellas, 3/5 = 1 estrella, menos = 0 estrellas
     let stars = 0;
@@ -850,35 +850,35 @@ async function showResultado() {
     } else if (porcentaje >= 60) {
         stars = 1;
     }
-    
+
     // Calcular recompensas: proporcional a respuestas correctas
     const monedasGanadas = Math.floor(monedasBase * (respuestasCorrectas / preguntasActuales.length));
     const xpGanado = Math.floor(xpBase * (respuestasCorrectas / preguntasActuales.length));
-    
+
     // Actualizar datos del usuario
     userGameData.monedas += monedasGanadas;
     userGameData.xp += xpGanado;
-    
+
     // Si aprobó (>=60%), marcar nivel como completado y desbloquear siguiente
     if (porcentaje >= 60) {
         // Guardar con estrellas - solo actualizar si obtiene más estrellas que antes
         const previousData = userGameData.nivelesCompletados[nivelId];
         const previousStars = previousData && typeof previousData === 'object' ? (previousData.stars || 0) : (previousData ? 1 : 0);
-        
+
         if (stars > previousStars) {
-            userGameData.nivelesCompletados[nivelId] = { 
-                completed: true, 
+            userGameData.nivelesCompletados[nivelId] = {
+                completed: true,
                 stars: stars,
                 bestScore: respuestasCorrectas,
                 completedAt: new Date().toISOString()
             };
         }
-        
+
         // Desbloquear siguiente nivel
         if (currentNivel >= nivelDesbloqueado) {
             nivelDesbloqueado = currentNivel + 1;
         }
-        
+
         resultadoIcon.classList.add('success');
         resultadoIcon.innerHTML = '<i class="bi bi-trophy-fill"></i>';
         resultadoTitulo.textContent = stars === 3 ? '¡Perfecto!' : stars === 2 ? '¡Excelente!' : '¡Bien hecho!';
@@ -894,7 +894,7 @@ async function showResultado() {
         resultadoTitulo.textContent = '¡No te rindas!';
         resultadoMensaje.textContent = 'Inténtalo de nuevo';
     }
-    
+
     // Generar HTML de estrellas para el resultado
     const starsHTML = `
         <div class="resultado-stars">
@@ -903,7 +903,7 @@ async function showResultado() {
             <i class="bi bi-star-fill ${stars >= 3 ? 'active' : ''}"></i>
         </div>
     `;
-    
+
     document.getElementById('resultadoStats').innerHTML = `
         ${starsHTML}
         <div class="resultado-stat">
@@ -919,14 +919,14 @@ async function showResultado() {
             <span>+<span id="xpGanado">${xpGanado}</span> XP</span>
         </div>
     `;
-    
+
     // Guardar progreso
     await saveUserProgress();
-    
+
     // Actualizar UI
     updateHeaderStats();
     generatePath();
-    
+
     document.getElementById('resultadoModal').classList.add('active');
 }
 
@@ -941,11 +941,11 @@ async function saveUserProgress() {
     try {
         const db = window.firebaseDB;
         const progresoKey = `progreso_${currentMateria}`;
-        
+
         // Calcular nivel basado en XP de esta materia (sistema progresivo)
         const nuevoNivel = calculateLevelFromXP(userGameData.xp);
         userGameData.nivel = nuevoNivel;
-        
+
         // Guardar XP y nivel POR MATERIA (dentro del progreso de la materia)
         // Las monedas son globales (compartidas entre materias)
         await db.collection('usuarios').doc(currentUser.id).update({
@@ -958,7 +958,7 @@ async function saveUserProgress() {
                 nivelDesbloqueado: nivelDesbloqueado
             }
         });
-        
+
         console.log(`Progreso guardado para ${currentMateria}:`, {
             xp: userGameData.xp,
             nivel: nuevoNivel,
@@ -972,7 +972,7 @@ async function saveUserProgress() {
 async function updateUserEnergy() {
     try {
         const db = window.firebaseDB;
-        
+
         // Solo actualizar la energía, NO el timestamp de regeneración
         // El timestamp solo se actualiza cuando se REGENERA energía, no cuando se gasta
         await db.collection('usuarios').doc(currentUser.id).update({
@@ -999,43 +999,43 @@ async function updateUserPistas() {
 function drawLines() {
     const oldSvg = document.querySelector('.path-svg');
     if (oldSvg) oldSvg.remove();
-    
+
     const container = document.getElementById('pathContainer');
     const nodesContainer = document.getElementById('nodesContainer');
-    
+
     if (!nodesContainer) return;
-    
+
     const rows = nodesContainer.querySelectorAll('.level-row');
-    
+
     if (rows.length < 2) return;
-    
+
     const containerRect = container.getBoundingClientRect();
-    
+
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.classList.add('path-svg');
     svg.setAttribute('width', '100%');
     svg.setAttribute('height', nodesContainer.offsetHeight);
-    
+
     for (let i = 0; i < rows.length - 1; i++) {
         const currentNode = rows[i].querySelector('.level-node');
         const nextNode = rows[i + 1].querySelector('.level-node');
-        
+
         if (!currentNode || !nextNode) continue;
-        
+
         const currentRect = currentNode.getBoundingClientRect();
         const nextRect = nextNode.getBoundingClientRect();
-        
+
         const x1 = currentRect.left + currentRect.width / 2 - containerRect.left;
         const y1 = currentRect.top + currentRect.height - containerRect.top;
         const x2 = nextRect.left + nextRect.width / 2 - containerRect.left;
         const y2 = nextRect.top - containerRect.top;
-        
+
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         const midY = (y1 + y2) / 2;
         const d = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`;
         path.setAttribute('d', d);
         path.classList.add('path-line');
-        
+
         const nivel = parseInt(currentNode.dataset.nivel) || i + 1;
         if (nivel < nivelDesbloqueado) {
             path.classList.add('completed');
@@ -1044,10 +1044,10 @@ function drawLines() {
         } else {
             path.classList.add('locked');
         }
-        
+
         svg.appendChild(path);
     }
-    
+
     container.insertBefore(svg, nodesContainer);
 }
 
@@ -1065,27 +1065,27 @@ function setupEventListeners() {
             window.location.href = 'Clases.html';
         }
     });
-    
+
     document.getElementById('closeDesafioModal').addEventListener('click', closeDesafioModal);
     document.getElementById('cancelDesafio').addEventListener('click', closeDesafioModal);
     document.getElementById('startDesafio').addEventListener('click', startDesafio);
-    
+
     document.getElementById('closePreguntaModal').addEventListener('click', closePreguntaModal);
     document.getElementById('verificarBtn').addEventListener('click', verificarRespuesta);
-    
+
     document.getElementById('continuarBtn').addEventListener('click', closeResultadoModal);
-    
+
     // Modal de alerta
     document.getElementById('alertBtn').addEventListener('click', closeAlertModal);
-    
+
     // Botón de reinicio de progreso
     document.getElementById('resetProgressBtn').addEventListener('click', openResetModal);
     document.getElementById('cancelResetBtn').addEventListener('click', closeResetModal);
     document.getElementById('confirmResetBtn').addEventListener('click', confirmResetProgress);
-    
+
     // Validar input de confirmación
     document.getElementById('resetConfirmInput').addEventListener('input', validateResetInput);
-    
+
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) modal.classList.remove('active');
@@ -1098,10 +1098,10 @@ function setupEventListeners() {
 function showAlert(title, message, type = 'warning') {
     const modal = document.getElementById('alertModal');
     const icon = document.getElementById('alertIcon');
-    
+
     document.getElementById('alertTitulo').textContent = title;
     document.getElementById('alertMensaje').textContent = message;
-    
+
     // Cambiar icono según tipo
     icon.className = 'alert-icon';
     if (type === 'error') {
@@ -1113,7 +1113,7 @@ function showAlert(title, message, type = 'warning') {
     } else {
         icon.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i>';
     }
-    
+
     modal.classList.add('active');
 }
 
@@ -1136,12 +1136,12 @@ function openResetModal() {
     const modal = document.getElementById('resetModal');
     const input = document.getElementById('resetConfirmInput');
     const confirmBtn = document.getElementById('confirmResetBtn');
-    
+
     // Limpiar input y deshabilitar botón
     input.value = '';
     input.classList.remove('valid');
     confirmBtn.disabled = true;
-    
+
     modal.classList.add('active');
 }
 
@@ -1153,7 +1153,7 @@ function validateResetInput() {
     const input = document.getElementById('resetConfirmInput');
     const confirmBtn = document.getElementById('confirmResetBtn');
     const value = input.value.trim().toUpperCase();
-    
+
     if (value === 'REINICIAR') {
         input.classList.add('valid');
         confirmBtn.disabled = false;
@@ -1166,11 +1166,11 @@ function validateResetInput() {
 async function confirmResetProgress() {
     const input = document.getElementById('resetConfirmInput');
     if (input.value.trim().toUpperCase() !== 'REINICIAR') return;
-    
+
     try {
         const db = window.firebaseDB;
         const progresoKey = `progreso_${currentMateria}`;
-        
+
         // Reiniciar progreso de esta materia
         await db.collection('usuarios').doc(currentUser.id).update({
             [progresoKey]: {
@@ -1180,23 +1180,23 @@ async function confirmResetProgress() {
                 nivelDesbloqueado: 1
             }
         });
-        
+
         // Actualizar datos locales
         userGameData.xp = 0;
         userGameData.nivel = 1;
         userGameData.nivelesCompletados = {};
         nivelDesbloqueado = 1;
-        
+
         // Cerrar modal
         closeResetModal();
-        
+
         // Actualizar UI
         updateHeaderStats();
         generatePath();
-        
+
         // Mostrar mensaje de éxito
         showAlert('Progreso Reiniciado', `Tu progreso en ${currentMateria} ha sido reiniciado. ¡Buena suerte empezando de nuevo!`, 'info');
-        
+
         console.log(`Progreso de ${currentMateria} reiniciado completamente`);
     } catch (error) {
         console.error('Error reiniciando progreso:', error);
