@@ -1137,14 +1137,430 @@ function loadForo() {
 }
 
 // Load notas
-function loadNotas() {
+// Variable global para almacenar datos de notas para búsqueda
+let notasTareasData = [];
+
+async function loadNotas() {
     const notasContainer = document.getElementById('notasContainer');
-    notasContainer.innerHTML = `
-        <div class="empty-state">
-            <i class="bi bi-journal-text"></i>
-            <p>Próximamente: Notas</p>
+    notasContainer.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>';
+
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+
+        // Obtener color de la materia
+        const materiaColor = window.currentMateriaColor || '#2196F3';
+
+        // Obtener todas las tareas de la materia actual
+        const tareasSnapshot = await db.collection('tareas')
+            .where('materia', '==', currentMateria)
+            .get();
+
+        if (tareasSnapshot.empty) {
+            notasContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-journal-text"></i>
+                    <p>No hay tareas asignadas en esta materia</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Ordenar tareas por fecha
+        const tareas = [];
+        tareasSnapshot.forEach(doc => {
+            tareas.push({ id: doc.id, ...doc.data() });
+        });
+        tareas.sort((a, b) => {
+            const fechaA = a.fechaEntrega ? a.fechaEntrega.seconds : 0;
+            const fechaB = b.fechaEntrega ? b.fechaEntrega.seconds : 0;
+            return fechaB - fechaA; // Más recientes primero
+        });
+
+        if (currentUser.tipoUsuario === 'estudiante') {
+            await loadNotasEstudiante(notasContainer, tareas, db, materiaColor);
+        } else if (currentUser.tipoUsuario === 'admin') {
+            await loadNotasAdmin(notasContainer, tareas, db, materiaColor);
+        }
+
+    } catch (error) {
+        console.error('Error al cargar notas:', error);
+        notasContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>Error al cargar las notas</p>
+            </div>
+        `;
+    }
+}
+
+// Cargar notas para estudiante - Vista profesional con lista
+async function loadNotasEstudiante(container, tareas, db, materiaColor) {
+    let totalPuntos = 0;
+    let puntosObtenidos = 0;
+    let tareasCalificadas = 0;
+    let tareasEntregadas = 0;
+    let tareasPendientes = 0;
+
+    // Procesar datos de tareas
+    const tareasProcessed = [];
+    
+    for (const tarea of tareas) {
+        const fechaEntrega = tarea.fechaEntrega ? new Date(tarea.fechaEntrega.seconds * 1000) : null;
+        const maxPuntos = tarea.puntos || 100;
+        totalPuntos += maxPuntos;
+
+        const entregaSnapshot = await db.collection('entregas')
+            .where('tareaId', '==', tarea.id)
+            .where('estudianteId', '==', currentUser.id)
+            .get();
+
+        let estado = '';
+        let nota = null;
+        let estadoClass = '';
+        let notaClass = '';
+        let notaTexto = '';
+        let iconEstado = '';
+
+        if (!entregaSnapshot.empty) {
+            const entrega = entregaSnapshot.docs[0].data();
+            tareasEntregadas++;
+            
+            if (entrega.calificacion !== undefined && entrega.calificacion !== null) {
+                nota = entrega.calificacion;
+                const porcentaje = (nota / maxPuntos) * 100;
+                puntosObtenidos += nota;
+                tareasCalificadas++;
+
+                estado = 'Calificada';
+                estadoClass = 'estado-calificada';
+                iconEstado = 'bi-check-circle-fill';
+                notaTexto = `${nota}/${maxPuntos}`;
+
+                if (porcentaje >= 90) {
+                    notaClass = 'nota-excelente';
+                } else if (porcentaje >= 70) {
+                    notaClass = 'nota-buena';
+                } else if (porcentaje >= 50) {
+                    notaClass = 'nota-regular';
+                } else {
+                    notaClass = 'nota-baja';
+                }
+            } else {
+                estado = 'En revisión';
+                estadoClass = 'estado-revision';
+                iconEstado = 'bi-hourglass-split';
+                notaTexto = 'Pendiente';
+                notaClass = 'nota-pendiente';
+            }
+        } else {
+            const ahora = new Date();
+            if (fechaEntrega && fechaEntrega < ahora) {
+                estado = 'No entregada';
+                estadoClass = 'estado-vencida';
+                iconEstado = 'bi-x-circle-fill';
+                notaTexto = 'Sin nota';
+                notaClass = 'nota-sin';
+            } else {
+                estado = 'Pendiente';
+                estadoClass = 'estado-pendiente';
+                iconEstado = 'bi-clock';
+                notaTexto = '-';
+                notaClass = 'nota-pendiente';
+                tareasPendientes++;
+            }
+        }
+
+        tareasProcessed.push({
+            ...tarea,
+            fechaEntrega,
+            maxPuntos,
+            estado,
+            estadoClass,
+            iconEstado,
+            nota,
+            notaTexto,
+            notaClass
+        });
+    }
+
+    // Guardar para búsqueda
+    notasTareasData = tareasProcessed;
+
+    // Calcular promedio
+    const promedio = tareasCalificadas > 0 ? (puntosObtenidos / tareasCalificadas).toFixed(1) : 0;
+    const promedioPercent = tareasCalificadas > 0 ? Math.round((puntosObtenidos / (tareasCalificadas * 100)) * 100) : 0;
+
+    let html = `
+        <!-- Resumen arriba -->
+        <div class="notas-resumen-pro" style="--materia-color: ${materiaColor}">
+            <div class="resumen-main">
+                <div class="resumen-promedio-circle" style="--progress: ${promedioPercent}%">
+                    <div class="promedio-inner">
+                        <span class="promedio-numero">${promedio}</span>
+                        <span class="promedio-label">Promedio</span>
+                    </div>
+                </div>
+                <div class="resumen-stats">
+                    <div class="stat-item">
+                        <div class="stat-icon-box" style="background: ${materiaColor}20; color: ${materiaColor}">
+                            <i class="bi bi-journal-text"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">${tareas.length}</span>
+                            <span class="stat-label">Total Tareas</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon-box" style="background: #28a74520; color: #28a745">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">${tareasCalificadas}</span>
+                            <span class="stat-label">Calificadas</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon-box" style="background: #ffc10720; color: #ffc107">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">${tareasPendientes}</span>
+                            <span class="stat-label">Pendientes</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon-box" style="background: #17a2b820; color: #17a2b8">
+                            <i class="bi bi-send-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">${tareasEntregadas}</span>
+                            <span class="stat-label">Entregadas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Buscador -->
+        <div class="notas-search-container">
+            <div class="notas-search-wrapper">
+                <i class="bi bi-search"></i>
+                <input type="text" id="notasSearchInput" placeholder="Buscar tarea..." autocomplete="off">
+                <button class="clear-notas-search" id="clearNotasSearch" style="display: none;">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="notas-filter-info">
+                <span id="notasResultCount">${tareas.length} tareas</span>
+            </div>
+        </div>
+
+        <!-- Lista de tareas -->
+        <div class="notas-lista" id="notasLista">
     `;
+
+    html += renderNotasList(tareasProcessed, materiaColor);
+
+    html += `</div>`;
+
+    container.innerHTML = html;
+
+    // Setup buscador
+    setupNotasSearch(materiaColor);
+}
+
+// Renderizar lista de notas
+function renderNotasList(tareas, materiaColor) {
+    if (tareas.length === 0) {
+        return `
+            <div class="notas-empty-search">
+                <i class="bi bi-search"></i>
+                <p>No se encontraron tareas</p>
+            </div>
+        `;
+    }
+
+    let html = '';
+    for (const tarea of tareas) {
+        const fechaFormateada = tarea.fechaEntrega ? tarea.fechaEntrega.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        }) : 'Sin fecha';
+
+        html += `
+            <div class="nota-item" data-titulo="${tarea.titulo.toLowerCase()}">
+                <div class="nota-item-left">
+                    <div class="nota-item-icon" style="background: ${materiaColor}15; color: ${materiaColor}">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="nota-item-info">
+                        <h4 class="nota-item-titulo">${tarea.titulo}</h4>
+                        <div class="nota-item-meta">
+                            <span class="nota-item-fecha">
+                                <i class="bi bi-calendar3"></i>
+                                ${fechaFormateada}
+                            </span>
+                            <span class="nota-item-puntos">
+                                <i class="bi bi-star"></i>
+                                ${tarea.maxPuntos} pts
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="nota-item-right">
+                    <span class="nota-estado ${tarea.estadoClass}">
+                        <i class="bi ${tarea.iconEstado}"></i>
+                        ${tarea.estado}
+                    </span>
+                    <span class="nota-calificacion ${tarea.notaClass}">${tarea.notaTexto}</span>
+                </div>
+            </div>
+        `;
+    }
+    return html;
+}
+
+// Setup buscador de notas
+function setupNotasSearch(materiaColor) {
+    const searchInput = document.getElementById('notasSearchInput');
+    const clearBtn = document.getElementById('clearNotasSearch');
+    const resultCount = document.getElementById('notasResultCount');
+    const notasLista = document.getElementById('notasLista');
+
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        clearBtn.style.display = query ? 'flex' : 'none';
+
+        const filtered = notasTareasData.filter(t => 
+            t.titulo.toLowerCase().includes(query)
+        );
+
+        resultCount.textContent = `${filtered.length} tarea${filtered.length !== 1 ? 's' : ''}`;
+        notasLista.innerHTML = renderNotasList(filtered, materiaColor);
+    });
+
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.style.display = 'none';
+        resultCount.textContent = `${notasTareasData.length} tareas`;
+        notasLista.innerHTML = renderNotasList(notasTareasData, materiaColor);
+        searchInput.focus();
+    });
+}
+
+// Cargar notas para admin/profesor
+async function loadNotasAdmin(container, tareas, db, materiaColor) {
+    const estudiantesSnapshot = await db.collection('usuarios')
+        .where('tipoUsuario', '==', 'estudiante')
+        .where('materias', 'array-contains', currentMateria)
+        .get();
+
+    if (estudiantesSnapshot.empty) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-people"></i>
+                <p>No hay estudiantes inscritos en esta materia</p>
+            </div>
+        `;
+        return;
+    }
+
+    const estudiantes = [];
+    estudiantesSnapshot.forEach(doc => {
+        estudiantes.push({ id: doc.id, ...doc.data() });
+    });
+    estudiantes.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+
+    let html = `
+        <div class="notas-header-admin-pro" style="--materia-color: ${materiaColor}">
+            <div class="header-admin-left">
+                <div class="header-admin-icon">
+                    <i class="bi bi-table"></i>
+                </div>
+                <div class="header-admin-info">
+                    <h3>Libro de Calificaciones</h3>
+                    <span>${estudiantes.length} estudiantes · ${tareas.length} tareas</span>
+                </div>
+            </div>
+        </div>
+        <div class="notas-table-container notas-table-scroll">
+            <table class="notas-table notas-table-admin">
+                <thead>
+                    <tr>
+                        <th class="sticky-col">Estudiante</th>
+    `;
+
+    for (const tarea of tareas) {
+        const maxPuntos = tarea.puntos || 100;
+        html += `<th class="tarea-header" title="${tarea.titulo}">${tarea.titulo.substring(0, 15)}${tarea.titulo.length > 15 ? '...' : ''}<br><small>(${maxPuntos} pts)</small></th>`;
+    }
+    html += `<th class="promedio-header" style="background: ${materiaColor}">Promedio</th></tr></thead><tbody>`;
+
+    for (const estudiante of estudiantes) {
+        let puntosObtenidos = 0;
+        let tareasCalificadas = 0;
+
+        html += `<tr><td class="sticky-col estudiante-nombre">${estudiante.nombre || 'Sin nombre'}</td>`;
+
+        for (const tarea of tareas) {
+            const maxPuntos = tarea.puntos || 100;
+
+            const entregaSnapshot = await db.collection('entregas')
+                .where('tareaId', '==', tarea.id)
+                .where('estudianteId', '==', estudiante.id)
+                .get();
+
+            let celda = '';
+            let celdaClass = '';
+
+            if (!entregaSnapshot.empty) {
+                const entrega = entregaSnapshot.docs[0].data();
+                
+                if (entrega.calificacion !== undefined && entrega.calificacion !== null) {
+                    const nota = entrega.calificacion;
+                    const porcentaje = (nota / maxPuntos) * 100;
+                    
+                    puntosObtenidos += nota;
+                    tareasCalificadas++;
+
+                    celda = nota;
+                    if (porcentaje >= 90) {
+                        celdaClass = 'celda-excelente';
+                    } else if (porcentaje >= 70) {
+                        celdaClass = 'celda-buena';
+                    } else if (porcentaje >= 50) {
+                        celdaClass = 'celda-regular';
+                    } else {
+                        celdaClass = 'celda-baja';
+                    }
+                } else {
+                    celda = '<i class="bi bi-hourglass-split"></i>';
+                    celdaClass = 'celda-pendiente';
+                }
+            } else {
+                celda = '<i class="bi bi-x-circle"></i>';
+                celdaClass = 'celda-sin-entrega';
+            }
+
+            html += `<td class="${celdaClass}">${celda}</td>`;
+        }
+
+        const promedio = tareasCalificadas > 0 ? (puntosObtenidos / tareasCalificadas).toFixed(1) : '-';
+        const promedioClass = promedio !== '-' ? 
+            (promedio >= 90 ? 'celda-excelente' : 
+             promedio >= 70 ? 'celda-buena' : 
+             promedio >= 50 ? 'celda-regular' : 'celda-baja') : '';
+
+        html += `<td class="promedio-celda ${promedioClass}">${promedio}</td></tr>`;
+    }
+
+    html += `</tbody></table></div>`;
+
+    container.innerHTML = html;
 }
 
 // Load anuncios
