@@ -721,7 +721,7 @@ html {
 }
 
 .close-btn {
-    background: #f5f5f5;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
     border: none;
     width: 32px;
     height: 32px;
@@ -731,11 +731,15 @@ html {
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
-    color: #666;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+    transition: all 0.2s ease;
 }
 
 .close-btn:hover {
-    background: #e0e0e0;
+    background: linear-gradient(135deg, #ff0000, #990000);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
 }
 
 .modal-body {
@@ -866,9 +870,37 @@ html {
 .pregunta-header {
     padding: 0.8rem 1rem;
     display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    background: #f8f8f8;
+}
+
+.pregunta-tema {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: linear-gradient(135deg, var(--materia-color, #2196F3), var(--materia-dark, #1976D2));
+    border-radius: 8px;
+    align-self: flex-start;
+}
+
+.pregunta-tema i {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.85rem;
+}
+
+.pregunta-tema span {
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.pregunta-header-row {
+    display: flex;
     align-items: center;
     gap: 0.8rem;
-    background: #f8f8f8;
 }
 
 .pregunta-progreso {

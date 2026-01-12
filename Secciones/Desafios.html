@@ -105,15 +105,21 @@
     <div class="modal" id="preguntaModal">
         <div class="modal-content modal-pregunta">
             <div class="pregunta-header">
-                <div class="pregunta-progreso">
-                    <div class="progreso-bar">
-                        <div class="progreso-fill" id="progresoFill"></div>
-                    </div>
-                    <span id="preguntaNumero">1/5</span>
+                <div class="pregunta-tema" id="preguntaTema" style="display: none;">
+                    <i class="bi bi-bookmark-fill"></i>
+                    <span>Tema del nivel</span>
                 </div>
-                <button class="close-btn" id="closePreguntaModal">
-                    <i class="bi bi-x"></i>
-                </button>
+                <div class="pregunta-header-row">
+                    <div class="pregunta-progreso">
+                        <div class="progreso-bar">
+                            <div class="progreso-fill" id="progresoFill"></div>
+                        </div>
+                        <span id="preguntaNumero">1/5</span>
+                    </div>
+                    <button class="close-btn" id="closePreguntaModal">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
             </div>
             <div class="pregunta-body">
                 <h3 class="pregunta-texto" id="preguntaTexto">¿Cuál es la respuesta correcta?</h3>

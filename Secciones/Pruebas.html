@@ -450,36 +450,110 @@
                     <i class="bi bi-x"></i>
                 </button>
             </div>
+            
+            <!-- Tabs Navigation -->
+            <div class="nivel-tabs">
+                <button type="button" class="nivel-tab active" data-tab="general">
+                    <i class="bi bi-gear-fill"></i>
+                    General
+                </button>
+                <button type="button" class="nivel-tab" data-tab="preguntas">
+                    <i class="bi bi-question-circle-fill"></i>
+                    Preguntas
+                    <span class="tab-badge" id="preguntasCount">0</span>
+                </button>
+                <button type="button" class="nivel-tab" data-tab="preview">
+                    <i class="bi bi-play-circle-fill"></i>
+                    Vista Previa
+                </button>
+            </div>
+            
             <div class="modal-body">
                 <form id="nivelForm">
                     <input type="hidden" id="nivelId">
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="nivelNumero"><i class="bi bi-hash"></i> Número de Nivel *</label>
-                            <input type="number" id="nivelNumero" min="1" max="1000" required placeholder="1-1000">
-                        </div>
-                        <div class="form-group">
-                            <label for="nivelRecompensaMonedas"><i class="bi bi-coin"></i> Recompensa Monedas</label>
-                            <input type="number" id="nivelRecompensaMonedas" min="1" max="1000" value="10">
-                        </div>
-                        <div class="form-group">
-                            <label for="nivelRecompensaXP"><i class="bi bi-star"></i> Recompensa XP</label>
-                            <input type="number" id="nivelRecompensaXP" min="1" max="1000" value="20">
+                    <!-- Tab: General -->
+                    <div class="nivel-tab-content active" id="tabGeneral">
+                        <div class="tab-section">
+                            <div class="section-header">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <h4>Información del Nivel</h4>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nivelNumero"><i class="bi bi-hash"></i> Número *</label>
+                                    <div class="input-with-validation">
+                                        <input type="number" id="nivelNumero" min="1" max="1000" required placeholder="1-1000">
+                                        <span class="validation-icon" id="numeroValidation"></span>
+                                    </div>
+                                    <span class="input-hint">Único</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nivelTema"><i class="bi bi-bookmark-fill"></i> Tema *</label>
+                                    <input type="text" id="nivelTema" placeholder="Ej: Introducción a Fracciones" required>
+                                    <span class="input-hint">Tema del nivel</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nivelRecompensaMonedas"><i class="bi bi-coin"></i> Recompensa Monedas</label>
+                                    <input type="number" id="nivelRecompensaMonedas" min="1" max="1000" value="10">
+                                    <span class="input-hint">Monedas al completar</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nivelRecompensaXP"><i class="bi bi-star-fill"></i> Recompensa XP</label>
+                                    <input type="number" id="nivelRecompensaXP" min="1" max="1000" value="20">
+                                    <span class="input-hint">Puntos de experiencia</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="nivelDescripcion">
+                                    <i class="bi bi-text-paragraph"></i> Descripción
+                                    <span class="char-counter" id="descripcionCounter">0/500</span>
+                                </label>
+                                <textarea id="nivelDescripcion" rows="3" maxlength="500" placeholder="Descripción del nivel y objetivos de aprendizaje..."></textarea>
+                                <span class="input-hint">Descripción opcional del nivel</span>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="nivelDescripcion"><i class="bi bi-text-paragraph"></i> Descripción (opcional)</label>
-                        <textarea id="nivelDescripcion" rows="2" placeholder="Descripción del nivel..."></textarea>
-                    </div>
-                    
-                    <div class="preguntas-section">
-                        <div class="preguntas-header">
-                            <h4><i class="bi bi-question-circle"></i> Preguntas del Nivel (5 preguntas)</h4>
+                    <!-- Tab: Preguntas -->
+                    <div class="nivel-tab-content" id="tabPreguntas">
+                        <div class="preguntas-toolbar">
+                            <div class="preguntas-info">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <span>Cada nivel debe tener exactamente <strong>5 preguntas</strong></span>
+                            </div>
                         </div>
                         <div class="preguntas-container" id="preguntasContainer">
                             <!-- Las 5 preguntas se generan automáticamente -->
+                        </div>
+                    </div>
+                    
+                    <!-- Tab: Vista Previa -->
+                    <div class="nivel-tab-content" id="tabPreview">
+                        <div class="preview-container">
+                            <div class="preview-header">
+                                <i class="bi bi-phone"></i>
+                                <span>Así verán los estudiantes este nivel</span>
+                            </div>
+                            <div class="preview-device">
+                                <div class="preview-screen" id="previewScreen">
+                                    <!-- Preview content generated dynamically -->
+                                </div>
+                            </div>
+                            <div class="preview-navigation">
+                                <button type="button" class="preview-nav-btn" id="prevPreviewBtn" disabled>
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <span class="preview-indicator" id="previewIndicator">Pregunta 1 de 5</span>
+                                <button type="button" class="preview-nav-btn" id="nextPreviewBtn">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </form>

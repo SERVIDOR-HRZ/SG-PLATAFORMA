@@ -678,6 +678,18 @@ function showChestResult() {
 function showPregunta() {
     const pregunta = preguntasActuales[currentPreguntaIndex];
 
+    // Mostrar tema del nivel
+    const temaElement = document.getElementById('preguntaTema');
+    if (temaElement && currentNivelData) {
+        const tema = currentNivelData.tema || '';
+        if (tema) {
+            temaElement.style.display = 'flex';
+            temaElement.querySelector('span').textContent = tema;
+        } else {
+            temaElement.style.display = 'none';
+        }
+    }
+
     // Calcular progreso: (pregunta actual) / total * 100
     // Para que en 5/5 muestre 100%, usamos (índice + 1) / total
     const progreso = ((currentPreguntaIndex + 1) / preguntasActuales.length) * 100;

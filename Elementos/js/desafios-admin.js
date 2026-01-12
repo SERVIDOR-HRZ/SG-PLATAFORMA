@@ -3,6 +3,7 @@
 
 let desafiosNiveles = [];
 let currentMateriaDesafio = 'matematicas';
+let currentPreviewIndex = 0;
 
 const materiasConfig = {
     matematicas: { nombre: 'Matemáticas', icon: 'bi-calculator', color: '#2196F3' },
@@ -310,6 +311,218 @@ function setupDesafiosEventListeners() {
     if (nivelForm) {
         nivelForm.addEventListener('submit', handleSaveNivel);
     }
+
+    // Tab navigation
+    setupNivelTabs();
+    
+    // Description counter
+    const descripcionInput = document.getElementById('nivelDescripcion');
+    if (descripcionInput) {
+        descripcionInput.addEventListener('input', updateDescripcionCounter);
+    }
+    
+    // Numero validation
+    const numeroInput = document.getElementById('nivelNumero');
+    if (numeroInput) {
+        numeroInput.addEventListener('input', validateNumeroNivel);
+    }
+    
+    // Preview navigation - prevent form submit
+    const prevBtn = document.getElementById('prevPreviewBtn');
+    const nextBtn = document.getElementById('nextPreviewBtn');
+    
+    // Remover listeners anteriores clonando los elementos
+    if (prevBtn) {
+        const newPrevBtn = prevBtn.cloneNode(true);
+        prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+        newPrevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            navigatePreview(-1);
+            return false;
+        });
+    }
+    if (nextBtn) {
+        const newNextBtn = nextBtn.cloneNode(true);
+        nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+        newNextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            navigatePreview(1);
+            return false;
+        });
+    }
+}
+
+function setupNivelTabs() {
+    const tabs = document.querySelectorAll('.nivel-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabName = tab.dataset.tab;
+            switchNivelTab(tabName);
+        });
+    });
+}
+
+function switchNivelTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.nivel-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.nivel-tab[data-tab="${tabName}"]`)?.classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.nivel-tab-content').forEach(c => c.classList.remove('active'));
+    
+    if (tabName === 'general') {
+        document.getElementById('tabGeneral')?.classList.add('active');
+    } else if (tabName === 'preguntas') {
+        document.getElementById('tabPreguntas')?.classList.add('active');
+        updatePreguntasCount();
+    } else if (tabName === 'preview') {
+        document.getElementById('tabPreview')?.classList.add('active');
+        currentPreviewIndex = 0;
+        updatePreview();
+    }
+}
+
+function updateDescripcionCounter() {
+    const textarea = document.getElementById('nivelDescripcion');
+    const counter = document.getElementById('descripcionCounter');
+    if (textarea && counter) {
+        counter.textContent = `${textarea.value.length}/500`;
+    }
+}
+
+function validateNumeroNivel() {
+    const input = document.getElementById('nivelNumero');
+    const validation = document.getElementById('numeroValidation');
+    const nivelId = document.getElementById('nivelId')?.value;
+    
+    if (!input || !validation) return;
+    
+    const numero = parseInt(input.value);
+    const existe = desafiosNiveles.find(n => n.numero === numero && n.id !== nivelId);
+    
+    if (existe) {
+        validation.innerHTML = '<i class="bi bi-x-circle-fill" style="color: #ff4444;"></i>';
+        input.classList.add('invalid');
+        input.classList.remove('valid');
+    } else if (numero >= 1 && numero <= 1000) {
+        validation.innerHTML = '<i class="bi bi-check-circle-fill" style="color: #00c853;"></i>';
+        input.classList.add('valid');
+        input.classList.remove('invalid');
+    } else {
+        validation.innerHTML = '';
+        input.classList.remove('valid', 'invalid');
+    }
+}
+
+function updatePreguntasCount() {
+    let count = 0;
+    for (let i = 0; i < 5; i++) {
+        const pregunta = document.querySelector(`input[name="pregunta_${i}"]`)?.value;
+        const opciones = [
+            document.querySelector(`input[name="opcion_${i}_0"]`)?.value,
+            document.querySelector(`input[name="opcion_${i}_1"]`)?.value,
+            document.querySelector(`input[name="opcion_${i}_2"]`)?.value,
+            document.querySelector(`input[name="opcion_${i}_3"]`)?.value
+        ];
+        const correcta = document.querySelector(`select[name="correcta_${i}"]`)?.value;
+        
+        if (pregunta && opciones.every(o => o) && correcta !== '') {
+            count++;
+        }
+    }
+    
+    const badge = document.getElementById('preguntasCount');
+    if (badge) {
+        badge.textContent = count;
+        badge.className = 'tab-badge' + (count === 5 ? ' complete' : count > 0 ? ' partial' : '');
+    }
+}
+
+function updatePreview() {
+    const screen = document.getElementById('previewScreen');
+    const indicator = document.getElementById('previewIndicator');
+    const prevBtn = document.getElementById('prevPreviewBtn');
+    const nextBtn = document.getElementById('nextPreviewBtn');
+    
+    if (!screen) return;
+    
+    const i = currentPreviewIndex;
+    const tema = document.getElementById('nivelTema')?.value || 'Sin tema';
+    const pregunta = document.querySelector(`input[name="pregunta_${i}"]`)?.value || 'Pregunta sin texto';
+    const opciones = [
+        document.querySelector(`input[name="opcion_${i}_0"]`)?.value || 'Opción A',
+        document.querySelector(`input[name="opcion_${i}_1"]`)?.value || 'Opción B',
+        document.querySelector(`input[name="opcion_${i}_2"]`)?.value || 'Opción C',
+        document.querySelector(`input[name="opcion_${i}_3"]`)?.value || 'Opción D'
+    ];
+    const correctaVal = document.querySelector(`select[name="correcta_${i}"]`)?.value;
+    const correcta = correctaVal !== '' ? parseInt(correctaVal) : -1;
+    const pista = document.querySelector(`input[name="pista_${i}"]`)?.value || '';
+    
+    const letras = ['A', 'B', 'C', 'D'];
+    
+    // Pista estilo Duolingo/Desafios (amarillo bonito)
+    let pistaHTML = '';
+    if (pista) {
+        pistaHTML = `
+            <div class="preview-pista-card">
+                <div class="preview-pista-icon">
+                    <i class="bi bi-lightbulb-fill"></i>
+                </div>
+                <div class="preview-pista-title">
+                    <i class="bi bi-lightbulb"></i> Pista
+                </div>
+                <div class="preview-pista-text">
+                    ${pista}
+                </div>
+            </div>
+        `;
+    } else {
+        pistaHTML = `<div class="preview-no-hint"><i class="bi bi-lightbulb"></i> Sin pista configurada</div>`;
+    }
+    
+    screen.innerHTML = `
+        <div class="preview-tema">
+            <i class="bi bi-bookmark-fill"></i>
+            <span>${tema}</span>
+        </div>
+        <div class="preview-progress">
+            <div class="preview-progress-bar">
+                <div class="preview-progress-fill" style="width: ${((i + 1) / 5) * 100}%"></div>
+            </div>
+            <span>${i + 1}/5</span>
+        </div>
+        <div class="preview-question">
+            <p>${pregunta}</p>
+        </div>
+        <div class="preview-options">
+            ${opciones.map((op, idx) => `
+                <div class="preview-option ${idx === correcta ? 'correct' : ''}">
+                    <span class="option-letter">${letras[idx]}</span>
+                    <span class="option-text">${op}</span>
+                    ${idx === correcta ? '<i class="bi bi-check-circle-fill"></i>' : ''}
+                </div>
+            `).join('')}
+        </div>
+        ${pistaHTML}
+    `;
+    
+    if (indicator) indicator.textContent = `Pregunta ${i + 1} de 5`;
+    if (prevBtn) prevBtn.disabled = i === 0;
+    if (nextBtn) nextBtn.disabled = i === 4;
+    
+    console.log('Preview actualizado - Pregunta:', i + 1);
+}
+
+function navigatePreview(direction) {
+    const newIndex = currentPreviewIndex + direction;
+    if (newIndex >= 0 && newIndex <= 4) {
+        currentPreviewIndex = newIndex;
+        updatePreview();
+        console.log('Navegando a pregunta:', currentPreviewIndex + 1);
+    }
 }
 
 async function loadDesafiosNiveles() {
@@ -417,8 +630,19 @@ function showCreateNivelModal() {
         ? Math.max(...desafiosNiveles.map(n => n.numero)) + 1
         : 1;
     document.getElementById('nivelNumero').value = siguienteNumero;
+    
+    // Reset to first tab
+    switchNivelTab('general');
+    
+    // Reset counters and validation
+    updateDescripcionCounter();
+    validateNumeroNivel();
+    
+    // Reset preview
+    currentPreviewIndex = 0;
 
     createFiveQuestions();
+    updatePreguntasCount();
     modal.classList.add('active');
 }
 
@@ -433,39 +657,46 @@ function createFiveQuestions(existingQuestions = null) {
 
     for (let i = 0; i < 5; i++) {
         const p = existingQuestions ? existingQuestions[i] : null;
+        const isComplete = p?.pregunta && p?.opciones?.every(o => o) && p?.correcta !== undefined;
 
         container.innerHTML += `
-            <div class="pregunta-item" data-index="${i}">
+            <div class="pregunta-item ${isComplete ? 'complete' : ''}" data-index="${i}">
                 <div class="pregunta-header-simple">
-                    <h5><i class="bi bi-question-circle"></i> Pregunta ${i + 1}</h5>
+                    <div class="pregunta-header-left">
+                        <span class="pregunta-number">${i + 1}</span>
+                        <h5>Pregunta ${i + 1}</h5>
+                        <span class="pregunta-status ${isComplete ? 'complete' : 'incomplete'}">
+                            <i class="bi ${isComplete ? 'bi-check-circle-fill' : 'bi-circle'}"></i>
+                        </span>
+                    </div>
                 </div>
                 <div class="pregunta-body">
                     <div class="form-group">
                         <label>Texto de la pregunta *</label>
-                        <input type="text" name="pregunta_${i}" required placeholder="Escribe la pregunta..." value="${p?.pregunta || ''}">
+                        <input type="text" name="pregunta_${i}" required placeholder="Escribe la pregunta..." value="${p?.pregunta || ''}" oninput="onPreguntaInput(${i})">
                     </div>
                     <div class="opciones-grid">
                         <div class="form-group">
-                            <label>Opción A *</label>
-                            <input type="text" name="opcion_${i}_0" required placeholder="Opción A" value="${p?.opciones?.[0] || ''}">
+                            <label><span class="option-badge">A</span> Opción A *</label>
+                            <input type="text" name="opcion_${i}_0" required placeholder="Opción A" value="${p?.opciones?.[0] || ''}" oninput="onPreguntaInput(${i})">
                         </div>
                         <div class="form-group">
-                            <label>Opción B *</label>
-                            <input type="text" name="opcion_${i}_1" required placeholder="Opción B" value="${p?.opciones?.[1] || ''}">
+                            <label><span class="option-badge">B</span> Opción B *</label>
+                            <input type="text" name="opcion_${i}_1" required placeholder="Opción B" value="${p?.opciones?.[1] || ''}" oninput="onPreguntaInput(${i})">
                         </div>
                         <div class="form-group">
-                            <label>Opción C *</label>
-                            <input type="text" name="opcion_${i}_2" required placeholder="Opción C" value="${p?.opciones?.[2] || ''}">
+                            <label><span class="option-badge">C</span> Opción C *</label>
+                            <input type="text" name="opcion_${i}_2" required placeholder="Opción C" value="${p?.opciones?.[2] || ''}" oninput="onPreguntaInput(${i})">
                         </div>
                         <div class="form-group">
-                            <label>Opción D *</label>
-                            <input type="text" name="opcion_${i}_3" required placeholder="Opción D" value="${p?.opciones?.[3] || ''}">
+                            <label><span class="option-badge">D</span> Opción D *</label>
+                            <input type="text" name="opcion_${i}_3" required placeholder="Opción D" value="${p?.opciones?.[3] || ''}" oninput="onPreguntaInput(${i})">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Respuesta correcta *</label>
-                            <select name="correcta_${i}" required>
+                            <label><i class="bi bi-check2-circle"></i> Respuesta correcta *</label>
+                            <select name="correcta_${i}" required onchange="onPreguntaInput(${i})">
                                 <option value="">Seleccionar...</option>
                                 <option value="0" ${p?.correcta === 0 ? 'selected' : ''}>A</option>
                                 <option value="1" ${p?.correcta === 1 ? 'selected' : ''}>B</option>
@@ -474,13 +705,42 @@ function createFiveQuestions(existingQuestions = null) {
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Pista (opcional)</label>
+                            <label><i class="bi bi-lightbulb"></i> Pista (opcional)</label>
                             <input type="text" name="pista_${i}" placeholder="Pista para el estudiante..." value="${p?.pista || ''}">
                         </div>
                     </div>
                 </div>
             </div>
         `;
+    }
+}
+
+function onPreguntaInput(index) {
+    updatePreguntaStatus(index);
+    updatePreguntasCount();
+}
+
+function updatePreguntaStatus(index) {
+    const item = document.querySelector(`.pregunta-item[data-index="${index}"]`);
+    if (!item) return;
+    
+    const pregunta = document.querySelector(`input[name="pregunta_${index}"]`)?.value;
+    const opciones = [
+        document.querySelector(`input[name="opcion_${index}_0"]`)?.value,
+        document.querySelector(`input[name="opcion_${index}_1"]`)?.value,
+        document.querySelector(`input[name="opcion_${index}_2"]`)?.value,
+        document.querySelector(`input[name="opcion_${index}_3"]`)?.value
+    ];
+    const correcta = document.querySelector(`select[name="correcta_${index}"]`)?.value;
+    
+    const isComplete = pregunta && opciones.every(o => o) && correcta !== '';
+    
+    item.classList.toggle('complete', isComplete);
+    
+    const status = item.querySelector('.pregunta-status');
+    if (status) {
+        status.className = `pregunta-status ${isComplete ? 'complete' : 'incomplete'}`;
+        status.innerHTML = `<i class="bi ${isComplete ? 'bi-check-circle-fill' : 'bi-circle'}"></i>`;
     }
 }
 
@@ -499,6 +759,7 @@ async function handleSaveNivel(e) {
     try {
         const nivelId = document.getElementById('nivelId').value;
         const numero = parseInt(document.getElementById('nivelNumero').value);
+        const tema = document.getElementById('nivelTema')?.value || '';
         const descripcion = document.getElementById('nivelDescripcion').value;
         const recompensaMonedas = parseInt(document.getElementById('nivelRecompensaMonedas').value) || 10;
         const recompensaXP = parseInt(document.getElementById('nivelRecompensaXP').value) || 20;
@@ -535,6 +796,7 @@ async function handleSaveNivel(e) {
         const nivelData = {
             materia: currentMateriaDesafio,
             numero,
+            tema,
             descripcion,
             preguntas,
             recompensaMonedas,
@@ -578,8 +840,25 @@ async function editNivel(nivelId) {
     document.getElementById('nivelDescripcion').value = nivel.descripcion || '';
     document.getElementById('nivelRecompensaMonedas').value = nivel.recompensaMonedas || 10;
     document.getElementById('nivelRecompensaXP').value = nivel.recompensaXP || 20;
+    
+    // Set tema if exists
+    const temaInput = document.getElementById('nivelTema');
+    if (temaInput) {
+        temaInput.value = nivel.tema || '';
+    }
+
+    // Reset to first tab
+    switchNivelTab('general');
+    
+    // Update counters and validation
+    updateDescripcionCounter();
+    validateNumeroNivel();
+    
+    // Reset preview
+    currentPreviewIndex = 0;
 
     createFiveQuestions(nivel.preguntas);
+    updatePreguntasCount();
     document.getElementById('nivelModal').classList.add('active');
 }
 
@@ -636,6 +915,7 @@ async function cloneNivel(nivelId) {
         const nuevoNivel = {
             materia: nivel.materia,
             numero: siguienteNumero,
+            tema: nivel.tema ? `${nivel.tema} (copia)` : '',
             descripcion: nivel.descripcion ? `${nivel.descripcion} (copia)` : '',
             preguntas: preguntasClonadas,
             recompensaMonedas: nivel.recompensaMonedas || 10,
