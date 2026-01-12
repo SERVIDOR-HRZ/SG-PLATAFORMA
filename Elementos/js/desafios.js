@@ -612,7 +612,7 @@ async function startDesafio() {
 
     // Verificar energía (si no tiene energía infinita)
     if (!userGameData.energiaInfinita && userGameData.energia < 1) {
-        showAlert('Sin Energía', 'No tienes suficiente energía. Compra más en la tienda o espera 10 minutos para regenerar 1 energía.');
+        showAlertWithShop('¡Sin Energía!', 'No tienes suficiente energía para jugar. Puedes comprar más en la tienda o esperar 10 minutos para regenerar 1 energía.', 'energy');
         return;
     }
 
@@ -708,7 +708,7 @@ function showPregunta() {
             `;
             pistaBtn.addEventListener('click', () => usarPista(pregunta.pista));
         } else {
-            pistaBtn.className = 'pista-btn pista-btn-disabled';
+            pistaBtn.className = 'pista-btn pista-btn-no-hints';
             pistaBtn.innerHTML = `
                 <div class="pista-btn-left">
                     <div class="pista-btn-icon">
@@ -716,12 +716,14 @@ function showPregunta() {
                     </div>
                     <span class="pista-btn-text">Sin pistas</span>
                 </div>
-                <div class="pista-btn-count">
-                    <i class="bi bi-lightbulb"></i>
-                    0
+                <div class="pista-btn-shop">
+                    <i class="bi bi-shop"></i>
+                    Comprar
                 </div>
             `;
-            pistaBtn.disabled = true;
+            pistaBtn.addEventListener('click', () => {
+                showAlertWithShop('¡Sin Pistas!', 'No tienes pistas disponibles. Puedes comprar más en la tienda para ayudarte con las preguntas difíciles.', 'hints');
+            });
         }
         opcionesContainer.appendChild(pistaBtn);
     }
@@ -761,17 +763,54 @@ async function usarPista(pista) {
     userGameData.pistas--;
     await updateUserPistas();
 
-    // Mostrar la pista
-    const pistaContainer = document.getElementById('pistaMostrada');
-    pistaContainer.innerHTML = `
-        <i class="bi bi-lightbulb-fill"></i>
-        <span>${pista}</span>
-    `;
-    pistaContainer.style.display = 'flex';
+    // Mostrar la pista en un modal emergente
+    showPistaModal(pista);
 
     // Ocultar botón de pista
     const pistaBtn = document.querySelector('.pista-btn');
     if (pistaBtn) pistaBtn.style.display = 'none';
+    
+    // Actualizar contador de pistas en el header
+    updateHeaderStats();
+}
+
+function showPistaModal(pista) {
+    // Crear el modal de pista si no existe
+    let pistaModal = document.getElementById('pistaModal');
+    
+    if (!pistaModal) {
+        pistaModal = document.createElement('div');
+        pistaModal.className = 'modal';
+        pistaModal.id = 'pistaModal';
+        pistaModal.innerHTML = `
+            <div class="modal-content modal-pista">
+                <div class="pista-modal-icon">
+                    <i class="bi bi-lightbulb-fill"></i>
+                </div>
+                <h3 class="pista-modal-title">💡 Pista</h3>
+                <p class="pista-modal-text" id="pistaModalText"></p>
+                <button class="pista-modal-btn" id="closePistaModal">
+                    <i class="bi bi-check-lg"></i>
+                    Entendido
+                </button>
+            </div>
+        `;
+        document.body.appendChild(pistaModal);
+        
+        // Event listener para cerrar
+        document.getElementById('closePistaModal').addEventListener('click', closePistaModal);
+    }
+    
+    // Mostrar la pista
+    document.getElementById('pistaModalText').textContent = pista;
+    pistaModal.classList.add('active');
+}
+
+function closePistaModal() {
+    const pistaModal = document.getElementById('pistaModal');
+    if (pistaModal) {
+        pistaModal.classList.remove('active');
+    }
 }
 
 function selectOption(btn, index) {
@@ -1182,12 +1221,6 @@ function setupEventListeners() {
 
     // Validar input de confirmación
     document.getElementById('resetConfirmInput').addEventListener('input', validateResetInput);
-
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.remove('active');
-        });
-    });
 }
 
 // ============ UTILITY FUNCTIONS ============
@@ -1211,7 +1244,66 @@ function showAlert(title, message, type = 'warning') {
         icon.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i>';
     }
 
+    // Restaurar botón normal
+    const alertBtn = document.getElementById('alertBtn');
+    alertBtn.textContent = 'Entendido';
+    alertBtn.onclick = closeAlertModal;
+    
+    // Ocultar botón de tienda si existe
+    const tiendaBtn = document.getElementById('alertTiendaBtn');
+    if (tiendaBtn) tiendaBtn.style.display = 'none';
+
     modal.classList.add('active');
+}
+
+// Mostrar alerta con opción de ir a la tienda
+function showAlertWithShop(title, message, type = 'warning') {
+    const modal = document.getElementById('alertModal');
+    const icon = document.getElementById('alertIcon');
+
+    document.getElementById('alertTitulo').textContent = title;
+    document.getElementById('alertMensaje').textContent = message;
+
+    // Cambiar icono según tipo
+    icon.className = 'alert-icon';
+    if (type === 'energy') {
+        icon.classList.add('energy');
+        icon.innerHTML = '<i class="bi bi-lightning-fill"></i>';
+    } else if (type === 'hints') {
+        icon.classList.add('hints');
+        icon.innerHTML = '<i class="bi bi-lightbulb-fill"></i>';
+    } else {
+        icon.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i>';
+    }
+
+    // Cambiar botón principal a "Cerrar"
+    const alertBtn = document.getElementById('alertBtn');
+    alertBtn.textContent = 'Cerrar';
+    alertBtn.onclick = closeAlertModal;
+    
+    // Mostrar/crear botón de tienda
+    let tiendaBtn = document.getElementById('alertTiendaBtn');
+    if (!tiendaBtn) {
+        tiendaBtn = document.createElement('button');
+        tiendaBtn.id = 'alertTiendaBtn';
+        tiendaBtn.className = 'tienda-btn';
+        alertBtn.parentNode.insertBefore(tiendaBtn, alertBtn);
+    }
+    
+    tiendaBtn.innerHTML = '<i class="bi bi-shop"></i> Ir a la Tienda';
+    tiendaBtn.style.display = 'inline-flex';
+    tiendaBtn.onclick = () => {
+        closeAlertModal();
+        closeDesafioModal();
+        goToShop();
+    };
+
+    modal.classList.add('active');
+}
+
+function goToShop() {
+    // Redirigir al aula con la tienda abierta
+    window.location.href = `Aula.html?aula=${currentAulaId}&materia=${currentMateria}&tab=desafios&subtab=tienda`;
 }
 
 function closeAlertModal() {

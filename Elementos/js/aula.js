@@ -771,6 +771,34 @@ function setupTabs() {
     
     // Setup desafíos submenu
     setupDesafiosSubmenu();
+    
+    // Verificar si hay parámetros de URL para abrir un tab específico
+    checkUrlTabParams();
+}
+
+// Verificar parámetros de URL para abrir tabs específicos
+function checkUrlTabParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    const subtabParam = urlParams.get('subtab');
+    
+    if (tabParam) {
+        // Buscar y hacer clic en el tab correspondiente
+        const tabBtn = document.querySelector(`.tab-btn[data-tab="${tabParam}"]`);
+        if (tabBtn) {
+            tabBtn.click();
+            
+            // Si hay subtab, esperar un poco y luego activarlo
+            if (subtabParam) {
+                setTimeout(() => {
+                    const subtabBtn = document.querySelector(`.desafios-submenu-btn[data-subtab="${subtabParam}"]`);
+                    if (subtabBtn) {
+                        subtabBtn.click();
+                    }
+                }, 100);
+            }
+        }
+    }
 }
 
 // Setup desafíos submenu (Retos / Tienda / Racha / Ranking)
