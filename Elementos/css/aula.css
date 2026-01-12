@@ -6872,6 +6872,18 @@ body {
     opacity: 0.9;
 }
 
+.ranking-user-position .ranking-score {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 1.1rem;
+}
+
+.ranking-user-position .ranking-score i {
+    color: white;
+}
+
 .ranking-empty {
     text-align: center;
     padding: 3rem;
