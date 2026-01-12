@@ -91,6 +91,10 @@
                     <i class="bi bi-door-open-fill"></i>
                     <span>Aulas</span>
                 </button>
+                <button class="dashboard-tab" data-view="resetProgress" id="resetProgressTab">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    <span>Restablecer Progreso</span>
+                </button>
             </div>
         </div>
 
@@ -205,6 +209,77 @@
             <div class="no-results" id="noAulas" style="display: none;">
                 <i class="bi bi-door-open"></i>
                 <p>No hay aulas creadas</p>
+            </div>
+        </div>
+
+        <!-- Reset Progress Management Section -->
+        <div class="reset-progress-section" id="resetProgressManagement" style="display: none;">
+            <div class="reset-progress-header">
+                <div class="reset-progress-header-left">
+                    <h2><i class="bi bi-arrow-counterclockwise"></i> Restablecer Progreso de Usuarios</h2>
+                    <p class="reset-progress-subtitle">Restablece la racha, XP y monedas de todos los estudiantes</p>
+                </div>
+            </div>
+            
+            <div class="reset-progress-warning-card">
+                <div class="warning-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="warning-content">
+                    <h3>¡Advertencia!</h3>
+                    <p>Esta acción restablecerá el progreso de <strong>TODOS</strong> los estudiantes. Los siguientes datos serán reiniciados:</p>
+                    <ul>
+                        <li><i class="bi bi-fire"></i> Racha de días (global y por materia)</li>
+                        <li><i class="bi bi-star-fill"></i> Puntos de experiencia XP (de todas las materias)</li>
+                        <li><i class="bi bi-coin"></i> Monedas acumuladas</li>
+                        <li><i class="bi bi-graph-up"></i> Niveles por materia (vuelven a nivel 1)</li>
+                    </ul>
+                    <p class="warning-note"><strong>Nota:</strong> Las insignias obtenidas NO serán eliminadas.</p>
+                </div>
+            </div>
+
+            <div class="reset-progress-stats">
+                <div class="reset-stat-card">
+                    <div class="reset-stat-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="reset-stat-content">
+                        <h3 id="resetTotalStudents">0</h3>
+                        <p>Estudiantes Afectados</p>
+                    </div>
+                </div>
+                <div class="reset-stat-card">
+                    <div class="reset-stat-icon xp">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <div class="reset-stat-content">
+                        <h3 id="resetTotalXP">0</h3>
+                        <p>XP Total a Restablecer</p>
+                    </div>
+                </div>
+                <div class="reset-stat-card">
+                    <div class="reset-stat-icon coins">
+                        <i class="bi bi-coin"></i>
+                    </div>
+                    <div class="reset-stat-content">
+                        <h3 id="resetTotalCoins">0</h3>
+                        <p>Monedas Totales a Restablecer</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reset-progress-actions">
+                <button class="reset-all-progress-btn" id="resetAllProgressBtn">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Restablecer Todo el Progreso
+                </button>
+            </div>
+
+            <div class="reset-progress-log" id="resetProgressLog" style="display: none;">
+                <h4><i class="bi bi-journal-text"></i> Registro de Actividad</h4>
+                <div class="log-content" id="resetLogContent">
+                    <!-- Log entries will be added here -->
+                </div>
             </div>
         </div>
 
@@ -1618,6 +1693,83 @@
                         <span>Eliminar Aula</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Progress Confirmation Modal -->
+    <div class="modal" id="resetProgressModal">
+        <div class="modal-content confirmation-modal reset-progress-modal">
+            <div class="modal-header">
+                <h3><i class="bi bi-arrow-counterclockwise"></i> Confirmar Restablecimiento</h3>
+                <button class="close-btn" id="closeResetProgressModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-content">
+                    <div class="confirmation-icon warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div class="confirmation-text">
+                        <p><strong>¡ACCIÓN IRREVERSIBLE!</strong></p>
+                        <p>Estás a punto de restablecer el progreso de <strong id="resetConfirmStudentCount">0</strong> estudiantes.</p>
+                        <p>Se eliminarán:</p>
+                        <ul class="reset-items-list">
+                            <li><i class="bi bi-fire"></i> Todas las rachas (global y por materia)</li>
+                            <li><i class="bi bi-star-fill"></i> Todo el XP de todas las materias</li>
+                            <li><i class="bi bi-coin"></i> Todas las monedas</li>
+                            <li><i class="bi bi-graph-up"></i> Niveles (vuelven a 1)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="security-code-section">
+                    <label for="resetProgressSecurityCode">
+                        <i class="bi bi-shield-lock"></i>
+                        Código de Seguridad
+                    </label>
+                    <input type="password" id="resetProgressSecurityCode" placeholder="Ingresa el código de seguridad" autocomplete="off">
+                    <p class="security-hint">Este código es necesario para confirmar el restablecimiento</p>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancelResetProgress">Cancelar</button>
+                    <button type="button" class="confirm-reset-btn" id="confirmResetProgress">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        <span>Confirmar Restablecimiento</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ver Aulas Modal -->
+    <div class="modal" id="verAulasModal">
+        <div class="modal-content ver-aulas-modal-content">
+            <div class="modal-header">
+                <h3><i class="bi bi-door-open-fill"></i> Aulas de <span id="verAulasUserName">Usuario</span></h3>
+                <button class="close-btn" onclick="cerrarModalAulas()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="verAulasModalBody">
+                <!-- Aulas info will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Ver Insignias Modal -->
+    <div class="modal" id="verInsigniasModal">
+        <div class="modal-content ver-insignias-modal">
+            <div class="modal-header">
+                <h3><i class="bi bi-award-fill"></i> Insignias de <span id="verInsigniasUserName">Usuario</span></h3>
+                <button class="close-btn" onclick="cerrarModalInsignias()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="verInsigniasModalBody">
+                <!-- Insignias info will be loaded here -->
             </div>
         </div>
     </div>

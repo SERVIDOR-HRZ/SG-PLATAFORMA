@@ -2962,6 +2962,7 @@ function switchDashboardView(view) {
     const institucionesManagement = document.getElementById('institucionesManagement');
     const coordinadoresManagement = document.getElementById('coordinadoresManagement');
     const aulasManagement = document.getElementById('aulasManagement');
+    const resetProgressManagement = document.getElementById('resetProgressManagement');
     const statsGrid = document.querySelector('.stats-grid');
 
     // Handle different views
@@ -2971,6 +2972,7 @@ function switchDashboardView(view) {
         if (institucionesManagement) institucionesManagement.style.display = 'none';
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
         if (aulasManagement) aulasManagement.style.display = 'none';
+        if (resetProgressManagement) resetProgressManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'none';
         loadInsignias();
     } else if (view === 'instituciones') {
@@ -2979,6 +2981,7 @@ function switchDashboardView(view) {
         if (institucionesManagement) institucionesManagement.style.display = 'block';
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
         if (aulasManagement) aulasManagement.style.display = 'none';
+        if (resetProgressManagement) resetProgressManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'none';
         loadInstitucionesForManagement();
     } else if (view === 'coordinadores') {
@@ -2987,6 +2990,7 @@ function switchDashboardView(view) {
         if (institucionesManagement) institucionesManagement.style.display = 'none';
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'block';
         if (aulasManagement) aulasManagement.style.display = 'none';
+        if (resetProgressManagement) resetProgressManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'none';
         loadCoordinadores();
     } else if (view === 'aulas') {
@@ -2995,14 +2999,25 @@ function switchDashboardView(view) {
         if (institucionesManagement) institucionesManagement.style.display = 'none';
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
         if (aulasManagement) aulasManagement.style.display = 'block';
+        if (resetProgressManagement) resetProgressManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'none';
         loadAulas();
+    } else if (view === 'resetProgress') {
+        if (usersTableContainer) usersTableContainer.style.display = 'none';
+        if (insigniasManagement) insigniasManagement.style.display = 'none';
+        if (institucionesManagement) institucionesManagement.style.display = 'none';
+        if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
+        if (aulasManagement) aulasManagement.style.display = 'none';
+        if (resetProgressManagement) resetProgressManagement.style.display = 'block';
+        if (statsGrid) statsGrid.style.display = 'none';
+        loadResetProgressStats();
     } else {
         if (usersTableContainer) usersTableContainer.style.display = 'block';
         if (insigniasManagement) insigniasManagement.style.display = 'none';
         if (institucionesManagement) institucionesManagement.style.display = 'none';
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
         if (aulasManagement) aulasManagement.style.display = 'none';
+        if (resetProgressManagement) resetProgressManagement.style.display = 'none';
         if (statsGrid) statsGrid.style.display = 'grid';
     }
 
@@ -5882,3 +5897,286 @@ window.cerrarModalInsignias = cerrarModalInsignias;
 window.toggleAulaProfesor = toggleAulaProfesor;
 window.loadAulasForProfesorCreateForm = loadAulasForProfesorCreateForm;
 window.loadAulasForProfesorEditForm = loadAulasForProfesorEditForm;
+
+
+// ==========================================
+// RESET PROGRESS FUNCTIONS
+// ==========================================
+
+// Load reset progress statistics
+async function loadResetProgressStats() {
+    try {
+        await waitForFirebase();
+
+        // Get all students
+        const snapshot = await window.firebaseDB.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        let totalStudents = 0;
+        let totalXP = 0;
+        let totalCoins = 0;
+
+        // Lista de materias
+        const materias = ['matematicas', 'lectura', 'sociales', 'naturales', 'ingles', 'anuncios'];
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            totalStudents++;
+            
+            // Sumar XP global
+            totalXP += (data.xp || data.experiencia || 0);
+            
+            // Sumar XP por cada materia
+            materias.forEach(materia => {
+                const progresoMateria = data[`progreso_${materia}`];
+                if (progresoMateria && progresoMateria.xp) {
+                    totalXP += progresoMateria.xp;
+                }
+            });
+            
+            // Sumar monedas
+            totalCoins += (data.puntos || data.puntosAcumulados || data.monedas || 0);
+        });
+
+        // Update stats display
+        const resetTotalStudents = document.getElementById('resetTotalStudents');
+        const resetTotalXP = document.getElementById('resetTotalXP');
+        const resetTotalCoins = document.getElementById('resetTotalCoins');
+
+        if (resetTotalStudents) resetTotalStudents.textContent = totalStudents.toLocaleString();
+        if (resetTotalXP) resetTotalXP.textContent = totalXP.toLocaleString();
+        if (resetTotalCoins) resetTotalCoins.textContent = totalCoins.toLocaleString();
+
+    } catch (error) {
+        console.error('Error loading reset progress stats:', error);
+        showMessage('Error al cargar estadísticas', 'error');
+    }
+}
+
+// Initialize reset progress management
+function initializeResetProgressManagement() {
+    const resetAllProgressBtn = document.getElementById('resetAllProgressBtn');
+    const resetProgressModal = document.getElementById('resetProgressModal');
+    const closeResetProgressModal = document.getElementById('closeResetProgressModal');
+    const cancelResetProgress = document.getElementById('cancelResetProgress');
+    const confirmResetProgress = document.getElementById('confirmResetProgress');
+
+    if (resetAllProgressBtn) {
+        resetAllProgressBtn.addEventListener('click', openResetProgressModal);
+    }
+
+    if (closeResetProgressModal) {
+        closeResetProgressModal.addEventListener('click', closeResetProgressModalFn);
+    }
+
+    if (cancelResetProgress) {
+        cancelResetProgress.addEventListener('click', closeResetProgressModalFn);
+    }
+
+    if (confirmResetProgress) {
+        confirmResetProgress.addEventListener('click', handleResetAllProgress);
+    }
+
+    if (resetProgressModal) {
+        resetProgressModal.addEventListener('click', function(e) {
+            if (e.target === resetProgressModal) {
+                closeResetProgressModalFn();
+            }
+        });
+    }
+}
+
+// Open reset progress confirmation modal
+async function openResetProgressModal() {
+    const modal = document.getElementById('resetProgressModal');
+    const confirmStudentCount = document.getElementById('resetConfirmStudentCount');
+    const securityCodeInput = document.getElementById('resetProgressSecurityCode');
+
+    if (!modal) return;
+
+    // Get student count
+    try {
+        await waitForFirebase();
+        const snapshot = await window.firebaseDB.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+        
+        if (confirmStudentCount) {
+            confirmStudentCount.textContent = snapshot.size.toLocaleString();
+        }
+    } catch (error) {
+        console.error('Error getting student count:', error);
+    }
+
+    // Clear security code input
+    if (securityCodeInput) {
+        securityCodeInput.value = '';
+    }
+
+    modal.classList.add('show');
+}
+
+// Close reset progress modal
+function closeResetProgressModalFn() {
+    const modal = document.getElementById('resetProgressModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+// Handle reset all progress
+async function handleResetAllProgress() {
+    const securityCodeInput = document.getElementById('resetProgressSecurityCode');
+    const confirmBtn = document.getElementById('confirmResetProgress');
+    const logContainer = document.getElementById('resetProgressLog');
+    const logContent = document.getElementById('resetLogContent');
+
+    if (!securityCodeInput) return;
+
+    const enteredCode = securityCodeInput.value.trim();
+
+    // Verify security code
+    if (enteredCode !== SUPERUSER_SECURITY_CODE) {
+        showMessage('Código de seguridad incorrecto', 'error');
+        securityCodeInput.classList.add('error');
+        setTimeout(() => securityCodeInput.classList.remove('error'), 2000);
+        return;
+    }
+
+    // Disable button and show loading
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Procesando...';
+    }
+
+    try {
+        await waitForFirebase();
+
+        // Get all students
+        const snapshot = await window.firebaseDB.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        const totalStudents = snapshot.size;
+        let processedCount = 0;
+        let errorCount = 0;
+
+        // Show log container
+        if (logContainer) {
+            logContainer.style.display = 'block';
+            logContent.innerHTML = '';
+        }
+
+        // Add start log entry
+        addLogEntry('info', `Iniciando restablecimiento de ${totalStudents} estudiantes...`);
+
+        // Lista de materias para restablecer progreso
+        const materias = ['matematicas', 'lectura', 'sociales', 'naturales', 'ingles', 'anuncios'];
+
+        // Process each student - Firebase batch limit is 500, so we may need multiple batches
+        const batchSize = 500;
+        const docs = snapshot.docs;
+        
+        for (let i = 0; i < docs.length; i += batchSize) {
+            const batch = window.firebaseDB.batch();
+            const batchDocs = docs.slice(i, i + batchSize);
+            
+            batchDocs.forEach(doc => {
+                const userRef = window.firebaseDB.collection('usuarios').doc(doc.id);
+                
+                // Crear objeto de actualización con campos globales
+                const updateData = {
+                    puntos: 0,
+                    puntosAcumulados: 0,
+                    monedas: 0,
+                    xp: 0,
+                    experiencia: 0,
+                    racha: 0,
+                    rachaDias: 0,
+                    ultimaActividad: null
+                };
+                
+                // Agregar progreso por materia (xp, nivel, racha por cada materia)
+                materias.forEach(materia => {
+                    updateData[`progreso_${materia}`] = {
+                        xp: 0,
+                        nivel: 1,
+                        racha: 0
+                    };
+                });
+                
+                batch.update(userRef, updateData);
+                processedCount++;
+            });
+
+            // Commit this batch
+            await batch.commit();
+            addLogEntry('info', `Procesados ${Math.min(i + batchSize, docs.length)} de ${docs.length} estudiantes...`);
+        }
+
+        // Add success log entry
+        addLogEntry('success', `✓ Se restableció el progreso de ${processedCount} estudiantes exitosamente`);
+        addLogEntry('success', `✓ XP, racha y nivel de todas las materias restablecidos a 0`);
+
+        // Close modal and show success message
+        closeResetProgressModalFn();
+        showMessage(`Progreso restablecido para ${processedCount} estudiantes (incluyendo XP por materia)`, 'success');
+
+        // Reload stats
+        loadResetProgressStats();
+
+        // Reload users if in users view
+        if (typeof loadUsers === 'function') {
+            loadUsers();
+        }
+
+    } catch (error) {
+        console.error('Error resetting progress:', error);
+        addLogEntry('error', `Error: ${error.message}`);
+        showMessage('Error al restablecer el progreso', 'error');
+    } finally {
+        // Re-enable button
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i> Confirmar Restablecimiento';
+        }
+    }
+}
+
+// Add log entry
+function addLogEntry(type, message) {
+    const logContent = document.getElementById('resetLogContent');
+    if (!logContent) return;
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('es-ES');
+
+    const icons = {
+        'success': 'bi-check-circle-fill',
+        'error': 'bi-x-circle-fill',
+        'info': 'bi-info-circle-fill'
+    };
+
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.innerHTML = `
+        <i class="bi ${icons[type] || 'bi-info-circle'}"></i>
+        <span>${message}</span>
+        <span class="log-time">${timeStr}</span>
+    `;
+
+    logContent.appendChild(entry);
+    logContent.scrollTop = logContent.scrollHeight;
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeResetProgressManagement();
+});
+
+// Make functions globally available
+window.loadResetProgressStats = loadResetProgressStats;
+window.openResetProgressModal = openResetProgressModal;
+window.closeResetProgressModalFn = closeResetProgressModalFn;
+window.handleResetAllProgress = handleResetAllProgress;
