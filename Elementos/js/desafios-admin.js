@@ -1,9 +1,10 @@
 // Desafios Admin - Gestión de niveles de desafíos
-// Cada nivel tiene exactamente 5 preguntas
+// Mínimo 5 preguntas, se pueden agregar más
 
 let desafiosNiveles = [];
 let currentMateriaDesafio = 'matematicas';
 let currentPreviewIndex = 0;
+let currentPreguntasCount = 5; // Número actual de preguntas
 
 const materiasConfig = {
     matematicas: { nombre: 'Matemáticas', icon: 'bi-calculator', color: '#2196F3' },
@@ -418,7 +419,7 @@ function validateNumeroNivel() {
 
 function updatePreguntasCount() {
     let count = 0;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < currentPreguntasCount; i++) {
         const pregunta = document.querySelector(`input[name="pregunta_${i}"]`)?.value;
         const opciones = [
             document.querySelector(`input[name="opcion_${i}_0"]`)?.value,
@@ -435,8 +436,8 @@ function updatePreguntasCount() {
     
     const badge = document.getElementById('preguntasCount');
     if (badge) {
-        badge.textContent = count;
-        badge.className = 'tab-badge' + (count === 5 ? ' complete' : count > 0 ? ' partial' : '');
+        badge.textContent = `${count}/${currentPreguntasCount}`;
+        badge.className = 'tab-badge' + (count === currentPreguntasCount ? ' complete' : count > 0 ? ' partial' : '');
     }
 }
 
@@ -447,6 +448,11 @@ function updatePreview() {
     const nextBtn = document.getElementById('nextPreviewBtn');
     
     if (!screen) return;
+    
+    // Asegurar que el índice esté dentro del rango
+    if (currentPreviewIndex >= currentPreguntasCount) {
+        currentPreviewIndex = currentPreguntasCount - 1;
+    }
     
     const i = currentPreviewIndex;
     const tema = document.getElementById('nivelTema')?.value || 'Sin tema';
@@ -490,9 +496,9 @@ function updatePreview() {
         </div>
         <div class="preview-progress">
             <div class="preview-progress-bar">
-                <div class="preview-progress-fill" style="width: ${((i + 1) / 5) * 100}%"></div>
+                <div class="preview-progress-fill" style="width: ${((i + 1) / currentPreguntasCount) * 100}%"></div>
             </div>
-            <span>${i + 1}/5</span>
+            <span>${i + 1}/${currentPreguntasCount}</span>
         </div>
         <div class="preview-question">
             <p>${pregunta}</p>
@@ -509,19 +515,16 @@ function updatePreview() {
         ${pistaHTML}
     `;
     
-    if (indicator) indicator.textContent = `Pregunta ${i + 1} de 5`;
+    if (indicator) indicator.textContent = `Pregunta ${i + 1} de ${currentPreguntasCount}`;
     if (prevBtn) prevBtn.disabled = i === 0;
-    if (nextBtn) nextBtn.disabled = i === 4;
-    
-    console.log('Preview actualizado - Pregunta:', i + 1);
+    if (nextBtn) nextBtn.disabled = i >= currentPreguntasCount - 1;
 }
 
 function navigatePreview(direction) {
     const newIndex = currentPreviewIndex + direction;
-    if (newIndex >= 0 && newIndex <= 4) {
+    if (newIndex >= 0 && newIndex < currentPreguntasCount) {
         currentPreviewIndex = newIndex;
         updatePreview();
-        console.log('Navegando a pregunta:', currentPreviewIndex + 1);
     }
 }
 
@@ -608,7 +611,7 @@ function renderDesafiosNiveles() {
             <div class="nivel-body">
                 <p class="nivel-descripcion">${nivel.descripcion || 'Sin descripción'}</p>
                 <div class="nivel-stats">
-                    <span><i class="bi bi-question-circle"></i> 5 preguntas</span>
+                    <span><i class="bi bi-question-circle"></i> ${nivel.preguntas?.length || 5} preguntas</span>
                     <span><i class="bi bi-coin"></i> +${nivel.recompensaMonedas || 10} monedas</span>
                     <span><i class="bi bi-star"></i> +${nivel.recompensaXP || 20} XP</span>
                 </div>
@@ -638,10 +641,11 @@ function showCreateNivelModal() {
     updateDescripcionCounter();
     validateNumeroNivel();
     
-    // Reset preview
+    // Reset preview and preguntas count
     currentPreviewIndex = 0;
+    currentPreguntasCount = 5;
 
-    createFiveQuestions();
+    createQuestions();
     updatePreguntasCount();
     modal.classList.add('active');
 }
@@ -651,68 +655,204 @@ function hideNivelModal() {
     if (modal) modal.classList.remove('active');
 }
 
-function createFiveQuestions(existingQuestions = null) {
+function createQuestions(existingQuestions = null) {
     const container = document.getElementById('preguntasContainer');
     container.innerHTML = '';
+    
+    // Determinar cuántas preguntas crear
+    const numPreguntas = existingQuestions ? existingQuestions.length : 5;
+    currentPreguntasCount = Math.max(5, numPreguntas); // Mínimo 5
 
-    for (let i = 0; i < 5; i++) {
-        const p = existingQuestions ? existingQuestions[i] : null;
-        const isComplete = p?.pregunta && p?.opciones?.every(o => o) && p?.correcta !== undefined;
+    for (let i = 0; i < currentPreguntasCount; i++) {
+        addPreguntaHTML(i, existingQuestions ? existingQuestions[i] : null);
+    }
+    
+    // Agregar botón para añadir más preguntas
+    addAddPreguntaButton();
+}
 
-        container.innerHTML += `
-            <div class="pregunta-item ${isComplete ? 'complete' : ''}" data-index="${i}">
-                <div class="pregunta-header-simple">
-                    <div class="pregunta-header-left">
-                        <span class="pregunta-number">${i + 1}</span>
-                        <h5>Pregunta ${i + 1}</h5>
-                        <span class="pregunta-status ${isComplete ? 'complete' : 'incomplete'}">
-                            <i class="bi ${isComplete ? 'bi-check-circle-fill' : 'bi-circle'}"></i>
-                        </span>
-                    </div>
+function addPreguntaHTML(index, p = null) {
+    const container = document.getElementById('preguntasContainer');
+    const isComplete = p?.pregunta && p?.opciones?.every(o => o) && p?.correcta !== undefined;
+    const canDelete = index >= 5; // Solo se pueden eliminar las preguntas después de la 5
+
+    const preguntaDiv = document.createElement('div');
+    preguntaDiv.className = `pregunta-item ${isComplete ? 'complete' : ''}`;
+    preguntaDiv.dataset.index = index;
+    
+    preguntaDiv.innerHTML = `
+        <div class="pregunta-header-simple">
+            <div class="pregunta-header-left">
+                <span class="pregunta-number">${index + 1}</span>
+                <h5>Pregunta ${index + 1}</h5>
+                <span class="pregunta-status ${isComplete ? 'complete' : 'incomplete'}">
+                    <i class="bi ${isComplete ? 'bi-check-circle-fill' : 'bi-circle'}"></i>
+                </span>
+            </div>
+            ${canDelete ? `
+                <button type="button" class="btn-delete-pregunta" onclick="deletePregunta(${index})" title="Eliminar pregunta">
+                    <i class="bi bi-trash"></i>
+                </button>
+            ` : ''}
+        </div>
+        <div class="pregunta-body">
+            <div class="form-group">
+                <label>Texto de la pregunta *</label>
+                <input type="text" name="pregunta_${index}" required placeholder="Escribe la pregunta..." value="${p?.pregunta || ''}" oninput="onPreguntaInput(${index})">
+            </div>
+            <div class="opciones-grid">
+                <div class="form-group">
+                    <label><span class="option-badge">A</span> Opción A *</label>
+                    <input type="text" name="opcion_${index}_0" required placeholder="Opción A" value="${p?.opciones?.[0] || ''}" oninput="onPreguntaInput(${index})">
                 </div>
-                <div class="pregunta-body">
-                    <div class="form-group">
-                        <label>Texto de la pregunta *</label>
-                        <input type="text" name="pregunta_${i}" required placeholder="Escribe la pregunta..." value="${p?.pregunta || ''}" oninput="onPreguntaInput(${i})">
-                    </div>
-                    <div class="opciones-grid">
-                        <div class="form-group">
-                            <label><span class="option-badge">A</span> Opción A *</label>
-                            <input type="text" name="opcion_${i}_0" required placeholder="Opción A" value="${p?.opciones?.[0] || ''}" oninput="onPreguntaInput(${i})">
-                        </div>
-                        <div class="form-group">
-                            <label><span class="option-badge">B</span> Opción B *</label>
-                            <input type="text" name="opcion_${i}_1" required placeholder="Opción B" value="${p?.opciones?.[1] || ''}" oninput="onPreguntaInput(${i})">
-                        </div>
-                        <div class="form-group">
-                            <label><span class="option-badge">C</span> Opción C *</label>
-                            <input type="text" name="opcion_${i}_2" required placeholder="Opción C" value="${p?.opciones?.[2] || ''}" oninput="onPreguntaInput(${i})">
-                        </div>
-                        <div class="form-group">
-                            <label><span class="option-badge">D</span> Opción D *</label>
-                            <input type="text" name="opcion_${i}_3" required placeholder="Opción D" value="${p?.opciones?.[3] || ''}" oninput="onPreguntaInput(${i})">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label><i class="bi bi-check2-circle"></i> Respuesta correcta *</label>
-                            <select name="correcta_${i}" required onchange="onPreguntaInput(${i})">
-                                <option value="">Seleccionar...</option>
-                                <option value="0" ${p?.correcta === 0 ? 'selected' : ''}>A</option>
-                                <option value="1" ${p?.correcta === 1 ? 'selected' : ''}>B</option>
-                                <option value="2" ${p?.correcta === 2 ? 'selected' : ''}>C</option>
-                                <option value="3" ${p?.correcta === 3 ? 'selected' : ''}>D</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="bi bi-lightbulb"></i> Pista (opcional)</label>
-                            <input type="text" name="pista_${i}" placeholder="Pista para el estudiante..." value="${p?.pista || ''}">
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label><span class="option-badge">B</span> Opción B *</label>
+                    <input type="text" name="opcion_${index}_1" required placeholder="Opción B" value="${p?.opciones?.[1] || ''}" oninput="onPreguntaInput(${index})">
+                </div>
+                <div class="form-group">
+                    <label><span class="option-badge">C</span> Opción C *</label>
+                    <input type="text" name="opcion_${index}_2" required placeholder="Opción C" value="${p?.opciones?.[2] || ''}" oninput="onPreguntaInput(${index})">
+                </div>
+                <div class="form-group">
+                    <label><span class="option-badge">D</span> Opción D *</label>
+                    <input type="text" name="opcion_${index}_3" required placeholder="Opción D" value="${p?.opciones?.[3] || ''}" oninput="onPreguntaInput(${index})">
                 </div>
             </div>
-        `;
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="bi bi-check2-circle"></i> Respuesta correcta *</label>
+                    <select name="correcta_${index}" required onchange="onPreguntaInput(${index})">
+                        <option value="">Seleccionar...</option>
+                        <option value="0" ${p?.correcta === 0 ? 'selected' : ''}>A</option>
+                        <option value="1" ${p?.correcta === 1 ? 'selected' : ''}>B</option>
+                        <option value="2" ${p?.correcta === 2 ? 'selected' : ''}>C</option>
+                        <option value="3" ${p?.correcta === 3 ? 'selected' : ''}>D</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="bi bi-lightbulb"></i> Pista (opcional)</label>
+                    <input type="text" name="pista_${index}" placeholder="Pista para el estudiante..." value="${p?.pista || ''}">
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Insertar antes del botón de agregar si existe
+    const addBtn = container.querySelector('.add-pregunta-container');
+    if (addBtn) {
+        container.insertBefore(preguntaDiv, addBtn);
+    } else {
+        container.appendChild(preguntaDiv);
     }
+}
+
+function addAddPreguntaButton() {
+    const container = document.getElementById('preguntasContainer');
+    
+    // Remover botón existente si hay
+    const existingBtn = container.querySelector('.add-pregunta-container');
+    if (existingBtn) existingBtn.remove();
+    
+    const btnContainer = document.createElement('div');
+    btnContainer.className = 'add-pregunta-container';
+    btnContainer.innerHTML = `
+        <button type="button" class="btn-add-pregunta" onclick="addNewPregunta()">
+            <i class="bi bi-plus-circle"></i>
+            Agregar Pregunta
+        </button>
+        <span class="preguntas-count-info">
+            <i class="bi bi-info-circle"></i>
+            ${currentPreguntasCount} preguntas (mínimo 5)
+        </span>
+    `;
+    container.appendChild(btnContainer);
+}
+
+function addNewPregunta() {
+    const newIndex = currentPreguntasCount;
+    currentPreguntasCount++;
+    addPreguntaHTML(newIndex, null);
+    addAddPreguntaButton(); // Actualizar el contador
+    updatePreguntasCount();
+    
+    // Scroll al nuevo elemento
+    const newItem = document.querySelector(`.pregunta-item[data-index="${newIndex}"]`);
+    if (newItem) {
+        newItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function deletePregunta(index) {
+    if (currentPreguntasCount <= 5) {
+        showDesafiosAlert('No se puede eliminar', 'Debe haber al menos 5 preguntas.', 'warning');
+        return;
+    }
+    
+    // Eliminar el elemento
+    const item = document.querySelector(`.pregunta-item[data-index="${index}"]`);
+    if (item) item.remove();
+    
+    currentPreguntasCount--;
+    
+    // Reindexar todas las preguntas
+    reindexPreguntas();
+    addAddPreguntaButton();
+    updatePreguntasCount();
+}
+
+function reindexPreguntas() {
+    const items = document.querySelectorAll('.pregunta-item');
+    items.forEach((item, newIndex) => {
+        const oldIndex = parseInt(item.dataset.index);
+        item.dataset.index = newIndex;
+        
+        // Actualizar número visual
+        const numberSpan = item.querySelector('.pregunta-number');
+        if (numberSpan) numberSpan.textContent = newIndex + 1;
+        
+        const h5 = item.querySelector('h5');
+        if (h5) h5.textContent = `Pregunta ${newIndex + 1}`;
+        
+        // Actualizar nombres de inputs
+        const inputs = item.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            const name = input.name;
+            if (name) {
+                input.name = name.replace(/_\d+/, `_${newIndex}`);
+                const oninput = input.getAttribute('oninput');
+                if (oninput) input.setAttribute('oninput', oninput.replace(/\d+/, newIndex));
+                const onchange = input.getAttribute('onchange');
+                if (onchange) input.setAttribute('onchange', onchange.replace(/\d+/, newIndex));
+            }
+        });
+        
+        // Actualizar botón de eliminar
+        const deleteBtn = item.querySelector('.btn-delete-pregunta');
+        if (deleteBtn) {
+            if (newIndex < 5) {
+                deleteBtn.remove(); // No se pueden eliminar las primeras 5
+            } else {
+                deleteBtn.setAttribute('onclick', `deletePregunta(${newIndex})`);
+            }
+        } else if (newIndex >= 5) {
+            // Agregar botón de eliminar si no existe y es >= 5
+            const headerLeft = item.querySelector('.pregunta-header-simple');
+            if (headerLeft && !headerLeft.querySelector('.btn-delete-pregunta')) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-delete-pregunta';
+                btn.setAttribute('onclick', `deletePregunta(${newIndex})`);
+                btn.title = 'Eliminar pregunta';
+                btn.innerHTML = '<i class="bi bi-trash"></i>';
+                headerLeft.appendChild(btn);
+            }
+        }
+    });
+}
+
+// Alias para compatibilidad
+function createFiveQuestions(existingQuestions = null) {
+    createQuestions(existingQuestions);
 }
 
 function onPreguntaInput(index) {
@@ -774,7 +914,7 @@ async function handleSaveNivel(e) {
         }
 
         const preguntas = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < currentPreguntasCount; i++) {
             const preguntaText = document.querySelector(`input[name="pregunta_${i}"]`)?.value;
             const opciones = [
                 document.querySelector(`input[name="opcion_${i}_0"]`)?.value,
@@ -791,6 +931,10 @@ async function handleSaveNivel(e) {
             }
 
             preguntas.push({ pregunta: preguntaText, opciones, correcta, pista });
+        }
+
+        if (preguntas.length < 5) {
+            throw new Error('Debe haber al menos 5 preguntas');
         }
 
         const nivelData = {

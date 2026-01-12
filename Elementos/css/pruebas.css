@@ -1475,37 +1475,48 @@
 
 .pregunta-body label {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: #555;
-    margin-bottom: 0.3rem;
+    color: #ffffff;
+    margin-bottom: 0.4rem;
+}
+
+.pregunta-body label i {
+    color: #ff6b6b;
+    margin-right: 0.3rem;
 }
 
 .pregunta-body input,
 .pregunta-body select,
 .pregunta-body textarea {
     width: 100%;
-    padding: 0.6rem 0.8rem;
-    border: 2px solid #ddd !important;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    background: #fff !important;
-    color: #333 !important;
+    padding: 0.7rem 0.9rem;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    transition: all 0.3s ease;
 }
 
 .pregunta-body input::placeholder {
-    color: #999 !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.pregunta-body select option {
+    background: #1a1a1a;
+    color: #ffffff;
 }
 
 .pregunta-body input:focus,
 .pregunta-body select:focus,
 .pregunta-body textarea:focus {
     outline: none;
-    border-color: #667eea !important;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2) !important;
-    background: #fff !important;
+    border-color: #ff0000 !important;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
 }
 
 .opciones-grid {
@@ -2480,4 +2491,90 @@ input.invalid {
     .nivel-tab {
         padding: 0.75rem;
     }
+}
+
+
+/* ========================================
+   ADD/DELETE PREGUNTA BUTTONS
+   ======================================== */
+.add-pregunta-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+}
+
+.btn-add-pregunta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.5rem;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.btn-add-pregunta:hover {
+    background: linear-gradient(135deg, #45a049, #388E3C);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.btn-add-pregunta i {
+    font-size: 1.1rem;
+}
+
+.preguntas-count-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.preguntas-count-info i {
+    font-size: 0.9rem;
+}
+
+.btn-delete-pregunta {
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+}
+
+.btn-delete-pregunta:hover {
+    background: linear-gradient(135deg, #ff0000, #990000);
+    transform: scale(1.1);
+}
+
+.btn-delete-pregunta i {
+    font-size: 0.9rem;
+}
+
+.pregunta-header-simple {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
 }
