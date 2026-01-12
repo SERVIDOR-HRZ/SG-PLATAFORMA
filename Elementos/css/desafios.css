@@ -1107,6 +1107,17 @@ html {
 .resultado-stat:nth-child(2) i { color: #FFD700; }
 .resultado-stat:nth-child(3) i { color: #9C27B0; }
 
+.resultado-stat.no-reward {
+    background: #fff3e0;
+    color: #e65100;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.resultado-stat.no-reward i {
+    color: #ff9800;
+}
+
 .continuar-btn {
     width: 100%;
     padding: 0.9rem;

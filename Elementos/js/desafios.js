@@ -890,26 +890,49 @@ async function showResultado() {
         stars = 1;
     }
 
-    // Calcular recompensas: proporcional a respuestas correctas
-    const monedasGanadas = Math.floor(monedasBase * (respuestasCorrectas / preguntasActuales.length));
-    const xpGanado = Math.floor(xpBase * (respuestasCorrectas / preguntasActuales.length));
+    // Verificar si es la primera vez que se completa este nivel
+    const previousData = userGameData.nivelesCompletados[nivelId];
+    const isFirstCompletion = !previousData;
+    const previousStars = previousData && typeof previousData === 'object' ? (previousData.stars || 0) : (previousData ? 1 : 0);
 
-    // Actualizar datos del usuario
-    userGameData.monedas += monedasGanadas;
-    userGameData.xp += xpGanado;
+    // Debug: verificar estado
+    console.log('=== DEBUG RECOMPENSAS ===');
+    console.log('nivelId:', nivelId);
+    console.log('nivelesCompletados:', userGameData.nivelesCompletados);
+    console.log('previousData:', previousData);
+    console.log('isFirstCompletion:', isFirstCompletion);
+    console.log('previousStars:', previousStars);
+    console.log('stars actuales:', stars);
+    console.log('========================');
 
-    // Si aprobó (>=60%), marcar nivel como completado y desbloquear siguiente
+    // Solo dar recompensas la primera vez que se aprueba el nivel
+    let monedasGanadas = 0;
+    let xpGanado = 0;
+    let mejoroEstrellas = false;
+
     if (porcentaje >= 60) {
-        // Guardar con estrellas - solo actualizar si obtiene más estrellas que antes
-        const previousData = userGameData.nivelesCompletados[nivelId];
-        const previousStars = previousData && typeof previousData === 'object' ? (previousData.stars || 0) : (previousData ? 1 : 0);
+        if (isFirstCompletion) {
+            // Primera vez: dar recompensas completas proporcionales
+            monedasGanadas = Math.floor(monedasBase * (respuestasCorrectas / preguntasActuales.length));
+            xpGanado = Math.floor(xpBase * (respuestasCorrectas / preguntasActuales.length));
+            
+            // Actualizar datos del usuario
+            userGameData.monedas += monedasGanadas;
+            userGameData.xp += xpGanado;
+        } else if (stars > previousStars) {
+            // Ya completado pero mejoró estrellas: solo actualizar estrellas, SIN recompensas
+            mejoroEstrellas = true;
+            // NO dar recompensas por mejorar estrellas
+        }
+        // Si ya completó: no dar recompensas
 
-        if (stars > previousStars) {
+        // Guardar con estrellas - solo actualizar si obtiene más estrellas que antes
+        if (isFirstCompletion || stars > previousStars) {
             userGameData.nivelesCompletados[nivelId] = {
                 completed: true,
                 stars: stars,
                 bestScore: respuestasCorrectas,
-                completedAt: new Date().toISOString()
+                completedAt: isFirstCompletion ? new Date().toISOString() : (previousData?.completedAt || new Date().toISOString())
             };
         }
 
@@ -920,8 +943,17 @@ async function showResultado() {
 
         resultadoIcon.classList.add('success');
         resultadoIcon.innerHTML = '<i class="bi bi-trophy-fill"></i>';
-        resultadoTitulo.textContent = stars === 3 ? '¡Perfecto!' : stars === 2 ? '¡Excelente!' : '¡Bien hecho!';
-        resultadoMensaje.textContent = 'Has completado este nivel';
+        
+        if (isFirstCompletion) {
+            resultadoTitulo.textContent = stars === 3 ? '¡Perfecto!' : stars === 2 ? '¡Excelente!' : '¡Bien hecho!';
+            resultadoMensaje.textContent = 'Has completado este nivel';
+        } else if (mejoroEstrellas) {
+            resultadoTitulo.textContent = '¡Mejoraste!';
+            resultadoMensaje.textContent = `Subiste de ${previousStars} a ${stars} estrellas`;
+        } else {
+            resultadoTitulo.textContent = '¡Nivel completado!';
+            resultadoMensaje.textContent = 'Ya habías completado este nivel';
+        }
     } else if (porcentaje >= 40) {
         resultadoIcon.classList.add('partial');
         resultadoIcon.innerHTML = '<i class="bi bi-star-half"></i>';
@@ -943,24 +975,48 @@ async function showResultado() {
         </div>
     `;
 
+    // Mostrar recompensas (o mensaje de que ya se completó)
+    let recompensasHTML = '';
+    if (monedasGanadas > 0 || xpGanado > 0) {
+        recompensasHTML = `
+            <div class="resultado-stat">
+                <i class="bi bi-coin"></i>
+                <span>+${monedasGanadas} Monedas</span>
+            </div>
+            <div class="resultado-stat">
+                <i class="bi bi-star-fill"></i>
+                <span>+${xpGanado} XP</span>
+            </div>
+        `;
+    } else if (porcentaje >= 60 && !isFirstCompletion) {
+        if (mejoroEstrellas) {
+            recompensasHTML = `
+                <div class="resultado-stat no-reward">
+                    <i class="bi bi-arrow-up-circle"></i>
+                    <span>¡Mejoraste a ${stars} estrellas!</span>
+                </div>
+            `;
+        } else {
+            recompensasHTML = `
+                <div class="resultado-stat no-reward">
+                    <i class="bi bi-info-circle"></i>
+                    <span>Sin recompensas (nivel ya completado)</span>
+                </div>
+            `;
+        }
+    }
+
     document.getElementById('resultadoStats').innerHTML = `
         ${starsHTML}
         <div class="resultado-stat">
             <i class="bi bi-check-circle"></i>
-            <span><span id="respuestasCorrectas">${respuestasCorrectas}</span>/${preguntasActuales.length} Correctas</span>
+            <span>${respuestasCorrectas}/${preguntasActuales.length} Correctas</span>
         </div>
-        <div class="resultado-stat">
-            <i class="bi bi-coin"></i>
-            <span>+<span id="monedasGanadas">${monedasGanadas}</span> Monedas</span>
-        </div>
-        <div class="resultado-stat">
-            <i class="bi bi-star-fill"></i>
-            <span>+<span id="xpGanado">${xpGanado}</span> XP</span>
-        </div>
+        ${recompensasHTML}
     `;
 
-    // Guardar progreso (solo actualiza racha si aprobó)
-    await saveUserProgress(porcentaje >= 60);
+    // Guardar progreso (solo actualiza racha si aprobó Y es primera vez o mejoró)
+    await saveUserProgress(porcentaje >= 60 && (isFirstCompletion || mejoroEstrellas));
 
     // Actualizar UI
     updateHeaderStats();
