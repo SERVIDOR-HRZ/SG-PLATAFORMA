@@ -2578,3 +2578,136 @@ input.invalid {
     padding: 1rem 1.25rem;
     background: rgba(255, 255, 255, 0.05);
 }
+
+/* ========================================
+   MENÚ DE MATERIAS - DESAFÍOS
+   ======================================== */
+.materias-menu {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.materia-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.5rem;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #666;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.materia-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.materia-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #333;
+    transform: translateY(-2px);
+}
+
+.materia-btn:hover i {
+    transform: scale(1.15);
+}
+
+.materia-btn.active {
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+}
+
+.materia-btn.active i {
+    color: white;
+}
+
+/* Colores específicos por materia al hover (no activo) */
+.materia-btn[data-materia="matematicas"]:not(.active):hover {
+    border-color: #2196F3;
+    color: #2196F3;
+}
+
+.materia-btn[data-materia="lectura"]:not(.active):hover {
+    border-color: #E53935;
+    color: #E53935;
+}
+
+.materia-btn[data-materia="sociales"]:not(.active):hover {
+    border-color: #FF9800;
+    color: #FF9800;
+}
+
+.materia-btn[data-materia="naturales"]:not(.active):hover {
+    border-color: #4CAF50;
+    color: #4CAF50;
+}
+
+.materia-btn[data-materia="ingles"]:not(.active):hover {
+    border-color: #9C27B0;
+    color: #9C27B0;
+}
+
+/* Colores específicos cuando está activo */
+.materia-btn[data-materia="matematicas"].active {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
+.materia-btn[data-materia="lectura"].active {
+    background: linear-gradient(135deg, #E53935 0%, #C62828 100%);
+    box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4);
+}
+
+.materia-btn[data-materia="sociales"].active {
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+
+.materia-btn[data-materia="naturales"].active {
+    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.materia-btn[data-materia="ingles"].active {
+    background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .materias-menu {
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+    
+    .materia-btn {
+        padding: 0.7rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .materia-btn span {
+        display: none;
+    }
+    
+    .materia-btn i {
+        font-size: 1.3rem;
+    }
+}

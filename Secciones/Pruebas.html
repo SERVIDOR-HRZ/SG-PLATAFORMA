@@ -99,19 +99,36 @@
 
             <!-- Desafios Admin View -->
             <div class="desafios-admin-container" id="desafiosAdminView" style="display: none;">
+                <!-- Menú de Materias -->
+                <div class="materias-menu" id="materiasMenu">
+                    <button class="materia-btn active" data-materia="matematicas">
+                        <i class="bi bi-calculator"></i>
+                        <span>Matemáticas</span>
+                    </button>
+                    <button class="materia-btn" data-materia="lectura">
+                        <i class="bi bi-book"></i>
+                        <span>Lectura Crítica</span>
+                    </button>
+                    <button class="materia-btn" data-materia="sociales">
+                        <i class="bi bi-globe"></i>
+                        <span>Ciencias Sociales</span>
+                    </button>
+                    <button class="materia-btn" data-materia="naturales">
+                        <i class="bi bi-tree"></i>
+                        <span>Ciencias Naturales</span>
+                    </button>
+                    <button class="materia-btn" data-materia="ingles">
+                        <i class="bi bi-translate"></i>
+                        <span>Inglés</span>
+                    </button>
+                </div>
+                
                 <div class="desafios-admin-header">
                     <div class="desafios-header-left">
-                        <h2><i class="bi bi-trophy-fill"></i> Gestión de Desafíos</h2>
+                        <h2><i class="bi bi-trophy-fill"></i> <span id="materiaTitle">Matemáticas</span></h2>
                         <p>Crea niveles con preguntas para que los estudiantes practiquen</p>
                     </div>
                     <div class="desafios-header-right">
-                        <select id="desafioMateriaSelect" class="materia-select">
-                            <option value="matematicas">Matemáticas</option>
-                            <option value="lectura">Lectura Crítica</option>
-                            <option value="sociales">Ciencias Sociales</option>
-                            <option value="naturales">Ciencias Naturales</option>
-                            <option value="ingles">Inglés</option>
-                        </select>
                         <button class="btn btn-primary" id="createNivelBtn">
                             <i class="bi bi-plus-circle"></i>
                             Crear Nivel

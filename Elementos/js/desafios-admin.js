@@ -285,11 +285,24 @@ function initDesafiosAdmin() {
 }
 
 function setupDesafiosEventListeners() {
-    const materiaSelect = document.getElementById('desafioMateriaSelect');
-    if (materiaSelect) {
-        materiaSelect.addEventListener('change', function () {
-            currentMateriaDesafio = this.value;
-            loadDesafiosNiveles();
+    // Menú de materias (botones)
+    const materiasMenu = document.getElementById('materiasMenu');
+    if (materiasMenu) {
+        materiasMenu.querySelectorAll('.materia-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remover active de todos
+                materiasMenu.querySelectorAll('.materia-btn').forEach(b => b.classList.remove('active'));
+                // Agregar active al clickeado
+                this.classList.add('active');
+                // Cambiar materia
+                currentMateriaDesafio = this.dataset.materia;
+                // Actualizar título
+                const materiaTitle = document.getElementById('materiaTitle');
+                if (materiaTitle) {
+                    materiaTitle.textContent = materiasConfig[currentMateriaDesafio]?.nombre || currentMateriaDesafio;
+                }
+                loadDesafiosNiveles();
+            });
         });
     }
 

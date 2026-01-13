@@ -145,11 +145,11 @@ async function loadAulaData() {
         if (materiasVisibles && materiasVisibles.length > 0) {
             // Guardar las materias visibles en currentAulaData para uso posterior
             currentAulaData.materiasVisibles = materiasVisibles;
-            
+
             // Verificar si hay una materia en la URL (para persistir al recargar)
             const urlParams = new URLSearchParams(window.location.search);
             const materiaFromUrl = urlParams.get('materia');
-            
+
             if (materiaFromUrl && materiasVisibles.includes(materiaFromUrl)) {
                 // Si hay una materia válida en la URL, entrar directamente a ella
                 showMateriasCards(materiasVisibles);
@@ -448,7 +448,7 @@ function enterMateria(materiaId) {
 
     // Cargar contenido
     loadAnuncios();
-    
+
     // Iniciar sistema de regeneración de energía
     initEnergyRegeneration();
 }
@@ -461,10 +461,10 @@ async function initEnergyRegeneration() {
     if (energyRegenInterval) {
         clearInterval(energyRegenInterval);
     }
-    
+
     // Verificar y regenerar energía al cargar
     await checkAndRegenerateEnergy();
-    
+
     // Configurar intervalo para verificar cada minuto
     energyRegenInterval = setInterval(async () => {
         await checkAndRegenerateEnergy();
@@ -474,17 +474,17 @@ async function initEnergyRegeneration() {
 async function checkAndRegenerateEnergy() {
     try {
         if (!window.firebaseDB) return;
-        
+
         const db = window.firebaseDB;
         const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
-        
+
         if (!userDoc.exists) return;
-        
+
         const userData = userDoc.data();
         const energiaActual = userData.energia !== undefined ? userData.energia : 10;
         const energiaMax = userData.energiaMax || 10;
         const ultimaRegeneracion = userData.ultimaRegeneracionEnergia?.toDate() || new Date(0);
-        
+
         // Si tiene energía infinita activa, no regenerar
         if (userData.energiaInfinita && userData.energiaInfinitaExpira) {
             const expira = userData.energiaInfinitaExpira.toDate ? userData.energiaInfinitaExpira.toDate() : new Date(userData.energiaInfinitaExpira);
@@ -492,25 +492,25 @@ async function checkAndRegenerateEnergy() {
                 return; // Energía infinita activa
             }
         }
-        
+
         // Si ya tiene energía máxima, solo actualizar timestamp
         if (energiaActual >= energiaMax) {
             return;
         }
-        
+
         // Calcular cuántas energías regenerar (1 cada 10 minutos)
         const ahora = new Date();
         const minutosTranscurridos = Math.floor((ahora - ultimaRegeneracion) / (1000 * 60));
         const energiasARegenerar = Math.floor(minutosTranscurridos / 10);
-        
+
         if (energiasARegenerar > 0) {
             const nuevaEnergia = Math.min(energiaActual + energiasARegenerar, energiaMax);
-            
+
             await db.collection('usuarios').doc(currentUser.id).update({
                 energia: nuevaEnergia,
                 ultimaRegeneracionEnergia: firebase.firestore.Timestamp.now()
             });
-            
+
             // Actualizar UI
             updateEnergyUI(nuevaEnergia, energiaMax);
         }
@@ -525,7 +525,7 @@ function updateEnergyUI(energia, energiaMax) {
     if (energyBadge) {
         energyBadge.textContent = `${energia}/${energiaMax}`;
     }
-    
+
     // Actualizar en la tienda si está visible
     const tiendaEnergy = document.getElementById('tiendaEnergia');
     if (tiendaEnergy) {
@@ -546,7 +546,7 @@ async function showMateriaStatsCard(materiaId, config) {
     let monedas = 0;
     let nivel = 1;
     let xp = 0;
-    
+
     try {
         if (window.firebaseDB) {
             const userDoc = await window.firebaseDB.collection('usuarios').doc(currentUser.id).get();
@@ -556,7 +556,7 @@ async function showMateriaStatsCard(materiaId, config) {
                 energia = data.energia !== undefined ? data.energia : 10;
                 energiaMax = data.energiaMax || 10;
                 monedas = data.puntos || data.puntosAcumulados || 0;
-                
+
                 // Cargar XP y nivel POR MATERIA (no global)
                 const progresoKey = `progreso_${materiaId}`;
                 if (data[progresoKey]) {
@@ -564,10 +564,10 @@ async function showMateriaStatsCard(materiaId, config) {
                 } else {
                     xp = 0;
                 }
-                
+
                 // Calcular nivel basado en XP de esta materia (sistema progresivo)
                 nivel = calculateLevelFromXP(xp);
-                
+
                 // Verificar energía infinita
                 if (data.energiaInfinita && data.energiaInfinitaExpira) {
                     const expira = data.energiaInfinitaExpira.toDate ? data.energiaInfinitaExpira.toDate() : new Date(data.energiaInfinitaExpira);
@@ -584,7 +584,7 @@ async function showMateriaStatsCard(materiaId, config) {
 
     // Crear color más oscuro para el gradiente
     const darkerColor = adjustColorBrightness(config.color, -40);
-    
+
     // Calcular progreso de nivel (sistema progresivo: 100, 200, 400, 800...)
     const xpParaNivel = getXPNeededForNextLevel(nivel);
     const xpBaseNivel = getXPForLevel(nivel);
@@ -593,7 +593,7 @@ async function showMateriaStatsCard(materiaId, config) {
 
     // Crear la tarjeta de estadísticas
     const energiaDisplay = energiaMax ? `${energia}/${energiaMax}` : `${energia}`;
-    
+
     const statsCardHTML = `
         <div class="materia-stats-card" id="materiaStatsCard" style="background: linear-gradient(135deg, ${config.color}, ${darkerColor});">
             <div class="materia-stats-header">
@@ -667,7 +667,7 @@ function backToMateriasSelection() {
 
     // Limpiar materia actual
     currentMateria = '';
-    
+
     // Limpiar el parámetro materia de la URL
     const url = new URL(window.location.href);
     url.searchParams.delete('materia');
@@ -768,10 +768,10 @@ function setupTabs() {
             }
         });
     });
-    
+
     // Setup desafíos submenu
     setupDesafiosSubmenu();
-    
+
     // Verificar si hay parámetros de URL para abrir un tab específico
     checkUrlTabParams();
 }
@@ -781,13 +781,13 @@ function checkUrlTabParams() {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
     const subtabParam = urlParams.get('subtab');
-    
+
     if (tabParam) {
         // Buscar y hacer clic en el tab correspondiente
         const tabBtn = document.querySelector(`.tab-btn[data-tab="${tabParam}"]`);
         if (tabBtn) {
             tabBtn.click();
-            
+
             // Si hay subtab, esperar un poco y luego activarlo
             if (subtabParam) {
                 setTimeout(() => {
@@ -804,19 +804,19 @@ function checkUrlTabParams() {
 // Setup desafíos submenu (Retos / Tienda / Racha / Ranking)
 function setupDesafiosSubmenu() {
     const submenuBtns = document.querySelectorAll('.desafios-submenu-btn');
-    
+
     submenuBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const subtab = btn.getAttribute('data-subtab');
-            
+
             // Remove active from all submenu buttons
             submenuBtns.forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.desafios-subtab').forEach(s => s.classList.remove('active'));
-            
+
             // Add active to clicked
             btn.classList.add('active');
             document.getElementById(`${subtab}Subtab`).classList.add('active');
-            
+
             // Cargar datos según la pestaña
             if (subtab === 'tienda') {
                 loadTiendaData();
@@ -827,10 +827,10 @@ function setupDesafiosSubmenu() {
             }
         });
     });
-    
+
     // Setup ranking filter buttons
     setupRankingFilter();
-    
+
     // Botón iniciar desafío
     const iniciarDesafioBtn = document.getElementById('iniciarDesafioBtn');
     if (iniciarDesafioBtn) {
@@ -839,7 +839,7 @@ function setupDesafiosSubmenu() {
             window.location.href = `Desafios.html?materia=${currentMateria}&aula=${currentAulaId}`;
         });
     }
-    
+
     // Setup tienda buttons
     setupTiendaButtons();
 }
@@ -854,37 +854,37 @@ async function loadRachaData() {
         await esperarFirebase();
         const db = window.firebaseDB;
         const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
-        
+
         if (userDoc.exists) {
             const data = userDoc.data();
-            
+
             // Obtener progreso de la materia actual
             const progresoKey = `progreso_${currentMateria}`;
             const progresoMateria = data[progresoKey] || {};
-            
+
             // Leer racha desde el progreso de la materia
             let racha = progresoMateria.racha || 0;
             const mejorRacha = progresoMateria.mejorRacha || 0;
             const diasTotales = progresoMateria.diasDesafios || 0;
             const ultimoDesafio = progresoMateria.ultimoDesafio ? (progresoMateria.ultimoDesafio.toDate ? progresoMateria.ultimoDesafio.toDate() : new Date(progresoMateria.ultimoDesafio)) : null;
-            
+
             // Verificar si la racha se perdió (no completó ayer ni hoy)
             const hoy = new Date();
             hoy.setHours(0, 0, 0, 0);
             const ayer = new Date(hoy);
             ayer.setDate(ayer.getDate() - 1);
-            
+
             let completadoHoy = false;
             let completadoAyer = false;
-            
+
             if (ultimoDesafio) {
                 const fechaUltimo = new Date(ultimoDesafio);
                 fechaUltimo.setHours(0, 0, 0, 0);
-                
+
                 completadoHoy = fechaUltimo.getTime() === hoy.getTime();
                 completadoAyer = fechaUltimo.getTime() === ayer.getTime();
             }
-            
+
             // Si no completó hoy ni ayer, la racha se perdió
             if (!completadoHoy && !completadoAyer && racha > 0) {
                 racha = 0;
@@ -893,12 +893,12 @@ async function loadRachaData() {
                     [`${progresoKey}.racha`]: 0
                 });
             }
-            
+
             // Actualizar UI
             document.getElementById('rachaCount').textContent = racha;
             document.getElementById('rachaMejor').textContent = mejorRacha;
             document.getElementById('rachaTotalDias').textContent = diasTotales;
-            
+
             const rachaMessage = document.getElementById('rachaMessage');
             if (completadoHoy) {
                 rachaMessage.classList.add('completed');
@@ -914,7 +914,7 @@ async function loadRachaData() {
                     rachaMessage.innerHTML = '<i class="bi bi-info-circle"></i><span>Completa al menos un desafío hoy para mantener tu racha</span>';
                 }
             }
-            
+
             // Renderizar calendario (desde el progreso de la materia)
             renderRachaCalendar(progresoMateria.diasCompletados || []);
         }
@@ -927,24 +927,24 @@ async function loadRachaData() {
 function renderRachaCalendar(diasCompletados = []) {
     const container = document.getElementById('rachaCalendar');
     if (!container) return;
-    
+
     const hoy = new Date();
     const mesActual = hoy.getMonth();
     const anioActual = hoy.getFullYear();
-    
+
     const primerDia = new Date(anioActual, mesActual, 1);
     const ultimoDia = new Date(anioActual, mesActual + 1, 0);
     const diasEnMes = ultimoDia.getDate();
     const primerDiaSemana = primerDia.getDay();
-    
+
     const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    
+
     // Convertir días completados a formato comparable
     const diasSet = new Set(diasCompletados.map(d => {
         const fecha = d.toDate ? d.toDate() : new Date(d);
         return `${fecha.getFullYear()}-${fecha.getMonth()}-${fecha.getDate()}`;
     }));
-    
+
     let html = `
         <div class="racha-calendar-header">
             <span class="racha-calendar-title">${nombresMeses[mesActual]} ${anioActual}</span>
@@ -954,27 +954,27 @@ function renderRachaCalendar(diasCompletados = []) {
         </div>
         <div class="racha-days-grid">
     `;
-    
+
     // Días vacíos al inicio
     for (let i = 0; i < primerDiaSemana; i++) {
         html += '<div class="racha-day empty"></div>';
     }
-    
+
     // Días del mes
     for (let dia = 1; dia <= diasEnMes; dia++) {
         const fechaKey = `${anioActual}-${mesActual}-${dia}`;
         const esHoy = dia === hoy.getDate();
         const esFuturo = dia > hoy.getDate();
         const completado = diasSet.has(fechaKey);
-        
+
         let clases = 'racha-day';
         if (completado) clases += ' completed';
         if (esHoy) clases += ' today';
         if (esFuturo) clases += ' future';
-        
+
         html += `<div class="${clases}">${dia}</div>`;
     }
-    
+
     html += '</div>';
     container.innerHTML = html;
 }
@@ -1003,10 +1003,10 @@ async function loadRankingData() {
     try {
         await esperarFirebase();
         const db = window.firebaseDB;
-        
+
         // Obtener estudiantes que tienen acceso a la materia actual
         let snapshot;
-        
+
         if (currentAulaId) {
             // Si hay aula, buscar por aulasAsignadas (array-contains)
             snapshot = await db.collection('usuarios')
@@ -1025,19 +1025,19 @@ async function loadRankingData() {
                 .where('tipoUsuario', '==', 'estudiante')
                 .get();
         }
-        
+
         let estudiantes = [];
         const progresoKey = `progreso_${currentMateria}`;
-        
+
         snapshot.forEach(doc => {
             const data = doc.data();
-            
+
             // Obtener XP, nivel y racha de la materia actual (todo por materia)
             const progresoMateria = data[progresoKey] || {};
             const xpMateria = progresoMateria.xp || 0;
             const nivelMateria = progresoMateria.nivel || 1;
             const rachaMateria = progresoMateria.racha || 0;
-            
+
             estudiantes.push({
                 id: doc.id,
                 nombre: data.nombre || 'Usuario',
@@ -1047,19 +1047,19 @@ async function loadRankingData() {
                 nivel: nivelMateria
             });
         });
-        
+
         // Ordenar según el filtro
         if (currentRankingFilter === 'racha') {
             estudiantes.sort((a, b) => b.racha - a.racha);
         } else {
             estudiantes.sort((a, b) => b.xp - a.xp);
         }
-        
+
         // Renderizar podio y lista
         renderRankingPodium(estudiantes.slice(0, 3));
         renderRankingList(estudiantes.slice(3, 10));
         renderUserPosition(estudiantes);
-        
+
     } catch (error) {
         console.error('Error cargando ranking:', error);
     }
@@ -1069,25 +1069,25 @@ async function loadRankingData() {
 function renderRankingPodium(top3) {
     const container = document.getElementById('rankingPodium');
     if (!container) return;
-    
+
     if (top3.length === 0) {
         container.innerHTML = '<div class="ranking-empty"><i class="bi bi-trophy"></i><p>No hay datos de ranking aún</p></div>';
         return;
     }
-    
+
     const positions = ['second', 'first', 'third'];
     const order = [1, 0, 2]; // Segundo, Primero, Tercero (para el display)
     const medals = ['🥈', '🥇', '🥉'];
-    
+
     let html = '';
     order.forEach((idx, displayIdx) => {
         const estudiante = top3[idx];
         if (!estudiante) return;
-        
+
         const score = currentRankingFilter === 'racha' ? estudiante.racha : estudiante.xp;
         const scoreIcon = currentRankingFilter === 'racha' ? 'bi-fire' : 'bi-star-fill';
         const scoreLabel = currentRankingFilter === 'racha' ? 'días' : 'XP';
-        
+
         html += `
             <div class="podium-item ${positions[displayIdx]}">
                 <div class="podium-medal">${medals[displayIdx]}</div>
@@ -1100,7 +1100,7 @@ function renderRankingPodium(top3) {
             </div>
         `;
     });
-    
+
     container.innerHTML = html;
 }
 
@@ -1108,19 +1108,19 @@ function renderRankingPodium(top3) {
 function renderRankingList(estudiantes) {
     const container = document.getElementById('rankingList');
     if (!container) return;
-    
+
     if (estudiantes.length === 0) {
         container.innerHTML = '';
         return;
     }
-    
+
     let html = '';
     estudiantes.forEach((est, idx) => {
         const posicion = idx + 4;
         const score = currentRankingFilter === 'racha' ? est.racha : est.xp;
         const scoreIcon = currentRankingFilter === 'racha' ? 'bi-fire' : 'bi-star-fill';
         const isCurrentUser = est.id === currentUser.id;
-        
+
         html += `
             <div class="ranking-item ${isCurrentUser ? 'current-user' : ''}">
                 <div class="ranking-position">${posicion}</div>
@@ -1138,7 +1138,7 @@ function renderRankingList(estudiantes) {
             </div>
         `;
     });
-    
+
     container.innerHTML = html;
 }
 
@@ -1146,17 +1146,17 @@ function renderRankingList(estudiantes) {
 function renderUserPosition(todosEstudiantes) {
     const container = document.getElementById('rankingUserPosition');
     if (!container) return;
-    
+
     const miPosicion = todosEstudiantes.findIndex(e => e.id === currentUser.id) + 1;
-    
+
     if (miPosicion === 0 || miPosicion <= 10) {
         container.style.display = 'none';
         return;
     }
-    
+
     const miData = todosEstudiantes.find(e => e.id === currentUser.id);
     const score = currentRankingFilter === 'racha' ? miData.racha : miData.xp;
-    
+
     container.style.display = 'flex';
     container.innerHTML = `
         <div class="user-pos-left">
@@ -1180,13 +1180,13 @@ async function loadTiendaData() {
         await esperarFirebase();
         const db = window.firebaseDB;
         const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
-        
+
         if (userDoc.exists) {
             const data = userDoc.data();
             const monedas = data.puntos || data.puntosAcumulados || 0;
             let energia = data.energia !== undefined ? data.energia : 10;
             const energiaMax = data.energiaMax || 10;
-            
+
             // Verificar energía infinita
             let energiaDisplay = `${energia}/${energiaMax}`;
             if (data.energiaInfinita && data.energiaInfinitaExpira) {
@@ -1195,25 +1195,25 @@ async function loadTiendaData() {
                     energiaDisplay = '∞';
                 }
             }
-            
+
             // Actualizar monedas en el header
             const monedasHeader = document.getElementById('monedasHeader');
             if (monedasHeader) {
                 monedasHeader.textContent = monedas;
             }
-            
+
             // Actualizar energía en el header
             const energyBadge = document.querySelector('.materia-energy-badge span');
             if (energyBadge) {
                 energyBadge.textContent = energiaDisplay;
             }
-            
+
             // Actualizar en la tienda
             const tiendaMonedas = document.getElementById('tiendaMonedas');
             if (tiendaMonedas) {
                 tiendaMonedas.textContent = monedas;
             }
-            
+
             const tiendaEnergia = document.getElementById('tiendaEnergia');
             if (tiendaEnergia) {
                 tiendaEnergia.textContent = energiaDisplay;
@@ -1227,7 +1227,7 @@ async function loadTiendaData() {
 // Setup tienda buttons
 function setupTiendaButtons() {
     const tiendaItems = document.querySelectorAll('.tienda-item');
-    
+
     tiendaItems.forEach(item => {
         const comprarBtn = item.querySelector('.tienda-comprar-btn');
         if (comprarBtn) {
@@ -1246,16 +1246,16 @@ let compraPendiente = { itemType: null, precio: null };
 // Mostrar modal de confirmación de compra
 function mostrarConfirmacionCompra(itemType, precio) {
     compraPendiente = { itemType, precio };
-    
+
     const modal = document.getElementById('confirmarCompraModal');
     const mensaje = document.getElementById('confirmarCompraMensaje');
-    
+
     if (!modal || !mensaje) {
         // Si no existe el modal, proceder directamente
         handleCompra(itemType, precio);
         return;
     }
-    
+
     mensaje.textContent = `¿Deseas comprar ${getItemName(itemType)} por ${precio} monedas?`;
     modal.style.display = 'flex';
 }
@@ -1272,10 +1272,10 @@ function cerrarConfirmacionCompra() {
 function confirmarCompra() {
     const itemType = compraPendiente.itemType;
     const precio = compraPendiente.precio;
-    
+
     cerrarConfirmacionCompra();
     compraPendiente = { itemType: null, precio: null };
-    
+
     if (itemType && precio) {
         handleCompra(itemType, precio);
     }
@@ -1288,11 +1288,11 @@ function cancelarCompra() {
 }
 
 // Inicializar eventos del modal de confirmación
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const confirmarBtn = document.getElementById('confirmarCompraBtn');
     const cancelarBtn = document.getElementById('cancelarCompraBtn');
     const modal = document.getElementById('confirmarCompraModal');
-    
+
     if (confirmarBtn) {
         confirmarBtn.addEventListener('click', confirmarCompra);
     }
@@ -1300,7 +1300,7 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelarBtn.addEventListener('click', cancelarCompra);
     }
     if (modal) {
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) {
                 cancelarCompra();
             }
@@ -1313,34 +1313,34 @@ async function handleCompra(itemType, precio) {
     try {
         await esperarFirebase();
         const db = window.firebaseDB;
-        
+
         // Obtener datos actuales del usuario
         const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
         if (!userDoc.exists) {
             showTiendaAlert('Error', 'No se encontró el usuario', 'error');
             return;
         }
-        
+
         const userData = userDoc.data();
         const monedasActuales = userData.puntos || userData.puntosAcumulados || 0;
-        
+
         // Verificar si tiene suficientes monedas
         if (monedasActuales < precio) {
             showTiendaAlert('Monedas insuficientes', `Necesitas ${precio} monedas pero solo tienes ${monedasActuales}`, 'warning');
             return;
         }
-        
+
         // Calcular lo que se va a agregar
         let updateData = {
             puntos: monedasActuales - precio,
             puntosAcumulados: monedasActuales - precio
         };
-        
+
         // Determinar qué se compró
         if (itemType.startsWith('energia')) {
             const cantidadEnergia = getCantidadFromItem(itemType, 'energia');
             const energiaActual = userData.energia || 0;
-            
+
             if (itemType === 'energiaInfinita') {
                 // Energía infinita por 24 horas
                 updateData.energiaInfinita = true;
@@ -1354,16 +1354,16 @@ async function handleCompra(itemType, precio) {
             const pistasActuales = userData.pistas || 0;
             updateData.pistas = pistasActuales + cantidadPistas;
         }
-        
+
         // Actualizar en Firebase
         await db.collection('usuarios').doc(currentUser.id).update(updateData);
-        
+
         // Actualizar UI
         loadTiendaData();
-        
+
         // Mostrar confirmación
         showTiendaAlert('¡Compra exitosa!', `Has comprado ${getItemName(itemType)} por ${precio} monedas`, 'success');
-        
+
     } catch (error) {
         console.error('Error en la compra:', error);
         showTiendaAlert('Error', 'No se pudo completar la compra', 'error');
@@ -1395,16 +1395,16 @@ function getItemName(itemType) {
 function showTiendaAlert(title, message, type = 'success') {
     const modal = document.getElementById('tiendaAlertModal');
     const icon = document.getElementById('tiendaAlertIcon');
-    
+
     if (!modal || !icon) {
         console.error('Modal de tienda no encontrado');
         alert(`${title}\n\n${message}`);
         return;
     }
-    
+
     document.getElementById('tiendaAlertTitulo').textContent = title;
     document.getElementById('tiendaAlertMensaje').textContent = message;
-    
+
     // Cambiar icono y color según tipo
     if (type === 'error') {
         icon.style.background = 'linear-gradient(180deg, #F44336 0%, #D32F2F 100%)';
@@ -1420,7 +1420,7 @@ function showTiendaAlert(title, message, type = 'success') {
         icon.style.background = 'linear-gradient(180deg, #4CAF50 0%, #388E3C 100%)';
         icon.innerHTML = '<i class="bi bi-check-circle-fill" style="font-size: 2.5rem; color: white;"></i>';
     }
-    
+
     modal.style.display = 'flex';
 }
 
@@ -1432,15 +1432,15 @@ function closeTiendaAlert() {
 }
 
 // Inicializar evento del botón de alerta de tienda
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const alertBtn = document.getElementById('tiendaAlertBtn');
     if (alertBtn) {
         alertBtn.addEventListener('click', closeTiendaAlert);
     }
-    
+
     const alertModal = document.getElementById('tiendaAlertModal');
     if (alertModal) {
-        alertModal.addEventListener('click', function(e) {
+        alertModal.addEventListener('click', function (e) {
             if (e.target === alertModal) {
                 closeTiendaAlert();
             }
@@ -1534,7 +1534,7 @@ async function loadNotasEstudiante(container, tareas, db, materiaColor) {
 
     // Procesar datos de tareas
     const tareasProcessed = [];
-    
+
     for (const tarea of tareas) {
         const fechaEntrega = tarea.fechaEntrega ? new Date(tarea.fechaEntrega.seconds * 1000) : null;
         const maxPuntos = tarea.puntos || 100;
@@ -1555,7 +1555,7 @@ async function loadNotasEstudiante(container, tareas, db, materiaColor) {
         if (!entregaSnapshot.empty) {
             const entrega = entregaSnapshot.docs[0].data();
             tareasEntregadas++;
-            
+
             if (entrega.calificacion !== undefined && entrega.calificacion !== null) {
                 nota = entrega.calificacion;
                 const porcentaje = (nota / maxPuntos) * 100;
@@ -1765,7 +1765,7 @@ function setupNotasSearch(materiaColor) {
         const query = e.target.value.toLowerCase().trim();
         clearBtn.style.display = query ? 'flex' : 'none';
 
-        const filtered = notasTareasData.filter(t => 
+        const filtered = notasTareasData.filter(t =>
             t.titulo.toLowerCase().includes(query)
         );
 
@@ -1849,11 +1849,11 @@ async function loadNotasAdmin(container, tareas, db, materiaColor) {
 
             if (!entregaSnapshot.empty) {
                 const entrega = entregaSnapshot.docs[0].data();
-                
+
                 if (entrega.calificacion !== undefined && entrega.calificacion !== null) {
                     const nota = entrega.calificacion;
                     const porcentaje = (nota / maxPuntos) * 100;
-                    
+
                     puntosObtenidos += nota;
                     tareasCalificadas++;
 
@@ -1880,10 +1880,10 @@ async function loadNotasAdmin(container, tareas, db, materiaColor) {
         }
 
         const promedio = tareasCalificadas > 0 ? (puntosObtenidos / tareasCalificadas).toFixed(1) : '-';
-        const promedioClass = promedio !== '-' ? 
-            (promedio >= 90 ? 'celda-excelente' : 
-             promedio >= 70 ? 'celda-buena' : 
-             promedio >= 50 ? 'celda-regular' : 'celda-baja') : '';
+        const promedioClass = promedio !== '-' ?
+            (promedio >= 90 ? 'celda-excelente' :
+                promedio >= 70 ? 'celda-buena' :
+                    promedio >= 50 ? 'celda-regular' : 'celda-baja') : '';
 
         html += `<td class="promedio-celda ${promedioClass}">${promedio}</td></tr>`;
     }
@@ -3180,7 +3180,7 @@ function createMaterialCard(id, material) {
             if (fileInfo.tipo === 'canva') {
                 const canvaEmbedUrl = fileInfo.canvaEmbedUrl || file.canvaEmbedUrl;
                 const escapedCanvaUrl = (canvaEmbedUrl || file.url).replace(/'/g, "\\'");
-                
+
                 mediaItems.push(`
                     <div class="material-canva-file" onclick="openCanvaModal('${escapedCanvaUrl}', '${escapedUrl}', '${fileInfo.nombre}')">
                         <div class="canva-container-medium">
@@ -3564,16 +3564,16 @@ async function openStudentProfileModal(studentId) {
     try {
         await esperarFirebase();
         const db = window.firebaseDB;
-        
+
         const doc = await db.collection('usuarios').doc(studentId).get();
-        
+
         if (!doc.exists) {
             showMessage('Estudiante no encontrado', 'error');
             return;
         }
-        
+
         const estudiante = doc.data();
-        
+
         // Header
         const avatarContainer = document.getElementById('studentProfileAvatar');
         if (estudiante.fotoPerfil) {
@@ -3581,9 +3581,9 @@ async function openStudentProfileModal(studentId) {
         } else {
             avatarContainer.innerHTML = `<div class="avatar-default"><i class="bi bi-person-fill"></i></div>`;
         }
-        
+
         document.getElementById('studentProfileName').textContent = estudiante.nombre || 'Sin nombre';
-        
+
         // Información Personal
         const personalInfo = document.getElementById('studentProfilePersonalInfo');
         personalInfo.innerHTML = `
@@ -3604,10 +3604,10 @@ async function openStudentProfileModal(studentId) {
                 <div class="student-profile-info-value">${estudiante.departamento || 'No disponible'}</div>
             </div>
         `;
-        
+
         // Información Académica
         const academicInfo = document.getElementById('studentProfileAcademicInfo');
-        
+
         // Formatear fecha de creación
         let fechaRegistro = 'No disponible';
         if (estudiante.fechaCreacion) {
@@ -3615,7 +3615,7 @@ async function openStudentProfileModal(studentId) {
                 // Si es un Timestamp de Firebase
                 if (estudiante.fechaCreacion.toDate) {
                     fechaRegistro = estudiante.fechaCreacion.toDate().toLocaleDateString('es-ES');
-                } 
+                }
                 // Si es un string de fecha
                 else if (typeof estudiante.fechaCreacion === 'string') {
                     const fecha = new Date(estudiante.fechaCreacion);
@@ -3636,7 +3636,7 @@ async function openStudentProfileModal(studentId) {
                 fechaRegistro = 'No disponible';
             }
         }
-        
+
         academicInfo.innerHTML = `
             <div class="student-profile-info-item">
                 <div class="student-profile-info-label"><i class="bi bi-building"></i> INSTITUCIÓN</div>
@@ -3655,24 +3655,24 @@ async function openStudentProfileModal(studentId) {
                 <div class="student-profile-info-value">${estudiante.activo !== false ? 'Activo' : 'Inactivo'}</div>
             </div>
         `;
-        
+
         // Ocultar sección de Progreso
         const progressSection = document.getElementById('studentProfileGamificationSection');
         if (progressSection) {
             progressSection.style.display = 'none';
         }
-        
+
         // Redes Sociales
         const socialSection = document.getElementById('studentProfileSocialSection');
         const socialLinks = document.getElementById('studentProfileSocialLinks');
-        
+
         const redesSociales = estudiante.redesSociales || {};
         const tieneRedes = redesSociales.linkedin || redesSociales.twitter || redesSociales.instagram || redesSociales.facebook || redesSociales.tiktok || redesSociales.youtube;
-        
+
         if (tieneRedes) {
             socialSection.style.display = 'block';
             let socialHTML = '';
-            
+
             if (redesSociales.linkedin) {
                 socialHTML += `<a href="${redesSociales.linkedin}" target="_blank" class="student-social-link linkedin"><i class="bi bi-linkedin"></i> LinkedIn</a>`;
             }
@@ -3691,15 +3691,15 @@ async function openStudentProfileModal(studentId) {
             if (redesSociales.youtube) {
                 socialHTML += `<a href="${redesSociales.youtube}" target="_blank" class="student-social-link youtube"><i class="bi bi-youtube"></i> YouTube</a>`;
             }
-            
+
             socialLinks.innerHTML = socialHTML;
         } else {
             socialSection.style.display = 'none';
         }
-        
+
         // Mostrar modal
         document.getElementById('studentProfileModal').classList.add('active');
-        
+
     } catch (error) {
         console.error('Error al cargar perfil del estudiante:', error);
         showMessage('Error al cargar información del estudiante', 'error');
@@ -5777,12 +5777,12 @@ function detectExternalLinkType(url) {
     if (url.includes('drive.google.com')) {
         return detectDriveFileType(url);
     }
-    
+
     // Check if it's a Canva URL
     if (url.includes('canva.com')) {
         return detectDriveFileType(url);
     }
-    
+
     // Check for GitHub
     if (url.includes('github.com')) {
         return {
@@ -5792,7 +5792,7 @@ function detectExternalLinkType(url) {
             isExternal: true
         };
     }
-    
+
     // Check for GitLab
     if (url.includes('gitlab.com')) {
         return {
@@ -5802,7 +5802,7 @@ function detectExternalLinkType(url) {
             isExternal: true
         };
     }
-    
+
     // Check for Bitbucket
     if (url.includes('bitbucket.org')) {
         return {
@@ -5812,7 +5812,7 @@ function detectExternalLinkType(url) {
             isExternal: true
         };
     }
-    
+
     // Check for Notion
     if (url.includes('notion.so') || url.includes('notion.site')) {
         return {
@@ -5822,7 +5822,7 @@ function detectExternalLinkType(url) {
             isExternal: true
         };
     }
-    
+
     // Check for Figma
     if (url.includes('figma.com')) {
         return {
@@ -5832,7 +5832,7 @@ function detectExternalLinkType(url) {
             isExternal: true
         };
     }
-    
+
     // Check for Miro
     if (url.includes('miro.com')) {
         return {
@@ -5842,7 +5842,7 @@ function detectExternalLinkType(url) {
             isExternal: true
         };
     }
-    
+
     // Check for Trello
     if (url.includes('trello.com')) {
         return {
@@ -5852,7 +5852,7 @@ function detectExternalLinkType(url) {
             isExternal: true
         };
     }
-    
+
     // Check for YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
         return {
@@ -5862,7 +5862,7 @@ function detectExternalLinkType(url) {
             isExternal: true
         };
     }
-    
+
     // Check for Vimeo
     if (url.includes('vimeo.com')) {
         return {
@@ -5872,7 +5872,7 @@ function detectExternalLinkType(url) {
             isExternal: true
         };
     }
-    
+
     // Generic external link
     const domain = extractDomain(url);
     return {
@@ -5898,7 +5898,7 @@ function extractGitHubInfo(url) {
     try {
         const urlObj = new URL(url);
         const pathParts = urlObj.pathname.split('/').filter(p => p);
-        
+
         if (pathParts.length >= 2) {
             const user = pathParts[0];
             const repo = pathParts[1];
@@ -6061,10 +6061,10 @@ function closeMediaModal() {
 async function checkIfAlreadyDownloaded(fileId) {
     try {
         if (!window.firebaseDB || !currentUser.id) return false;
-        
+
         const db = window.firebaseDB;
         const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
-        
+
         if (userDoc.exists) {
             const userData = userDoc.data();
             const descargasRealizadas = userData.descargasRealizadas || [];
@@ -6081,13 +6081,13 @@ async function checkIfAlreadyDownloaded(fileId) {
 async function registerDownload(fileId, fileName) {
     try {
         if (!window.firebaseDB || !currentUser.id) return false;
-        
+
         const db = window.firebaseDB;
         await db.collection('usuarios').doc(currentUser.id).update({
             descargasRealizadas: firebase.firestore.FieldValue.arrayUnion(fileId),
             ultimaDescarga: firebase.firestore.Timestamp.now()
         });
-        
+
         // Registrar en log de descargas
         await db.collection('logDescargas').add({
             usuarioId: currentUser.id,
@@ -6099,7 +6099,7 @@ async function registerDownload(fileId, fileName) {
             materia: currentMateria || '',
             fechaDescarga: firebase.firestore.Timestamp.now()
         });
-        
+
         return true;
     } catch (error) {
         console.error('Error registrando descarga:', error);
@@ -6178,19 +6178,19 @@ function closeDownloadConfirmModal() {
 // Confirmar y proceder con la descarga
 async function confirmDownload(fileId, originalUrl, fileName) {
     closeDownloadConfirmModal();
-    
+
     // Registrar la descarga
     const registered = await registerDownload(fileId, fileName);
-    
+
     if (registered) {
         // Crear URL de descarga directa de Google Drive
         const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-        
+
         // Abrir descarga en nueva ventana
         window.open(downloadUrl, '_blank');
-        
+
         showAlertModal('Descarga Iniciada', 'Recuerda: este documento es confidencial y está vinculado a tu cuenta.');
-        
+
         // Actualizar el botón de descarga en el modal actual
         const downloadBtn = document.querySelector('.download-pdf-btn');
         if (downloadBtn) {
@@ -6211,12 +6211,12 @@ async function confirmDownload(fileId, originalUrl, fileName) {
 async function attemptDownloadPDF(fileId, originalUrl, fileName) {
     // Verificar si ya descargó este archivo
     const alreadyDownloaded = await checkIfAlreadyDownloaded(fileId);
-    
+
     if (alreadyDownloaded) {
         showAlertModal('Descarga no permitida', 'Ya has descargado este documento anteriormente. Solo se permite una descarga por usuario.');
         return;
     }
-    
+
     // Mostrar modal de confirmación
     showDownloadConfirmation(fileId, originalUrl, fileName);
 }
@@ -6225,15 +6225,15 @@ async function attemptDownloadPDF(fileId, originalUrl, fileName) {
 async function openDriveFileModal(embedUrl, originalUrl, fileName, fileType) {
     const modal = document.getElementById('mediaModal');
     const modalContent = document.getElementById('mediaModalContent');
-    
+
     // Extraer el fileId de la URL
     const fileId = extractDriveFileId(originalUrl) || extractDriveFileId(embedUrl);
-    
+
     // Verificar si ya descargó este archivo (solo para PDFs)
     let downloadButtonHTML = '';
     if (fileType === 'pdf' && fileId) {
         const alreadyDownloaded = await checkIfAlreadyDownloaded(fileId);
-        
+
         if (alreadyDownloaded) {
             downloadButtonHTML = `
                 <button class="download-pdf-btn" disabled style="background: #6c757d; cursor: not-allowed;">
