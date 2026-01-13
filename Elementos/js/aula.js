@@ -2042,6 +2042,7 @@ async function createPostCard(id, anuncio) {
                             <iframe 
                                 src="https://drive.google.com/file/d/${fileId}/preview" 
                                 frameborder="0" 
+                                sandbox="allow-scripts allow-same-origin"
                                 allow="autoplay">
                             </iframe>
                             <div class="media-overlay">
@@ -2282,6 +2283,7 @@ async function createTaskCard(id, tarea) {
                             <iframe 
                                 src="https://drive.google.com/file/d/${fileId}/preview" 
                                 frameborder="0" 
+                                sandbox="allow-scripts allow-same-origin"
                                 allow="autoplay">
                             </iframe>
                             <div class="media-overlay">
@@ -3125,6 +3127,7 @@ function createMaterialCard(id, material) {
                                 <iframe 
                                     src="https://drive.google.com/file/d/${fileId}/preview" 
                                     frameborder="0" 
+                                    sandbox="allow-scripts allow-same-origin"
                                     allow="autoplay">
                                 </iframe>
                                 <div class="media-overlay">
@@ -3236,7 +3239,8 @@ function createMaterialCard(id, material) {
                     <div class="drive-file-container-medium" onclick="openDriveFileModal('${escapedEmbedUrl}', '${escapedUrl}', '${fileInfo.nombre}', '${fileInfo.tipo}')">
                         <iframe 
                             src="${embedUrl}" 
-                            frameborder="0">
+                            frameborder="0"
+                            sandbox="allow-scripts allow-same-origin">
                         </iframe>
                         <div class="media-overlay">
                             <i class="bi ${fileInfo.icono}"></i>
@@ -3344,7 +3348,7 @@ function extractDriveFolderId(url) {
     return null;
 }
 
-// Open Drive folder modal with professional view
+// Open Drive folder modal with professional view (sin opción de abrir en nueva pestaña)
 function openDriveFolderModal(folderId, originalUrl) {
     const modal = document.getElementById('mediaModal');
     const modalContent = document.getElementById('mediaModalContent');
@@ -3359,7 +3363,7 @@ function openDriveFolderModal(folderId, originalUrl) {
                     <i class="bi bi-folder-fill" style="color: #ffc107; font-size: 1.8rem;"></i>
                     <div class="drive-folder-title-section">
                         <span class="drive-folder-title">Carpeta de Google Drive</span>
-                        <span class="drive-folder-subtitle">Haz clic en un archivo para abrirlo</span>
+                        <span class="drive-folder-subtitle">Visualiza el contenido de la carpeta</span>
                     </div>
                 </div>
                 <div class="drive-folder-actions">
@@ -3371,10 +3375,6 @@ function openDriveFolderModal(folderId, originalUrl) {
                             <i class="bi bi-grid-3x3-gap"></i>
                         </button>
                     </div>
-                    <a href="${originalUrl}" target="_blank" class="drive-folder-open-btn">
-                        <i class="bi bi-box-arrow-up-right"></i>
-                        Abrir en Drive
-                    </a>
                 </div>
             </div>
             <div class="drive-folder-fullscreen-content" id="driveFolderContent">
@@ -3386,12 +3386,9 @@ function openDriveFolderModal(folderId, originalUrl) {
                     id="driveFolderIframe"
                     src="${gridUrl}" 
                     frameborder="0"
+                    sandbox="allow-scripts allow-same-origin"
                     onload="hideFolderLoading()">
                 </iframe>
-            </div>
-            <div class="drive-folder-footer">
-                <i class="bi bi-info-circle"></i>
-                <span>Los archivos se abrirán en una nueva pestaña.</span>
             </div>
         </div>
     `;
@@ -5886,6 +5883,7 @@ function openMediaModal(src, type) {
                 <iframe 
                     src="https://drive.google.com/file/d/${src}/preview" 
                     frameborder="0" 
+                    sandbox="allow-scripts allow-same-origin"
                     allow="autoplay">
                 </iframe>
             </div>
@@ -5903,7 +5901,7 @@ function closeMediaModal() {
     modalContent.innerHTML = '';
 }
 
-// Open Drive file modal for full preview
+// Open Drive file modal for full preview (sin opción de abrir en nueva pestaña para PDFs)
 function openDriveFileModal(embedUrl, originalUrl, fileName, fileType) {
     const modal = document.getElementById('mediaModal');
     const modalContent = document.getElementById('mediaModalContent');
@@ -5920,6 +5918,7 @@ function openDriveFileModal(embedUrl, originalUrl, fileName, fileType) {
                 <iframe 
                     src="${embedUrl}" 
                     frameborder="0"
+                    sandbox="allow-scripts allow-same-origin"
                     allowfullscreen>
                 </iframe>
             </div>

@@ -3918,12 +3918,17 @@ body {
 .drive-file-fullscreen-content {
     flex: 1;
     overflow: hidden;
+    position: relative;
 }
 
 .drive-file-fullscreen-content iframe {
     width: 100%;
     height: 100%;
     border: none;
+}
+
+/* Responsive for drive file thumbnails */
+    pointer-events: none;
 }
 
 /* Responsive for drive file thumbnails */
