@@ -2,7 +2,7 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">  
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios - Seamos Genios</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
@@ -220,14 +220,15 @@
                     <p class="reset-progress-subtitle">Restablece la racha, XP y monedas de todos los estudiantes</p>
                 </div>
             </div>
-            
+
             <div class="reset-progress-warning-card">
                 <div class="warning-icon">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                 </div>
                 <div class="warning-content">
                     <h3>¡Advertencia!</h3>
-                    <p>Esta acción restablecerá el progreso de <strong>TODOS</strong> los estudiantes. Los siguientes datos serán reiniciados:</p>
+                    <p>Esta acción restablecerá el progreso de <strong>TODOS</strong> los estudiantes. Los siguientes
+                        datos serán reiniciados:</p>
                     <ul>
                         <li><i class="bi bi-fire"></i> Racha de días (global y por materia)</li>
                         <li><i class="bi bi-star-fill"></i> Puntos de experiencia XP (de todas las materias)</li>
@@ -379,52 +380,52 @@
                         </div>
                     </div>
                     <div class="table-actions">
-                    <div class="export-dropdown">
-                        <button class="export-btn" id="exportBtn">
-                            <i class="bi bi-file-earmark-excel"></i>
-                            Exportar Excel
-                            <i class="bi bi-chevron-down"></i>
-                        </button>
-                        <div class="export-menu" id="exportMenu">
-                            <button class="export-option" data-type="all">
-                                <i class="bi bi-people-fill"></i>
-                                Todos los Usuarios
+                        <div class="export-dropdown">
+                            <button class="export-btn" id="exportBtn">
+                                <i class="bi bi-file-earmark-excel"></i>
+                                Exportar Excel
+                                <i class="bi bi-chevron-down"></i>
                             </button>
-                            <button class="export-option" data-type="estudiante">
-                                <i class="bi bi-person-fill"></i>
-                                Solo Estudiantes
-                            </button>
-                            <button class="export-option" data-type="admin">
-                                <i class="bi bi-person-badge-fill"></i>
-                                Solo Profesores
-                            </button>
-                            <button class="export-option" data-type="superusuario">
-                                <i class="bi bi-shield-fill-exclamation"></i>
-                                Solo Super Usuarios
-                            </button>
-                            <button class="export-option" data-type="codigos">
-                                <i class="bi bi-key-fill"></i>
-                                Códigos de Recuperación
-                            </button>
-                            <button class="export-option" data-type="insignias">
-                                <i class="bi bi-award-fill"></i>
-                                Insignias y Gamificación
-                            </button>
+                            <div class="export-menu" id="exportMenu">
+                                <button class="export-option" data-type="all">
+                                    <i class="bi bi-people-fill"></i>
+                                    Todos los Usuarios
+                                </button>
+                                <button class="export-option" data-type="estudiante">
+                                    <i class="bi bi-person-fill"></i>
+                                    Solo Estudiantes
+                                </button>
+                                <button class="export-option" data-type="admin">
+                                    <i class="bi bi-person-badge-fill"></i>
+                                    Solo Profesores
+                                </button>
+                                <button class="export-option" data-type="superusuario">
+                                    <i class="bi bi-shield-fill-exclamation"></i>
+                                    Solo Super Usuarios
+                                </button>
+                                <button class="export-option" data-type="codigos">
+                                    <i class="bi bi-key-fill"></i>
+                                    Códigos de Recuperación
+                                </button>
+                                <button class="export-option" data-type="insignias">
+                                    <i class="bi bi-award-fill"></i>
+                                    Insignias y Gamificación
+                                </button>
+                            </div>
                         </div>
+                        <button class="manage-insignias-btn" id="manageInsigniasBtn" title="Gestionar Insignias">
+                            <i class="bi bi-award-fill"></i>
+                            <span>Gestionar Insignias</span>
+                        </button>
+                        <button class="create-user-btn" id="createUserBtn">
+                            <i class="bi bi-person-plus-fill"></i>
+                            Crear Usuario
+                        </button>
+                        <button class="refresh-btn" id="refreshBtn">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Actualizar
+                        </button>
                     </div>
-                    <button class="manage-insignias-btn" id="manageInsigniasBtn" title="Gestionar Insignias">
-                        <i class="bi bi-award-fill"></i>
-                        <span>Gestionar Insignias</span>
-                    </button>
-                    <button class="create-user-btn" id="createUserBtn">
-                        <i class="bi bi-person-plus-fill"></i>
-                        Crear Usuario
-                    </button>
-                    <button class="refresh-btn" id="refreshBtn">
-                        <i class="bi bi-arrow-clockwise"></i>
-                        Actualizar
-                    </button>
-                </div>
                 </div>
             </div>
 
@@ -596,9 +597,11 @@
 
                             <div class="input-group">
                                 <label for="createUsuario" id="createUsuarioLabel">Nombre de Usuario *</label>
-                                <input type="text" id="createUsuario" required placeholder="Solo el nombre (ej: juan.perez)">
+                                <input type="text" id="createUsuario" required
+                                    placeholder="Solo el nombre (ej: juan.perez)">
                                 <small id="createUsuarioHint"
-                                    style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Solo escribe el nombre de usuario. Se agregará automáticamente @seamosgenios.com</small>
+                                    style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Solo escribe el nombre
+                                    de usuario. Se agregará automáticamente @seamosgenios.com</small>
                             </div>
 
                             <div class="input-group">
@@ -628,7 +631,8 @@
                     <!-- Asignación de Aulas y Materias para Profesores -->
                     <div class="form-section admin-fields" style="display: none;">
                         <h4>Aulas y Materias Asignadas</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas donde enseñará este profesor y las materias que impartirá en cada una</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas donde
+                            enseñará este profesor y las materias que impartirá en cada una</p>
                         <div class="aulas-profesor-grid" id="aulasProfesorCreateGrid">
                             <div class="loading-aulas-msg">
                                 <i class="bi bi-arrow-clockwise spin"></i>
@@ -637,14 +641,17 @@
                         </div>
                         <div class="no-aulas-msg" id="noAulasProfesorCreateMsg" style="display: none;">
                             <i class="bi bi-info-circle"></i>
-                            <span>No hay aulas creadas. <a href="#" onclick="switchDashboardView('aulas'); closeCreateUserModal();">Crear aulas primero</a></span>
+                            <span>No hay aulas creadas. <a href="#"
+                                    onclick="switchDashboardView('aulas'); closeCreateUserModal();">Crear aulas
+                                    primero</a></span>
                         </div>
                     </div>
 
                     <!-- Acceso a Aulas para Estudiantes -->
                     <div class="form-section student-fields">
                         <h4>Acceso a Aulas Virtuales</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas a las que el estudiante tendrá acceso</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas a las que
+                            el estudiante tendrá acceso</p>
                         <div class="aulas-permisos-grid" id="aulasPermisosCreateGrid">
                             <!-- Las aulas se cargarán dinámicamente desde Firebase -->
                             <div class="loading-aulas-msg">
@@ -654,7 +661,9 @@
                         </div>
                         <div class="no-aulas-msg" id="noAulasCreateMsg" style="display: none;">
                             <i class="bi bi-info-circle"></i>
-                            <span>No hay aulas creadas. <a href="#" onclick="switchDashboardView('aulas'); closeCreateUserModal();">Crear aulas primero</a></span>
+                            <span>No hay aulas creadas. <a href="#"
+                                    onclick="switchDashboardView('aulas'); closeCreateUserModal();">Crear aulas
+                                    primero</a></span>
                         </div>
                     </div>
 
@@ -751,7 +760,8 @@
                         <div class="input-group">
                             <label for="createSecurityCode">Código de Seguridad *</label>
                             <input type="password" id="createSecurityCode" placeholder="Ingresa el código de seguridad">
-                            <small style="color: #666; font-size: 0.85rem;">Este código es necesario para crear superusuarios</small>
+                            <small style="color: #666; font-size: 0.85rem;">Este código es necesario para crear
+                                superusuarios</small>
                         </div>
                     </div>
 
@@ -838,8 +848,10 @@
 
                             <div class="input-group">
                                 <label for="editUsuario">Nombre de Usuario *</label>
-                                <input type="text" id="editUsuario" required placeholder="Solo el nombre (ej: juan.perez)">
-                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Solo escribe el nombre de usuario. Se agregará automáticamente @seamosgenios.com</small>
+                                <input type="text" id="editUsuario" required
+                                    placeholder="Solo el nombre (ej: juan.perez)">
+                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Solo escribe el
+                                    nombre de usuario. Se agregará automáticamente @seamosgenios.com</small>
                             </div>
 
                             <div class="input-group">
@@ -858,7 +870,8 @@
                     <!-- Asignación de Aulas y Materias para Profesores -->
                     <div class="form-section admin-edit-fields" style="display: none;">
                         <h4>Aulas y Materias Asignadas</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas donde enseña este profesor y las materias que imparte en cada una</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas donde
+                            enseña este profesor y las materias que imparte en cada una</p>
                         <div class="aulas-profesor-grid" id="aulasProfesorEditGrid">
                             <div class="loading-aulas-msg">
                                 <i class="bi bi-arrow-clockwise spin"></i>
@@ -979,7 +992,8 @@
                     <!-- Acceso a Aulas -->
                     <div class="form-section student-edit-fields">
                         <h4>Acceso a Aulas Virtuales</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas a las que el estudiante tendrá acceso</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las aulas a las que
+                            el estudiante tendrá acceso</p>
                         <div class="aulas-permisos-grid" id="aulasPermisosEditGrid">
                             <!-- Las aulas se cargarán dinámicamente desde Firebase -->
                             <div class="loading-aulas-msg">
@@ -1119,7 +1133,8 @@
                         <div class="form-grid">
                             <div class="input-group">
                                 <label for="insigniaNombre">Nombre de la Insignia *</label>
-                                <input type="text" id="insigniaNombre" required placeholder="Ej: Matemático Experto" maxlength="50">
+                                <input type="text" id="insigniaNombre" required placeholder="Ej: Matemático Experto"
+                                    maxlength="50">
                             </div>
 
                             <div class="input-group">
@@ -1136,7 +1151,9 @@
 
                             <div class="input-group full-width">
                                 <label for="insigniaDescripcion">Descripción</label>
-                                <textarea id="insigniaDescripcion" placeholder="Descripción de cómo se obtiene esta insignia" rows="3" maxlength="200"></textarea>
+                                <textarea id="insigniaDescripcion"
+                                    placeholder="Descripción de cómo se obtiene esta insignia" rows="3"
+                                    maxlength="200"></textarea>
                             </div>
                         </div>
                     </div>
@@ -1145,7 +1162,7 @@
                     <div class="form-section icon-selector-section">
                         <h4>Seleccionar Ícono *</h4>
                         <p class="section-subtitle">Elige un ícono de Bootstrap Icons para representar esta insignia</p>
-                        
+
                         <!-- Icon Categories Filter -->
                         <div class="icon-categories">
                             <button type="button" class="icon-category-btn active" data-category="all">Todos</button>
@@ -1171,7 +1188,8 @@
                     <!-- Color Selector -->
                     <div class="form-section">
                         <h4>Color de la Insignia</h4>
-                        <p class="section-subtitle">El color se asignará automáticamente según la materia seleccionada</p>
+                        <p class="section-subtitle">El color se asignará automáticamente según la materia seleccionada
+                        </p>
                         <div class="color-preview-section">
                             <div class="auto-color-info">
                                 <div class="color-info-header">
@@ -1257,12 +1275,14 @@
                         <div class="form-grid">
                             <div class="input-group full-width">
                                 <label for="institucionNombre">Nombre de la Institución *</label>
-                                <input type="text" id="institucionNombre" required placeholder="Ej: Colegio San José" maxlength="100">
+                                <input type="text" id="institucionNombre" required placeholder="Ej: Colegio San José"
+                                    maxlength="100">
                             </div>
 
                             <div class="input-group full-width">
                                 <label for="institucionDescripcion">Descripción</label>
-                                <textarea id="institucionDescripcion" placeholder="Descripción breve de la institución" rows="4" maxlength="500"></textarea>
+                                <textarea id="institucionDescripcion" placeholder="Descripción breve de la institución"
+                                    rows="4" maxlength="500"></textarea>
                             </div>
 
                             <div class="input-group">
@@ -1410,19 +1430,22 @@
                         <div class="form-grid">
                             <div class="input-group full-width">
                                 <label for="coordinadorNombre">Nombre Completo *</label>
-                                <input type="text" id="coordinadorNombre" required placeholder="Nombre completo del coordinador">
+                                <input type="text" id="coordinadorNombre" required
+                                    placeholder="Nombre completo del coordinador">
                             </div>
 
                             <div class="input-group">
                                 <label for="coordinadorUsuario">Nombre de Usuario *</label>
                                 <input type="text" id="coordinadorUsuario" required placeholder="nombre.usuario">
-                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Se agregará automáticamente @seamosgenios.com</small>
+                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">Se agregará
+                                    automáticamente @seamosgenios.com</small>
                             </div>
 
                             <div class="input-group">
                                 <label for="coordinadorPassword">Contraseña *</label>
                                 <div class="password-input">
-                                    <input type="password" id="coordinadorPassword" required placeholder="Contraseña segura" minlength="6">
+                                    <input type="password" id="coordinadorPassword" required
+                                        placeholder="Contraseña segura" minlength="6">
                                     <button type="button" class="password-toggle" id="toggleCoordinadorPassword">
                                         <i class="bi bi-eye"></i>
                                     </button>
@@ -1513,12 +1536,14 @@
                         <div class="form-grid">
                             <div class="input-group full-width">
                                 <label for="aulaNombre">Nombre del Aula *</label>
-                                <input type="text" id="aulaNombre" required placeholder="Ej: Aula 11-A, Grupo Avanzado, etc." maxlength="100">
+                                <input type="text" id="aulaNombre" required
+                                    placeholder="Ej: Aula 11-A, Grupo Avanzado, etc." maxlength="100">
                             </div>
 
                             <div class="input-group full-width">
                                 <label for="aulaDescripcion">Descripción</label>
-                                <textarea id="aulaDescripcion" placeholder="Descripción breve del aula" rows="3" maxlength="300"></textarea>
+                                <textarea id="aulaDescripcion" placeholder="Descripción breve del aula" rows="3"
+                                    maxlength="300"></textarea>
                             </div>
                         </div>
                     </div>
@@ -1526,7 +1551,8 @@
                     <!-- Materias Selection -->
                     <div class="form-section">
                         <h4>Materias del Aula *</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las materias que estarán disponibles en esta aula</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona las materias que
+                            estarán disponibles en esta aula</p>
                         <div class="materias-aula-grid">
                             <label class="materia-aula-checkbox">
                                 <input type="checkbox" name="materiaAula" value="anuncios">
@@ -1579,27 +1605,33 @@
                         <div class="color-aula-grid">
                             <label class="color-aula-option">
                                 <input type="radio" name="colorAula" value="#667eea" checked>
-                                <span class="color-preview" style="background: linear-gradient(135deg, #667eea, #764ba2);"></span>
+                                <span class="color-preview"
+                                    style="background: linear-gradient(135deg, #667eea, #764ba2);"></span>
                             </label>
                             <label class="color-aula-option">
                                 <input type="radio" name="colorAula" value="#ff0000">
-                                <span class="color-preview" style="background: linear-gradient(135deg, #ff0000, #cc0000);"></span>
+                                <span class="color-preview"
+                                    style="background: linear-gradient(135deg, #ff0000, #cc0000);"></span>
                             </label>
                             <label class="color-aula-option">
                                 <input type="radio" name="colorAula" value="#28a745">
-                                <span class="color-preview" style="background: linear-gradient(135deg, #28a745, #20c997);"></span>
+                                <span class="color-preview"
+                                    style="background: linear-gradient(135deg, #28a745, #20c997);"></span>
                             </label>
                             <label class="color-aula-option">
                                 <input type="radio" name="colorAula" value="#ffc107">
-                                <span class="color-preview" style="background: linear-gradient(135deg, #ffc107, #fd7e14);"></span>
+                                <span class="color-preview"
+                                    style="background: linear-gradient(135deg, #ffc107, #fd7e14);"></span>
                             </label>
                             <label class="color-aula-option">
                                 <input type="radio" name="colorAula" value="#17a2b8">
-                                <span class="color-preview" style="background: linear-gradient(135deg, #17a2b8, #138496);"></span>
+                                <span class="color-preview"
+                                    style="background: linear-gradient(135deg, #17a2b8, #138496);"></span>
                             </label>
                             <label class="color-aula-option">
                                 <input type="radio" name="colorAula" value="#9c27b0">
-                                <span class="color-preview" style="background: linear-gradient(135deg, #9c27b0, #7b1fa2);"></span>
+                                <span class="color-preview"
+                                    style="background: linear-gradient(135deg, #9c27b0, #7b1fa2);"></span>
                             </label>
                         </div>
                     </div>
@@ -1607,8 +1639,9 @@
                     <!-- Asignar Estudiantes -->
                     <div class="form-section">
                         <h4>Asignar Estudiantes</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona los estudiantes que tendrán acceso a esta aula</p>
-                        
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona los estudiantes que
+                            tendrán acceso a esta aula</p>
+
                         <!-- Asignación rápida por institución -->
                         <div class="asignacion-rapida-section">
                             <label>Asignación rápida por institución:</label>
@@ -1631,7 +1664,8 @@
                         <div class="estudiantes-search-section">
                             <div class="search-box">
                                 <i class="bi bi-search"></i>
-                                <input type="text" id="searchEstudiantesAula" placeholder="Buscar estudiantes por nombre...">
+                                <input type="text" id="searchEstudiantesAula"
+                                    placeholder="Buscar estudiantes por nombre...">
                             </div>
                         </div>
 
@@ -1642,7 +1676,7 @@
                                 <span>Cargando estudiantes...</span>
                             </div>
                         </div>
-                        
+
                         <!-- Contador de seleccionados -->
                         <div class="estudiantes-counter" id="estudiantesCounter">
                             <i class="bi bi-people"></i>
@@ -1713,7 +1747,8 @@
                     </div>
                     <div class="confirmation-text">
                         <p><strong>¡ACCIÓN IRREVERSIBLE!</strong></p>
-                        <p>Estás a punto de restablecer el progreso de <strong id="resetConfirmStudentCount">0</strong> estudiantes.</p>
+                        <p>Estás a punto de restablecer el progreso de <strong id="resetConfirmStudentCount">0</strong>
+                            estudiantes.</p>
                         <p>Se eliminarán:</p>
                         <ul class="reset-items-list">
                             <li><i class="bi bi-fire"></i> Todas las rachas (global y por materia)</li>
@@ -1729,7 +1764,8 @@
                         <i class="bi bi-shield-lock"></i>
                         Código de Seguridad
                     </label>
-                    <input type="password" id="resetProgressSecurityCode" placeholder="Ingresa el código de seguridad" autocomplete="off">
+                    <input type="password" id="resetProgressSecurityCode" placeholder="Ingresa el código de seguridad"
+                        autocomplete="off">
                     <p class="security-hint">Este código es necesario para confirmar el restablecimiento</p>
                 </div>
 

@@ -5901,10 +5901,199 @@ function closeMediaModal() {
     modalContent.innerHTML = '';
 }
 
+// Verificar si el usuario ya descargó este archivo
+async function checkIfAlreadyDownloaded(fileId) {
+    try {
+        if (!window.firebaseDB || !currentUser.id) return false;
+        
+        const db = window.firebaseDB;
+        const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
+        
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            const descargasRealizadas = userData.descargasRealizadas || [];
+            return descargasRealizadas.includes(fileId);
+        }
+        return false;
+    } catch (error) {
+        console.error('Error verificando descarga:', error);
+        return false;
+    }
+}
+
+// Registrar descarga del archivo
+async function registerDownload(fileId, fileName) {
+    try {
+        if (!window.firebaseDB || !currentUser.id) return false;
+        
+        const db = window.firebaseDB;
+        await db.collection('usuarios').doc(currentUser.id).update({
+            descargasRealizadas: firebase.firestore.FieldValue.arrayUnion(fileId),
+            ultimaDescarga: firebase.firestore.Timestamp.now()
+        });
+        
+        // Registrar en log de descargas
+        await db.collection('logDescargas').add({
+            usuarioId: currentUser.id,
+            usuarioNombre: currentUser.nombre || 'Sin nombre',
+            usuarioEmail: currentUser.usuario || currentUser.email || 'Sin email',
+            archivoId: fileId,
+            archivoNombre: fileName,
+            aulaId: currentAulaId || '',
+            materia: currentMateria || '',
+            fechaDescarga: firebase.firestore.Timestamp.now()
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('Error registrando descarga:', error);
+        return false;
+    }
+}
+
+// Mostrar modal de confirmación de descarga
+function showDownloadConfirmation(fileId, originalUrl, fileName) {
+    const confirmModal = document.createElement('div');
+    confirmModal.className = 'modal active';
+    confirmModal.id = 'downloadConfirmModal';
+    confirmModal.innerHTML = `
+        <div class="modal-content modal-content-small" style="max-width: 500px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white;">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bi bi-shield-exclamation"></i>
+                    Advertencia de Seguridad
+                </h3>
+                <button class="close-btn" onclick="closeDownloadConfirmModal()" style="color: white;">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #ffc107, #ff9800); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="bi bi-file-earmark-lock2" style="font-size: 2.5rem; color: white;"></i>
+                    </div>
+                    <h4 style="color: #333; margin-bottom: 0.5rem;">${fileName}</h4>
+                    <span style="color: #666; font-size: 0.9rem;">Documento Protegido</span>
+                </div>
+                
+                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <p style="color: #856404; font-size: 0.9rem; margin: 0; line-height: 1.6;">
+                        <i class="bi bi-exclamation-triangle-fill" style="margin-right: 0.5rem;"></i>
+                        <strong>IMPORTANTE:</strong> Este documento está <strong>encriptado</strong> y contiene marcas de agua invisibles vinculadas a tu cuenta.
+                    </p>
+                </div>
+                
+                <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <p style="color: #721c24; font-size: 0.85rem; margin: 0; line-height: 1.6;">
+                        <i class="bi bi-shield-fill-x" style="margin-right: 0.5rem;"></i>
+                        En caso de <strong>filtración</strong> o <strong>reenvío</strong> a cualquier red social, plataforma o terceros, y si se detecta esta infracción, <strong>tu cuenta será bloqueada indefinidamente</strong> sin posibilidad de recuperación.
+                    </p>
+                </div>
+                
+                <div style="background: #e7f3ff; border: 1px solid #b6d4fe; border-radius: 8px; padding: 1rem;">
+                    <p style="color: #084298; font-size: 0.85rem; margin: 0; line-height: 1.6;">
+                        <i class="bi bi-info-circle-fill" style="margin-right: 0.5rem;"></i>
+                        Solo puedes descargar este documento <strong>UNA VEZ</strong>. Asegúrate de guardarlo en un lugar seguro.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-actions" style="padding: 0 1.5rem 1.5rem; display: flex; gap: 1rem;">
+                <button type="button" class="cancel-btn" onclick="closeDownloadConfirmModal()" style="flex: 1;">
+                    Cancelar
+                </button>
+                <button type="button" class="submit-btn" onclick="confirmDownload('${fileId}', '${originalUrl}', '${fileName}')" style="flex: 1; background: linear-gradient(135deg, #28a745, #20c997);">
+                    <i class="bi bi-download"></i>
+                    Acepto y Descargar
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(confirmModal);
+}
+
+// Cerrar modal de confirmación de descarga
+function closeDownloadConfirmModal() {
+    const modal = document.getElementById('downloadConfirmModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Confirmar y proceder con la descarga
+async function confirmDownload(fileId, originalUrl, fileName) {
+    closeDownloadConfirmModal();
+    
+    // Registrar la descarga
+    const registered = await registerDownload(fileId, fileName);
+    
+    if (registered) {
+        // Crear URL de descarga directa de Google Drive
+        const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+        
+        // Abrir descarga en nueva ventana
+        window.open(downloadUrl, '_blank');
+        
+        showAlertModal('Descarga Iniciada', 'Recuerda: este documento es confidencial y está vinculado a tu cuenta.');
+        
+        // Actualizar el botón de descarga en el modal actual
+        const downloadBtn = document.querySelector('.download-pdf-btn');
+        if (downloadBtn) {
+            downloadBtn.innerHTML = `
+                <i class="bi bi-check-circle-fill"></i>
+                Ya descargado
+            `;
+            downloadBtn.disabled = true;
+            downloadBtn.style.background = '#6c757d';
+            downloadBtn.style.cursor = 'not-allowed';
+        }
+    } else {
+        showAlertModal('Error', 'No se pudo procesar la descarga. Intenta de nuevo.');
+    }
+}
+
+// Intentar descargar PDF
+async function attemptDownloadPDF(fileId, originalUrl, fileName) {
+    // Verificar si ya descargó este archivo
+    const alreadyDownloaded = await checkIfAlreadyDownloaded(fileId);
+    
+    if (alreadyDownloaded) {
+        showAlertModal('Descarga no permitida', 'Ya has descargado este documento anteriormente. Solo se permite una descarga por usuario.');
+        return;
+    }
+    
+    // Mostrar modal de confirmación
+    showDownloadConfirmation(fileId, originalUrl, fileName);
+}
+
 // Open Drive file modal for full preview (sin opción de abrir en nueva pestaña para PDFs)
-function openDriveFileModal(embedUrl, originalUrl, fileName, fileType) {
+async function openDriveFileModal(embedUrl, originalUrl, fileName, fileType) {
     const modal = document.getElementById('mediaModal');
     const modalContent = document.getElementById('mediaModalContent');
+    
+    // Extraer el fileId de la URL
+    const fileId = extractDriveFileId(originalUrl) || extractDriveFileId(embedUrl);
+    
+    // Verificar si ya descargó este archivo (solo para PDFs)
+    let downloadButtonHTML = '';
+    if (fileType === 'pdf' && fileId) {
+        const alreadyDownloaded = await checkIfAlreadyDownloaded(fileId);
+        
+        if (alreadyDownloaded) {
+            downloadButtonHTML = `
+                <button class="download-pdf-btn" disabled style="background: #6c757d; cursor: not-allowed;">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Ya descargado
+                </button>
+            `;
+        } else {
+            downloadButtonHTML = `
+                <button class="download-pdf-btn" onclick="attemptDownloadPDF('${fileId}', '${originalUrl}', '${fileName}')">
+                    <i class="bi bi-download"></i>
+                    Descargar PDF
+                </button>
+            `;
+        }
+    }
 
     modalContent.innerHTML = `
         <div class="drive-file-fullscreen">
@@ -5913,6 +6102,7 @@ function openDriveFileModal(embedUrl, originalUrl, fileName, fileType) {
                     <i class="bi ${getFileTypeIcon(fileType)}" style="color: ${getFileTypeColor(fileType)}"></i>
                     <span>${fileName}</span>
                 </div>
+                ${downloadButtonHTML}
             </div>
             <div class="drive-file-fullscreen-content">
                 <iframe 
