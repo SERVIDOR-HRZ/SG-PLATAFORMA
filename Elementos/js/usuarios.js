@@ -4660,7 +4660,7 @@ function renderAulas() {
     aulasGrid.innerHTML = '';
 
     const materiasConfig = {
-        'anuncios': { nombre: 'anuncios', icon: 'bi-megaphone' },
+        'anuncios': { nombre: 'Anuncios', icon: 'bi-megaphone' },
         'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator' },
         'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book' },
         'sociales': { nombre: 'C. Sociales', icon: 'bi-globe' },
@@ -5365,7 +5365,7 @@ function quitarTodosInstitucion() {
 
 // Configuración de materias
 const materiasConfigProfesor = {
-    'anuncios': { nombre: 'anuncios', icon: 'bi-megaphone', color: '#1a1a1a' },
+    'anuncios': { nombre: 'Anuncios', icon: 'bi-megaphone', color: '#1a1a1a' },
     'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator', color: '#667eea' },
     'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book', color: '#dc3545' },
     'sociales': { nombre: 'C. Sociales', icon: 'bi-globe', color: '#ffc107' },
@@ -5647,16 +5647,13 @@ async function mostrarAulasUsuario(userId, userName) {
         modal.innerHTML = `
             <div class="modal-content ver-aulas-modal-content">
                 <div class="modal-header">
-                    <h3 id="verAulasModalTitle">Aulas Asignadas</h3>
+                    <h3><i class="bi bi-door-open-fill"></i> Aulas de <span id="verAulasUserName">Usuario</span></h3>
                     <button class="close-btn" onclick="cerrarModalAulas()">
                         <i class="bi bi-x"></i>
                     </button>
                 </div>
                 <div class="modal-body" id="verAulasModalBody">
                     <!-- Aulas se cargarán aquí -->
-                </div>
-                <div class="modal-actions">
-                    <button class="cancel-btn" onclick="cerrarModalAulas()">Cerrar</button>
                 </div>
             </div>
         `;
@@ -5671,28 +5668,50 @@ async function mostrarAulasUsuario(userId, userName) {
     }
 
     // Actualizar título
-    document.getElementById('verAulasModalTitle').innerHTML = `
-        <i class="bi bi-door-open-fill"></i> Aulas de ${userName}
-    `;
+    const userNameSpan = document.getElementById('verAulasUserName');
+    if (userNameSpan) {
+        userNameSpan.textContent = userName;
+    }
+
+    // Configuración de colores y nombres de materias
+    const materiasColores = {
+        'anuncios': { nombre: 'Anuncios', color: '#1a1a1a', icon: 'bi-megaphone' },
+        'matematicas': { nombre: 'Matemáticas', color: '#667eea', icon: 'bi-calculator' },
+        'lectura': { nombre: 'Lectura Crítica', color: '#dc3545', icon: 'bi-book' },
+        'sociales': { nombre: 'C. Sociales', color: '#ffc107', icon: 'bi-globe' },
+        'naturales': { nombre: 'C. Naturales', color: '#28a745', icon: 'bi-tree' },
+        'ingles': { nombre: 'Inglés', color: '#9c27b0', icon: 'bi-translate' }
+    };
 
     // Generar contenido de las aulas
-    const aulasHTML = aulasInfo.map(aula => `
-        <div class="aula-info-card" style="border-left: 4px solid ${aula.color};">
-            <div class="aula-info-header" style="background: linear-gradient(135deg, ${aula.color}20, ${aula.color}10);">
-                <div class="aula-color-indicator" style="background: ${aula.color};"></div>
-                <h4 class="aula-info-nombre">${aula.nombre}</h4>
-            </div>
-            ${aula.descripcion ? `<p class="aula-info-descripcion">${aula.descripcion}</p>` : ''}
-            ${aula.materias && aula.materias.length > 0 ? `
-                <div class="aula-info-materias">
-                    <span class="materias-label"><i class="bi bi-book"></i> Materias:</span>
-                    <div class="materias-tags">
-                        ${aula.materias.map(m => `<span class="materia-tag" style="background: ${aula.color}30; color: ${aula.color}; border: 1px solid ${aula.color}50;">${m}</span>`).join('')}
-                    </div>
+    const aulasHTML = aulasInfo.map(aula => {
+        const materiasHTML = aula.materias && aula.materias.length > 0 
+            ? aula.materias.map(m => {
+                const config = materiasColores[m] || { nombre: m, color: '#666', icon: 'bi-book' };
+                return `<span class="materia-tag-colored" style="background: ${config.color};">
+                    <i class="bi ${config.icon}"></i> ${config.nombre}
+                </span>`;
+            }).join('')
+            : '';
+
+        return `
+            <div class="aula-info-card" style="border-color: ${aula.color};">
+                <div class="aula-info-header" style="background: linear-gradient(135deg, ${aula.color}20, ${aula.color}10);">
+                    <div class="aula-color-indicator" style="background: ${aula.color};"></div>
+                    <h4 class="aula-info-nombre">${aula.nombre}</h4>
                 </div>
-            ` : ''}
-        </div>
-    `).join('');
+                ${aula.descripcion ? `<p class="aula-info-descripcion">${aula.descripcion}</p>` : ''}
+                ${materiasHTML ? `
+                    <div class="aula-info-materias">
+                        <span class="materias-label"><i class="bi bi-collection"></i> Materias:</span>
+                        <div class="materias-tags">
+                            ${materiasHTML}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
 
     document.getElementById('verAulasModalBody').innerHTML = `
         <div class="aulas-info-container">

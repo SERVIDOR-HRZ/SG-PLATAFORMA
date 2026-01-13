@@ -246,14 +246,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 
 .table-user-avatar:hover {
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
 }
 
 .table-avatar-image {
@@ -268,7 +268,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
     color: white;
 }
 
@@ -307,7 +307,7 @@ body {
 .search-box i {
     position: absolute;
     left: 1rem;
-    color: #667eea;
+    color: #ff0000;
     z-index: 1;
     font-size: 1.1rem;
 }
@@ -323,8 +323,8 @@ body {
 
 .search-box input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
 }
 
 .filter-container {
@@ -477,7 +477,7 @@ body {
 }
 
 .manage-insignias-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -490,7 +490,7 @@ body {
     /* Hidden by default */
     align-items: center;
     gap: 0.5rem;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
 }
 
 .manage-insignias-btn.show {
@@ -501,7 +501,7 @@ body {
 .manage-insignias-btn:hover {
     background: linear-gradient(135deg, #5568d3, #653a8b);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
 }
 
 .create-user-btn {
@@ -631,18 +631,18 @@ body {
     min-width: 2450px;
     border-collapse: collapse;
     table-layout: fixed;
-    border: 1px solid #e0e0e0;
+    border: 2px solid #999;
     position: relative;
 }
 
 .users-table th {
-    background: #f8f9fa;
+    background: #1a1a1a;
     padding: 1rem;
     text-align: left;
     font-weight: 600;
-    color: #333;
-    border-bottom: 2px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
+    color: white;
+    border-bottom: 2px solid #555;
+    border-right: 1px solid #555;
     white-space: nowrap;
     position: sticky;
     top: 0;
@@ -655,8 +655,8 @@ body {
 
 .users-table td {
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #bbb;
+    border-right: 1px solid #bbb;
     vertical-align: middle;
 }
 
@@ -1000,21 +1000,10 @@ body {
 /* Table Cell Improvements */
 .users-table td {
     padding: 0.8rem 0.6rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #bbb;
     vertical-align: middle;
     font-size: 0.8rem;
     word-wrap: break-word;
-}
-
-.users-table th {
-    background: #f8f9fa;
-    padding: 0.8rem 0.6rem;
-    text-align: left;
-    font-weight: 600;
-    color: #333;
-    border-bottom: 2px solid #e0e0e0;
-    white-space: nowrap;
-    font-size: 0.75rem;
 }
 
 /* Specific column widths for better layout */
@@ -1028,9 +1017,19 @@ body {
     padding: 0.8rem 0.5rem;
     position: sticky;
     left: 0;
-    background: #f8f9fa;
     z-index: 9;
-    border-right: 2px solid #dee2e6;
+    border-right: 2px solid #999;
+}
+
+/* Primera columna del encabezado - sticky */
+.users-table th:nth-child(1) {
+    z-index: 11;
+    background: #1a1a1a;
+}
+
+/* Columna de acciones sticky */
+.users-table th:nth-child(17) {
+    z-index: 11;
 }
 
 .users-table td:nth-child(1) {
@@ -1039,10 +1038,6 @@ body {
 
 .users-table tr.inactive td:nth-child(1) {
     background: #ffcccc;
-}
-
-.users-table th:nth-child(1) {
-    z-index: 11;
 }
 
 .users-table th:nth-child(2),
@@ -1161,9 +1156,8 @@ body {
     padding: 0.8rem 0.4rem;
     position: sticky;
     right: 0;
-    background: #f8f9fa;
     z-index: 8;
-    border-left: 2px solid #dee2e6;
+    border-left: 2px solid #999;
 }
 
 .users-table td:nth-child(17) {
@@ -1176,6 +1170,7 @@ body {
 
 .users-table th:nth-child(17) {
     z-index: 11;
+    background: #1a1a1a;
 }
 
 /* Action Buttons */
@@ -1647,8 +1642,8 @@ body {
 .input-group select:focus,
 .input-group textarea:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
 }
 
 .student-fields {
@@ -2681,11 +2676,12 @@ body {
 /* Modal de Perfil de Usuario */
 #userProfileModal .modal-content {
     max-width: 750px;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height: 85vh;
     border-radius: 16px;
     overflow: hidden;
     animation: modalSlideUp 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes modalSlideUp {
@@ -2710,20 +2706,21 @@ body {
 }
 
 #userProfileModal .modal-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
     border-radius: 4px;
 }
 
 #userProfileModal .modal-content::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+    background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
 }
 
 .profile-modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
     color: white;
     padding: 40px 30px 30px;
     text-align: center;
     position: relative;
+    flex-shrink: 0;
 }
 
 .profile-modal-header .close-btn {
@@ -2812,6 +2809,28 @@ body {
 .profile-modal-body {
     padding: 35px 30px;
     background: #fafbfc;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(85vh - 280px);
+}
+
+/* Scrollbar para el body del modal */
+.profile-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.profile-modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.profile-modal-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    border-radius: 4px;
+}
+
+.profile-modal-body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #cc0000, #990000);
 }
 
 .profile-section {
@@ -2832,7 +2851,7 @@ body {
     font-weight: 700;
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 3px solid #667eea;
+    border-bottom: 3px solid #ff0000;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -2846,13 +2865,13 @@ body {
     left: 0;
     width: 60px;
     height: 3px;
-    background: linear-gradient(90deg, #667eea, transparent);
+    background: linear-gradient(90deg, #ff0000, transparent);
 }
 
 .profile-section h3 i {
-    color: #667eea;
+    color: #ff0000;
     font-size: 24px;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(204, 0, 0, 0.1));
     padding: 8px;
     border-radius: 8px;
 }
@@ -2865,10 +2884,10 @@ body {
 }
 
 .profile-info-item {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.03), rgba(204, 0, 0, 0.03));
     padding: 16px 18px;
     border-radius: 12px;
-    border-left: 4px solid #667eea;
+    border: 2px solid rgba(255, 0, 0, 0.2);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -2881,7 +2900,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.05), rgba(204, 0, 0, 0.05));
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -2891,13 +2910,14 @@ body {
 }
 
 .profile-info-item:hover {
-    transform: translateX(5px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.2);
+    border-color: rgba(255, 0, 0, 0.4);
 }
 
 .profile-info-label {
     font-size: 11px;
-    color: #667eea;
+    color: #ff0000;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2910,7 +2930,7 @@ body {
 }
 
 .profile-info-label i {
-    color: #667eea;
+    color: #ff0000;
     font-size: 14px;
 }
 
@@ -2931,13 +2951,18 @@ body {
 }
 
 .profile-biography {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.08) 0%, rgba(204, 0, 0, 0.08) 100%);
     padding: 24px;
     border-radius: 12px;
-    border-left: 5px solid #667eea;
+    border: 2px solid rgba(255, 0, 0, 0.25);
     margin-top: 20px;
     position: relative;
     overflow: hidden;
+}
+
+.profile-biography:hover {
+    border-color: rgba(255, 0, 0, 0.4);
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.15);
 }
 
 .profile-biography::before {
@@ -2946,7 +2971,7 @@ body {
     top: 10px;
     left: 15px;
     font-size: 80px;
-    color: rgba(102, 126, 234, 0.15);
+    color: rgba(255, 0, 0, 0.15);
     font-family: Georgia, serif;
     line-height: 0.8;
 }
@@ -3158,10 +3183,10 @@ body {
 }
 
 .insignia-checkbox input[type="checkbox"]:checked+.insignia-checkbox-content {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(204, 0, 0, 0.1));
+    border-color: #ff0000;
     border-width: 3px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
 }
 
 .insignia-checkbox input[type="checkbox"]:checked+.insignia-checkbox-content .insignia-icon {
@@ -3169,7 +3194,7 @@ body {
 }
 
 .insignia-checkbox input[type="checkbox"]:checked+.insignia-checkbox-content .insignia-name {
-    color: #667eea;
+    color: #ff0000;
     font-weight: 700;
 }
 
@@ -3179,7 +3204,7 @@ body {
     position: absolute;
     top: 8px;
     right: 8px;
-    color: #667eea;
+    color: #ff0000;
     font-size: 1.1rem;
     background: white;
     border-radius: 50%;
@@ -3374,12 +3399,12 @@ body {
 }
 
 .checkbox-content.matematicas i {
-    color: #667eea;
+    color: #ff0000;
 }
 
 .asignatura-checkbox input[type="checkbox"]:checked+.checkbox-content.matematicas {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.1) 0%, rgba(255, 0, 0, 0.05) 100%);
+    border-color: #ff0000;
 }
 
 .checkbox-content.ciencias {
@@ -3551,7 +3576,7 @@ body {
 }
 
 .insignias-more {
-    background: #667eea;
+    background: #ff0000;
     color: white;
     padding: 0.15rem 0.4rem;
     border-radius: 10px;
@@ -3601,103 +3626,155 @@ body {
 
 /* Dashboard Menu Styles */
 .dashboard-menu {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: black;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
     margin-bottom: 2rem;
     overflow: hidden;
+    padding: 0.5rem;
 }
 
 .dashboard-tabs {
     display: flex;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e0e0e0;
+    background: transparent;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .dashboard-tab {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 1rem 1.5rem;
+    flex: 0 1 auto;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1.25rem;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: #666;
-    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
     position: relative;
-    border-bottom: 3px solid transparent;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.dashboard-tab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .dashboard-tab:hover {
-    background: rgba(255, 0, 0, 0.05);
-    color: #ff0000;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dashboard-tab:hover::before {
+    opacity: 1;
 }
 
 .dashboard-tab.active {
-    background: white;
-    color: #ff0000;
-    border-bottom-color: #ff0000;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.dashboard-tab.active::before {
+    opacity: 1;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
 }
 
 .dashboard-tab i {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     transition: all 0.3s ease;
 }
 
 .dashboard-tab.active i {
-    transform: scale(1.1);
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
 }
 
 .dashboard-tab span {
     font-weight: 600;
     letter-spacing: 0.3px;
+    white-space: nowrap;
 }
 
 /* Responsive Dashboard Menu */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
     .dashboard-tabs {
-        flex-direction: column;
+        gap: 0.25rem;
     }
 
     .dashboard-tab {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-        border-bottom: 1px solid #e0e0e0;
-        border-right: none;
+        padding: 0.65rem 0.9rem;
+        font-size: 0.8rem;
     }
 
-    .dashboard-tab:last-child {
-        border-bottom: none;
+    .dashboard-tab i {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-menu {
+        padding: 0.4rem;
+        border-radius: 12px;
     }
 
-    .dashboard-tab.active {
-        border-bottom: 1px solid #e0e0e0;
-        border-left: 3px solid #ff0000;
+    .dashboard-tabs {
+        gap: 0.2rem;
+    }
+
+    .dashboard-tab {
+        padding: 0.6rem 0.7rem;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .dashboard-tab span {
+        display: none;
+    }
+
+    .dashboard-tab i {
+        font-size: 1.2rem;
     }
 }
 
 @media (max-width: 480px) {
     .dashboard-menu {
         margin-bottom: 1.5rem;
+        padding: 0.35rem;
+    }
+
+    .dashboard-tabs {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.15rem;
     }
 
     .dashboard-tab {
-        padding: 0.6rem 0.75rem;
-        font-size: 0.85rem;
-        gap: 0.5rem;
+        padding: 0.5rem 0.4rem;
+        flex-direction: column;
+        gap: 0.15rem;
     }
 
     .dashboard-tab i {
-        font-size: 1rem;
-    }
-
-    .dashboard-tab span {
-        font-size: 0.85rem;
+        font-size: 1.1rem;
     }
 }
 
@@ -3854,19 +3931,18 @@ ruser tab special styling */
 }
 
 .dashboard-tab[data-view="superusuarios"]:hover {
-    background: rgba(255, 0, 0, 0.05);
-    color: #ff0000;
+    background: rgba(156, 39, 176, 0.3);
+    color: #fff;
 }
 
 .dashboard-tab[data-view="superusuarios"].active {
-    background: white;
-    color: #ff0000;
-    border-bottom-color: #ff0000;
-    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
+    background: linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(156, 39, 176, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .dashboard-tab[data-view="superusuarios"].active i {
-    color: #ff0000;
+    color: #fff;
     animation: pulse-super-tab 2s infinite;
 }
 
@@ -3874,25 +3950,25 @@ ruser tab special styling */
 
     0%,
     100% {
-        transform: scale(1.1);
-        text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
     }
 
     50% {
-        transform: scale(1.2);
-        text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+        transform: scale(1.25);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
     }
 }
 
 /* Responsive adjustments for 4 tabs */
 @media (max-width: 1024px) {
     .dashboard-tab {
-        padding: 0.8rem 1rem;
-        font-size: 0.85rem;
+        padding: 0.7rem 0.9rem;
+        font-size: 0.8rem;
     }
 
     .dashboard-tab span {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 }
 
@@ -3908,37 +3984,27 @@ ruser tab special styling */
     }
 
     .dashboard-tab i {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
     }
 }
 
 @media (max-width: 480px) {
     .dashboard-tabs {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.15rem;
     }
 
     .dashboard-tab {
-        border-bottom: 1px solid #e0e0e0;
-        border-right: 1px solid #e0e0e0;
-    }
-
-    .dashboard-tab:nth-child(2n) {
-        border-right: none;
-    }
-
-    .dashboard-tab:nth-child(n+3) {
-        border-bottom: none;
+        border-radius: 8px;
     }
 
     .dashboard-tab.active {
-        border-bottom: 1px solid #e0e0e0;
-        border-left: 3px solid #ff0000;
+        box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
     }
 
     .dashboard-tab[data-view="superusuarios"].active {
-        border-left: 3px solid #9c27b0;
+        box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
     }
 }
 
@@ -4320,19 +4386,18 @@ tudent columns visibility for profesores view */
 }
 
 .dashboard-tab[data-view="codigos"]:hover {
-    background: rgba(255, 0, 0, 0.05);
-    color: #ff0000;
+    background: rgba(255, 193, 7, 0.3);
+    color: #fff;
 }
 
 .dashboard-tab[data-view="codigos"].active {
-    background: white;
-    color: #ff0000;
-    border-bottom-color: #ff0000;
-    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
+    background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
+    color: #212529;
+    box-shadow: 0 4px 20px rgba(243, 156, 18, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .dashboard-tab[data-view="codigos"].active i {
-    color: #ff0000;
+    color: #212529;
     animation: pulse-recovery-tab 2s infinite;
 }
 
@@ -4340,13 +4405,13 @@ tudent columns visibility for profesores view */
 
     0%,
     100% {
-        transform: scale(1.1);
-        text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
     }
 
     50% {
-        transform: scale(1.2);
-        text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+        transform: scale(1.25);
+        filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
     }
 }
 
@@ -4758,99 +4823,11 @@ nced Rol column styling in recovery view */
     top: 80px;
     /* Below the fixed header */
     z-index: 100;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
-    overflow: hidden;
 }
 
 /* Enhanced shadow when scrolling */
 .dashboard-menu.scrolled {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* Ensure dashboard tabs container has proper background */
-.dashboard-tabs {
-    display: flex;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e0e0e0;
-    position: relative;
-}
-
-/* Enhanced active tab styling for better visibility when fixed */
-.dashboard-tab.active {
-    background: white;
-    color: #ff0000;
-    border-bottom-color: #ff0000;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 1;
-}
-
-/* Special styling for superuser tab when active */
-.dashboard-tab[data-view="superusuarios"].active {
-    color: #ff0000;
-    border-bottom-color: #ff0000;
-    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
-}
-
-/* Special styling for recovery codes tab when active */
-.dashboard-tab[data-view="codigos"].active {
-    color: #ff0000;
-    border-bottom-color: #ff0000;
-    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
-}
-
-/* Responsive adjustments for fixed menu */
-@media (max-width: 768px) {
-    .dashboard-menu {
-        top: 70px;
-        /* Adjust for smaller header on mobile */
-        margin-bottom: 1.5rem;
-        border-radius: 8px;
-    }
-}
-
-@media (max-width: 480px) {
-    .dashboard-menu {
-        top: 65px;
-        /* Adjust for even smaller header */
-        margin-bottom: 1rem;
-        border-radius: 6px;
-    }
-
-    .dashboard-tabs {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0;
-    }
-
-    .dashboard-tab {
-        border-bottom: 1px solid #e0e0e0;
-        border-right: 1px solid #e0e0e0;
-    }
-
-    .dashboard-tab:nth-child(2n) {
-        border-right: none;
-    }
-
-    .dashboard-tab:nth-child(n+4) {
-        border-bottom: none;
-    }
-
-    .dashboard-tab.active {
-        border-bottom: 1px solid #e0e0e0;
-        border-left: 3px solid #ff0000;
-    }
-
-    .dashboard-tab[data-view="superusuarios"].active {
-        border-left: 3px solid #9c27b0;
-    }
-
-    .dashboard-tab[data-view="codigos"].active {
-        border-left: 3px solid #ffc107;
-    }
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 /* Ens
@@ -4911,19 +4888,18 @@ ure proper spacing with fixed dashboard menu */
 }
 
 .dashboard-tab[data-view="insignias"]:hover {
-    background: rgba(255, 0, 0, 0.05);
-    color: #ff0000;
+    background: rgba(255, 0, 0, 0.3);
+    color: #fff;
 }
 
 .dashboard-tab[data-view="insignias"].active {
-    background: white;
-    color: #ff0000;
-    border-bottom-color: #ff0000;
-    box-shadow: 0 -2px 8px rgba(255, 0, 0, 0.2);
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(255, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .dashboard-tab[data-view="insignias"].active i {
-    color: #ff0000;
+    color: #fff;
     animation: pulse-insignias-tab 2s infinite;
 }
 
@@ -4931,13 +4907,13 @@ ure proper spacing with fixed dashboard menu */
 
     0%,
     100% {
-        transform: scale(1.1);
-        text-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
     }
 
     50% {
-        transform: scale(1.2);
-        text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+        transform: scale(1.25);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
     }
 }
 
@@ -4951,11 +4927,11 @@ ure proper spacing with fixed dashboard menu */
 }
 
 .users-table.insignias-view .insignias-cell {
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(255, 0, 0, 0.1);
     border-radius: 8px;
     padding: 0.75rem;
     margin: 0.25rem;
-    border: 1px solid rgba(102, 126, 234, 0.3);
+    border: 1px solid rgba(255, 0, 0, 0.3);
 }
 
 .users-table.insignias-view .insignia-badge {
@@ -5036,6 +5012,186 @@ ure proper spacing with fixed dashboard menu */
     }
 }
 
+/* Instituciones tab special styling */
+.dashboard-tab[data-view="instituciones"] {
+    position: relative;
+}
+
+.dashboard-tab[data-view="instituciones"]:hover {
+    background: rgba(23, 162, 184, 0.3);
+    color: #fff;
+}
+
+.dashboard-tab[data-view="instituciones"].active {
+    background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(23, 162, 184, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-tab[data-view="instituciones"].active i {
+    color: #fff;
+    animation: pulse-instituciones-tab 2s infinite;
+}
+
+@keyframes pulse-instituciones-tab {
+
+    0%,
+    100% {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    }
+
+    50% {
+        transform: scale(1.25);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    }
+}
+
+/* Coordinadores tab special styling */
+.dashboard-tab[data-view="coordinadores"] {
+    position: relative;
+}
+
+.dashboard-tab[data-view="coordinadores"]:hover {
+    background: rgba(0, 123, 255, 0.3);
+    color: #fff;
+}
+
+.dashboard-tab[data-view="coordinadores"].active {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-tab[data-view="coordinadores"].active i {
+    color: #fff;
+    animation: pulse-coordinadores-tab 2s infinite;
+}
+
+@keyframes pulse-coordinadores-tab {
+
+    0%,
+    100% {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    }
+
+    50% {
+        transform: scale(1.25);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    }
+}
+
+/* Aulas tab special styling */
+.dashboard-tab[data-view="aulas"] {
+    position: relative;
+}
+
+.dashboard-tab[data-view="aulas"]:hover {
+    background: rgba(40, 167, 69, 0.3);
+    color: #fff;
+}
+
+.dashboard-tab[data-view="aulas"].active {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-tab[data-view="aulas"].active i {
+    color: #fff;
+    animation: pulse-aulas-tab 2s infinite;
+}
+
+@keyframes pulse-aulas-tab {
+
+    0%,
+    100% {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    }
+
+    50% {
+        transform: scale(1.25);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    }
+}
+
+/* Reset Progress tab special styling */
+.dashboard-tab[data-view="resetProgress"] {
+    position: relative;
+}
+
+.dashboard-tab[data-view="resetProgress"]:hover {
+    background: rgba(220, 53, 69, 0.3);
+    color: #fff;
+}
+
+.dashboard-tab[data-view="resetProgress"].active {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(220, 53, 69, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-tab[data-view="resetProgress"].active i {
+    color: #fff;
+    animation: pulse-reset-tab 2s infinite;
+}
+
+@keyframes pulse-reset-tab {
+
+    0%,
+    100% {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    }
+
+    50% {
+        transform: scale(1.25);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    }
+}
+
+/* Profesores tab special styling */
+.dashboard-tab[data-view="profesores"] {
+    position: relative;
+}
+
+.dashboard-tab[data-view="profesores"]:hover {
+    background: rgba(255, 87, 34, 0.3);
+    color: #fff;
+}
+
+.dashboard-tab[data-view="profesores"].active {
+    background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(255, 87, 34, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-tab[data-view="profesores"].active i {
+    color: #fff;
+}
+
+/* Estudiantes tab special styling */
+.dashboard-tab[data-view="estudiantes"] {
+    position: relative;
+}
+
+.dashboard-tab[data-view="estudiantes"]:hover {
+    background: rgba(0, 150, 136, 0.3);
+    color: #fff;
+}
+
+.dashboard-tab[data-view="estudiantes"].active {
+    background: linear-gradient(135deg, #009688 0%, #4caf50 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0, 150, 136, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-tab[data-view="estudiantes"].active i {
+    color: #fff;
+}
+
 /*
  Responsive adjustments for 6 tabs */
 @media (max-width: 1400px) {
@@ -5075,23 +5231,14 @@ ure proper spacing with fixed dashboard menu */
 @media (max-width: 768px) {
     .dashboard-tabs {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.15rem;
     }
 
     .dashboard-tab {
-        border-bottom: 1px solid #e0e0e0;
-        border-right: 1px solid #e0e0e0;
         padding: 0.6rem 0.4rem;
         font-size: 0.6rem;
-    }
-
-    .dashboard-tab:nth-child(3n) {
-        border-right: none;
-    }
-
-    .dashboard-tab:nth-child(n+4) {
-        border-bottom: none;
+        border-radius: 8px;
     }
 
     .dashboard-tab span {
@@ -5103,31 +5250,22 @@ ure proper spacing with fixed dashboard menu */
     }
 }
 
-/* Very small mobile - 2x3 grid */
+/* Very small mobile - 2x5 grid */
 @media (max-width: 480px) {
     .dashboard-tabs {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.1rem;
     }
 
     .dashboard-tab {
-        border-bottom: 1px solid #e0e0e0;
-        border-right: 1px solid #e0e0e0;
         padding: 0.5rem 0.3rem;
         font-size: 0.55rem;
-    }
-
-    .dashboard-tab:nth-child(2n) {
-        border-right: none;
-    }
-
-    .dashboard-tab:nth-child(n+5) {
-        border-bottom: none;
+        border-radius: 6px;
     }
 
     .dashboard-tab i {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 }
 
@@ -5359,13 +5497,13 @@ sure forms don't interfere with modal layout */
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--insignia-color, #667eea);
+    background: var(--insignia-color, #ff0000);
 }
 
 .insignia-manager-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    border-color: var(--insignia-color, #667eea);
+    border-color: var(--insignia-color, #ff0000);
 }
 
 .insignia-card-header {
@@ -5382,7 +5520,7 @@ sure forms don't interfere with modal layout */
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--insignia-color, #667eea);
+    background: var(--insignia-color, #ff0000);
     color: white;
     font-size: 1.8rem;
 }
@@ -5469,7 +5607,7 @@ sure forms don't interfere with modal layout */
 }
 
 .insignia-preview-section {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(204, 0, 0, 0.1));
     border-radius: 12px;
     padding: 1.5rem;
     text-align: center;
@@ -5498,7 +5636,7 @@ sure forms don't interfere with modal layout */
 
 .preview-icon {
     font-size: 3.5rem;
-    color: var(--preview-color, #667eea);
+    color: var(--preview-color, #ff0000);
     transition: all 0.3s ease;
     animation: iconPulse 2s ease-in-out infinite;
 }
@@ -5549,18 +5687,18 @@ sure forms don't interfere with modal layout */
 }
 
 .icon-category-btn:hover {
-    border-color: #667eea;
-    color: #667eea;
-    background: rgba(102, 126, 234, 0.08);
+    border-color: #ff0000;
+    color: #ff0000;
+    background: rgba(255, 0, 0, 0.08);
     transform: translateY(-2px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .icon-category-btn.active {
-    border-color: #667eea;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #ff0000;
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
 }
 
 /* Selected Icon Display */
@@ -5621,26 +5759,26 @@ sure forms don't interfere with modal layout */
 }
 
 .icon-option:hover {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.05);
+    border-color: #ff0000;
+    background: rgba(255, 0, 0, 0.05);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .icon-option:hover i {
-    color: #667eea;
+    color: #ff0000;
     transform: scale(1.15);
 }
 
 .icon-option.selected {
-    border-color: #667eea;
+    border-color: #ff0000;
     border-width: 3px;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.15), rgba(204, 0, 0, 0.15));
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
 }
 
 .icon-option.selected i {
-    color: #667eea;
+    color: #ff0000;
     transform: scale(1.2);
 }
 
@@ -5654,7 +5792,7 @@ sure forms don't interfere with modal layout */
 }
 
 .icons-grid::-webkit-scrollbar-thumb {
-    background: #667eea;
+    background: #ff0000;
     border-radius: 4px;
 }
 
@@ -5664,15 +5802,15 @@ sure forms don't interfere with modal layout */
 
 /* Color Preview Section */
 .color-preview-section {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.05), rgba(204, 0, 0, 0.05));
     border-radius: 12px;
     padding: 1.5rem;
     border: 2px solid #e0e0e0;
 }
 
 .auto-color-info {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(40, 167, 69, 0.05));
-    border: 2px solid rgba(102, 126, 234, 0.2);
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.05), rgba(40, 167, 69, 0.05));
+    border: 2px solid rgba(255, 0, 0, 0.2);
     border-radius: 12px;
     padding: 1.25rem;
 }
@@ -5684,7 +5822,7 @@ sure forms don't interfere with modal layout */
     margin-bottom: 1rem;
     font-weight: 600;
     font-size: 0.95rem;
-    color: #667eea;
+    color: #ff0000;
 }
 
 .color-info-header i {
@@ -5870,7 +6008,7 @@ sure forms don't interfere with modal layout */
 
 .insignia-icon-dynamic {
     font-size: 2rem;
-    color: var(--insignia-color, #667eea);
+    color: var(--insignia-color, #ff0000);
     transition: all 0.3s ease;
 }
 
@@ -5889,10 +6027,10 @@ sure forms don't interfere with modal layout */
 }
 
 .insignia-checkbox-dynamic input[type="checkbox"]:checked+.insignia-checkbox-content-dynamic {
-    background: rgba(var(--insignia-rgb, 102, 126, 234), 0.1);
-    border-color: var(--insignia-color, #667eea);
+    background: rgba(var(--insignia-rgb, 255, 0, 0), 0.1);
+    border-color: var(--insignia-color, #ff0000);
     border-width: 3px;
-    box-shadow: 0 4px 12px rgba(var(--insignia-rgb, 102, 126, 234), 0.2);
+    box-shadow: 0 4px 12px rgba(var(--insignia-rgb, 255, 0, 0), 0.2);
 }
 
 .insignia-checkbox-dynamic input[type="checkbox"]:checked+.insignia-checkbox-content-dynamic .insignia-icon-dynamic {
@@ -5900,7 +6038,7 @@ sure forms don't interfere with modal layout */
 }
 
 .insignia-checkbox-dynamic input[type="checkbox"]:checked+.insignia-checkbox-content-dynamic .insignia-name-dynamic {
-    color: var(--insignia-color, #667eea);
+    color: var(--insignia-color, #ff0000);
     font-weight: 700;
 }
 
@@ -5910,7 +6048,7 @@ sure forms don't interfere with modal layout */
     position: absolute;
     top: 8px;
     right: 8px;
-    color: var(--insignia-color, #667eea);
+    color: var(--insignia-color, #ff0000);
     font-size: 1.1rem;
     background: white;
     border-radius: 50%;
@@ -6064,7 +6202,7 @@ sure forms don't interfere with modal layout */
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
     font-size: 2rem;
 }
@@ -6475,15 +6613,19 @@ sure forms don't interfere with modal layout */
 }
 
 .coordinadores-table th {
-    background: #f8f9fa;
-    color: #333;
+    background: #1a1a1a;
+    color: white;
     padding: 1rem;
     text-align: left;
     font-weight: 600;
     font-size: 0.85rem;
     white-space: nowrap;
-    border-bottom: 2px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
+    border-bottom: 2px solid #333;
+    border-right: 1px solid #333;
+}
+
+.coordinadores-table th:last-child {
+    border-right: none;
 }
 
 .coordinadores-table th:first-child {
@@ -6748,7 +6890,7 @@ sure forms don't interfere with modal layout */
 }
 
 .create-aula-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -6760,13 +6902,13 @@ sure forms don't interfere with modal layout */
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
 }
 
 .create-aula-btn:hover {
     background: linear-gradient(135deg, #5568d3, #653a8b);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
 }
 
 /* Aulas Grid */
@@ -6839,8 +6981,12 @@ sure forms don't interfere with modal layout */
     color: white;
 }
 
+.aula-materia-badge.anuncios {
+    background: #1a1a1a;
+}
+
 .aula-materia-badge.matematicas {
-    background: #667eea;
+    background: #ff0000;
 }
 
 .aula-materia-badge.lectura {
@@ -6879,7 +7025,7 @@ sure forms don't interfere with modal layout */
 }
 
 .aula-info-item i {
-    color: #667eea;
+    color: #ff0000;
     width: 16px;
 }
 
@@ -6940,7 +7086,7 @@ sure forms don't interfere with modal layout */
     color: #333;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #667eea;
+    border-bottom: 2px solid #ff0000;
 }
 
 .aula-form .form-grid {
@@ -6979,8 +7125,8 @@ sure forms don't interfere with modal layout */
 .aula-form .input-group select:focus,
 .aula-form .input-group textarea:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
 }
 
 /* Materias Aula Grid */
@@ -7023,16 +7169,16 @@ sure forms don't interfere with modal layout */
 
 .materia-aula-checkbox input:checked+.checkbox-content {
     border-color: currentColor;
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(255, 0, 0, 0.1);
 }
 
 .materia-aula-checkbox .checkbox-content.matematicas {
-    color: #667eea;
+    color: #ff0000;
 }
 
 .materia-aula-checkbox input:checked+.checkbox-content.matematicas {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.1);
+    border-color: #ff0000;
+    background: rgba(255, 0, 0, 0.1);
 }
 
 .materia-aula-checkbox .checkbox-content.lectura {
@@ -7120,7 +7266,7 @@ sure forms don't interfere with modal layout */
 
 /* Save Aula Button */
 .save-aula-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -7250,9 +7396,9 @@ sure forms don't interfere with modal layout */
 }
 
 .aula-permiso-checkbox input:checked+.aula-checkbox-content {
-    border-color: var(--aula-color, #667eea);
-    background: rgba(102, 126, 234, 0.08);
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    border-color: var(--aula-color, #ff0000);
+    background: rgba(255, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
 }
 
 /* Checkmark indicator for selected aulas */
@@ -7288,9 +7434,9 @@ sure forms don't interfere with modal layout */
 }
 
 .aula-permiso-checkbox input:checked+.aula-checkbox-content::before {
-    background: var(--aula-color, #667eea);
-    border-color: var(--aula-color, #667eea);
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+    background: var(--aula-color, #ff0000);
+    border-color: var(--aula-color, #ff0000);
+    box-shadow: 0 2px 6px rgba(255, 0, 0, 0.4);
 }
 
 .aula-permiso-checkbox input:checked+.aula-checkbox-content::after {
@@ -7299,8 +7445,8 @@ sure forms don't interfere with modal layout */
 }
 
 .aula-permiso-checkbox:hover .aula-checkbox-content {
-    border-color: var(--aula-color, #667eea);
-    background: rgba(102, 126, 234, 0.03);
+    border-color: var(--aula-color, #ff0000);
+    background: rgba(255, 0, 0, 0.03);
 }
 
 /* Loading and no aulas messages */
@@ -7353,12 +7499,12 @@ sure forms don't interfere with modal layout */
     align-items: center;
     gap: 0.35rem;
     padding: 0.35rem 0.75rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 6px rgba(255, 0, 0, 0.3);
 }
 
 .aulas-count-badge i {
@@ -7399,7 +7545,7 @@ sure forms don't interfere with modal layout */
     align-items: center;
     gap: 0.35rem;
     padding: 0.4rem 0.75rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
     border: none;
     border-radius: 20px;
@@ -7407,13 +7553,13 @@ sure forms don't interfere with modal layout */
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 6px rgba(255, 0, 0, 0.3);
 }
 
 .ver-aulas-btn:hover {
-    background: linear-gradient(135deg, #5a6fd6, #6a4190);
+    background: linear-gradient(135deg, #cc0000, #990000);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
 }
 
 .ver-aulas-btn i {
@@ -7434,13 +7580,14 @@ sure forms don't interfere with modal layout */
 }
 
 .ver-aulas-modal-content .modal-header h3 i {
-    color: #667eea;
+    color: #ff0000;
 }
 
 .aulas-info-container {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    padding-bottom: 1rem;
 }
 
 .aulas-count-info {
@@ -7463,10 +7610,11 @@ sure forms don't interfere with modal layout */
 /* Tarjeta de información de aula */
 .aula-info-card {
     background: white;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
+    border: 3px solid;
 }
 
 .aula-info-card:hover {
@@ -7534,6 +7682,29 @@ sure forms don't interfere with modal layout */
     border-radius: 12px;
     font-size: 0.7rem;
     font-weight: 600;
+}
+
+/* Etiquetas de materias con colores específicos */
+.materia-tag-colored {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.materia-tag-colored:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.materia-tag-colored i {
+    font-size: 0.7rem;
 }
 
 
@@ -7632,8 +7803,8 @@ sure forms don't interfere with modal layout */
 
 .estudiantes-search-section .search-box input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
 }
 
 /* Grid de estudiantes */
@@ -7675,7 +7846,7 @@ sure forms don't interfere with modal layout */
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -7707,13 +7878,13 @@ sure forms don't interfere with modal layout */
 }
 
 .estudiante-aula-checkbox input:checked+.estudiante-checkbox-content {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.08);
+    border-color: #ff0000;
+    background: rgba(255, 0, 0, 0.08);
 }
 
 .estudiante-aula-checkbox:hover .estudiante-checkbox-content {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.03);
+    border-color: #ff0000;
+    background: rgba(255, 0, 0, 0.03);
 }
 
 .estudiante-aula-checkbox .check-icon {
@@ -7729,8 +7900,8 @@ sure forms don't interfere with modal layout */
 }
 
 .estudiante-aula-checkbox input:checked+.estudiante-checkbox-content .check-icon {
-    background: #667eea;
-    border-color: #667eea;
+    background: #ff0000;
+    border-color: #ff0000;
     color: white;
 }
 
@@ -7779,7 +7950,7 @@ sure forms don't interfere with modal layout */
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
     border-radius: 8px;
     margin-top: 1rem;
@@ -7836,8 +8007,8 @@ sure forms don't interfere with modal layout */
 }
 
 .aula-profesor-item.selected {
-    border-color: #667eea;
-    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2);
+    border-color: #ff0000;
+    box-shadow: 0 2px 12px rgba(255, 0, 0, 0.2);
 }
 
 .aula-profesor-header {
@@ -7850,7 +8021,7 @@ sure forms don't interfere with modal layout */
 }
 
 .aula-profesor-header:hover {
-    background: rgba(102, 126, 234, 0.05);
+    background: rgba(255, 0, 0, 0.05);
 }
 
 .aula-profesor-checkbox {
@@ -7866,8 +8037,8 @@ sure forms don't interfere with modal layout */
 }
 
 .aula-profesor-item.selected .aula-profesor-checkbox {
-    background: #667eea;
-    border-color: #667eea;
+    background: #ff0000;
+    border-color: #ff0000;
     color: white;
 }
 
@@ -7979,7 +8150,7 @@ sure forms don't interfere with modal layout */
     font-size: 0.9rem;
 }
 
-.materia-profesor-checkbox input:checked + .materia-chip {
+.materia-profesor-checkbox input:checked+.materia-chip {
     border-width: 2px;
 }
 
@@ -7987,23 +8158,26 @@ sure forms don't interfere with modal layout */
 .materia-profesor-checkbox .materia-chip.anuncios {
     color: #1a1a1a;
 }
-.materia-profesor-checkbox input:checked + .materia-chip.anuncios {
+
+.materia-profesor-checkbox input:checked+.materia-chip.anuncios {
     background: rgba(26, 26, 26, 0.15);
     border-color: #1a1a1a;
 }
 
 .materia-profesor-checkbox .materia-chip.matematicas {
-    color: #667eea;
+    color: #ff0000;
 }
-.materia-profesor-checkbox input:checked + .materia-chip.matematicas {
-    background: rgba(102, 126, 234, 0.15);
-    border-color: #667eea;
+
+.materia-profesor-checkbox input:checked+.materia-chip.matematicas {
+    background: rgba(255, 0, 0, 0.15);
+    border-color: #ff0000;
 }
 
 .materia-profesor-checkbox .materia-chip.lectura {
     color: #dc3545;
 }
-.materia-profesor-checkbox input:checked + .materia-chip.lectura {
+
+.materia-profesor-checkbox input:checked+.materia-chip.lectura {
     background: rgba(220, 53, 69, 0.15);
     border-color: #dc3545;
 }
@@ -8011,7 +8185,8 @@ sure forms don't interfere with modal layout */
 .materia-profesor-checkbox .materia-chip.sociales {
     color: #d39e00;
 }
-.materia-profesor-checkbox input:checked + .materia-chip.sociales {
+
+.materia-profesor-checkbox input:checked+.materia-chip.sociales {
     background: rgba(255, 193, 7, 0.15);
     border-color: #ffc107;
 }
@@ -8020,8 +8195,9 @@ sure forms don't interfere with modal layout */
 .materia-profesor-checkbox .materia-chip.ciencias {
     color: #28a745;
 }
-.materia-profesor-checkbox input:checked + .materia-chip.naturales,
-.materia-profesor-checkbox input:checked + .materia-chip.ciencias {
+
+.materia-profesor-checkbox input:checked+.materia-chip.naturales,
+.materia-profesor-checkbox input:checked+.materia-chip.ciencias {
     background: rgba(40, 167, 69, 0.15);
     border-color: #28a745;
 }
@@ -8029,7 +8205,8 @@ sure forms don't interfere with modal layout */
 .materia-profesor-checkbox .materia-chip.ingles {
     color: #9c27b0;
 }
-.materia-profesor-checkbox input:checked + .materia-chip.ingles {
+
+.materia-profesor-checkbox input:checked+.materia-chip.ingles {
     background: rgba(156, 39, 176, 0.15);
     border-color: #9c27b0;
 }
@@ -8045,20 +8222,20 @@ sure forms don't interfere with modal layout */
     .aulas-profesor-grid {
         max-height: 350px;
     }
-    
+
     .aula-profesor-header {
         flex-wrap: wrap;
     }
-    
+
     .aula-profesor-materias-disponibles {
         width: 100%;
         margin-top: 0.5rem;
     }
-    
+
     .materias-profesor-grid {
         gap: 0.35rem;
     }
-    
+
     .materia-profesor-checkbox .materia-chip {
         padding: 0.3rem 0.6rem;
         font-size: 0.75rem;
@@ -8236,7 +8413,7 @@ sure forms don't interfere with modal layout */
     .insignias-grid-display {
         grid-template-columns: 1fr;
     }
-    
+
     .ver-insignias-modal {
         max-width: 95%;
         margin: 1rem;
@@ -8385,7 +8562,7 @@ sure forms don't interfere with modal layout */
 .reset-stat-icon {
     width: 55px;
     height: 55px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #ff0000, #cc0000);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -8477,7 +8654,7 @@ sure forms don't interfere with modal layout */
 }
 
 .reset-progress-log h4 i {
-    color: #667eea;
+    color: #ff0000;
 }
 
 .log-content {

@@ -3550,9 +3550,165 @@ function createStudentItem(estudiante) {
             <div class="student-name">${estudiante.nombre}</div>
             <div class="student-email">${estudiante.usuario}</div>
         </div>
+        <button class="view-student-info-btn" onclick="openStudentProfileModal('${estudiante.id}')">
+            <i class="bi bi-eye"></i>
+            Ver información
+        </button>
     `;
 
     return item;
+}
+
+// Open student profile modal
+async function openStudentProfileModal(studentId) {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+        
+        const doc = await db.collection('usuarios').doc(studentId).get();
+        
+        if (!doc.exists) {
+            showMessage('Estudiante no encontrado', 'error');
+            return;
+        }
+        
+        const estudiante = doc.data();
+        
+        // Header
+        const avatarContainer = document.getElementById('studentProfileAvatar');
+        if (estudiante.fotoPerfil) {
+            avatarContainer.innerHTML = `<img src="${estudiante.fotoPerfil}" alt="${estudiante.nombre}">`;
+        } else {
+            avatarContainer.innerHTML = `<div class="avatar-default"><i class="bi bi-person-fill"></i></div>`;
+        }
+        
+        document.getElementById('studentProfileName').textContent = estudiante.nombre || 'Sin nombre';
+        
+        // Información Personal
+        const personalInfo = document.getElementById('studentProfilePersonalInfo');
+        personalInfo.innerHTML = `
+            <div class="student-profile-info-item">
+                <div class="student-profile-info-label"><i class="bi bi-envelope"></i> EMAIL</div>
+                <div class="student-profile-info-value">${estudiante.usuario || 'No disponible'}</div>
+            </div>
+            <div class="student-profile-info-item">
+                <div class="student-profile-info-label"><i class="bi bi-telephone"></i> TELÉFONO</div>
+                <div class="student-profile-info-value">${estudiante.telefono || 'No disponible'}</div>
+            </div>
+            <div class="student-profile-info-item">
+                <div class="student-profile-info-label"><i class="bi bi-card-text"></i> DOCUMENTO</div>
+                <div class="student-profile-info-value">${estudiante.tipoDocumento ? estudiante.tipoDocumento + ' ' : ''}${estudiante.numeroDocumento || 'No disponible'}</div>
+            </div>
+            <div class="student-profile-info-item">
+                <div class="student-profile-info-label"><i class="bi bi-geo-alt"></i> DEPARTAMENTO</div>
+                <div class="student-profile-info-value">${estudiante.departamento || 'No disponible'}</div>
+            </div>
+        `;
+        
+        // Información Académica
+        const academicInfo = document.getElementById('studentProfileAcademicInfo');
+        
+        // Formatear fecha de creación
+        let fechaRegistro = 'No disponible';
+        if (estudiante.fechaCreacion) {
+            try {
+                // Si es un Timestamp de Firebase
+                if (estudiante.fechaCreacion.toDate) {
+                    fechaRegistro = estudiante.fechaCreacion.toDate().toLocaleDateString('es-ES');
+                } 
+                // Si es un string de fecha
+                else if (typeof estudiante.fechaCreacion === 'string') {
+                    const fecha = new Date(estudiante.fechaCreacion);
+                    if (!isNaN(fecha.getTime())) {
+                        fechaRegistro = fecha.toLocaleDateString('es-ES');
+                    }
+                }
+                // Si es un número (timestamp en milisegundos)
+                else if (typeof estudiante.fechaCreacion === 'number') {
+                    fechaRegistro = new Date(estudiante.fechaCreacion).toLocaleDateString('es-ES');
+                }
+                // Si es un objeto Date
+                else if (estudiante.fechaCreacion instanceof Date) {
+                    fechaRegistro = estudiante.fechaCreacion.toLocaleDateString('es-ES');
+                }
+            } catch (e) {
+                console.log('Error al formatear fecha:', e);
+                fechaRegistro = 'No disponible';
+            }
+        }
+        
+        academicInfo.innerHTML = `
+            <div class="student-profile-info-item">
+                <div class="student-profile-info-label"><i class="bi bi-building"></i> INSTITUCIÓN</div>
+                <div class="student-profile-info-value">${estudiante.institucion || 'No disponible'}</div>
+            </div>
+            <div class="student-profile-info-item">
+                <div class="student-profile-info-label"><i class="bi bi-mortarboard"></i> GRADO</div>
+                <div class="student-profile-info-value">${estudiante.grado || 'No disponible'}</div>
+            </div>
+            <div class="student-profile-info-item">
+                <div class="student-profile-info-label"><i class="bi bi-calendar-event"></i> FECHA REGISTRO</div>
+                <div class="student-profile-info-value">${fechaRegistro}</div>
+            </div>
+            <div class="student-profile-info-item">
+                <div class="student-profile-info-label"><i class="bi bi-check-circle"></i> ESTADO</div>
+                <div class="student-profile-info-value">${estudiante.activo !== false ? 'Activo' : 'Inactivo'}</div>
+            </div>
+        `;
+        
+        // Ocultar sección de Progreso
+        const progressSection = document.getElementById('studentProfileGamificationSection');
+        if (progressSection) {
+            progressSection.style.display = 'none';
+        }
+        
+        // Redes Sociales
+        const socialSection = document.getElementById('studentProfileSocialSection');
+        const socialLinks = document.getElementById('studentProfileSocialLinks');
+        
+        const redesSociales = estudiante.redesSociales || {};
+        const tieneRedes = redesSociales.linkedin || redesSociales.twitter || redesSociales.instagram || redesSociales.facebook || redesSociales.tiktok || redesSociales.youtube;
+        
+        if (tieneRedes) {
+            socialSection.style.display = 'block';
+            let socialHTML = '';
+            
+            if (redesSociales.linkedin) {
+                socialHTML += `<a href="${redesSociales.linkedin}" target="_blank" class="student-social-link linkedin"><i class="bi bi-linkedin"></i> LinkedIn</a>`;
+            }
+            if (redesSociales.twitter) {
+                socialHTML += `<a href="${redesSociales.twitter}" target="_blank" class="student-social-link twitter"><i class="bi bi-twitter-x"></i> Twitter</a>`;
+            }
+            if (redesSociales.instagram) {
+                socialHTML += `<a href="${redesSociales.instagram}" target="_blank" class="student-social-link instagram"><i class="bi bi-instagram"></i> Instagram</a>`;
+            }
+            if (redesSociales.facebook) {
+                socialHTML += `<a href="${redesSociales.facebook}" target="_blank" class="student-social-link facebook"><i class="bi bi-facebook"></i> Facebook</a>`;
+            }
+            if (redesSociales.tiktok) {
+                socialHTML += `<a href="${redesSociales.tiktok}" target="_blank" class="student-social-link tiktok"><i class="bi bi-tiktok"></i> TikTok</a>`;
+            }
+            if (redesSociales.youtube) {
+                socialHTML += `<a href="${redesSociales.youtube}" target="_blank" class="student-social-link youtube"><i class="bi bi-youtube"></i> YouTube</a>`;
+            }
+            
+            socialLinks.innerHTML = socialHTML;
+        } else {
+            socialSection.style.display = 'none';
+        }
+        
+        // Mostrar modal
+        document.getElementById('studentProfileModal').classList.add('active');
+        
+    } catch (error) {
+        console.error('Error al cargar perfil del estudiante:', error);
+        showMessage('Error al cargar información del estudiante', 'error');
+    }
+}
+
+// Close student profile modal
+function closeStudentProfileModal() {
+    document.getElementById('studentProfileModal').classList.remove('active');
 }
 
 // Setup students search functionality
