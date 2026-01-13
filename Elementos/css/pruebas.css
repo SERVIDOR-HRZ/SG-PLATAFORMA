@@ -1250,12 +1250,14 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     transition: all 0.3s ease;
-    border-left: 4px solid var(--nivel-color, #667eea);
+    border: 3px solid var(--nivel-color, #667eea);
+    cursor: pointer;
 }
 
 .nivel-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 25px color-mix(in srgb, var(--nivel-color, #667eea) 30%, transparent);
+    border-color: var(--nivel-color, #667eea);
 }
 
 .nivel-header {
@@ -2709,5 +2711,359 @@ input.invalid {
     
     .materia-btn i {
         font-size: 1.3rem;
+    }
+}
+
+/* ========================================
+   NIVEL PREVIEW HINT
+   ======================================== */
+.nivel-preview-hint {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 0.8rem;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: all 0.3s ease;
+}
+
+.nivel-card:hover .nivel-preview-hint {
+    color: var(--nivel-color, #667eea);
+}
+
+.nivel-preview-hint i {
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   NIVEL PREVIEW MODAL - PROFESIONAL
+   ======================================== */
+.nivel-preview-modal {
+    max-width: 750px;
+    width: 95%;
+}
+
+.nivel-preview-modal .modal-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 2rem;
+}
+
+.nivel-preview-modal .modal-header h3 {
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.nivel-preview-modal .modal-header h3 i {
+    color: #4CAF50;
+    font-size: 1.3rem;
+}
+
+.nivel-preview-modal .modal-body {
+    padding: 0;
+    background: linear-gradient(180deg, #1a1a2e 0%, #0d1117 100%);
+}
+
+.nivel-preview-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.nivel-preview-screen {
+    background: transparent;
+    padding: 2rem;
+    min-height: auto;
+}
+
+/* Header del preview con info del nivel */
+.nivel-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nivel-preview-header .nivel-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--preview-color, #667eea), color-mix(in srgb, var(--preview-color, #667eea) 70%, black));
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: white;
+}
+
+.nivel-preview-header .nivel-badge i {
+    font-size: 1rem;
+}
+
+.nivel-preview-header .nivel-tema {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Barra de progreso mejorada */
+.nivel-preview-screen .preview-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nivel-preview-screen .preview-progress-bar {
+    flex: 1;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nivel-preview-screen .preview-progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px currentColor;
+}
+
+.nivel-preview-screen .preview-progress span {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 700;
+    min-width: 45px;
+    text-align: right;
+}
+
+/* Pregunta mejorada */
+.nivel-preview-screen .preview-question {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border-radius: 16px;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    position: relative;
+}
+
+.nivel-preview-screen .preview-question::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--preview-color, #667eea), transparent);
+    border-radius: 16px 16px 0 0;
+}
+
+.nivel-preview-screen .preview-question p {
+    color: white;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Opciones mejoradas */
+.nivel-preview-screen .preview-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.nivel-preview-screen .preview-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.nivel-preview-screen .preview-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.nivel-preview-screen .preview-option.correct {
+    border-color: #4CAF50;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.2);
+}
+
+.nivel-preview-screen .preview-option .option-letter {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    color: white;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.nivel-preview-screen .preview-option.correct .option-letter {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.nivel-preview-screen .preview-option .option-text {
+    flex: 1;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.nivel-preview-screen .preview-option.correct .option-text {
+    color: white;
+}
+
+.nivel-preview-screen .preview-option .option-check {
+    font-size: 1.3rem;
+    color: #4CAF50;
+}
+
+/* Pista mejorada con icono */
+.nivel-preview-screen .preview-pista-card {
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+    border-radius: 14px;
+    border: 2px solid #FFD54F;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+}
+
+.nivel-preview-screen .preview-pista-card .preview-pista-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #FFD54F, #FFC107);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+}
+
+.nivel-preview-screen .preview-pista-card .preview-pista-icon i {
+    font-size: 1.4rem;
+    color: #5D4037;
+}
+
+.nivel-preview-screen .preview-pista-card .preview-pista-content {
+    flex: 1;
+}
+
+.nivel-preview-screen .preview-pista-card .preview-pista-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8D6E63;
+    margin-bottom: 0.3rem;
+}
+
+.nivel-preview-screen .preview-pista-card .preview-pista-text {
+    color: #4E342E;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* Navegación mejorada */
+.nivel-preview-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1.25rem 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nivel-preview-navigation .preview-nav-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.nivel-preview-navigation .preview-nav-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--preview-color, #667eea), color-mix(in srgb, var(--preview-color, #667eea) 70%, black));
+    border-color: var(--preview-color, #667eea);
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--preview-color, #667eea) 40%, transparent);
+}
+
+.nivel-preview-navigation .preview-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.nivel-preview-navigation .preview-indicator {
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.6rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    min-width: 150px;
+    text-align: center;
+}
+
+/* Footer del modal */
+.nivel-preview-modal .modal-footer {
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.25rem 2rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .nivel-preview-modal {
+        max-width: 100%;
+        margin: 0.5rem;
+    }
+    
+    .nivel-preview-screen .preview-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .nivel-preview-screen {
+        padding: 1.25rem;
     }
 }

@@ -603,13 +603,13 @@ function renderDesafiosNiveles() {
     const config = materiasConfig[currentMateriaDesafio];
 
     container.innerHTML = desafiosNiveles.map(nivel => `
-        <div class="nivel-card" data-id="${nivel.id}" style="--nivel-color: ${config.color}">
+        <div class="nivel-card" data-id="${nivel.id}" style="--nivel-color: ${config.color}" onclick="showNivelPreview('${nivel.id}')">
             <div class="nivel-header">
                 <div class="nivel-number">
                     <i class="bi bi-trophy-fill"></i>
                     <span>Nivel ${nivel.numero}</span>
                 </div>
-                <div class="nivel-actions">
+                <div class="nivel-actions" onclick="event.stopPropagation()">
                     <button class="btn-clone-nivel" onclick="cloneNivel('${nivel.id}')" title="Clonar nivel">
                         <i class="bi bi-copy"></i>
                     </button>
@@ -628,9 +628,178 @@ function renderDesafiosNiveles() {
                     <span><i class="bi bi-coin"></i> +${nivel.recompensaMonedas || 10} monedas</span>
                     <span><i class="bi bi-star"></i> +${nivel.recompensaXP || 20} XP</span>
                 </div>
+                <div class="nivel-preview-hint">
+                    <i class="bi bi-eye"></i> Clic para ver vista previa
+                </div>
             </div>
         </div>
     `).join('');
+}
+
+// Vista previa del nivel
+let currentNivelPreviewIndex = 0;
+let currentNivelPreviewData = null;
+
+function showNivelPreview(nivelId) {
+    const nivel = desafiosNiveles.find(n => n.id === nivelId);
+    if (!nivel || !nivel.preguntas || nivel.preguntas.length === 0) {
+        showDesafiosAlert('Sin preguntas', 'Este nivel no tiene preguntas configuradas.', 'warning');
+        return;
+    }
+    
+    currentNivelPreviewData = nivel;
+    currentNivelPreviewIndex = 0;
+    
+    // Crear modal de vista previa si no existe
+    createNivelPreviewModal();
+    
+    // Mostrar modal
+    const modal = document.getElementById('nivelPreviewModal');
+    if (modal) {
+        updateNivelPreviewContent();
+        modal.classList.add('active');
+    }
+}
+
+function createNivelPreviewModal() {
+    if (document.getElementById('nivelPreviewModal')) return;
+    
+    const config = materiasConfig[currentMateriaDesafio];
+    
+    const modalHTML = `
+        <div class="modal-overlay" id="nivelPreviewModal">
+            <div class="modal nivel-preview-modal">
+                <div class="modal-header">
+                    <h3><i class="bi bi-eye"></i> <span id="previewNivelTitle">Vista Previa</span></h3>
+                    <button class="close-btn" onclick="closeNivelPreviewModal()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="nivel-preview-container">
+                        <div class="nivel-preview-screen" id="nivelPreviewScreen">
+                            <!-- Contenido generado dinámicamente -->
+                        </div>
+                        <div class="nivel-preview-navigation">
+                            <button type="button" class="preview-nav-btn" id="prevNivelPreviewBtn" onclick="navigateNivelPreview(-1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <span class="preview-indicator" id="nivelPreviewIndicator">Pregunta 1 de 5</span>
+                            <button type="button" class="preview-nav-btn" id="nextNivelPreviewBtn" onclick="navigateNivelPreview(1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeNivelPreviewModal()">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="closeNivelPreviewModal(); editNivel(currentNivelPreviewData.id)">
+                        <i class="bi bi-pencil"></i> Editar Nivel
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function updateNivelPreviewContent() {
+    if (!currentNivelPreviewData) return;
+    
+    const nivel = currentNivelPreviewData;
+    const preguntas = nivel.preguntas || [];
+    const i = currentNivelPreviewIndex;
+    const pregunta = preguntas[i];
+    
+    if (!pregunta) return;
+    
+    const screen = document.getElementById('nivelPreviewScreen');
+    const indicator = document.getElementById('nivelPreviewIndicator');
+    const prevBtn = document.getElementById('prevNivelPreviewBtn');
+    const nextBtn = document.getElementById('nextNivelPreviewBtn');
+    const title = document.getElementById('previewNivelTitle');
+    const modal = document.getElementById('nivelPreviewModal');
+    
+    const config = materiasConfig[currentMateriaDesafio];
+    const letras = ['A', 'B', 'C', 'D'];
+    
+    // Aplicar color de la materia al modal
+    if (screen) {
+        screen.style.setProperty('--preview-color', config.color);
+    }
+    
+    if (title) title.textContent = `Nivel ${nivel.numero} - ${nivel.tema || 'Sin tema'}`;
+    
+    let pistaHTML = '';
+    if (pregunta.pista) {
+        pistaHTML = `
+            <div class="preview-pista-card">
+                <div class="preview-pista-icon">
+                    <i class="bi bi-lightbulb-fill"></i>
+                </div>
+                <div class="preview-pista-content">
+                    <div class="preview-pista-label">Pista</div>
+                    <div class="preview-pista-text">${pregunta.pista}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    screen.innerHTML = `
+        <div class="nivel-preview-header">
+            <div class="nivel-badge" style="--preview-color: ${config.color}">
+                <i class="bi ${config.icon}"></i>
+                <span>Nivel ${nivel.numero}</span>
+            </div>
+            <div class="nivel-tema">
+                <i class="bi bi-bookmark-fill"></i>
+                ${nivel.tema || 'Sin tema'}
+            </div>
+        </div>
+        <div class="preview-progress">
+            <div class="preview-progress-bar">
+                <div class="preview-progress-fill" style="width: ${((i + 1) / preguntas.length) * 100}%; background: linear-gradient(90deg, ${config.color}, color-mix(in srgb, ${config.color} 70%, white)); color: ${config.color}"></div>
+            </div>
+            <span>${i + 1}/${preguntas.length}</span>
+        </div>
+        <div class="preview-question" style="--preview-color: ${config.color}">
+            <p>${pregunta.pregunta || 'Sin texto'}</p>
+        </div>
+        <div class="preview-options">
+            ${(pregunta.opciones || []).map((op, idx) => `
+                <div class="preview-option ${idx === pregunta.correcta ? 'correct' : ''}">
+                    <span class="option-letter">${letras[idx]}</span>
+                    <span class="option-text">${op}</span>
+                    ${idx === pregunta.correcta ? '<i class="bi bi-check-circle-fill option-check"></i>' : ''}
+                </div>
+            `).join('')}
+        </div>
+        ${pistaHTML}
+    `;
+    
+    // Aplicar color a la navegación
+    const navBtns = document.querySelectorAll('#nivelPreviewModal .preview-nav-btn');
+    navBtns.forEach(btn => btn.style.setProperty('--preview-color', config.color));
+    
+    if (indicator) indicator.textContent = `Pregunta ${i + 1} de ${preguntas.length}`;
+    if (prevBtn) prevBtn.disabled = i === 0;
+    if (nextBtn) nextBtn.disabled = i >= preguntas.length - 1;
+}
+
+function navigateNivelPreview(direction) {
+    if (!currentNivelPreviewData) return;
+    const preguntas = currentNivelPreviewData.preguntas || [];
+    const newIndex = currentNivelPreviewIndex + direction;
+    if (newIndex >= 0 && newIndex < preguntas.length) {
+        currentNivelPreviewIndex = newIndex;
+        updateNivelPreviewContent();
+    }
+}
+
+function closeNivelPreviewModal() {
+    const modal = document.getElementById('nivelPreviewModal');
+    if (modal) modal.classList.remove('active');
 }
 
 function showCreateNivelModal() {
