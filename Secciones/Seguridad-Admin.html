@@ -5,9 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seguridad y Seguimiento - Seamos Genios</title>
+
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../Elementos/css/seguridad-admin.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
@@ -20,33 +22,65 @@
             <button class="back-btn" id="backBtn">
                 <i class="bi bi-arrow-left"></i>
             </button>
-            <img src="../Elementos/img/logo1.png" alt="Logo" class="header-logo">
-            <h1>Seguridad y Seguimiento</h1>
+            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
+            <h1><i class="bi bi-shield-lock"></i> Seguridad y Seguimiento</h1>
         </div>
         <div class="header-right">
-            <span class="user-name" id="adminName">ADMIN</span>
-            <div class="user-avatar">
-                <i class="bi bi-shield-lock-fill"></i>
+            <div class="user-info" id="userInfoContainer">
+                <span class="user-name" id="userName">ADMIN</span>
+                <div class="user-avatar" id="userAvatarContainer">
+                    <div class="user-avatar-default" id="userAvatarDefault">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto">
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Page Title -->
+        <div class="page-title">
+            <div class="title-info">
+                <h2>Panel de Monitoreo de Descargas</h2>
+                <p>Supervisa la actividad de descarga de documentos y detecta comportamientos sospechosos</p>
+            </div>
+            <div class="title-badge">
+                <i class="bi bi-shield-check"></i>
+                <span>Protección Activa</span>
+            </div>
+        </div>
+
         <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                <div class="stat-icon blue">
                     <i class="bi bi-download"></i>
                 </div>
                 <div class="stat-info">
                     <span class="stat-value" id="totalDescargas">0</span>
-                    <span class="stat-label">Descargas Totales</span>
+                    <span class="stat-label">Total Descargas</span>
+                </div>
+                <div class="stat-trend up">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-icon red">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="usuariosSospechosos">0</span>
+                    <span class="stat-label">Usuarios Sospechosos</span>
+                </div>
+                <div class="stat-indicator">
+                    <span class="indicator-dot"></span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
-                    <i class="bi bi-people-fill"></i>
+                <div class="stat-icon green">
+                    <i class="bi bi-people"></i>
                 </div>
                 <div class="stat-info">
                     <span class="stat-value" id="usuariosActivos">0</span>
@@ -54,169 +88,136 @@
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
+                <div class="stat-icon purple">
+                    <i class="bi bi-calendar-check"></i>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-value" id="alertasPendientes">0</span>
-                    <span class="stat-label">Alertas Pendientes</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-                    <i class="bi bi-person-x-fill"></i>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-value" id="usuariosBloqueados">0</span>
-                    <span class="stat-label">Usuarios Bloqueados</span>
+                    <span class="stat-value" id="descargasHoy">0</span>
+                    <span class="stat-label">Descargas Hoy</span>
                 </div>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="tabs-container">
-            <button class="tab-btn active" data-tab="descargas">
-                <i class="bi bi-download"></i>
-                Registro de Descargas
-            </button>
-            <button class="tab-btn" data-tab="usuarios">
-                <i class="bi bi-people"></i>
-                Gestión de Usuarios
-            </button>
-            <button class="tab-btn" data-tab="alertas">
-                <i class="bi bi-bell"></i>
-                Alertas de Seguridad
-            </button>
+        <!-- Filters -->
+        <div class="filters-container">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="filterStatus"><i class="bi bi-funnel"></i> Estado:</label>
+                    <select id="filterStatus">
+                        <option value="todos">Todos</option>
+                        <option value="sospechoso">Sospechosos</option>
+                        <option value="normal">Normales</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterDate"><i class="bi bi-calendar"></i> Período:</label>
+                    <select id="filterDate">
+                        <option value="todos">Todo el tiempo</option>
+                        <option value="hoy">Hoy</option>
+                        <option value="semana">Última semana</option>
+                        <option value="mes">Último mes</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterAula"><i class="bi bi-book"></i> Aula:</label>
+                    <select id="filterAula">
+                        <option value="">Todas las aulas</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre, email, documento o IP...">
+                </div>
+                <button class="refresh-btn" id="refreshBtn" title="Actualizar datos">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>Actualizar</span>
+                </button>
+            </div>
         </div>
 
-        <!-- Tab Content -->
-        <div class="tab-content">
-            <!-- Descargas Tab -->
-            <div class="tab-pane active" id="descargasPane">
-                <!-- Filtros -->
-                <div class="filters-container">
-                    <div class="search-box">
-                        <i class="bi bi-search"></i>
-                        <input type="text" id="searchDescargas" placeholder="Buscar por estudiante, documento...">
-                    </div>
-                    <div class="filter-group">
-                        <select id="filterMateria">
-                            <option value="">Todas las materias</option>
-                        </select>
-                        <select id="filterFecha">
-                            <option value="">Todas las fechas</option>
-                            <option value="hoy">Hoy</option>
-                            <option value="semana">Esta semana</option>
-                            <option value="mes">Este mes</option>
-                        </select>
-                        <button class="export-btn" id="exportDescargasBtn">
-                            <i class="bi bi-file-earmark-excel"></i>
-                            Exportar
-                        </button>
-                    </div>
+        <!-- Suspicious Users Alert -->
+        <div class="alert-section" id="alertSection" style="display: none;">
+            <div class="alert-header">
+                <div class="alert-title">
+                    <i class="bi bi-shield-exclamation"></i>
+                    <h3>Usuarios con Actividad Sospechosa</h3>
                 </div>
-                <!-- Tabla de descargas -->
-                <div class="table-container">
-                    <table class="data-table" id="descargasTable">
-                        <thead>
-                            <tr>
-                                <th>Estudiante</th>
-                                <th>Documento</th>
-                                <th>Materia</th>
-                                <th>Aula</th>
-                                <th>Fecha/Hora</th>
-                                <th>Código Único</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="descargasTableBody">
-                            <!-- Se llena dinámicamente -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="empty-state" id="emptyDescargas" style="display: none;">
-                    <i class="bi bi-download"></i>
-                    <p>No hay registros de descargas</p>
-                </div>
+                <span class="alert-subtitle">Usuarios con más de 3 descargas detectadas</span>
             </div>
-
-            <!-- Usuarios Tab -->
-            <div class="tab-pane" id="usuariosPane">
-                <!-- Filtros -->
-                <div class="filters-container">
-                    <div class="search-box">
-                        <i class="bi bi-search"></i>
-                        <input type="text" id="searchUsuarios" placeholder="Buscar por nombre, email...">
-                    </div>
-                    <div class="filter-group">
-                        <select id="filterEstado">
-                            <option value="">Todos los estados</option>
-                            <option value="activo">Activos</option>
-                            <option value="bloqueado">Bloqueados</option>
-                            <option value="suspendido">Suspendidos</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- Lista de usuarios -->
-                <div class="users-grid" id="usuariosGrid">
-                    <!-- Se llena dinámicamente -->
-                </div>
-                <div class="empty-state" id="emptyUsuarios" style="display: none;">
-                    <i class="bi bi-people"></i>
-                    <p>No hay usuarios para mostrar</p>
-                </div>
+            <div class="alert-list" id="alertList">
+                <!-- Alertas dinámicas -->
             </div>
+        </div>
 
-            <!-- Alertas Tab -->
-            <div class="tab-pane" id="alertasPane">
-                <div class="alerts-list" id="alertasList">
-                    <!-- Se llena dinámicamente -->
+        <!-- Downloads Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <div class="table-title">
+                    <i class="bi bi-table"></i>
+                    <h3>Registro de Descargas</h3>
+                    <span class="table-subtitle">Historial completo de actividad</span>
                 </div>
-                <div class="empty-state" id="emptyAlertas" style="display: none;">
-                    <i class="bi bi-bell-slash"></i>
-                    <p>No hay alertas pendientes</p>
+                <button class="export-btn" id="exportBtn">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Exportar CSV
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="downloads-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Documento</th>
+                            <th>Aula</th>
+                            <th>Materia</th>
+                            <th>Fecha</th>
+                            <th>Dispositivo</th>
+                            <th>IP</th>
+                            <th>Descargas</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="downloadsTableBody">
+                        <!-- Datos dinámicos -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-pagination">
+                <span id="paginationInfo">Mostrando 0 de 0</span>
+                <div class="pagination-btns">
+                    <button id="prevPage" disabled title="Página anterior">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <span id="currentPage">1</span>
+                    <button id="nextPage" disabled title="Página siguiente">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal Ver Detalles Usuario -->
+    <!-- User Detail Modal -->
     <div class="modal" id="userDetailModal">
-        <div class="modal-content modal-large">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="bi bi-person-badge"></i> Detalles del Usuario</h3>
-                <button class="close-btn" onclick="closeUserDetailModal()">
-                    <i class="bi bi-x"></i>
+                <h3><i class="bi bi-person-badge"></i> Detalle de Usuario</h3>
+                <button class="close-btn" onclick="closeUserModal()">
+                    <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             <div class="modal-body" id="userDetailBody">
-                <!-- Se llena dinámicamente -->
+                <!-- Contenido dinámico -->
             </div>
         </div>
     </div>
 
-    <!-- Modal Confirmar Acción -->
-    <div class="modal" id="confirmActionModal">
-        <div class="modal-content modal-small">
-            <div class="modal-header">
-                <h3 id="confirmActionTitle">Confirmar Acción</h3>
-                <button class="close-btn" onclick="closeConfirmActionModal()">
-                    <i class="bi bi-x"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="confirm-icon" id="confirmActionIcon">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                </div>
-                <p id="confirmActionMessage">¿Estás seguro de realizar esta acción?</p>
-                <div class="input-group" id="confirmReasonGroup" style="display: none;">
-                    <label for="confirmReason">Motivo (obligatorio)</label>
-                    <textarea id="confirmReason" rows="3" placeholder="Escribe el motivo..."></textarea>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="cancel-btn" onclick="closeConfirmActionModal()">Cancelar</button>
-                <button class="submit-btn" id="confirmActionBtn">Confirmar</button>
+    <!-- Confirm Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content modal-confirm">
+            <div class="modal-body" id="confirmBody">
+                <!-- Contenido dinámico -->
             </div>
         </div>
     </div>
@@ -224,6 +225,7 @@
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/seguridad-admin.js"></script>
 </body>

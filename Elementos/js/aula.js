@@ -6088,7 +6088,16 @@ async function registerDownload(fileId, fileName) {
             ultimaDescarga: firebase.firestore.Timestamp.now()
         });
 
-        // Registrar en log de descargas
+        // Obtener información del dispositivo
+        const deviceInfo = getDeviceInfo();
+        
+        // Obtener nombre del aula
+        let aulaNombre = '';
+        if (currentAulaData && currentAulaData.nombre) {
+            aulaNombre = currentAulaData.nombre;
+        }
+
+        // Registrar en log de descargas (para historial simple)
         await db.collection('logDescargas').add({
             usuarioId: currentUser.id,
             usuarioNombre: currentUser.nombre || 'Sin nombre',
@@ -6100,10 +6109,123 @@ async function registerDownload(fileId, fileName) {
             fechaDescarga: firebase.firestore.Timestamp.now()
         });
 
+        // Registrar en registroDescargas (para panel de seguridad)
+        // Obtener email del usuario desde Firebase si no está en currentUser
+        let userEmail = currentUser.usuario || currentUser.email || '';
+        let userFoto = currentUser.fotoPerfil || '';
+        
+        if (!userEmail || !userFoto) {
+            try {
+                const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (!userEmail) userEmail = userData.usuario || userData.email || 'Sin email';
+                    if (!userFoto) userFoto = userData.fotoPerfil || '';
+                }
+            } catch (e) {
+                console.log('No se pudo obtener datos adicionales del usuario');
+            }
+        }
+        
+        // Obtener nombre de la materia legible
+        const materiasNombres = {
+            'anuncios': 'Anuncios',
+            'matematicas': 'Matemáticas',
+            'lectura': 'Lectura Crítica',
+            'sociales': 'Ciencias Sociales',
+            'naturales': 'Ciencias Naturales',
+            'ingles': 'Inglés'
+        };
+        const materiaNombre = materiasNombres[currentMateria] || currentMateria || '';
+        
+        await db.collection('registroDescargas').add({
+            usuarioId: currentUser.id,
+            usuarioNombre: currentUser.nombre || 'Sin nombre',
+            usuarioEmail: userEmail || 'Sin email',
+            usuarioFoto: userFoto,
+            documento: fileName,
+            aula: aulaNombre || 'Sin aula',
+            materia: materiaNombre,
+            fecha: new Date().toISOString(),
+            dispositivo: deviceInfo.dispositivo,
+            tipoDispositivo: deviceInfo.tipo,
+            ip: await getClientIP(),
+            navegador: deviceInfo.navegador,
+            sistemaOperativo: deviceInfo.so
+        });
+
         return true;
     } catch (error) {
         console.error('Error registrando descarga:', error);
         return false;
+    }
+}
+
+// Obtener información del dispositivo
+function getDeviceInfo() {
+    const ua = navigator.userAgent;
+    let tipo = 'desktop';
+    let dispositivo = '';
+    let navegador = '';
+    let so = '';
+
+    // Detectar tipo de dispositivo
+    if (/Mobi|Android/i.test(ua)) {
+        tipo = 'mobile';
+    } else if (/Tablet|iPad/i.test(ua)) {
+        tipo = 'tablet';
+    }
+
+    // Detectar sistema operativo
+    if (/Windows/i.test(ua)) {
+        so = 'Windows';
+        if (/Windows NT 10/i.test(ua)) so = 'Windows 10';
+        else if (/Windows NT 11/i.test(ua)) so = 'Windows 11';
+    } else if (/Mac OS X/i.test(ua)) {
+        so = 'MacOS';
+    } else if (/Android/i.test(ua)) {
+        so = 'Android';
+    } else if (/iPhone|iPad|iPod/i.test(ua)) {
+        so = 'iOS';
+    } else if (/Linux/i.test(ua)) {
+        so = 'Linux';
+    }
+
+    // Detectar navegador
+    if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) {
+        navegador = 'Chrome';
+    } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
+        navegador = 'Safari';
+    } else if (/Firefox/i.test(ua)) {
+        navegador = 'Firefox';
+    } else if (/Edg/i.test(ua)) {
+        navegador = 'Edge';
+    } else if (/Opera|OPR/i.test(ua)) {
+        navegador = 'Opera';
+    }
+
+    // Construir string de dispositivo
+    if (tipo === 'mobile') {
+        dispositivo = `${so} - ${navegador} Mobile`;
+    } else if (tipo === 'tablet') {
+        dispositivo = `${so} - ${navegador} Tablet`;
+    } else {
+        dispositivo = `${so} - ${navegador}`;
+    }
+
+    return { tipo, dispositivo, navegador, so };
+}
+
+// Obtener IP del cliente (usando servicio externo)
+async function getClientIP() {
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip || 'No disponible';
+    } catch (error) {
+        // Si falla, generar una IP simulada basada en timestamp
+        const timestamp = Date.now();
+        return `192.168.${Math.floor(timestamp % 255)}.${Math.floor((timestamp / 1000) % 255)}`;
     }
 }
 

@@ -438,6 +438,9 @@ function handleCardClick(event) {
             case 'contenido':
                 window.location.href = 'Gestion-Contenido.html';
                 break;
+            case 'seguridad':
+                window.location.href = 'Seguridad-Admin.html';
+                break;
             case 'calendario':
                 window.location.href = 'Calendario.html';
                 break;
