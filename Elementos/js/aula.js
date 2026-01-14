@@ -6113,17 +6113,17 @@ function showDownloadConfirmation(fileId, originalUrl, fileName) {
     confirmModal.className = 'modal active';
     confirmModal.id = 'downloadConfirmModal';
     confirmModal.innerHTML = `
-        <div class="modal-content modal-content-small" style="max-width: 500px;">
-            <div class="modal-header" style="background: linear-gradient(135deg, #dc3545, #c82333) !important; color: white !important;">
-                <h3 style="display: flex; align-items: center; gap: 0.5rem; color: white !important;">
-                    <i class="bi bi-shield-exclamation" style="color: white !important;"></i>
+        <div class="modal-content modal-content-small">
+            <div class="modal-header">
+                <h3>
+                    <i class="bi bi-shield-exclamation"></i>
                     Advertencia de Seguridad
                 </h3>
-                <button class="close-btn" onclick="closeDownloadConfirmModal()" style="background: rgba(255,255,255,0.2) !important; color: white !important; border: none !important;">
-                    <i class="bi bi-x" style="color: white !important;"></i>
+                <button class="close-btn" onclick="closeDownloadConfirmModal()">
+                    <i class="bi bi-x"></i>
                 </button>
             </div>
-            <div class="modal-body" style="padding: 1.5rem;">
+            <div class="modal-body">
                 <div style="text-align: center; margin-bottom: 1.5rem;">
                     <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #ffc107, #ff9800); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
                         <i class="bi bi-file-earmark-lock2" style="font-size: 2.5rem; color: white;"></i>
@@ -6153,11 +6153,11 @@ function showDownloadConfirmation(fileId, originalUrl, fileName) {
                     </p>
                 </div>
             </div>
-            <div class="modal-actions" style="padding: 0 1.5rem 1.5rem; display: flex; gap: 1rem;">
-                <button type="button" class="cancel-btn" onclick="closeDownloadConfirmModal()" style="flex: 1;">
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeDownloadConfirmModal()">
                     Cancelar
                 </button>
-                <button type="button" class="submit-btn" onclick="confirmDownload('${fileId}', '${originalUrl}', '${fileName}')" style="flex: 1; background: linear-gradient(135deg, #28a745, #20c997);">
+                <button type="button" class="submit-btn" onclick="confirmDownload('${fileId}', '${originalUrl}', '${fileName}')" style="background: linear-gradient(135deg, #28a745, #20c997);">
                     <i class="bi bi-download"></i>
                     Acepto y Descargar
                 </button>
@@ -6186,8 +6186,23 @@ async function confirmDownload(fileId, originalUrl, fileName) {
         // Crear URL de descarga directa de Google Drive
         const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
-        // Abrir descarga en nueva ventana
-        window.open(downloadUrl, '_blank');
+        // Detectar si es móvil
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            // En móviles, usar un enlace <a> con download para forzar descarga
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = fileName || 'documento.pdf';
+            link.target = '_self'; // Intentar en la misma ventana
+            link.rel = 'noopener';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            // En desktop, abrir en nueva ventana
+            window.open(downloadUrl, '_blank');
+        }
 
         showAlertModal('Descarga Iniciada', 'Recuerda: este documento es confidencial y está vinculado a tu cuenta.');
 
