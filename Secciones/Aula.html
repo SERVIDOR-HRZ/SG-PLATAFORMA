@@ -12,6 +12,7 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../Elementos/css/aula.css">
+    <link rel="stylesheet" href="../Elementos/css/seguridad.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
 </head>
 
@@ -1026,34 +1027,28 @@
     </div>
 
     <!-- Modal de Alerta Tienda -->
-    <div id="tiendaAlertModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; justify-content: center; align-items: center;">
-        <div style="background: white; border-radius: 16px; padding: 2rem; text-align: center; max-width: 350px; margin: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <div id="tiendaAlertIcon" style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);">
-                <i class="bi bi-check-circle-fill" style="font-size: 2.5rem; color: white;"></i>
+    <div id="tiendaAlertModal">
+        <div>
+            <div id="tiendaAlertIcon">
+                <i class="bi bi-check-circle-fill"></i>
             </div>
-            <h3 id="tiendaAlertTitulo" style="font-size: 1.4rem; color: #333; margin-bottom: 0.5rem;">Título</h3>
-            <p id="tiendaAlertMensaje" style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5;">Mensaje</p>
-            <button id="tiendaAlertBtn" style="padding: 0.8rem 2rem; border-radius: 10px; font-weight: 600; background: #2196F3; color: white; border: none; cursor: pointer; font-size: 1rem;">
-                Entendido
-            </button>
+            <h3 id="tiendaAlertTitulo">Título</h3>
+            <p id="tiendaAlertMensaje">Mensaje</p>
+            <button id="tiendaAlertBtn">Entendido</button>
         </div>
     </div>
 
     <!-- Modal de Confirmación de Compra -->
-    <div id="confirmarCompraModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; justify-content: center; align-items: center;">
-        <div style="background: white; border-radius: 16px; padding: 2rem; text-align: center; max-width: 350px; margin: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <div style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; background: linear-gradient(180deg, #2196F3 0%, #1976D2 100%);">
-                <i class="bi bi-cart-check-fill" style="font-size: 2.5rem; color: white;"></i>
+    <div id="confirmarCompraModal">
+        <div>
+            <div>
+                <i class="bi bi-cart-check-fill"></i>
             </div>
-            <h3 style="font-size: 1.4rem; color: #333; margin-bottom: 0.5rem;">Confirmar Compra</h3>
-            <p id="confirmarCompraMensaje" style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5;">¿Deseas comprar este artículo?</p>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button id="cancelarCompraBtn" style="padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 600; background: #e0e0e0; color: #333; border: none; cursor: pointer; font-size: 1rem;">
-                    Cancelar
-                </button>
-                <button id="confirmarCompraBtn" style="padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 600; background: #4CAF50; color: white; border: none; cursor: pointer; font-size: 1rem;">
-                    Comprar
-                </button>
+            <h3>Confirmar Compra</h3>
+            <p id="confirmarCompraMensaje">¿Deseas comprar este artículo?</p>
+            <div>
+                <button id="cancelarCompraBtn">Cancelar</button>
+                <button id="confirmarCompraBtn">Comprar</button>
             </div>
         </div>
     </div>
@@ -1115,6 +1110,7 @@
 
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/aula.js"></script>
+    <script src="../Elementos/js/seguridad.js"></script>
 </body>
 
 </html>

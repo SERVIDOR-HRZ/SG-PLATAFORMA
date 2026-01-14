@@ -7503,3 +7503,814 @@ body {
         justify-content: center;
     }
 }
+
+/* ============================================
+   MODALES MEJORADOS - DISEÑO PROFESIONAL
+   ============================================ */
+
+/* Base Modal Overlay mejorado */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Modal Content mejorado */
+.modal-content {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 550px;
+    max-height: 90vh;
+    max-height: 90dvh;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25), 
+                0 10px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-content-large {
+    max-width: 750px;
+}
+
+.modal-content-small {
+    max-width: 420px;
+}
+
+/* Modal Header mejorado */
+.modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+}
+
+.modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+/* Close Button mejorado */
+.close-btn {
+    background: #f5f5f5;
+    border: none;
+    font-size: 1.25rem;
+    color: #666;
+    cursor: pointer;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    transform: scale(1.05);
+}
+
+.close-btn:active {
+    transform: scale(0.95);
+}
+
+/* Modal Body mejorado */
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Modal Actions mejorado */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid #f0f0f0;
+    background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+    flex-shrink: 0;
+}
+
+/* Botones mejorados */
+.cancel-btn,
+.submit-btn {
+    padding: 0.85rem 1.75rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 48px;
+}
+
+.cancel-btn {
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+
+.cancel-btn:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.cancel-btn:active {
+    transform: scale(0.98);
+}
+
+.submit-btn {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+
+.submit-btn:hover {
+    background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);
+    transform: translateY(-1px);
+}
+
+.submit-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Input Groups mejorados */
+.input-group {
+    margin-bottom: 1.25rem;
+}
+
+.input-group:last-child {
+    margin-bottom: 0;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.input-group input,
+.input-group textarea,
+.input-group select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    background: #fafafa;
+}
+
+.input-group input:focus,
+.input-group textarea:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: #ef4444;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.input-group input::placeholder,
+.input-group textarea::placeholder {
+    color: #9ca3af;
+}
+
+/* ============================================
+   MODAL DE CONFIRMACIÓN MEJORADO
+   ============================================ */
+
+#confirmModal .modal-content,
+#alertModal .modal-content {
+    max-width: 400px;
+    text-align: center;
+}
+
+#confirmModal .modal-header,
+#alertModal .modal-header {
+    justify-content: center;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+#confirmModal .modal-header .close-btn,
+#alertModal .modal-header .close-btn {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#confirmModal .modal-body,
+#alertModal .modal-body {
+    padding: 1.5rem 2rem 2rem;
+}
+
+#confirmModal .modal-body p,
+#alertModal .modal-body p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #4b5563;
+    margin: 0;
+}
+
+#confirmModal .modal-actions,
+#alertModal .modal-actions {
+    justify-content: center;
+    gap: 1rem;
+    padding: 0 1.5rem 1.5rem;
+    background: transparent;
+    border-top: none;
+}
+
+#confirmModal .submit-btn {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+
+/* ============================================
+   MODALES DE TIENDA - DISEÑO PROFESIONAL
+   ============================================ */
+
+#tiendaAlertModal,
+#confirmarCompraModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    animation: modalFadeIn 0.3s ease;
+}
+
+#tiendaAlertModal > div,
+#confirmarCompraModal > div {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 2rem 1.75rem;
+    text-align: center;
+    max-width: 380px;
+    width: 100%;
+    margin: 1rem;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25),
+                0 10px 30px rgba(0, 0, 0, 0.15);
+    animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Iconos de los modales de tienda */
+#tiendaAlertIcon,
+#confirmarCompraModal > div > div:first-child {
+    width: 90px !important;
+    height: 90px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto 1.25rem !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+#tiendaAlertIcon i,
+#confirmarCompraModal > div > div:first-child i {
+    font-size: 2.75rem !important;
+    color: white !important;
+}
+
+/* Títulos de modales de tienda */
+#tiendaAlertTitulo,
+#confirmarCompraModal h3 {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+    margin-bottom: 0.75rem !important;
+    letter-spacing: -0.02em;
+}
+
+/* Mensajes de modales de tienda */
+#tiendaAlertMensaje,
+#confirmarCompraMensaje {
+    color: #6b7280 !important;
+    margin-bottom: 1.75rem !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+}
+
+/* Botones de modales de tienda */
+#tiendaAlertBtn {
+    padding: 0.95rem 2.5rem !important;
+    border-radius: 14px !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+    min-height: 52px;
+}
+
+#tiendaAlertBtn:hover {
+    background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%) !important;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+    transform: translateY(-2px) !important;
+}
+
+#tiendaAlertBtn:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+/* Contenedor de botones de confirmación de compra */
+#confirmarCompraModal > div > div:last-child {
+    display: flex !important;
+    gap: 0.75rem !important;
+    justify-content: center !important;
+    flex-wrap: wrap;
+}
+
+#cancelarCompraBtn {
+    padding: 0.95rem 1.75rem !important;
+    border-radius: 14px !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    background: #f3f4f6 !important;
+    color: #4b5563 !important;
+    border: 1px solid #e5e7eb !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    min-height: 52px;
+    min-width: 120px;
+}
+
+#cancelarCompraBtn:hover {
+    background: #e5e7eb !important;
+    color: #374151 !important;
+}
+
+#cancelarCompraBtn:active {
+    transform: scale(0.98) !important;
+}
+
+#confirmarCompraBtn {
+    padding: 0.95rem 1.75rem !important;
+    border-radius: 14px !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%) !important;
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35) !important;
+    min-height: 52px;
+    min-width: 120px;
+}
+
+#confirmarCompraBtn:hover {
+    background: linear-gradient(180deg, #16a34a 0%, #15803d 100%) !important;
+    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.45) !important;
+    transform: translateY(-2px) !important;
+}
+
+#confirmarCompraBtn:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+/* ============================================
+   MODAL DE PERFIL DE ESTUDIANTE MEJORADO
+   ============================================ */
+
+.student-profile-modal-content {
+    max-width: 500px;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.student-profile-modal-header {
+    padding: 2rem 1.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.student-profile-modal-header .close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.student-profile-modal-header .close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   RESPONSIVE - MÓVILES
+   ============================================ */
+
+@media (max-width: 768px) {
+    .modal {
+        padding: 0;
+        align-items: flex-end;
+    }
+    
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 24px 24px 0 0;
+        max-height: 92vh;
+        max-height: 92dvh;
+        animation: modalSlideUpMobile 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    @keyframes modalSlideUpMobile {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .modal-content-small,
+    .modal-content-large {
+        max-width: 100%;
+    }
+    
+    .modal-header {
+        padding: 1rem 1.25rem;
+        border-radius: 24px 24px 0 0;
+    }
+    
+    .modal-header::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: #d1d5db;
+        border-radius: 2px;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.15rem;
+        padding-top: 0.5rem;
+    }
+    
+    .close-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+    
+    .modal-body {
+        padding: 1.25rem;
+    }
+    
+    .modal-actions {
+        padding: 1rem 1.25rem 1.5rem;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .modal-actions button,
+    .cancel-btn,
+    .submit-btn {
+        width: 100%;
+        min-height: 52px;
+        font-size: 1rem;
+    }
+    
+    /* Modales de tienda en móvil */
+    #tiendaAlertModal,
+    #confirmarCompraModal {
+        padding: 0;
+        align-items: flex-end;
+    }
+    
+    #tiendaAlertModal > div,
+    #confirmarCompraModal > div {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 24px 24px 0 0 !important;
+        padding: 2rem 1.5rem 2.5rem !important;
+        animation: modalSlideUpMobile 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    #tiendaAlertModal > div::before,
+    #confirmarCompraModal > div::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: #d1d5db;
+        border-radius: 2px;
+    }
+    
+    #tiendaAlertIcon,
+    #confirmarCompraModal > div > div:first-child {
+        width: 80px !important;
+        height: 80px !important;
+        margin-top: 0.5rem !important;
+    }
+    
+    #tiendaAlertIcon i,
+    #confirmarCompraModal > div > div:first-child i {
+        font-size: 2.25rem !important;
+    }
+    
+    #tiendaAlertTitulo,
+    #confirmarCompraModal h3 {
+        font-size: 1.35rem !important;
+    }
+    
+    #tiendaAlertMensaje,
+    #confirmarCompraMensaje {
+        font-size: 0.95rem !important;
+    }
+    
+    #tiendaAlertBtn {
+        width: 100% !important;
+        padding: 1rem 2rem !important;
+    }
+    
+    #confirmarCompraModal > div > div:last-child {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+    }
+    
+    #cancelarCompraBtn,
+    #confirmarCompraBtn {
+        width: 100% !important;
+        padding: 1rem 1.5rem !important;
+    }
+    
+    /* Confirmación y alerta modales */
+    #confirmModal .modal-content,
+    #alertModal .modal-content {
+        max-width: 100%;
+        border-radius: 24px 24px 0 0;
+    }
+    
+    #confirmModal .modal-body,
+    #alertModal .modal-body {
+        padding: 1.5rem 1.5rem 1.75rem;
+    }
+    
+    #confirmModal .modal-actions,
+    #alertModal .modal-actions {
+        flex-direction: column;
+        padding: 0 1.25rem 1.75rem;
+    }
+    
+    #confirmModal .modal-actions button,
+    #alertModal .modal-actions button {
+        width: 100%;
+        min-height: 52px;
+    }
+    
+    /* Input groups en móvil */
+    .input-group input,
+    .input-group textarea,
+    .input-group select {
+        padding: 0.8rem 0.9rem;
+        font-size: 16px; /* Previene zoom en iOS */
+    }
+    
+    .video-input-container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .video-type-select {
+        flex: none;
+        width: 100%;
+    }
+    
+    .video-url-input {
+        width: 100%;
+    }
+    
+    .add-video-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .input-group {
+        margin-bottom: 1rem;
+    }
+    
+    .input-group label {
+        font-size: 0.85rem;
+    }
+    
+    #tiendaAlertIcon,
+    #confirmarCompraModal > div > div:first-child {
+        width: 70px !important;
+        height: 70px !important;
+    }
+    
+    #tiendaAlertIcon i,
+    #confirmarCompraModal > div > div:first-child i {
+        font-size: 2rem !important;
+    }
+    
+    #tiendaAlertTitulo,
+    #confirmarCompraModal h3 {
+        font-size: 1.25rem !important;
+    }
+}
+
+/* ============================================
+   MEJORAS ADICIONALES PARA PC
+   ============================================ */
+
+@media (min-width: 769px) {
+    .modal {
+        padding: 2rem;
+    }
+    
+    .modal-content {
+        max-height: 85vh;
+    }
+    
+    .modal-header {
+        padding: 1.5rem 1.75rem;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.35rem;
+    }
+    
+    .modal-body {
+        padding: 1.75rem;
+    }
+    
+    .modal-actions {
+        padding: 1.25rem 1.75rem;
+    }
+    
+    #tiendaAlertModal > div,
+    #confirmarCompraModal > div {
+        padding: 2.5rem 2rem !important;
+    }
+    
+    #tiendaAlertIcon,
+    #confirmarCompraModal > div > div:first-child {
+        width: 100px !important;
+        height: 100px !important;
+    }
+    
+    #tiendaAlertIcon i,
+    #confirmarCompraModal > div > div:first-child i {
+        font-size: 3rem !important;
+    }
+    
+    #tiendaAlertTitulo,
+    #confirmarCompraModal h3 {
+        font-size: 1.6rem !important;
+    }
+}
+
+/* ============================================
+   ESTADOS DE ÉXITO/ERROR PARA MODALES
+   ============================================ */
+
+.modal-success #tiendaAlertIcon {
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%) !important;
+}
+
+.modal-error #tiendaAlertIcon {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%) !important;
+}
+
+.modal-warning #tiendaAlertIcon {
+    background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%) !important;
+}
+
+.modal-info #tiendaAlertIcon {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+
+/* ============================================
+   MODAL DE DESCARGA/SEGURIDAD - ESTILOS
+   ============================================ */
+
+#downloadConfirmModal .modal-header {
+    background: linear-gradient(135deg, #dc3545, #c82333) !important;
+    color: white !important;
+    border-radius: 20px 20px 0 0;
+}
+
+#downloadConfirmModal .modal-header h3 {
+    color: white !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#downloadConfirmModal .modal-header h3 i {
+    color: white !important;
+}
+
+#downloadConfirmModal .modal-header .close-btn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: none;
+}
+
+#downloadConfirmModal .modal-header .close-btn:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+    color: white !important;
+}
+
+#downloadConfirmModal .modal-header .close-btn i {
+    color: white !important;
+}
+
+/* Responsive para el modal de descarga */
+@media (max-width: 768px) {
+    #downloadConfirmModal .modal-header {
+        border-radius: 24px 24px 0 0;
+    }
+    
+    #downloadConfirmModal .modal-header::before {
+        background: rgba(255, 255, 255, 0.4);
+    }
+}

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguridad y Seguimiento - Seamos Genios</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/seguridad-admin.css">
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" id="backBtn">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <img src="../Elementos/img/logo1.png" alt="Logo" class="header-logo">
+            <h1>Seguridad y Seguimiento</h1>
+        </div>
+        <div class="header-right">
+            <span class="user-name" id="adminName">ADMIN</span>
+            <div class="user-avatar">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                    <i class="bi bi-download"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalDescargas">0</span>
+                    <span class="stat-label">Descargas Totales</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="usuariosActivos">0</span>
+                    <span class="stat-label">Usuarios Activos</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="alertasPendientes">0</span>
+                    <span class="stat-label">Alertas Pendientes</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <i class="bi bi-person-x-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="usuariosBloqueados">0</span>
+                    <span class="stat-label">Usuarios Bloqueados</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <button class="tab-btn active" data-tab="descargas">
+                <i class="bi bi-download"></i>
+                Registro de Descargas
+            </button>
+            <button class="tab-btn" data-tab="usuarios">
+                <i class="bi bi-people"></i>
+                Gestión de Usuarios
+            </button>
+            <button class="tab-btn" data-tab="alertas">
+                <i class="bi bi-bell"></i>
+                Alertas de Seguridad
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Descargas Tab -->
+            <div class="tab-pane active" id="descargasPane">
+                <!-- Filtros -->
+                <div class="filters-container">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="searchDescargas" placeholder="Buscar por estudiante, documento...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="filterMateria">
+                            <option value="">Todas las materias</option>
+                        </select>
+                        <select id="filterFecha">
+                            <option value="">Todas las fechas</option>
+                            <option value="hoy">Hoy</option>
+                            <option value="semana">Esta semana</option>
+                            <option value="mes">Este mes</option>
+                        </select>
+                        <button class="export-btn" id="exportDescargasBtn">
+                            <i class="bi bi-file-earmark-excel"></i>
+                            Exportar
+                        </button>
+                    </div>
+                </div>
+                <!-- Tabla de descargas -->
+                <div class="table-container">
+                    <table class="data-table" id="descargasTable">
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Documento</th>
+                                <th>Materia</th>
+                                <th>Aula</th>
+                                <th>Fecha/Hora</th>
+                                <th>Código Único</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="descargasTableBody">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="emptyDescargas" style="display: none;">
+                    <i class="bi bi-download"></i>
+                    <p>No hay registros de descargas</p>
+                </div>
+            </div>
+
+            <!-- Usuarios Tab -->
+            <div class="tab-pane" id="usuariosPane">
+                <!-- Filtros -->
+                <div class="filters-container">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="searchUsuarios" placeholder="Buscar por nombre, email...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="filterEstado">
+                            <option value="">Todos los estados</option>
+                            <option value="activo">Activos</option>
+                            <option value="bloqueado">Bloqueados</option>
+                            <option value="suspendido">Suspendidos</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Lista de usuarios -->
+                <div class="users-grid" id="usuariosGrid">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                <div class="empty-state" id="emptyUsuarios" style="display: none;">
+                    <i class="bi bi-people"></i>
+                    <p>No hay usuarios para mostrar</p>
+                </div>
+            </div>
+
+            <!-- Alertas Tab -->
+            <div class="tab-pane" id="alertasPane">
+                <div class="alerts-list" id="alertasList">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                <div class="empty-state" id="emptyAlertas" style="display: none;">
+                    <i class="bi bi-bell-slash"></i>
+                    <p>No hay alertas pendientes</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Ver Detalles Usuario -->
+    <div class="modal" id="userDetailModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3><i class="bi bi-person-badge"></i> Detalles del Usuario</h3>
+                <button class="close-btn" onclick="closeUserDetailModal()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="userDetailBody">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmar Acción -->
+    <div class="modal" id="confirmActionModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 id="confirmActionTitle">Confirmar Acción</h3>
+                <button class="close-btn" onclick="closeConfirmActionModal()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-icon" id="confirmActionIcon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <p id="confirmActionMessage">¿Estás seguro de realizar esta acción?</p>
+                <div class="input-group" id="confirmReasonGroup" style="display: none;">
+                    <label for="confirmReason">Motivo (obligatorio)</label>
+                    <textarea id="confirmReason" rows="3" placeholder="Escribe el motivo..."></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" onclick="closeConfirmActionModal()">Cancelar</button>
+                <button class="submit-btn" id="confirmActionBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/seguridad-admin.js"></script>
+</body>
+
+</html>

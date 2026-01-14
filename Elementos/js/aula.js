@@ -6114,13 +6114,13 @@ function showDownloadConfirmation(fileId, originalUrl, fileName) {
     confirmModal.id = 'downloadConfirmModal';
     confirmModal.innerHTML = `
         <div class="modal-content modal-content-small" style="max-width: 500px;">
-            <div class="modal-header" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white;">
-                <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="bi bi-shield-exclamation"></i>
+            <div class="modal-header" style="background: linear-gradient(135deg, #dc3545, #c82333) !important; color: white !important;">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; color: white !important;">
+                    <i class="bi bi-shield-exclamation" style="color: white !important;"></i>
                     Advertencia de Seguridad
                 </h3>
-                <button class="close-btn" onclick="closeDownloadConfirmModal()" style="color: white;">
-                    <i class="bi bi-x"></i>
+                <button class="close-btn" onclick="closeDownloadConfirmModal()" style="background: rgba(255,255,255,0.2) !important; color: white !important; border: none !important;">
+                    <i class="bi bi-x" style="color: white !important;"></i>
                 </button>
             </div>
             <div class="modal-body" style="padding: 1.5rem;">
