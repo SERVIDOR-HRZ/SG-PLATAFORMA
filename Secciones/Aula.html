@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aula - Seamos Genios</title>
-    
+
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../Elementos/css/aula.css">
     <link rel="stylesheet" href="../Elementos/css/seguridad.css">
@@ -33,7 +33,8 @@
                     <div class="user-avatar-default" id="userAvatarDefault">
                         <i class="bi bi-person-fill"></i>
                     </div>
-                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto de perfil">
+                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src=""
+                        alt="Foto de perfil">
                 </div>
                 <div class="user-dropdown">
                     <button class="user-menu-btn" id="userMenuBtn">
@@ -125,7 +126,7 @@
                         Tienda
                     </button>
                 </div>
-                
+
                 <!-- Contenido de Retos -->
                 <div class="desafios-subtab active" id="retosSubtab">
                     <div class="retos-main-container">
@@ -145,7 +146,7 @@
                         <!-- Desafíos will be loaded here -->
                     </div>
                 </div>
-                
+
                 <!-- Contenido de Tienda -->
                 <div class="desafios-subtab" id="tiendaSubtab">
                     <div class="tienda-container" id="tiendaContainer">
@@ -196,7 +197,7 @@
                                 <button class="tienda-comprar-btn premium-btn">Comprar</button>
                             </div>
                         </div>
-                        
+
                         <h4 class="tienda-section-title"><i class="bi bi-lightbulb-fill"></i> Pistas</h4>
                         <div class="tienda-items-grid">
                             <div class="tienda-item" data-item="pista1" data-precio="100">
@@ -247,7 +248,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Contenido de Racha -->
                 <div class="desafios-subtab" id="rachaSubtab">
                     <div class="racha-container">
@@ -279,7 +280,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Contenido de Ranking -->
                 <div class="desafios-subtab" id="rankingSubtab">
                     <div class="ranking-container">
@@ -328,13 +329,14 @@
                 <div class="materials-search-container">
                     <div class="search-input-wrapper">
                         <i class="bi bi-search"></i>
-                        <input type="text" id="materialsSearchInput" placeholder="Buscar materiales..." autocomplete="off">
+                        <input type="text" id="materialsSearchInput" placeholder="Buscar materiales..."
+                            autocomplete="off">
                         <button class="clear-search-btn" id="clearMaterialsSearch" style="display: none;">
                             <i class="bi bi-x"></i>
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="create-material-container" id="createMaterialContainer" style="display: none;">
                     <div class="material-actions-row">
                         <button class="create-topic-btn" id="createTopicBtn">
@@ -365,7 +367,8 @@
                 <div class="students-search-container">
                     <div class="search-input-wrapper">
                         <i class="bi bi-search"></i>
-                        <input type="text" id="studentsSearchInput" placeholder="Buscar estudiantes..." autocomplete="off">
+                        <input type="text" id="studentsSearchInput" placeholder="Buscar estudiantes..."
+                            autocomplete="off">
                         <button class="clear-search-btn" id="clearStudentsSearch" style="display: none;">
                             <i class="bi bi-x"></i>
                         </button>
@@ -459,7 +462,8 @@
                     </div>
                     <div class="input-group">
                         <label for="taskDescription">Descripción</label>
-                        <textarea id="taskDescription" rows="4" required placeholder="Descripción detallada de la tarea"></textarea>
+                        <textarea id="taskDescription" rows="4" required
+                            placeholder="Descripción detallada de la tarea"></textarea>
                     </div>
                     <div class="input-group">
                         <label for="taskPoints">Puntos</label>
@@ -469,7 +473,7 @@
                         <label for="taskDueDate">Fecha de Entrega</label>
                         <input type="datetime-local" id="taskDueDate" required>
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="taskImage">Imagen (opcional)</label>
                         <input type="file" id="taskImage" accept="image/*">
@@ -480,7 +484,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="taskVideoType">Video (opcional)</label>
                         <select id="taskVideoType">
@@ -497,13 +501,14 @@
                             <span id="taskVideoHelpText"></span>
                         </div>
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="taskDriveUrl">Archivos de Drive (opcional)</label>
                         <input type="url" id="taskDriveUrl" placeholder="URL de carpeta, PDF o archivo de Drive">
                         <div class="url-help" style="display: flex;">
                             <i class="bi bi-info-circle"></i>
-                            <span>Puedes agregar enlaces a carpetas, PDFs o cualquier archivo de Google Drive. Asegúrate de que tengan permisos públicos.</span>
+                            <span>Puedes agregar enlaces a carpetas, PDFs o cualquier archivo de Google Drive. Asegúrate
+                                de que tengan permisos públicos.</span>
                         </div>
                     </div>
                 </div>
@@ -532,14 +537,16 @@
                     <input type="hidden" id="submitTaskId">
                     <div class="input-group">
                         <label for="submissionComment">Comentario (opcional)</label>
-                        <textarea id="submissionComment" rows="3" placeholder="Agrega un comentario sobre tu entrega..."></textarea>
+                        <textarea id="submissionComment" rows="3"
+                            placeholder="Agrega un comentario sobre tu entrega..."></textarea>
                     </div>
                     <div class="input-group">
                         <label for="submissionDriveUrl">Enlace de Drive</label>
                         <input type="url" id="submissionDriveUrl" required placeholder="https://drive.google.com/...">
                         <div class="url-help" style="display: flex;">
                             <i class="bi bi-info-circle"></i>
-                            <span>Sube tu tarea a Google Drive y pega el enlace aquí. Asegúrate de dar permisos de visualización.</span>
+                            <span>Sube tu tarea a Google Drive y pega el enlace aquí. Asegúrate de dar permisos de
+                                visualización.</span>
                         </div>
                     </div>
                     <div class="modal-actions">
@@ -589,7 +596,8 @@
                                 <option value="">Selecciona un tema</option>
                                 <!-- Topics will be loaded dynamically -->
                             </select>
-                            <button type="button" class="quick-add-topic-btn" id="quickAddTopicBtn" title="Crear nuevo tema">
+                            <button type="button" class="quick-add-topic-btn" id="quickAddTopicBtn"
+                                title="Crear nuevo tema">
                                 <i class="bi bi-plus-lg"></i>
                             </button>
                         </div>
@@ -600,9 +608,10 @@
                     </div>
                     <div class="input-group">
                         <label for="materialDescription">Descripción</label>
-                        <textarea id="materialDescription" rows="3" required placeholder="Descripción del material"></textarea>
+                        <textarea id="materialDescription" rows="3" required
+                            placeholder="Descripción del material"></textarea>
                     </div>
-                    
+
                     <!-- Imágenes -->
                     <div class="input-group">
                         <label>Imágenes (opcional)</label>
@@ -636,7 +645,9 @@
                     <div class="input-group">
                         <label>Enlaces externos (opcional)</label>
                         <div class="drive-file-input-container">
-                            <input type="url" id="materialDriveFileUrl" placeholder="URL de Drive, Canva, GitHub, o cualquier enlace" class="drive-file-url-input">
+                            <input type="url" id="materialDriveFileUrl"
+                                placeholder="URL de Drive, Canva, GitHub, o cualquier enlace"
+                                class="drive-file-url-input">
                             <button type="button" class="add-drive-file-btn" id="addMaterialDriveFileBtn">
                                 <i class="bi bi-plus-circle"></i>
                                 Agregar
@@ -706,7 +717,8 @@
                     </div>
                     <div class="input-group">
                         <label for="editTopicDescription">Descripción (opcional)</label>
-                        <textarea id="editTopicDescription" rows="2" placeholder="Breve descripción del tema"></textarea>
+                        <textarea id="editTopicDescription" rows="2"
+                            placeholder="Breve descripción del tema"></textarea>
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="cancel-btn" onclick="closeEditTopicModal()">Cancelar</button>
@@ -785,7 +797,7 @@
             <div class="modal-body">
                 <form id="editPostForm">
                     <input type="hidden" id="editPostId">
-                    
+
                     <div class="input-group">
                         <label for="editPostTitle">Título (opcional)</label>
                         <input type="text" id="editPostTitle" placeholder="Título del anuncio">
@@ -794,7 +806,7 @@
                         <label for="editPostContent">Descripción</label>
                         <textarea id="editPostContent" rows="5" required placeholder="Escribe tu anuncio..."></textarea>
                     </div>
-                    
+
                     <!-- Imagen Actual -->
                     <div class="input-group">
                         <label>Imagen Actual</label>
@@ -830,7 +842,7 @@
                             <input type="url" id="editPostVideoUrl" placeholder="URL del video" class="video-url-input">
                         </div>
                     </div>
-                    
+
                     <div class="modal-actions">
                         <button type="button" class="cancel-btn" onclick="closeEditPostModal()">Cancelar</button>
                         <button type="submit" class="submit-btn">
@@ -855,14 +867,15 @@
             <div class="modal-body">
                 <form id="editTaskForm">
                     <input type="hidden" id="editTaskId">
-                    
+
                     <div class="input-group">
                         <label for="editTaskTitle">Título</label>
                         <input type="text" id="editTaskTitle" required placeholder="Título de la tarea">
                     </div>
                     <div class="input-group">
                         <label for="editTaskDescription">Descripción</label>
-                        <textarea id="editTaskDescription" rows="4" required placeholder="Descripción detallada de la tarea"></textarea>
+                        <textarea id="editTaskDescription" rows="4" required
+                            placeholder="Descripción detallada de la tarea"></textarea>
                     </div>
                     <div class="input-group">
                         <label for="editTaskPoints">Puntos</label>
@@ -872,7 +885,7 @@
                         <label for="editTaskDueDate">Fecha de Entrega</label>
                         <input type="datetime-local" id="editTaskDueDate" required>
                     </div>
-                    
+
                     <!-- Imagen Actual -->
                     <div class="input-group">
                         <label>Imagen Actual</label>
@@ -908,12 +921,12 @@
                             <input type="url" id="editTaskVideoUrl" placeholder="URL del video" class="video-url-input">
                         </div>
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="editTaskDriveUrl">Archivos de Drive (opcional)</label>
                         <input type="url" id="editTaskDriveUrl" placeholder="URL de carpeta, PDF o archivo de Drive">
                     </div>
-                    
+
                     <div class="modal-actions">
                         <button type="button" class="cancel-btn" onclick="closeEditTaskModal()">Cancelar</button>
                         <button type="submit" class="submit-btn">
@@ -951,9 +964,10 @@
                     </div>
                     <div class="input-group">
                         <label for="editMaterialDescription">Descripción</label>
-                        <textarea id="editMaterialDescription" rows="3" required placeholder="Descripción del material"></textarea>
+                        <textarea id="editMaterialDescription" rows="3" required
+                            placeholder="Descripción del material"></textarea>
                     </div>
-                    
+
                     <!-- Imágenes Actuales -->
                     <div class="input-group">
                         <label>Imágenes Actuales</label>
@@ -986,7 +1000,8 @@
                                 <option value="youtube">YouTube</option>
                                 <option value="drive">Google Drive</option>
                             </select>
-                            <input type="url" id="editMaterialVideoUrl" placeholder="URL del video" class="video-url-input">
+                            <input type="url" id="editMaterialVideoUrl" placeholder="URL del video"
+                                class="video-url-input">
                             <button type="button" class="add-video-btn" id="addEditMaterialVideoBtn">
                                 <i class="bi bi-plus-circle"></i>
                                 Agregar
@@ -1005,7 +1020,9 @@
                     <div class="input-group">
                         <label>Agregar enlaces externos (opcional)</label>
                         <div class="drive-file-input-container">
-                            <input type="url" id="editMaterialDriveFileUrl" placeholder="URL de Drive, Canva, GitHub, o cualquier enlace" class="drive-file-url-input">
+                            <input type="url" id="editMaterialDriveFileUrl"
+                                placeholder="URL de Drive, Canva, GitHub, o cualquier enlace"
+                                class="drive-file-url-input">
                             <button type="button" class="add-drive-file-btn" id="addEditMaterialDriveFileBtn">
                                 <i class="bi bi-plus-circle"></i>
                                 Agregar

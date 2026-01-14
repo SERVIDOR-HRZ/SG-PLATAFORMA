@@ -8433,3 +8433,15 @@ body {
         height: calc(100dvh - 140px);
     }
 }
+
+
+/* ============================================
+   OCULTAR BOTÓN DE DESCARGA EN MÓVILES
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Ocultar botón de descarga de documentos en dispositivos móviles */
+    .download-pdf-btn {
+        display: none !important;
+    }
+}
