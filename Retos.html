@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retos Globales - Seamos Genios</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="retos.css">
+    <link rel="shortcut icon" href="Elementos/img/logo1.png" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" id="backBtn">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <img src="Elementos/img/logo1.png" alt="Logo" class="header-logo">
+            <h1 id="materiaTitle">Retos Globales</h1>
+        </div>
+        <div class="header-right">
+            <div class="header-stats">
+                <div class="stat-badge energy" id="energyBadge">
+                    <i class="bi bi-lightning-fill"></i>
+                    <span id="energiaActual">10</span>
+                    <span class="energy-timer" id="energyTimer" style="display: none;">
+                        <i class="bi bi-clock"></i>
+                        <span id="timerText">00:00</span>
+                    </span>
+                </div>
+                <div class="stat-badge hints" id="hintsBadge">
+                    <i class="bi bi-lightbulb-fill"></i>
+                    <span id="pistasActual">3</span>
+                </div>
+                <div class="stat-badge coins">
+                    <i class="bi bi-coin"></i>
+                    <span id="monedasActual">0</span>
+                </div>
+                <div class="stat-badge level">
+                    <i class="bi bi-star-fill"></i>
+                    <span>Nivel <span id="nivelActual">1</span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Botón Admin para crear niveles -->
+        <button class="admin-btn" id="adminBtn" title="Administrar niveles">
+            <i class="bi bi-gear-fill"></i>
+        </button>
+        
+        <!-- Botón de reinicio flotante -->
+        <button class="reset-progress-btn" id="resetProgressBtn" title="Reiniciar progreso">
+            <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+        
+        <div class="path-container" id="pathContainer">
+            <!-- El camino de niveles se genera dinámicamente -->
+        </div>
+    </main>
+
+    <!-- Modal Admin - Crear/Editar Niveles -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content modal-admin">
+            <div class="modal-header">
+                <h3><i class="bi bi-gear-fill"></i> Administrar Niveles</h3>
+                <button class="close-btn" id="closeAdminModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body admin-body">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" data-tab="crear">
+                        <i class="bi bi-plus-circle"></i> Crear Nivel
+                    </button>
+                    <button class="admin-tab" data-tab="lista">
+                        <i class="bi bi-list-ul"></i> Ver Niveles
+                    </button>
+                </div>
+                
+                <!-- Tab Crear Nivel -->
+                <div class="admin-tab-content active" id="tabCrear">
+                    <form id="formNivel">
+                        <div class="form-group">
+                            <label><i class="bi bi-hash"></i> Número de Nivel</label>
+                            <input type="number" id="nivelNumero" min="1" required placeholder="Ej: 1">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="bi bi-bookmark"></i> Tema (opcional)</label>
+                            <input type="text" id="nivelTema" placeholder="Ej: Matemáticas básicas">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="bi bi-card-text"></i> Descripción</label>
+                            <textarea id="nivelDescripcion" placeholder="Descripción del nivel..."></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="bi bi-coin"></i> Monedas</label>
+                                <input type="number" id="nivelMonedas" min="1" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="bi bi-star"></i> XP</label>
+                                <input type="number" id="nivelXP" min="1" value="20">
+                            </div>
+                        </div>
+                        
+                        <div class="preguntas-section">
+                            <h4><i class="bi bi-question-circle"></i> Preguntas</h4>
+                            <div id="preguntasContainer">
+                                <!-- Preguntas se agregan dinámicamente -->
+                            </div>
+                            <button type="button" class="add-pregunta-btn" id="addPreguntaBtn">
+                                <i class="bi bi-plus-lg"></i> Agregar Pregunta
+                            </button>
+                        </div>
+                        
+                        <button type="submit" class="save-nivel-btn">
+                            <i class="bi bi-save"></i> Guardar Nivel
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Tab Lista Niveles -->
+                <div class="admin-tab-content" id="tabLista">
+                    <div class="niveles-lista" id="nivelesLista">
+                        <!-- Lista de niveles -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Desafío -->
+    <div class="modal" id="desafioModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="desafioTitulo">Nivel 1</h3>
+                <button class="close-btn" id="closeDesafioModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="desafio-info">
+                    <div class="desafio-icon">
+                        <i class="bi bi-trophy-fill"></i>
+                    </div>
+                    <p class="desafio-descripcion">Responde correctamente las preguntas para ganar monedas y experiencia.</p>
+                    <div class="desafio-recompensas">
+                        <div class="recompensa">
+                            <i class="bi bi-coin"></i>
+                            <span>+10 Monedas</span>
+                        </div>
+                        <div class="recompensa">
+                            <i class="bi bi-star-fill"></i>
+                            <span>+20 XP</span>
+                        </div>
+                    </div>
+                    <div class="desafio-costo">
+                        <i class="bi bi-lightning-fill"></i>
+                        <span>Costo: 1 Energía</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelDesafio">Cancelar</button>
+                <button class="start-btn" id="startDesafio">
+                    <i class="bi bi-play-fill"></i>
+                    Comenzar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pregunta -->
+    <div class="modal" id="preguntaModal">
+        <div class="modal-content modal-pregunta">
+            <div class="pregunta-header">
+                <div class="pregunta-tema" id="preguntaTema" style="display: none;">
+                    <i class="bi bi-bookmark-fill"></i>
+                    <span>Tema del nivel</span>
+                </div>
+                <div class="pregunta-header-row">
+                    <div class="pregunta-progreso">
+                        <div class="progreso-bar">
+                            <div class="progreso-fill" id="progresoFill"></div>
+                        </div>
+                        <span id="preguntaNumero">1/5</span>
+                    </div>
+                    <button class="close-btn" id="closePreguntaModal">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="pregunta-body">
+                <h3 class="pregunta-texto" id="preguntaTexto">¿Cuál es la respuesta correcta?</h3>
+                <div class="opciones-container" id="opcionesContainer">
+                    <!-- Opciones se generan dinámicamente -->
+                </div>
+            </div>
+            <div class="pregunta-footer">
+                <button class="verificar-btn" id="verificarBtn" disabled>
+                    Verificar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultado -->
+    <div class="modal" id="resultadoModal">
+        <div class="modal-content modal-resultado">
+            <div class="resultado-icon" id="resultadoIcon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <h2 id="resultadoTitulo">¡Excelente!</h2>
+            <p id="resultadoMensaje">Has completado el reto</p>
+            <div class="resultado-stars" id="resultadoStars">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+            </div>
+            <div class="resultado-stats" id="resultadoStats">
+                <div class="resultado-stat">
+                    <i class="bi bi-check-circle"></i>
+                    <span><span id="respuestasCorrectas">5</span>/5 Correctas</span>
+                </div>
+                <div class="resultado-stat">
+                    <i class="bi bi-coin"></i>
+                    <span>+<span id="monedasGanadas">10</span> Monedas</span>
+                </div>
+                <div class="resultado-stat">
+                    <i class="bi bi-star-fill"></i>
+                    <span>+<span id="xpGanado">20</span> XP</span>
+                </div>
+            </div>
+            <button class="continuar-btn" id="continuarBtn">
+                Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Alerta -->
+    <div class="modal" id="alertModal">
+        <div class="modal-content modal-alert">
+            <div class="alert-icon" id="alertIcon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h2 id="alertTitulo">Aviso</h2>
+            <p id="alertMensaje">Mensaje de alerta</p>
+            <button class="continuar-btn" id="alertBtn">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Reinicio -->
+    <div class="modal" id="resetModal">
+        <div class="modal-content modal-reset">
+            <div class="reset-warning-icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h2 class="reset-title">⚠️ ¡ADVERTENCIA!</h2>
+            <div class="reset-warning-box">
+                <p class="reset-warning-text">Estás a punto de <strong>REINICIAR TODO TU PROGRESO</strong>.</p>
+                <ul class="reset-list">
+                    <li><i class="bi bi-x-circle-fill"></i> Se perderán TODOS los niveles completados</li>
+                    <li><i class="bi bi-x-circle-fill"></i> Tu XP volverá a 0</li>
+                    <li><i class="bi bi-x-circle-fill"></i> Tu nivel volverá a 1</li>
+                    <li><i class="bi bi-x-circle-fill"></i> Todas las estrellas se perderán</li>
+                </ul>
+                <p class="reset-irreversible">🚫 Esta acción es <strong>IRREVERSIBLE</strong></p>
+            </div>
+            <p class="reset-confirm-text">Escribe <strong>"REINICIAR"</strong> para confirmar:</p>
+            <input type="text" id="resetConfirmInput" class="reset-confirm-input" placeholder="Escribe REINICIAR" autocomplete="off">
+            <div class="reset-actions">
+                <button class="reset-cancel-btn" id="cancelResetBtn">
+                    <i class="bi bi-x-lg"></i>
+                    Cancelar
+                </button>
+                <button class="reset-confirm-btn" id="confirmResetBtn" disabled>
+                    <i class="bi bi-trash3-fill"></i>
+                    Reiniciar Todo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pista -->
+    <div class="modal" id="pistaModal">
+        <div class="modal-content modal-pista">
+            <div class="pista-modal-icon">
+                <i class="bi bi-lightbulb-fill"></i>
+            </div>
+            <h3 class="pista-modal-title">💡 Pista</h3>
+            <p class="pista-modal-text" id="pistaModalText"></p>
+            <button class="pista-modal-btn" id="closePistaModal">
+                <i class="bi bi-check-lg"></i>
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <script src="retos.js"></script>
+</body>
+
+</html>

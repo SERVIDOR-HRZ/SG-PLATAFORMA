@@ -127,9 +127,15 @@ class ProteccionWeb {
             });
         }
 
-        // Bloquear arrastrar elementos
+        // Bloquear arrastrar elementos (excepto elementos con draggable="true")
         if (this.config.bloquearArrastrar) {
             document.addEventListener('dragstart', (e) => {
+                // Permitir drag en elementos que explícitamente tienen draggable="true"
+                if (e.target.draggable === true || 
+                    e.target.hasAttribute('draggable') && e.target.getAttribute('draggable') === 'true' ||
+                    e.target.closest('[draggable="true"]')) {
+                    return true; // Permitir el drag
+                }
                 e.preventDefault();
                 return false;
             });
