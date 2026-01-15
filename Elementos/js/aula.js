@@ -3348,7 +3348,7 @@ function extractDriveFolderId(url) {
     return null;
 }
 
-// Open Drive folder modal with professional view (sin opción de abrir en nueva pestaña)
+// Open Drive folder modal with professional view (permite navegación dentro del iframe)
 function openDriveFolderModal(folderId, originalUrl) {
     const modal = document.getElementById('mediaModal');
     const modalContent = document.getElementById('mediaModalContent');
@@ -3363,7 +3363,7 @@ function openDriveFolderModal(folderId, originalUrl) {
                     <i class="bi bi-folder-fill" style="color: #ffc107; font-size: 1.8rem;"></i>
                     <div class="drive-folder-title-section">
                         <span class="drive-folder-title">Carpeta de Google Drive</span>
-                        <span class="drive-folder-subtitle">Visualiza el contenido de la carpeta</span>
+                        <span class="drive-folder-subtitle">Haz clic en los archivos para abrirlos</span>
                     </div>
                 </div>
                 <div class="drive-folder-actions">
@@ -3386,7 +3386,7 @@ function openDriveFolderModal(folderId, originalUrl) {
                     id="driveFolderIframe"
                     src="${gridUrl}" 
                     frameborder="0"
-                    sandbox="allow-scripts allow-same-origin"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
                     onload="hideFolderLoading()">
                 </iframe>
             </div>
