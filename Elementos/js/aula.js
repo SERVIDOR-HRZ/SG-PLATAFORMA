@@ -539,11 +539,12 @@ async function showMateriaStatsCard(materiaId, config) {
     const existingCard = document.getElementById('materiaStatsCard');
     if (existingCard) existingCard.remove();
 
-    // Obtener datos del usuario (foto, energía, monedas, nivel, xp)
+    // Obtener datos del usuario (foto, energía, monedas, pistas, nivel, xp)
     let userPhoto = '';
     let energia = 10;
     let energiaMax = 10;
     let monedas = 0;
+    let pistas = 0;
     let nivel = 1;
     let xp = 0;
 
@@ -556,6 +557,7 @@ async function showMateriaStatsCard(materiaId, config) {
                 energia = data.energia !== undefined ? data.energia : 10;
                 energiaMax = data.energiaMax || 10;
                 monedas = data.puntos || data.puntosAcumulados || 0;
+                pistas = data.pistas || 0;
 
                 // Cargar XP y nivel POR MATERIA (no global)
                 const progresoKey = `progreso_${materiaId}`;
@@ -608,6 +610,10 @@ async function showMateriaStatsCard(materiaId, config) {
                     <div class="materia-energy-badge">
                         <i class="bi bi-lightning-fill"></i>
                         <span>${energiaDisplay}</span>
+                    </div>
+                    <div class="materia-pistas-badge">
+                        <i class="bi bi-lightbulb-fill"></i>
+                        <span id="pistasHeader">${pistas}</span>
                     </div>
                     <div class="materia-monedas-badge">
                         <i class="bi bi-coin"></i>
@@ -1184,6 +1190,7 @@ async function loadTiendaData() {
         if (userDoc.exists) {
             const data = userDoc.data();
             const monedas = data.puntos || data.puntosAcumulados || 0;
+            const pistas = data.pistas || 0;
             let energia = data.energia !== undefined ? data.energia : 10;
             const energiaMax = data.energiaMax || 10;
 
@@ -1202,6 +1209,12 @@ async function loadTiendaData() {
                 monedasHeader.textContent = monedas;
             }
 
+            // Actualizar pistas en el header
+            const pistasHeader = document.getElementById('pistasHeader');
+            if (pistasHeader) {
+                pistasHeader.textContent = pistas;
+            }
+
             // Actualizar energía en el header
             const energyBadge = document.querySelector('.materia-energy-badge span');
             if (energyBadge) {
@@ -1217,6 +1230,11 @@ async function loadTiendaData() {
             const tiendaEnergia = document.getElementById('tiendaEnergia');
             if (tiendaEnergia) {
                 tiendaEnergia.textContent = energiaDisplay;
+            }
+
+            const tiendaPistas = document.getElementById('tiendaPistas');
+            if (tiendaPistas) {
+                tiendaPistas.textContent = pistas;
             }
         }
     } catch (error) {
@@ -1238,6 +1256,149 @@ function setupTiendaButtons() {
             });
         }
     });
+    
+    // Setup compra personalizada
+    setupCustomPurchase();
+}
+
+// Precios base para compra personalizada
+const PRECIO_ENERGIA_UNITARIO = 20;
+const PRECIO_PISTA_UNITARIO = 100;
+
+// Setup compra personalizada
+function setupCustomPurchase() {
+    // Energía personalizada
+    const energiaInput = document.getElementById('customEnergiaInput');
+    const energiaMinusBtn = document.getElementById('energiaMinusBtn');
+    const energiaPlusBtn = document.getElementById('energiaPlusBtn');
+    const energiaPriceDisplay = document.getElementById('customEnergiaPrice');
+    const buyEnergiaBtn = document.getElementById('buyCustomEnergiaBtn');
+    
+    // Pista personalizada
+    const pistaInput = document.getElementById('customPistaInput');
+    const pistaMinusBtn = document.getElementById('pistaMinusBtn');
+    const pistaPlusBtn = document.getElementById('pistaPlusBtn');
+    const pistaPriceDisplay = document.getElementById('customPistaPrice');
+    const buyPistaBtn = document.getElementById('buyCustomPistaBtn');
+    
+    // Funciones de actualización de precio
+    function updateEnergiaPrice() {
+        if (!energiaInput || !energiaPriceDisplay) return;
+        const cantidad = parseInt(energiaInput.value) || 1;
+        const precio = calcularPrecioEnergia(cantidad);
+        energiaPriceDisplay.innerHTML = `<i class="bi bi-coin"></i> ${precio}`;
+    }
+    
+    function updatePistaPrice() {
+        if (!pistaInput || !pistaPriceDisplay) return;
+        const cantidad = parseInt(pistaInput.value) || 1;
+        const precio = calcularPrecioPista(cantidad);
+        pistaPriceDisplay.innerHTML = `<i class="bi bi-coin"></i> ${precio}`;
+    }
+    
+    // Event listeners para energía
+    if (energiaInput) {
+        energiaInput.addEventListener('input', () => {
+            let val = parseInt(energiaInput.value) || 1;
+            if (val < 1) val = 1;
+            if (val > 100) val = 100;
+            energiaInput.value = val;
+            updateEnergiaPrice();
+        });
+    }
+    
+    if (energiaMinusBtn) {
+        energiaMinusBtn.addEventListener('click', () => {
+            let val = parseInt(energiaInput.value) || 1;
+            if (val > 1) {
+                energiaInput.value = val - 1;
+                updateEnergiaPrice();
+            }
+        });
+    }
+    
+    if (energiaPlusBtn) {
+        energiaPlusBtn.addEventListener('click', () => {
+            let val = parseInt(energiaInput.value) || 1;
+            if (val < 100) {
+                energiaInput.value = val + 1;
+                updateEnergiaPrice();
+            }
+        });
+    }
+    
+    if (buyEnergiaBtn) {
+        buyEnergiaBtn.addEventListener('click', () => {
+            const cantidad = parseInt(energiaInput.value) || 1;
+            const precio = calcularPrecioEnergia(cantidad);
+            mostrarConfirmacionCompra(`customEnergia${cantidad}`, precio);
+        });
+    }
+    
+    // Event listeners para pistas
+    if (pistaInput) {
+        pistaInput.addEventListener('input', () => {
+            let val = parseInt(pistaInput.value) || 1;
+            if (val < 1) val = 1;
+            if (val > 100) val = 100;
+            pistaInput.value = val;
+            updatePistaPrice();
+        });
+    }
+    
+    if (pistaMinusBtn) {
+        pistaMinusBtn.addEventListener('click', () => {
+            let val = parseInt(pistaInput.value) || 1;
+            if (val > 1) {
+                pistaInput.value = val - 1;
+                updatePistaPrice();
+            }
+        });
+    }
+    
+    if (pistaPlusBtn) {
+        pistaPlusBtn.addEventListener('click', () => {
+            let val = parseInt(pistaInput.value) || 1;
+            if (val < 100) {
+                pistaInput.value = val + 1;
+                updatePistaPrice();
+            }
+        });
+    }
+    
+    if (buyPistaBtn) {
+        buyPistaBtn.addEventListener('click', () => {
+            const cantidad = parseInt(pistaInput.value) || 1;
+            const precio = calcularPrecioPista(cantidad);
+            mostrarConfirmacionCompra(`customPista${cantidad}`, precio);
+        });
+    }
+}
+
+// Calcular precio de energía con descuentos por volumen
+function calcularPrecioEnergia(cantidad) {
+    // Descuentos por volumen
+    let descuento = 0;
+    if (cantidad >= 50) descuento = 0.20; // 20% descuento
+    else if (cantidad >= 20) descuento = 0.15; // 15% descuento
+    else if (cantidad >= 10) descuento = 0.10; // 10% descuento
+    else if (cantidad >= 5) descuento = 0.05; // 5% descuento
+    
+    const precioBase = cantidad * PRECIO_ENERGIA_UNITARIO;
+    return Math.floor(precioBase * (1 - descuento));
+}
+
+// Calcular precio de pistas con descuentos por volumen
+function calcularPrecioPista(cantidad) {
+    // Descuentos por volumen
+    let descuento = 0;
+    if (cantidad >= 50) descuento = 0.30; // 30% descuento
+    else if (cantidad >= 20) descuento = 0.20; // 20% descuento
+    else if (cantidad >= 10) descuento = 0.10; // 10% descuento
+    else if (cantidad >= 5) descuento = 0.05; // 5% descuento
+    
+    const precioBase = cantidad * PRECIO_PISTA_UNITARIO;
+    return Math.floor(precioBase * (1 - descuento));
 }
 
 // Variables para la compra pendiente
@@ -1336,10 +1497,34 @@ async function handleCompra(itemType, precio) {
             puntosAcumulados: monedasActuales - precio
         };
 
+        const energiaActual = userData.energia || 0;
+        const pistasActuales = userData.pistas || 0;
+
         // Determinar qué se compró
-        if (itemType.startsWith('energia')) {
+        if (itemType.startsWith('pack')) {
+            // Packs combinados
+            const packs = {
+                'packBasico': { energia: 3, pistas: 1 },
+                'packEstandar': { energia: 5, pistas: 3 },
+                'packPro': { energia: 10, pistas: 5 },
+                'packUltimate': { energia: 20, pistas: 10 },
+                'packMega': { energia: 50, pistas: 20 }
+            };
+            const pack = packs[itemType];
+            if (pack) {
+                updateData.energia = energiaActual + pack.energia;
+                updateData.pistas = pistasActuales + pack.pistas;
+            }
+        } else if (itemType.startsWith('customEnergia')) {
+            // Compra personalizada de energía
+            const cantidadEnergia = parseInt(itemType.replace('customEnergia', '')) || 1;
+            updateData.energia = energiaActual + cantidadEnergia;
+        } else if (itemType.startsWith('customPista')) {
+            // Compra personalizada de pistas
+            const cantidadPistas = parseInt(itemType.replace('customPista', '')) || 1;
+            updateData.pistas = pistasActuales + cantidadPistas;
+        } else if (itemType.startsWith('energia')) {
             const cantidadEnergia = getCantidadFromItem(itemType, 'energia');
-            const energiaActual = userData.energia || 0;
 
             if (itemType === 'energiaInfinita') {
                 // Energía infinita por 24 horas
@@ -1351,7 +1536,6 @@ async function handleCompra(itemType, precio) {
             }
         } else if (itemType.startsWith('pista')) {
             const cantidadPistas = getCantidadFromItem(itemType, 'pista');
-            const pistasActuales = userData.pistas || 0;
             updateData.pistas = pistasActuales + cantidadPistas;
         }
 
@@ -1382,12 +1566,32 @@ function getItemName(itemType) {
         'energia1': '1 Energía',
         'energia3': '3 Energías',
         'energia5': '5 Energías',
+        'energia10': '10 Energías',
+        'energia20': '20 Energías',
         'energiaInfinita': 'Energía Infinita (24h)',
         'pista1': '1 Pista',
         'pista3': '3 Pistas',
         'pista5': '5 Pistas',
-        'pista10': '10 Pistas'
+        'pista10': '10 Pistas',
+        'pista20': '20 Pistas',
+        'pista50': '50 Pistas',
+        'packBasico': 'Pack Básico (3 Energías + 1 Pista)',
+        'packEstandar': 'Pack Estándar (5 Energías + 3 Pistas)',
+        'packPro': 'Pack Pro (10 Energías + 5 Pistas)',
+        'packUltimate': 'Pack Ultimate (20 Energías + 10 Pistas)',
+        'packMega': 'Pack Mega (50 Energías + 20 Pistas)'
     };
+    
+    // Para compras personalizadas
+    if (itemType.startsWith('customEnergia')) {
+        const cantidad = itemType.replace('customEnergia', '');
+        return `${cantidad} Energía${cantidad > 1 ? 's' : ''}`;
+    }
+    if (itemType.startsWith('customPista')) {
+        const cantidad = itemType.replace('customPista', '');
+        return `${cantidad} Pista${cantidad > 1 ? 's' : ''}`;
+    }
+    
     return names[itemType] || itemType;
 }
 

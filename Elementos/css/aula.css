@@ -5732,10 +5732,15 @@ body {
     font-size: 1.1rem;
     font-weight: 600;
     color: #333;
+    margin-top: 2rem;
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.tienda-section-title:first-child {
+    margin-top: 0;
 }
 
 .tienda-section-title i {
@@ -6078,6 +6083,23 @@ body {
 
 .materia-monedas-badge i {
     color: #FFD700;
+    font-size: 0.9rem;
+}
+
+.materia-pistas-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(33, 150, 243, 0.3);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.materia-pistas-badge i {
+    color: #64B5F6;
     font-size: 0.9rem;
 }
 
@@ -8618,5 +8640,443 @@ body {
         width: 40px;
         height: 40px;
         font-size: 1.2rem;
+    }
+}
+
+
+/* ==================== TIENDA - COMPRA PERSONALIZADA ==================== */
+.tienda-custom-purchase {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 2px dashed #e0e0e0;
+}
+
+.tienda-custom-title {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tienda-custom-title i {
+    color: var(--materia-color, #2196F3);
+}
+
+.tienda-custom-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.tienda-custom-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.tienda-custom-input-group label {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.tienda-custom-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #e0e0e0;
+    transition: border-color 0.3s ease;
+}
+
+.tienda-custom-input-wrapper:focus-within {
+    border-color: var(--materia-color, #2196F3);
+}
+
+.tienda-custom-btn-minus,
+.tienda-custom-btn-plus {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.tienda-custom-btn-minus:hover,
+.tienda-custom-btn-plus:hover {
+    background: var(--materia-color, #2196F3);
+    color: white;
+}
+
+.tienda-custom-input {
+    width: 70px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    -moz-appearance: textfield;
+}
+
+.tienda-custom-input::-webkit-outer-spin-button,
+.tienda-custom-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.tienda-custom-price-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    background: linear-gradient(135deg, #fff9e6, #fff3cd);
+    border-radius: 10px;
+    border: 2px solid #ffc107;
+}
+
+.tienda-custom-price-label {
+    font-weight: 500;
+    color: #666;
+}
+
+.tienda-custom-price-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #f57c00;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.tienda-custom-price-value i {
+    color: #ffc107;
+}
+
+.tienda-custom-buy-btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.tienda-custom-buy-btn.energia-custom-btn {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.tienda-custom-buy-btn.energia-custom-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+}
+
+.tienda-custom-buy-btn.pista-custom-btn {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.tienda-custom-buy-btn.pista-custom-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+}
+
+/* Pista Mega Pack */
+.tienda-item-icon.pista-mega {
+    background: linear-gradient(135deg, #1565C0, #0D47A1);
+    box-shadow: 0 0 25px rgba(33, 150, 243, 0.5);
+}
+
+.tienda-item-icon.pista-mega i {
+    font-size: 2rem;
+    color: white;
+}
+
+.tienda-item-icon.pista-mega .cantidad {
+    font-size: 0.9rem;
+}
+
+/* Responsive para compra personalizada */
+@media (max-width: 768px) {
+    .tienda-custom-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .tienda-custom-input-group {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .tienda-custom-price-display {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .tienda-custom-buy-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+/* ==================== MODAL CONFIRMAR COMPRA ==================== */
+.confirmar-compra-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.confirmar-compra-content {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: modalSlideUp 0.3s ease;
+}
+
+.confirmar-compra-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #4CAF50, #388E3C);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.confirmar-compra-icon i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.confirmar-compra-content h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 0.8rem;
+}
+
+.confirmar-compra-content p {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.confirmar-compra-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.confirmar-compra-buttons .cancel-btn {
+    padding: 0.8rem 1.5rem;
+    border: 2px solid #e0e0e0;
+    background: white;
+    color: #666;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.confirmar-compra-buttons .cancel-btn:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
+}
+
+.confirmar-compra-buttons .submit-btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    background: linear-gradient(135deg, #4CAF50, #388E3C);
+    color: white;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.confirmar-compra-buttons .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+
+/* ==================== TIENDA - PACKS COMBINADOS ==================== */
+.tienda-section-combo i {
+    background: linear-gradient(135deg, #FF6B6B, #9C27B0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.tienda-combo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.tienda-item-combo {
+    position: relative;
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #FFD700, #FF6B6B, #9C27B0) border-box;
+    overflow: visible;
+}
+
+.tienda-item-combo:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(156, 39, 176, 0.2);
+}
+
+.tienda-combo-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #607D8B, #455A64);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.tienda-combo-badge.popular {
+    background: linear-gradient(135deg, #4CAF50, #388E3C);
+}
+
+.tienda-combo-badge.pro {
+    background: linear-gradient(135deg, #2196F3, #1565C0);
+}
+
+.tienda-combo-badge.ultimate {
+    background: linear-gradient(135deg, #FF6B6B, #E91E63);
+}
+
+.tienda-combo-badge.mega {
+    background: linear-gradient(135deg, #9C27B0, #6A1B9A);
+    animation: pulseBadge 2s ease-in-out infinite;
+}
+
+@keyframes pulseBadge {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.05); }
+}
+
+.tienda-combo-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.tienda-combo-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: relative;
+}
+
+.tienda-combo-icon.energia {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.tienda-combo-icon.pista {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+}
+
+.tienda-combo-icon i {
+    font-size: 1.3rem;
+}
+
+.tienda-combo-icon span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.tienda-combo-plus {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #9C27B0;
+}
+
+.tienda-item-combo .tienda-item-info {
+    margin-top: 0.5rem;
+}
+
+.combo-btn {
+    background: linear-gradient(135deg, #FF6B6B, #E91E63) !important;
+}
+
+.combo-btn:hover {
+    box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
+}
+
+/* Premium combo items */
+.tienda-item-combo.tienda-item-premium {
+    background: linear-gradient(135deg, #f3e5f5, #e1bee7) padding-box,
+                linear-gradient(135deg, #9C27B0, #6A1B9A, #4A148C) border-box;
+}
+
+@media (max-width: 768px) {
+    .tienda-combo-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .tienda-combo-icon {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .tienda-combo-icon i {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tienda-combo-grid {
+        grid-template-columns: 1fr;
     }
 }
