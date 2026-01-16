@@ -76,7 +76,55 @@ function initRetos() {
     
     // Setup event listeners
     setupEventListeners();
+    
+    // Crear modal de zoom para imágenes
+    createImageZoomModal();
 }
+
+// ============ MODAL ZOOM IMÁGENES ============
+function createImageZoomModal() {
+    // Verificar si ya existe
+    if (document.getElementById('imageZoomModal')) return;
+    
+    const modal = document.createElement('div');
+    modal.id = 'imageZoomModal';
+    modal.className = 'image-zoom-modal';
+    modal.innerHTML = `
+        <button class="image-zoom-close" onclick="closeImageZoom()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <img id="zoomImage" src="" alt="Imagen ampliada">
+    `;
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeImageZoom();
+    });
+    document.body.appendChild(modal);
+}
+
+function openImageZoom(src) {
+    const modal = document.getElementById('imageZoomModal');
+    const img = document.getElementById('zoomImage');
+    if (modal && img) {
+        img.src = src;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeImageZoom() {
+    const modal = document.getElementById('imageZoomModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// Cerrar modal de zoom con Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeImageZoom();
+    }
+});
 
 // ============ LOCALSTORAGE ============
 function loadUserData() {
@@ -859,14 +907,72 @@ function showPregunta() {
     
     // Opciones
     const letras = ['A', 'B', 'C', 'D'];
+    
+    // Detectar si alguna opción tiene imagen (contiene <img o es una URL de imagen)
+    const hasImages = pregunta.opciones.some(opcion => 
+        opcion.includes('<img') || 
+        /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(opcion) ||
+        opcion.includes('data:image')
+    );
+    
+    // Agregar clase si hay imágenes
+    if (hasImages) {
+        opcionesContainer.classList.add('has-images');
+    } else {
+        opcionesContainer.classList.remove('has-images');
+    }
+    
     pregunta.opciones.forEach((opcion, index) => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'opcion-btn';
-        btn.innerHTML = `
-            <span class="opcion-letra">${letras[index]}</span>
-            <span class="opcion-texto">${opcion}</span>
-        `;
+        
+        // Verificar si la opción contiene una imagen
+        const isImageOption = opcion.includes('<img') || 
+            /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(opcion) ||
+            opcion.includes('data:image');
+        
+        if (isImageOption) {
+            btn.classList.add('has-image');
+            
+            // Extraer la URL de la imagen y el texto
+            let imgSrc = '';
+            let textoOpcion = opcion;
+            
+            if (opcion.includes('<img')) {
+                // Extraer src del tag img
+                const srcMatch = opcion.match(/src=["']([^"']+)["']/);
+                if (srcMatch) {
+                    imgSrc = srcMatch[1];
+                }
+                // Extraer texto fuera del tag img
+                textoOpcion = opcion.replace(/<img[^>]*>/gi, '').trim();
+            } else if (/\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(opcion)) {
+                // Es una URL directa de imagen
+                imgSrc = opcion;
+                textoOpcion = '';
+            } else if (opcion.includes('data:image')) {
+                imgSrc = opcion;
+                textoOpcion = '';
+            }
+            
+            btn.innerHTML = `
+                <div class="opcion-content">
+                    <span class="opcion-letra">${letras[index]}</span>
+                    <div class="opcion-image-container">
+                        <img src="${imgSrc}" alt="Opción ${letras[index]}" onclick="event.stopPropagation(); openImageZoom('${imgSrc.replace(/'/g, "\\'")}')">
+                        <span class="zoom-icon"><i class="bi bi-zoom-in"></i></span>
+                    </div>
+                    ${textoOpcion ? `<span class="opcion-texto">${textoOpcion}</span>` : ''}
+                </div>
+            `;
+        } else {
+            btn.innerHTML = `
+                <span class="opcion-letra">${letras[index]}</span>
+                <span class="opcion-texto">${opcion}</span>
+            `;
+        }
+        
         btn.dataset.index = index;
         btn.addEventListener('click', () => selectOption(btn, index));
         opcionesContainer.appendChild(btn);
@@ -875,7 +981,7 @@ function showPregunta() {
     selectedOption = null;
     const verificarBtn = document.getElementById('verificarBtn');
     verificarBtn.disabled = true;
-    verificarBtn.textContent = 'VERIFICAR';
+    verificarBtn.textContent = 'CONTINUAR';
     verificarBtn.classList.remove('next');
     
     document.getElementById('preguntaModal').classList.add('active');

@@ -677,6 +677,7 @@ function showChestResult() {
 
 function showPregunta() {
     const pregunta = preguntasActuales[currentPreguntaIndex];
+    const tipo = pregunta.tipo || 'texto'; // Default to texto for old format
 
     // Mostrar tema del nivel
     const temaElement = document.getElementById('preguntaTema');
@@ -690,75 +691,38 @@ function showPregunta() {
         }
     }
 
-    // Calcular progreso: (pregunta actual) / total * 100
-    // Para que en 5/5 muestre 100%, usamos (índice + 1) / total
+    // Calcular progreso
     const progreso = ((currentPreguntaIndex + 1) / preguntasActuales.length) * 100;
     document.getElementById('progresoFill').style.width = `${progreso}%`;
     document.getElementById('preguntaNumero').textContent = `${currentPreguntaIndex + 1}/${preguntasActuales.length}`;
 
-    document.getElementById('preguntaTexto').textContent = pregunta.pregunta;
-
+    const preguntaTextoEl = document.getElementById('preguntaTexto');
     const opcionesContainer = document.getElementById('opcionesContainer');
     opcionesContainer.innerHTML = '';
 
-    // Agregar botón de pista si hay pista disponible
-    if (pregunta.pista) {
-        const pistaBtn = document.createElement('button');
-        if (userGameData.pistas > 0) {
-            pistaBtn.className = 'pista-btn';
-            pistaBtn.innerHTML = `
-                <div class="pista-btn-left">
-                    <div class="pista-btn-icon">
-                        <i class="bi bi-lightbulb-fill"></i>
-                    </div>
-                    <span class="pista-btn-text">Usar Pista</span>
-                </div>
-                <div class="pista-btn-count">
-                    <i class="bi bi-lightbulb"></i>
-                    ${userGameData.pistas}
-                </div>
-            `;
-            pistaBtn.addEventListener('click', () => usarPista(pregunta.pista));
-        } else {
-            pistaBtn.className = 'pista-btn pista-btn-no-hints';
-            pistaBtn.innerHTML = `
-                <div class="pista-btn-left">
-                    <div class="pista-btn-icon">
-                        <i class="bi bi-lightbulb"></i>
-                    </div>
-                    <span class="pista-btn-text">Sin pistas</span>
-                </div>
-                <div class="pista-btn-shop">
-                    <i class="bi bi-shop"></i>
-                    Comprar
-                </div>
-            `;
-            pistaBtn.addEventListener('click', () => {
-                showAlertWithShop('¡Sin Pistas!', 'No tienes pistas disponibles. Puedes comprar más en la tienda para ayudarte con las preguntas difíciles.', 'hints');
-            });
-        }
-        opcionesContainer.appendChild(pistaBtn);
+    // Renderizar según el tipo de pregunta
+    switch (tipo) {
+        case 'imagen':
+            renderPreguntaImagen(pregunta, preguntaTextoEl, opcionesContainer);
+            break;
+        case 'seleccionImagen':
+            renderPreguntaSeleccionImagen(pregunta, preguntaTextoEl, opcionesContainer);
+            break;
+        case 'imagenOpciones':
+            renderPreguntaImagenOpciones(pregunta, preguntaTextoEl, opcionesContainer);
+            break;
+        case 'video':
+            renderPreguntaVideo(pregunta, preguntaTextoEl, opcionesContainer);
+            break;
+        default: // texto
+            renderPreguntaTexto(pregunta, preguntaTextoEl, opcionesContainer);
+            break;
     }
 
-    // Contenedor para la pista mostrada
-    const pistaContainer = document.createElement('div');
-    pistaContainer.className = 'pista-mostrada';
-    pistaContainer.id = 'pistaMostrada';
-    pistaContainer.style.display = 'none';
-    opcionesContainer.appendChild(pistaContainer);
-
-    const letras = ['A', 'B', 'C', 'D'];
-    pregunta.opciones.forEach((opcion, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'opcion-btn';
-        btn.innerHTML = `
-            <span class="opcion-letra">${letras[index]}</span>
-            <span class="opcion-texto">${opcion}</span>
-        `;
-        btn.dataset.index = index;
-        btn.addEventListener('click', () => selectOption(btn, index));
-        opcionesContainer.appendChild(btn);
-    });
+    // Agregar botón de pista si hay pista disponible
+    if (pregunta.pista) {
+        addPistaButton(pregunta.pista, opcionesContainer);
+    }
 
     selectedOption = null;
     const verificarBtn = document.getElementById('verificarBtn');
@@ -767,6 +731,273 @@ function showPregunta() {
     verificarBtn.classList.remove('next');
 
     document.getElementById('preguntaModal').classList.add('active');
+}
+
+// Renderizar pregunta de texto (formato original)
+function renderPreguntaTexto(pregunta, preguntaTextoEl, container) {
+    preguntaTextoEl.textContent = pregunta.pregunta || '';
+    
+    const letras = ['A', 'B', 'C', 'D'];
+    (pregunta.opciones || []).forEach((opcion, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'opcion-btn';
+        btn.innerHTML = `
+            <span class="opcion-letra">${letras[index]}</span>
+            <span class="opcion-texto">${opcion}</span>
+        `;
+        btn.dataset.index = index;
+        btn.addEventListener('click', () => selectOption(btn, index));
+        container.appendChild(btn);
+    });
+}
+
+// Renderizar pregunta con imagen
+function renderPreguntaImagen(pregunta, preguntaTextoEl, container) {
+    let imagenHTML = '';
+    if (pregunta.imagenPregunta) {
+        imagenHTML = `
+            <div class="imagen-container" onclick="openImageModal('${pregunta.imagenPregunta}')">
+                <img src="${pregunta.imagenPregunta}" class="pregunta-imagen" alt="Imagen de la pregunta">
+                <div class="zoom-icon"><i class="bi bi-zoom-in"></i></div>
+            </div>
+        `;
+    }
+    
+    preguntaTextoEl.innerHTML = `${pregunta.pregunta || ''}${imagenHTML}`;
+    
+    const letras = ['A', 'B', 'C', 'D'];
+    (pregunta.opciones || []).forEach((opcion, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'opcion-btn';
+        btn.innerHTML = `
+            <span class="opcion-letra">${letras[index]}</span>
+            <span class="opcion-texto">${opcion}</span>
+        `;
+        btn.dataset.index = index;
+        btn.addEventListener('click', () => selectOption(btn, index));
+        container.appendChild(btn);
+    });
+}
+
+// Renderizar pregunta de selección de imagen
+function renderPreguntaSeleccionImagen(pregunta, preguntaTextoEl, container) {
+    preguntaTextoEl.textContent = pregunta.pregunta || 'Selecciona la imagen correcta';
+    
+    const imagenesGrid = document.createElement('div');
+    imagenesGrid.className = 'opciones-imagenes-grid';
+    
+    const letras = ['A', 'B', 'C', 'D'];
+    (pregunta.opcionesImagenes || []).forEach((imgUrl, index) => {
+        if (!imgUrl) return;
+        
+        const btn = document.createElement('button');
+        btn.className = 'opcion-imagen-btn';
+        btn.innerHTML = `
+            <img src="${imgUrl}" alt="Opción ${letras[index]}">
+            <span class="opcion-letra">${letras[index]}</span>
+            <span class="zoom-indicator" onclick="event.stopPropagation(); openImageModal('${imgUrl}')"><i class="bi bi-zoom-in"></i></span>
+        `;
+        btn.dataset.index = index;
+        btn.addEventListener('click', (e) => {
+            if (!e.target.closest('.zoom-indicator')) {
+                selectImageOption(btn, index);
+            }
+        });
+        imagenesGrid.appendChild(btn);
+    });
+    
+    container.appendChild(imagenesGrid);
+}
+
+// Renderizar pregunta con imagen y opciones de imagen
+function renderPreguntaImagenOpciones(pregunta, preguntaTextoEl, container) {
+    let imagenHTML = '';
+    if (pregunta.imagenPregunta) {
+        imagenHTML = `
+            <div class="imagen-container" onclick="openImageModal('${pregunta.imagenPregunta}')">
+                <img src="${pregunta.imagenPregunta}" class="pregunta-imagen" alt="Imagen de la pregunta">
+                <div class="zoom-icon"><i class="bi bi-zoom-in"></i></div>
+            </div>
+        `;
+    }
+    
+    preguntaTextoEl.innerHTML = `${pregunta.pregunta || ''}${imagenHTML}`;
+    
+    const imagenesGrid = document.createElement('div');
+    imagenesGrid.className = 'opciones-imagenes-grid';
+    
+    const letras = ['A', 'B', 'C', 'D'];
+    (pregunta.opcionesImagenes || []).forEach((imgUrl, index) => {
+        if (!imgUrl) return;
+        
+        const btn = document.createElement('button');
+        btn.className = 'opcion-imagen-btn';
+        btn.innerHTML = `
+            <img src="${imgUrl}" alt="Opción ${letras[index]}">
+            <span class="opcion-letra">${letras[index]}</span>
+            <span class="zoom-indicator" onclick="event.stopPropagation(); openImageModal('${imgUrl}')"><i class="bi bi-zoom-in"></i></span>
+        `;
+        btn.dataset.index = index;
+        btn.addEventListener('click', (e) => {
+            if (!e.target.closest('.zoom-indicator')) {
+                selectImageOption(btn, index);
+            }
+        });
+        imagenesGrid.appendChild(btn);
+    });
+    
+    container.appendChild(imagenesGrid);
+}
+
+// Renderizar pregunta con video
+function renderPreguntaVideo(pregunta, preguntaTextoEl, container) {
+    const videoUrl = pregunta.videoUrl || '';
+    let videoEmbed = '';
+    
+    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+        const videoId = extractYouTubeIdDesafios(videoUrl);
+        videoEmbed = videoId ? `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>` : '';
+    } else if (videoUrl.includes('drive.google.com')) {
+        const driveId = extractDriveIdDesafios(videoUrl);
+        videoEmbed = driveId ? `<iframe src="https://drive.google.com/file/d/${driveId}/preview" frameborder="0" allowfullscreen></iframe>` : '';
+    }
+    
+    preguntaTextoEl.innerHTML = `
+        ${pregunta.pregunta || 'Mira el video'}
+        <div class="video-container">${videoEmbed || '<div class="no-video"><i class="bi bi-play-circle"></i><span>Video no disponible</span></div>'}</div>
+    `;
+    
+    // Verificar si tiene opciones de texto (A, B, C, D) o solo Entendido
+    if (pregunta.opciones && pregunta.opciones.length > 0 && pregunta.opciones.some(o => o)) {
+        // Tiene opciones de texto - mostrar como A, B, C, D
+        const letras = ['A', 'B', 'C', 'D'];
+        (pregunta.opciones || []).forEach((opcion, index) => {
+            if (!opcion) return;
+            const btn = document.createElement('button');
+            btn.className = 'opcion-btn';
+            btn.innerHTML = `
+                <span class="opcion-letra">${letras[index]}</span>
+                <span class="opcion-texto">${opcion}</span>
+            `;
+            btn.dataset.index = index;
+            btn.addEventListener('click', () => selectOption(btn, index));
+            container.appendChild(btn);
+        });
+    } else {
+        // Solo botón "Entendido"
+        const entendidoContainer = document.createElement('div');
+        entendidoContainer.className = 'video-entendido-container';
+        entendidoContainer.innerHTML = `
+            <button class="video-entendido-btn" data-index="0">
+                <i class="bi bi-check-circle-fill"></i>
+                Entendido
+            </button>
+        `;
+        
+        entendidoContainer.querySelector('.video-entendido-btn').addEventListener('click', function() {
+            this.classList.add('selected');
+            selectedOption = 0;
+            document.getElementById('verificarBtn').disabled = false;
+        });
+        
+        container.appendChild(entendidoContainer);
+    }
+}
+
+// Abrir modal de imagen ampliada
+function openImageModal(imageUrl) {
+    // Crear modal si no existe
+    let modal = document.getElementById('imagenModalOverlay');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.className = 'imagen-modal-overlay';
+        modal.id = 'imagenModalOverlay';
+        modal.innerHTML = `
+            <div class="imagen-modal-content">
+                <button class="imagen-modal-close" onclick="closeImageModal()">
+                    <i class="bi bi-x"></i>
+                </button>
+                <img id="imagenModalImg" src="" alt="Imagen ampliada">
+                <div class="imagen-zoom-hint">
+                    <i class="bi bi-hand-index"></i>
+                    Toca fuera para cerrar
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Cerrar al hacer clic fuera
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeImageModal();
+            }
+        });
+    }
+    
+    // Mostrar imagen
+    document.getElementById('imagenModalImg').src = imageUrl;
+    modal.classList.add('active');
+}
+
+// Cerrar modal de imagen
+function closeImageModal() {
+    const modal = document.getElementById('imagenModalOverlay');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+// Seleccionar opción de imagen
+function selectImageOption(btn, index) {
+    if (document.querySelector('.opcion-imagen-btn.correct') || document.querySelector('.opcion-imagen-btn.incorrect')) return;
+
+    document.querySelectorAll('.opcion-imagen-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedOption = index;
+    document.getElementById('verificarBtn').disabled = false;
+}
+
+// Agregar botón de pista
+function addPistaButton(pista, container) {
+    const pistaBtn = document.createElement('button');
+    if (userGameData.pistas > 0) {
+        pistaBtn.className = 'pista-btn';
+        pistaBtn.innerHTML = `
+            <div class="pista-btn-left">
+                <div class="pista-btn-icon"><i class="bi bi-lightbulb-fill"></i></div>
+                <span class="pista-btn-text">Usar Pista</span>
+            </div>
+            <div class="pista-btn-count"><i class="bi bi-lightbulb"></i> ${userGameData.pistas}</div>
+        `;
+        pistaBtn.addEventListener('click', () => usarPista(pista));
+    } else {
+        pistaBtn.className = 'pista-btn pista-btn-no-hints';
+        pistaBtn.innerHTML = `
+            <div class="pista-btn-left">
+                <div class="pista-btn-icon"><i class="bi bi-lightbulb"></i></div>
+                <span class="pista-btn-text">Sin pistas</span>
+            </div>
+            <div class="pista-btn-shop"><i class="bi bi-shop"></i> Comprar</div>
+        `;
+        pistaBtn.addEventListener('click', () => {
+            showAlertWithShop('¡Sin Pistas!', 'No tienes pistas disponibles. Puedes comprar más en la tienda.', 'hints');
+        });
+    }
+    container.insertBefore(pistaBtn, container.firstChild);
+}
+
+// Extraer ID de YouTube
+function extractYouTubeIdDesafios(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
+// Extraer ID de Google Drive
+function extractDriveIdDesafios(url) {
+    const regExp = /\/d\/([a-zA-Z0-9_-]+)/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
 }
 
 async function usarPista(pista) {
@@ -843,15 +1074,28 @@ function verificarRespuesta() {
     }
 
     const pregunta = preguntasActuales[currentPreguntaIndex];
-    const opciones = document.querySelectorAll('.opcion-btn');
-
-    opciones.forEach((btn, index) => {
-        if (index === pregunta.correcta) {
-            btn.classList.add('correct');
-        } else if (index === selectedOption && selectedOption !== pregunta.correcta) {
-            btn.classList.add('incorrect');
-        }
-    });
+    const tipo = pregunta.tipo || 'texto';
+    
+    // Manejar verificación según el tipo
+    if (tipo === 'seleccionImagen' || tipo === 'imagenOpciones') {
+        const opciones = document.querySelectorAll('.opcion-imagen-btn');
+        opciones.forEach((btn, index) => {
+            if (index === pregunta.correcta) {
+                btn.classList.add('correct');
+            } else if (index === selectedOption && selectedOption !== pregunta.correcta) {
+                btn.classList.add('incorrect');
+            }
+        });
+    } else {
+        const opciones = document.querySelectorAll('.opcion-btn');
+        opciones.forEach((btn, index) => {
+            if (index === pregunta.correcta) {
+                btn.classList.add('correct');
+            } else if (index === selectedOption && selectedOption !== pregunta.correcta) {
+                btn.classList.add('incorrect');
+            }
+        });
+    }
 
     if (selectedOption === pregunta.correcta) {
         respuestasCorrectas++;

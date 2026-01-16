@@ -862,17 +862,16 @@ html {
 /* ============ PREGUNTA MODAL ============ */
 .modal-pregunta {
     max-width: 500px;
-    max-height: 90vh;
     display: flex;
     flex-direction: column;
 }
 
 .pregunta-header {
-    padding: 0.8rem 1rem;
+    padding: 0.6rem 0.8rem;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 0.6rem;
+    gap: 0.4rem;
     background: #f8f8f8;
 }
 
@@ -880,7 +879,7 @@ html {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.75rem;
+    padding: 0.3rem 0.6rem;
     background: linear-gradient(135deg, var(--materia-color, #2196F3), var(--materia-dark, #1976D2));
     border-radius: 8px;
     align-self: flex-start;
@@ -888,60 +887,60 @@ html {
 
 .pregunta-tema i {
     color: rgba(255, 255, 255, 0.9);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .pregunta-tema span {
     color: #ffffff;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
 }
 
 .pregunta-header-row {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.6rem;
 }
 
 .pregunta-progreso {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.6rem;
 }
 
 .progreso-bar {
     flex: 1;
-    height: 14px;
+    height: 10px;
     background: #E5E5E5;
-    border-radius: 8px;
+    border-radius: 5px;
     overflow: hidden;
 }
 
 .progreso-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--success-color), #7ED321);
-    border-radius: 8px;
+    border-radius: 5px;
     transition: width 0.4s ease;
 }
 
 #preguntaNumero {
     font-weight: 700;
     color: #666;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .pregunta-body {
-    padding: 1.5rem 1rem;
-    flex: 1;
-    overflow-y: auto;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .pregunta-texto {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #333;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
+    margin-bottom: 0.8rem;
+    line-height: 1.4;
     text-align: center;
     font-weight: 600;
 }
@@ -949,23 +948,24 @@ html {
 .opciones-container {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.5rem;
 }
 
 .opcion-btn {
-    padding: 0.9rem 1rem;
+    padding: 0.7rem 0.8rem;
     background: white;
     border: 3px solid #E5E5E5;
     border-radius: 12px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #333;
     cursor: pointer;
     transition: all 0.15s ease;
     text-align: left;
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.6rem;
     box-shadow: 0 3px 0 #E5E5E5;
+    flex-shrink: 0;
 }
 
 .opcion-btn:active {
@@ -992,8 +992,8 @@ html {
 }
 
 .opcion-letra {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     background: #E5E5E5;
     border-radius: 8px;
     display: flex;
@@ -1002,7 +1002,7 @@ html {
     font-weight: 700;
     color: #666;
     flex-shrink: 0;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .opcion-btn.selected .opcion-letra {
@@ -1023,20 +1023,22 @@ html {
 .opcion-texto {
     flex: 1;
     font-weight: 500;
+    font-size: 0.85rem;
 }
 
 .pregunta-footer {
-    padding: 0.8rem 1rem 1rem;
+    padding: 0.6rem 0.8rem 0.8rem;
     background: #f8f8f8;
+    flex-shrink: 0;
 }
 
 .verificar-btn {
     width: 100%;
-    padding: 0.9rem;
+    padding: 0.8rem;
     background: #E5E5E5;
     border: none;
     border-radius: 12px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #AFAFAF;
     cursor: not-allowed;
@@ -1961,4 +1963,645 @@ html {
     .reset-warning-icon i {
         font-size: 3rem;
     }
+}
+
+
+/* ========================================
+   NUEVOS TIPOS DE PREGUNTAS - ESTUDIANTE
+   ======================================== */
+
+/* Imagen en la pregunta */
+.pregunta-imagen {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 12px;
+    margin-top: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Grid de opciones de imagen */
+.opciones-imagenes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+/* Botón de opción de imagen */
+.opcion-imagen-btn {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid #E5E5E5;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    box-shadow: 0 3px 0 #E5E5E5;
+}
+
+.opcion-imagen-btn:active {
+    transform: translateY(3px);
+    box-shadow: none;
+}
+
+.opcion-imagen-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.opcion-imagen-btn .opcion-letra {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 28px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.opcion-imagen-btn.selected {
+    border-color: var(--materia-color);
+    box-shadow: 0 3px 0 var(--materia-color);
+}
+
+.opcion-imagen-btn.selected .opcion-letra {
+    background: var(--materia-color);
+}
+
+.opcion-imagen-btn.correct {
+    border-color: var(--success-color);
+    box-shadow: 0 3px 0 var(--success-color);
+}
+
+.opcion-imagen-btn.correct::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(88, 204, 2, 0.2);
+}
+
+.opcion-imagen-btn.correct .opcion-letra {
+    background: var(--success-color);
+}
+
+.opcion-imagen-btn.incorrect {
+    border-color: var(--error-color);
+    box-shadow: 0 3px 0 var(--error-color);
+}
+
+.opcion-imagen-btn.incorrect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 75, 75, 0.2);
+}
+
+.opcion-imagen-btn.incorrect .opcion-letra {
+    background: var(--error-color);
+}
+
+/* Contenedor de video */
+.video-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.video-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.no-video {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.4);
+    gap: 0.5rem;
+}
+
+.no-video i {
+    font-size: 3rem;
+}
+
+/* Opciones de video */
+.video-opciones {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.video-opciones .opcion-btn {
+    flex: 1;
+}
+
+.video-opciones .opcion-btn .opcion-letra {
+    background: transparent;
+    width: auto;
+    height: auto;
+}
+
+.video-opciones .opcion-btn .opcion-letra i {
+    font-size: 1.3rem;
+}
+
+.video-opciones .opcion-btn[data-index="0"] .opcion-letra i {
+    color: var(--success-color);
+}
+
+.video-opciones .opcion-btn[data-index="1"] .opcion-letra i {
+    color: var(--error-color);
+}
+
+.video-opciones .opcion-btn.selected[data-index="0"] {
+    border-color: var(--success-color);
+    background: rgba(88, 204, 2, 0.1);
+}
+
+.video-opciones .opcion-btn.selected[data-index="1"] {
+    border-color: var(--error-color);
+    background: rgba(255, 75, 75, 0.1);
+}
+
+/* Responsive para tipos de preguntas */
+@media (max-width: 400px) {
+    .opciones-imagenes-grid {
+        gap: 0.5rem;
+    }
+    
+    .opcion-imagen-btn .opcion-letra {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+        top: 5px;
+        left: 5px;
+    }
+    
+    .video-opciones {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Modal de pregunta ajustes para imágenes */
+.modal-pregunta .pregunta-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.pregunta-texto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.pregunta-texto img {
+    margin-top: 1rem;
+}
+
+
+/* ========================================
+   IMAGEN EN PREGUNTAS - ESTILO PROFESIONAL
+   ======================================== */
+.pregunta-imagen {
+    width: 100%;
+    max-height: 140px;
+    object-fit: contain;
+    border-radius: 12px;
+    margin-top: 0.5rem;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+    border: 2px solid #E5E5E5;
+}
+
+.pregunta-imagen:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.18);
+    border-color: var(--materia-color);
+}
+
+.pregunta-imagen:active {
+    transform: scale(0.98);
+}
+
+/* Modal de imagen ampliada */
+.imagen-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 1rem;
+    cursor: zoom-out;
+}
+
+.imagen-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.imagen-modal-content {
+    max-width: 95vw;
+    max-height: 90vh;
+    position: relative;
+    animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.imagen-modal-content img {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.imagen-modal-close {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 12px rgba(255, 0, 0, 0.4);
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.imagen-modal-close:hover {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, #ff0000, #990000);
+}
+
+.imagen-zoom-hint {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+/* Indicador de zoom en la imagen */
+.imagen-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.zoom-icon {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.65);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.85rem;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.imagen-container:hover .zoom-icon {
+    background: var(--materia-color);
+    transform: scale(1.1);
+}
+
+/* ========================================
+   VIDEO EN PREGUNTAS - ESTILO MEJORADO
+   ======================================== */
+.video-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.25);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.video-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.no-video {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.4);
+    gap: 0.5rem;
+}
+
+.no-video i {
+    font-size: 2.5rem;
+    opacity: 0.5;
+}
+
+.no-video span {
+    font-size: 0.85rem;
+}
+
+/* Botón único "Entendido" para videos */
+.video-entendido-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.video-entendido-btn {
+    padding: 0.85rem 2.5rem;
+    background: linear-gradient(180deg, var(--success-color) 0%, #46A302 100%);
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    box-shadow: 0 4px 0 #2D6601, 0 6px 15px rgba(88, 204, 2, 0.3);
+    transition: all 0.2s ease;
+}
+
+.video-entendido-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #2D6601, 0 10px 20px rgba(88, 204, 2, 0.4);
+}
+
+.video-entendido-btn:active,
+.video-entendido-btn.selected {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #2D6601;
+}
+
+.video-entendido-btn i {
+    font-size: 1.2rem;
+}
+
+/* Opciones de video estilo A, B, C, D */
+.video-opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+}
+
+.video-opciones .opcion-btn {
+    padding: 0.7rem 0.8rem;
+}
+
+/* ========================================
+   OPCIONES DE IMAGEN - DISEÑO PROFESIONAL
+   ======================================== */
+.opciones-imagenes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.opcion-imagen-btn {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 8px;
+    box-shadow: 0 3px 0 #bbb;
+    aspect-ratio: 4/3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.opcion-imagen-btn:active {
+    transform: translateY(3px);
+    box-shadow: none;
+}
+
+.opcion-imagen-btn img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+    border-radius: 6px;
+}
+
+.opcion-imagen-btn .opcion-letra {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    line-height: normal;
+}
+
+/* Icono de zoom en opciones de imagen - centrado */
+.opcion-imagen-btn .zoom-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 3;
+    opacity: 0;
+}
+
+.opcion-imagen-btn:hover .zoom-indicator {
+    opacity: 1;
+}
+
+.opcion-imagen-btn .zoom-indicator:hover {
+    transform: translate(-50%, -50%) scale(1.15);
+    background: var(--materia-color);
+}
+
+.opcion-imagen-btn.selected {
+    border-color: var(--materia-color);
+    box-shadow: 0 3px 0 var(--materia-color);
+}
+
+.opcion-imagen-btn.selected .opcion-letra {
+    background: var(--materia-color);
+}
+
+.opcion-imagen-btn.correct {
+    border-color: var(--success-color);
+    box-shadow: 0 3px 0 #2D6601;
+}
+
+.opcion-imagen-btn.correct::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(88, 204, 2, 0.2);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.opcion-imagen-btn.correct .opcion-letra {
+    background: var(--success-color);
+}
+
+.opcion-imagen-btn.correct .check-mark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: var(--success-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    box-shadow: 0 3px 12px rgba(88, 204, 2, 0.5);
+    animation: checkPop 0.3s ease;
+    z-index: 3;
+}
+
+@keyframes checkPop {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    50% { transform: translate(-50%, -50%) scale(1.2); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.opcion-imagen-btn.incorrect {
+    border-color: var(--error-color);
+    box-shadow: 0 3px 0 #B71C1C;
+}
+
+.opcion-imagen-btn.incorrect::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 75, 75, 0.2);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.opcion-imagen-btn.incorrect .opcion-letra {
+    background: var(--error-color);
+}
+
+/* Responsive para opciones de imagen */
+@media (max-width: 400px) {
+    .opciones-imagenes-grid {
+        gap: 8px;
+    }
+    
+    .opcion-imagen-btn {
+        border-width: 2px;
+        border-radius: 10px;
+        box-shadow: 0 2px 0 #bbb;
+        padding: 6px;
+    }
+    
+    .opcion-imagen-btn .opcion-letra {
+        width: 20px;
+        height: 20px;
+        font-size: 0.65rem;
+        top: 4px;
+        left: 4px;
+    }
+    
+    .pregunta-body {
+        padding: 0.6rem;
+    }
+    
+    .pregunta-texto {
+        font-size: 0.9rem;
+        margin-bottom: 0.6rem;
+    }
+}
 }
