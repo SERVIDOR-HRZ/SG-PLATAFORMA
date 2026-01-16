@@ -41,7 +41,7 @@ const tiposPregunta = {
     },
     video: {
         nombre: 'Pregunta con Video',
-        descripcion: 'Video de YouTube o Drive + Entendí/No entendí',
+        descripcion: 'Video de YouTube o Drive + Continuar',
         icon: 'bi-play-circle'
     }
 };
@@ -497,18 +497,26 @@ function updatePreview() {
                     ${videoEmbed || '<div class="preview-no-video"><i class="bi bi-play-circle"></i> Sin video</div>'}
                 </div>
             `;
-            opcionesHTML = `
-                <div class="preview-video-options">
-                    <div class="preview-option video-option ${pregunta.correcta === 0 ? 'correct' : ''}">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <span>Entendí</span>
+            
+            // Check if has text options (A, B, C, D) or just Continue
+            if (pregunta.opciones && pregunta.opciones.length > 0 && pregunta.opciones.some(o => o)) {
+                opcionesHTML = (pregunta.opciones || []).map((op, idx) => `
+                    <div class="preview-option ${idx === pregunta.correcta ? 'correct' : ''}">
+                        <span class="option-letter">${letras[idx]}</span>
+                        <span class="option-text">${op || `Opción ${letras[idx]}`}</span>
+                        ${idx === pregunta.correcta ? '<i class="bi bi-check-circle-fill"></i>' : ''}
                     </div>
-                    <div class="preview-option video-option ${pregunta.correcta === 1 ? 'correct' : ''}">
-                        <i class="bi bi-x-circle-fill"></i>
-                        <span>No entendí</span>
+                `).join('');
+            } else {
+                opcionesHTML = `
+                    <div class="preview-video-options">
+                        <div class="preview-option video-option correct">
+                            <i class="bi bi-arrow-right-circle-fill"></i>
+                            <span>Continuar</span>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
             break;
     }
     
@@ -752,7 +760,7 @@ function renderPreguntasContainer() {
                         <div class="option-icon"><i class="bi bi-play-circle"></i></div>
                         <div class="option-info">
                             <strong>Pregunta con Video</strong>
-                            <span>Video de YouTube o Drive + Entendí/No entendí</span>
+                            <span>Video de YouTube o Drive + Continuar</span>
                         </div>
                     </div>
                 </div>
@@ -1063,7 +1071,7 @@ function renderPreguntaCard(pregunta, index) {
                             <input type="radio" name="video_tipo_${index}" value="entendido" ${!tieneOpciones ? 'checked' : ''} 
                                    class="video-tipo-input" data-index="${index}">
                             <i class="bi bi-check-circle"></i>
-                            <span>Solo "Entendido"</span>
+                            <span>Solo "Continuar"</span>
                         </label>
                         <label class="video-tipo-label ${tieneOpciones ? 'selected' : ''}">
                             <input type="radio" name="video_tipo_${index}" value="opciones" ${tieneOpciones ? 'checked' : ''}
@@ -1725,16 +1733,26 @@ function updateNivelPreviewContent() {
                 <p>${pregunta.pregunta || 'Mira el video'}</p>
                 <div class="preview-video-container">${videoEmbed || '<div class="preview-no-video"><i class="bi bi-play-circle"></i></div>'}</div>
             `;
-            opcionesHTML = `
-                <div class="preview-video-options">
-                    <div class="preview-option video-option ${pregunta.correcta === 0 ? 'correct' : ''}">
-                        <i class="bi bi-check-circle-fill"></i><span>Entendí</span>
+            
+            // Check if has text options (A, B, C, D) or just Continue
+            if (pregunta.opciones && pregunta.opciones.length > 0 && pregunta.opciones.some(o => o)) {
+                opcionesHTML = (pregunta.opciones || []).map((op, idx) => `
+                    <div class="preview-option ${idx === pregunta.correcta ? 'correct' : ''}">
+                        <span class="option-letter">${letras[idx]}</span>
+                        <span class="option-text">${op}</span>
+                        ${idx === pregunta.correcta ? '<i class="bi bi-check-circle-fill option-check"></i>' : ''}
                     </div>
-                    <div class="preview-option video-option ${pregunta.correcta === 1 ? 'correct' : ''}">
-                        <i class="bi bi-x-circle-fill"></i><span>No entendí</span>
+                `).join('');
+            } else {
+                opcionesHTML = `
+                    <div class="preview-video-options">
+                        <div class="preview-option video-option correct">
+                            <i class="bi bi-arrow-right-circle-fill"></i>
+                            <span>Continuar</span>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
             break;
     }
     

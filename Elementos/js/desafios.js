@@ -679,6 +679,10 @@ function showPregunta() {
     const pregunta = preguntasActuales[currentPreguntaIndex];
     const tipo = pregunta.tipo || 'texto'; // Default to texto for old format
 
+    // Asegurar que el botón verificar esté visible (puede estar oculto por pregunta de video)
+    const verificarBtn = document.getElementById('verificarBtn');
+    verificarBtn.style.display = '';
+
     // Mostrar tema del nivel
     const temaElement = document.getElementById('preguntaTema');
     if (temaElement && currentNivelData) {
@@ -725,7 +729,6 @@ function showPregunta() {
     }
 
     selectedOption = null;
-    const verificarBtn = document.getElementById('verificarBtn');
     verificarBtn.disabled = true;
     verificarBtn.textContent = 'VERIFICAR';
     verificarBtn.classList.remove('next');
@@ -736,7 +739,7 @@ function showPregunta() {
 // Renderizar pregunta de texto (formato original)
 function renderPreguntaTexto(pregunta, preguntaTextoEl, container) {
     preguntaTextoEl.textContent = pregunta.pregunta || '';
-    
+
     const letras = ['A', 'B', 'C', 'D'];
     (pregunta.opciones || []).forEach((opcion, index) => {
         const btn = document.createElement('button');
@@ -762,9 +765,9 @@ function renderPreguntaImagen(pregunta, preguntaTextoEl, container) {
             </div>
         `;
     }
-    
+
     preguntaTextoEl.innerHTML = `${pregunta.pregunta || ''}${imagenHTML}`;
-    
+
     const letras = ['A', 'B', 'C', 'D'];
     (pregunta.opciones || []).forEach((opcion, index) => {
         const btn = document.createElement('button');
@@ -782,14 +785,14 @@ function renderPreguntaImagen(pregunta, preguntaTextoEl, container) {
 // Renderizar pregunta de selección de imagen
 function renderPreguntaSeleccionImagen(pregunta, preguntaTextoEl, container) {
     preguntaTextoEl.textContent = pregunta.pregunta || 'Selecciona la imagen correcta';
-    
+
     const imagenesGrid = document.createElement('div');
     imagenesGrid.className = 'opciones-imagenes-grid';
-    
+
     const letras = ['A', 'B', 'C', 'D'];
     (pregunta.opcionesImagenes || []).forEach((imgUrl, index) => {
         if (!imgUrl) return;
-        
+
         const btn = document.createElement('button');
         btn.className = 'opcion-imagen-btn';
         btn.innerHTML = `
@@ -805,7 +808,7 @@ function renderPreguntaSeleccionImagen(pregunta, preguntaTextoEl, container) {
         });
         imagenesGrid.appendChild(btn);
     });
-    
+
     container.appendChild(imagenesGrid);
 }
 
@@ -820,16 +823,16 @@ function renderPreguntaImagenOpciones(pregunta, preguntaTextoEl, container) {
             </div>
         `;
     }
-    
+
     preguntaTextoEl.innerHTML = `${pregunta.pregunta || ''}${imagenHTML}`;
-    
+
     const imagenesGrid = document.createElement('div');
     imagenesGrid.className = 'opciones-imagenes-grid';
-    
+
     const letras = ['A', 'B', 'C', 'D'];
     (pregunta.opcionesImagenes || []).forEach((imgUrl, index) => {
         if (!imgUrl) return;
-        
+
         const btn = document.createElement('button');
         btn.className = 'opcion-imagen-btn';
         btn.innerHTML = `
@@ -845,7 +848,7 @@ function renderPreguntaImagenOpciones(pregunta, preguntaTextoEl, container) {
         });
         imagenesGrid.appendChild(btn);
     });
-    
+
     container.appendChild(imagenesGrid);
 }
 
@@ -853,7 +856,7 @@ function renderPreguntaImagenOpciones(pregunta, preguntaTextoEl, container) {
 function renderPreguntaVideo(pregunta, preguntaTextoEl, container) {
     const videoUrl = pregunta.videoUrl || '';
     let videoEmbed = '';
-    
+
     if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
         const videoId = extractYouTubeIdDesafios(videoUrl);
         videoEmbed = videoId ? `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>` : '';
@@ -861,12 +864,12 @@ function renderPreguntaVideo(pregunta, preguntaTextoEl, container) {
         const driveId = extractDriveIdDesafios(videoUrl);
         videoEmbed = driveId ? `<iframe src="https://drive.google.com/file/d/${driveId}/preview" frameborder="0" allowfullscreen></iframe>` : '';
     }
-    
+
     preguntaTextoEl.innerHTML = `
         ${pregunta.pregunta || 'Mira el video'}
         <div class="video-container">${videoEmbed || '<div class="no-video"><i class="bi bi-play-circle"></i><span>Video no disponible</span></div>'}</div>
     `;
-    
+
     // Verificar si tiene opciones de texto (A, B, C, D) o solo Entendido
     if (pregunta.opciones && pregunta.opciones.length > 0 && pregunta.opciones.some(o => o)) {
         // Tiene opciones de texto - mostrar como A, B, C, D
@@ -884,22 +887,38 @@ function renderPreguntaVideo(pregunta, preguntaTextoEl, container) {
             container.appendChild(btn);
         });
     } else {
-        // Solo botón "Entendido"
+        // Solo botón "Continuar" - pasa directamente a la siguiente pregunta
         const entendidoContainer = document.createElement('div');
         entendidoContainer.className = 'video-entendido-container';
         entendidoContainer.innerHTML = `
             <button class="video-entendido-btn" data-index="0">
-                <i class="bi bi-check-circle-fill"></i>
-                Entendido
+                <i class="bi bi-arrow-right-circle-fill"></i>
+                Continuar
             </button>
         `;
-        
-        entendidoContainer.querySelector('.video-entendido-btn').addEventListener('click', function() {
+
+        entendidoContainer.querySelector('.video-entendido-btn').addEventListener('click', function () {
             this.classList.add('selected');
-            selectedOption = 0;
-            document.getElementById('verificarBtn').disabled = false;
+            // Contar como respuesta correcta automáticamente
+            respuestasCorrectas++;
+            // Ocultar botón verificar
+            document.getElementById('verificarBtn').style.display = 'none';
+            // Pasar a la siguiente pregunta directamente
+            setTimeout(() => {
+                currentPreguntaIndex++;
+                if (currentPreguntaIndex < preguntasActuales.length) {
+                    showPregunta();
+                    document.getElementById('verificarBtn').style.display = '';
+                } else {
+                    document.getElementById('preguntaModal').classList.remove('active');
+                    showResultado();
+                }
+            }, 300);
         });
-        
+
+        // Ocultar botón verificar para preguntas de video sin opciones
+        document.getElementById('verificarBtn').style.display = 'none';
+
         container.appendChild(entendidoContainer);
     }
 }
@@ -925,15 +944,15 @@ function openImageModal(imageUrl) {
             </div>
         `;
         document.body.appendChild(modal);
-        
+
         // Cerrar al hacer clic fuera
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) {
                 closeImageModal();
             }
         });
     }
-    
+
     // Mostrar imagen
     document.getElementById('imagenModalImg').src = imageUrl;
     modal.classList.add('active');
@@ -1012,7 +1031,7 @@ async function usarPista(pista) {
     // Ocultar botón de pista
     const pistaBtn = document.querySelector('.pista-btn');
     if (pistaBtn) pistaBtn.style.display = 'none';
-    
+
     // Actualizar contador de pistas en el header
     updateHeaderStats();
 }
@@ -1020,7 +1039,7 @@ async function usarPista(pista) {
 function showPistaModal(pista) {
     // Crear el modal de pista si no existe
     let pistaModal = document.getElementById('pistaModal');
-    
+
     if (!pistaModal) {
         pistaModal = document.createElement('div');
         pistaModal.className = 'modal';
@@ -1039,11 +1058,11 @@ function showPistaModal(pista) {
             </div>
         `;
         document.body.appendChild(pistaModal);
-        
+
         // Event listener para cerrar
         document.getElementById('closePistaModal').addEventListener('click', closePistaModal);
     }
-    
+
     // Mostrar la pista
     document.getElementById('pistaModalText').textContent = pista;
     pistaModal.classList.add('active');
@@ -1075,7 +1094,7 @@ function verificarRespuesta() {
 
     const pregunta = preguntasActuales[currentPreguntaIndex];
     const tipo = pregunta.tipo || 'texto';
-    
+
     // Manejar verificación según el tipo
     if (tipo === 'seleccionImagen' || tipo === 'imagenOpciones') {
         const opciones = document.querySelectorAll('.opcion-imagen-btn');
@@ -1171,7 +1190,7 @@ async function showResultado() {
             // Primera vez: dar recompensas completas proporcionales
             monedasGanadas = Math.floor(monedasBase * (respuestasCorrectas / preguntasActuales.length));
             xpGanado = Math.floor(xpBase * (respuestasCorrectas / preguntasActuales.length));
-            
+
             // Actualizar datos del usuario
             userGameData.monedas += monedasGanadas;
             userGameData.xp += xpGanado;
@@ -1199,7 +1218,7 @@ async function showResultado() {
 
         resultadoIcon.classList.add('success');
         resultadoIcon.innerHTML = '<i class="bi bi-trophy-fill"></i>';
-        
+
         if (isFirstCompletion) {
             resultadoTitulo.textContent = stars === 3 ? '¡Perfecto!' : stars === 2 ? '¡Excelente!' : '¡Bien hecho!';
             resultadoMensaje.textContent = 'Has completado este nivel';
@@ -1321,7 +1340,7 @@ async function saveUserProgress(aprobo = false) {
             // Calcular actualización de racha (por materia)
             const rachaUpdate = calcularActualizacionRacha(progresoActual);
             progresoData = { ...progresoData, ...rachaUpdate };
-            
+
             console.log(`Racha de ${currentMateria} actualizada:`, rachaUpdate);
         }
 
@@ -1352,34 +1371,34 @@ function calcularActualizacionRacha(progresoMateria) {
     const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
     const ayer = new Date(hoy);
     ayer.setDate(ayer.getDate() - 1);
-    
+
     // Obtener datos de racha de esta materia
     let rachaActual = progresoMateria.racha || 0;
     let mejorRacha = progresoMateria.mejorRacha || 0;
     let diasDesafios = progresoMateria.diasDesafios || 0;
     let diasCompletados = progresoMateria.diasCompletados || [];
-    
+
     // Convertir último desafío a fecha
     let ultimoDesafio = null;
     if (progresoMateria.ultimoDesafio) {
         ultimoDesafio = progresoMateria.ultimoDesafio.toDate ? progresoMateria.ultimoDesafio.toDate() : new Date(progresoMateria.ultimoDesafio);
     }
-    
+
     // Normalizar fecha del último desafío (solo día, sin hora)
     let fechaUltimoDesafio = null;
     if (ultimoDesafio) {
         fechaUltimoDesafio = new Date(ultimoDesafio.getFullYear(), ultimoDesafio.getMonth(), ultimoDesafio.getDate());
     }
-    
+
     // Verificar si ya completó un desafío hoy en esta materia
     const yaCompletoHoy = fechaUltimoDesafio && fechaUltimoDesafio.getTime() === hoy.getTime();
-    
+
     if (!yaCompletoHoy) {
         // Es el primer desafío del día en esta materia
-        
+
         // Verificar si la racha continúa (completó ayer) o se reinicia
         const completoAyer = fechaUltimoDesafio && fechaUltimoDesafio.getTime() === ayer.getTime();
-        
+
         if (completoAyer || rachaActual === 0) {
             // Continúa la racha o empieza una nueva
             rachaActual++;
@@ -1390,24 +1409,24 @@ function calcularActualizacionRacha(progresoMateria) {
             // Primera vez
             rachaActual = 1;
         }
-        
+
         // Actualizar mejor racha si es necesario
         if (rachaActual > mejorRacha) {
             mejorRacha = rachaActual;
         }
-        
+
         // Incrementar días totales
         diasDesafios++;
-        
+
         // Agregar hoy a los días completados (para el calendario)
         diasCompletados.push(firebase.firestore.Timestamp.fromDate(hoy));
-        
+
         // Limitar a los últimos 60 días para no sobrecargar
         if (diasCompletados.length > 60) {
             diasCompletados = diasCompletados.slice(-60);
         }
     }
-    
+
     return {
         racha: rachaActual,
         mejorRacha: mejorRacha,
@@ -1560,7 +1579,7 @@ function showAlert(title, message, type = 'warning') {
     const alertBtn = document.getElementById('alertBtn');
     alertBtn.textContent = 'Entendido';
     alertBtn.onclick = closeAlertModal;
-    
+
     // Ocultar botón de tienda si existe
     const tiendaBtn = document.getElementById('alertTiendaBtn');
     if (tiendaBtn) tiendaBtn.style.display = 'none';
@@ -1592,7 +1611,7 @@ function showAlertWithShop(title, message, type = 'warning') {
     const alertBtn = document.getElementById('alertBtn');
     alertBtn.textContent = 'Cerrar';
     alertBtn.onclick = closeAlertModal;
-    
+
     // Mostrar/crear botón de tienda
     let tiendaBtn = document.getElementById('alertTiendaBtn');
     if (!tiendaBtn) {
@@ -1601,7 +1620,7 @@ function showAlertWithShop(title, message, type = 'warning') {
         tiendaBtn.className = 'tienda-btn';
         alertBtn.parentNode.insertBefore(tiendaBtn, alertBtn);
     }
-    
+
     tiendaBtn.innerHTML = '<i class="bi bi-shop"></i> Ir a la Tienda';
     tiendaBtn.style.display = 'inline-flex';
     tiendaBtn.onclick = () => {
