@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Clasificación Saber 11</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 30px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        /* Subject Selector Buttons */
+        .subject-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>Demo - Clasificación Saber 11</h1>
+        
+        <!-- Subject Selector -->
+        <div class="subject-selector">
+            <button class="subject-btn active" data-subject="lectura">
+                <i class="bi bi-book"></i> Lectura
+            </button>
+            <button class="subject-btn" data-subject="matematicas">
+                <i class="bi bi-calculator"></i> Matemáticas
+            </button>
+            <button class="subject-btn" data-subject="sociales">
+                <i class="bi bi-globe"></i> Sociales
+            </button>
+            <button class="subject-btn" data-subject="ciencias">
+                <i class="bi bi-gear-fill"></i> Ciencias
+            </button>
+            <button class="subject-btn" data-subject="ingles">
+                <i class="bi bi-translate"></i> Inglés
+            </button>
+        </div>
+        
+        <!-- Clasificación Saber 11 Card -->
+        <div class="saber11-card" id="saber11Card">
+            <div class="saber11-header" id="saber11Header">
+                <div class="header-title">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>Clasificación Saber 11</span>
+                </div>
+                <button class="toggle-btn" id="toggleBtn">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            
+            <div class="saber11-content" id="saber11Content">
+                <!-- Componentes -->
+                <div class="section">
+                    <label class="section-label">
+                        <i class="bi bi-layers"></i> COMPONENTES:
+                    </label>
+                    <div class="componentes-grid" id="componentesGrid">
+                        <!-- Componentes will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Competencias -->
+                <div class="section">
+                    <label class="section-label">
+                        <i class="bi bi-lightbulb"></i> COMPETENCIAS:
+                    </label>
+                    <div class="competencias-list" id="competenciasList">
+                        <!-- Competencias will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Afirmaciones -->
+                <div class="section" id="afirmacionesSection">
+                    <div class="afirmaciones-placeholder" id="afirmacionesPlaceholder">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Selecciona al menos una competencia para ver las afirmaciones disponibles.</span>
+                    </div>
+                    <div class="afirmaciones-container" id="afirmacionesContainer" style="display: none;">
+                        <!-- Afirmaciones will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Tema Asociado -->
+                <div class="section">
+                    <label class="section-label">
+                        <i class="bi bi-bookmark"></i> TEMA ASOCIADO:
+                    </label>
+                    <select class="tema-select" id="temaSelect">
+                        <option value="">-- Seleccionar tema --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Selection Summary -->
+        <div class="selection-summary" id="selectionSummary">
+            <h3><i class="bi bi-check-circle"></i> Resumen de Selección</h3>
+            <div id="summaryContent">
+                <p class="empty-summary">No hay selecciones aún</p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .subject-btn {
+            padding: 12px 24px;
+            border: 2px solid #dee2e6;
+            border-radius: 30px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .subject-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .subject-btn.active {
+            color: white;
+            border-color: transparent;
+        }
+        
+        .subject-btn[data-subject="lectura"].active {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        
+        .subject-btn[data-subject="matematicas"].active {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        }
+        
+        .subject-btn[data-subject="sociales"].active {
+            background: linear-gradient(135deg, #fd7e14 0%, #e06c00 100%);
+        }
+        
+        .subject-btn[data-subject="ciencias"].active {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+        
+        .subject-btn[data-subject="ingles"].active {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+        }
+        
+        /* Saber 11 Card */
+        .saber11-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .saber11-header {
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            transition: background 0.3s ease;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .header-title i {
+            font-size: 20px;
+        }
+        
+        .toggle-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .toggle-btn i {
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-btn.collapsed i {
+            transform: rotate(-90deg);
+        }
+        
+        .saber11-content {
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .saber11-content.collapsed {
+            display: none;
+        }
+        
+        .section {
+            margin-bottom: 24px;
+        }
+        
+        .section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .section-label i {
+            font-size: 16px;
+        }
+
+        /* Componentes Grid */
+        .componentes-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .componente-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .componente-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .componente-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .componente-item.selected {
+            color: white;
+        }
+        
+        /* Competencias List */
+        .competencias-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .competencia-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .competencia-item:hover {
+            border-color: #adb5bd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .competencia-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .competencia-item.selected {
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* Afirmaciones */
+        .afirmaciones-placeholder {
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            color: #6c757d;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .afirmaciones-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .afirmacion-group {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e9ecef;
+        }
+        
+        .afirmacion-group-header {
+            padding: 14px 18px;
+            font-weight: 600;
+            font-size: 13px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .afirmacion-list {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .afirmacion-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .afirmacion-item:hover {
+            border-color: #adb5bd;
+        }
+        
+        .afirmacion-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+        
+        .afirmacion-item.selected {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        /* Tema Select */
+        .tema-select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px 12px;
+        }
+        
+        .tema-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+        }
+
+        /* Selection Summary */
+        .selection-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .selection-summary h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .selection-summary h3 i {
+            color: #28a745;
+        }
+        
+        .empty-summary {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .summary-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 8px;
+        }
+        
+        /* Subject-specific colors */
+        /* Lectura - Red */
+        .saber11-card.lectura .saber11-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        .saber11-card.lectura .componente-item.selected {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border-color: #dc3545;
+        }
+        .saber11-card.lectura .componente-item input[type="checkbox"] { accent-color: #dc3545; }
+        .saber11-card.lectura .competencia-item.selected {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffebee 100%);
+        }
+        .saber11-card.lectura .competencia-item input[type="checkbox"] { accent-color: #dc3545; }
+        .saber11-card.lectura .afirmacion-group-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        .saber11-card.lectura .afirmacion-item.selected {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffebee 100%);
+        }
+        .saber11-card.lectura .afirmacion-item input[type="checkbox"] { accent-color: #dc3545; }
+        .saber11-card.lectura .tema-select:focus { border-color: #dc3545; box-shadow: 0 0 0 3px rgba(220,53,69,0.15); }
+        
+        /* Matemáticas - Blue */
+        .saber11-card.matematicas .saber11-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        }
+        .saber11-card.matematicas .componente-item.selected {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border-color: #007bff;
+        }
+        .saber11-card.matematicas .componente-item input[type="checkbox"] { accent-color: #007bff; }
+        .saber11-card.matematicas .competencia-item.selected {
+            border-color: #007bff;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+        }
+        .saber11-card.matematicas .competencia-item input[type="checkbox"] { accent-color: #007bff; }
+        .saber11-card.matematicas .afirmacion-group-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        }
+        .saber11-card.matematicas .afirmacion-item.selected {
+            border-color: #007bff;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+        }
+        .saber11-card.matematicas .afirmacion-item input[type="checkbox"] { accent-color: #007bff; }
+        .saber11-card.matematicas .tema-select:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
+        
+        /* Sociales - Orange */
+        .saber11-card.sociales .saber11-header {
+            background: linear-gradient(135deg, #fd7e14 0%, #e06c00 100%);
+        }
+        .saber11-card.sociales .componente-item.selected {
+            background: linear-gradient(135deg, #fd7e14 0%, #e06c00 100%);
+            border-color: #fd7e14;
+        }
+        .saber11-card.sociales .componente-item input[type="checkbox"] { accent-color: #fd7e14; }
+        .saber11-card.sociales .competencia-item.selected {
+            border-color: #fd7e14;
+            background: linear-gradient(135deg, #fffaf5 0%, #fff3e0 100%);
+        }
+        .saber11-card.sociales .competencia-item input[type="checkbox"] { accent-color: #fd7e14; }
+        .saber11-card.sociales .afirmacion-group-header {
+            background: linear-gradient(135deg, #fd7e14 0%, #e06c00 100%);
+        }
+        .saber11-card.sociales .afirmacion-item.selected {
+            border-color: #fd7e14;
+            background: linear-gradient(135deg, #fffaf5 0%, #fff3e0 100%);
+        }
+        .saber11-card.sociales .afirmacion-item input[type="checkbox"] { accent-color: #fd7e14; }
+        .saber11-card.sociales .tema-select:focus { border-color: #fd7e14; box-shadow: 0 0 0 3px rgba(253,126,20,0.15); }
+
+        /* Ciencias - Green */
+        .saber11-card.ciencias .saber11-header {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+        .saber11-card.ciencias .componente-item.selected {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            border-color: #28a745;
+        }
+        .saber11-card.ciencias .componente-item input[type="checkbox"] { accent-color: #28a745; }
+        .saber11-card.ciencias .competencia-item.selected {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #f5fff7 0%, #e8f5e9 100%);
+        }
+        .saber11-card.ciencias .competencia-item input[type="checkbox"] { accent-color: #28a745; }
+        .saber11-card.ciencias .afirmacion-group-header {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+        .saber11-card.ciencias .afirmacion-item.selected {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #f5fff7 0%, #e8f5e9 100%);
+        }
+        .saber11-card.ciencias .afirmacion-item input[type="checkbox"] { accent-color: #28a745; }
+        .saber11-card.ciencias .tema-select:focus { border-color: #28a745; box-shadow: 0 0 0 3px rgba(40,167,69,0.15); }
+        
+        /* Inglés - Purple */
+        .saber11-card.ingles .saber11-header {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+        }
+        .saber11-card.ingles .componente-item.selected {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+            border-color: #6f42c1;
+        }
+        .saber11-card.ingles .componente-item input[type="checkbox"] { accent-color: #6f42c1; }
+        .saber11-card.ingles .competencia-item.selected {
+            border-color: #6f42c1;
+            background: linear-gradient(135deg, #faf8ff 0%, #f3e8ff 100%);
+        }
+        .saber11-card.ingles .competencia-item input[type="checkbox"] { accent-color: #6f42c1; }
+        .saber11-card.ingles .afirmacion-group-header {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+        }
+        .saber11-card.ingles .afirmacion-item.selected {
+            border-color: #6f42c1;
+            background: linear-gradient(135deg, #faf8ff 0%, #f3e8ff 100%);
+        }
+        .saber11-card.ingles .afirmacion-item input[type="checkbox"] { accent-color: #6f42c1; }
+        .saber11-card.ingles .tema-select:focus { border-color: #6f42c1; box-shadow: 0 0 0 3px rgba(111,66,193,0.15); }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .subject-selector { gap: 8px; }
+            .subject-btn { padding: 10px 16px; font-size: 12px; }
+            .saber11-content { padding: 16px; }
+            .componentes-grid { gap: 8px; }
+            .componente-item { padding: 8px 14px; font-size: 12px; }
+            .competencia-item { padding: 12px 16px; font-size: 13px; }
+            .afirmacion-item { padding: 10px 12px; font-size: 12px; }
+        }
+    </style>
+
+    <script>
+        // Estructura Saber 11 (datos de demo)
+        const SABER11_ESTRUCTURA = {
+            lectura: {
+                nombre: 'Lectura Crítica',
+                componentes: ['Literal', 'Inferencial', 'Crítico'],
+                competencias: [
+                    {
+                        id: 'identificar_contenidos',
+                        nombre: 'Identificar y entender contenidos locales',
+                        afirmaciones: [
+                            { id: 'ic_af1', descripcion: 'Identifica y entiende los contenidos locales que conforman un texto.' }
+                        ],
+                        temas: [
+                            { categoria: 'Semántica', nombre: 'Significado de palabras en contexto' },
+                            { categoria: 'Semántica', nombre: 'Conectores lógicos' },
+                            { categoria: 'Literal', nombre: 'Información explícita' },
+                            { categoria: 'Literal', nombre: 'Identificación de personajes y eventos' }
+                        ]
+                    },
+                    {
+                        id: 'comprender_articulacion',
+                        nombre: 'Comprender la articulación del texto',
+                        afirmaciones: [
+                            { id: 'ca_af1', descripcion: 'Comprende cómo se articulan las partes de un texto para darle un sentido global.' }
+                        ],
+                        temas: [
+                            { categoria: 'Estructura', nombre: 'Estructura formal del texto' },
+                            { categoria: 'Tipologías', nombre: 'Texto narrativo' },
+                            { categoria: 'Tipologías', nombre: 'Texto argumentativo' },
+                            { categoria: 'Tipologías', nombre: 'Texto expositivo' },
+                            { categoria: 'Tipologías', nombre: 'Texto discontinuo' }
+                        ]
+                    },
+                    {
+                        id: 'reflexionar_evaluar',
+                        nombre: 'Reflexionar y evaluar',
+                        afirmaciones: [
+                            { id: 're_af1', descripcion: 'Reflexiona a partir de un texto y evalúa su contenido.' }
+                        ],
+                        temas: [
+                            { categoria: 'Argumentación', nombre: 'Validez de argumentos' },
+                            { categoria: 'Argumentación', nombre: 'Falacias argumentativas' },
+                            { categoria: 'Intención', nombre: 'Intención comunicativa' }
+                        ]
+                    }
+                ]
+            },
+            matematicas: {
+                nombre: 'Matemáticas',
+                componentes: ['Numérico-Variacional', 'Geométrico-Métrico', 'Aleatorio'],
+                competencias: [
+                    {
+                        id: 'interpretacion_representacion',
+                        nombre: 'Interpretación y Representación',
+                        afirmaciones: [
+                            { id: 'ir_af1', descripcion: 'Comprende y transforma la información cuantitativa y esquemática presentada en distintos formatos.' }
+                        ],
+                        temas: [
+                            { categoria: 'Gráficas', nombre: 'Lectura de gráficas estadísticas' },
+                            { categoria: 'Tablas', nombre: 'Lectura e interpretación de tablas' },
+                            { categoria: 'Funciones', nombre: 'Gráficas de funciones' }
+                        ]
+                    },
+                    {
+                        id: 'formulacion_ejecucion',
+                        nombre: 'Formulación y Ejecución',
+                        afirmaciones: [
+                            { id: 'fe_af1', descripcion: 'Frente a un problema que involucre información cuantitativa, plantea e implementa estrategias.' }
+                        ],
+                        temas: [
+                            { categoria: 'Álgebra', nombre: 'Ecuaciones lineales y sistemas 2x2' },
+                            { categoria: 'Geometría', nombre: 'Cálculo de áreas' },
+                            { categoria: 'Geometría', nombre: 'Teorema de Pitágoras' },
+                            { categoria: 'Estadística', nombre: 'Medidas de tendencia central' }
+                        ]
+                    },
+                    {
+                        id: 'argumentacion',
+                        nombre: 'Argumentación',
+                        afirmaciones: [
+                            { id: 'ar_af1', descripcion: 'Valida procedimientos y estrategias matemáticas utilizadas para dar solución a problemas.' }
+                        ],
+                        temas: [
+                            { categoria: 'Razonamiento', nombre: 'Validación de procedimientos' },
+                            { categoria: 'Razonamiento', nombre: 'Justificación de soluciones' }
+                        ]
+                    }
+                ]
+            },
+            sociales: {
+                nombre: 'Sociales y Ciudadanas',
+                componentes: ['Pensamiento Social', 'Interpretación de Perspectivas', 'Pensamiento Sistémico'],
+                competencias: [
+                    {
+                        id: 'pensamiento_social',
+                        nombre: 'Pensamiento Social',
+                        afirmaciones: [
+                            { id: 'ps_af1', descripcion: 'Comprende modelos conceptuales, sus características y contextos de aplicación.' }
+                        ],
+                        temas: [
+                            { categoria: 'Conceptos', nombre: 'Económicos básicos' },
+                            { categoria: 'Conceptos', nombre: 'Políticos básicos' },
+                            { categoria: 'Constitución', nombre: 'Estado Social de Derecho' },
+                            { categoria: 'Constitución', nombre: 'Ramas del poder público' }
+                        ]
+                    },
+                    {
+                        id: 'interpretacion_perspectivas',
+                        nombre: 'Interpretación y Análisis de Perspectivas',
+                        afirmaciones: [
+                            { id: 'ip_af1', descripcion: 'Contextualiza y evalúa usos de fuentes y argumentos.' }
+                        ],
+                        temas: [
+                            { categoria: 'Actores', nombre: 'Perspectivas de actores sociales' },
+                            { categoria: 'Ideologías', nombre: 'Cosmovisiones e ideologías' }
+                        ]
+                    },
+                    {
+                        id: 'pensamiento_sistemico',
+                        nombre: 'Pensamiento Sistémico y Reflexión Crítica',
+                        afirmaciones: [
+                            { id: 'psr_af1', descripcion: 'Comprende que los problemas y sus soluciones involucran distintas dimensiones.' }
+                        ],
+                        temas: [
+                            { categoria: 'Dimensiones', nombre: 'Política' },
+                            { categoria: 'Dimensiones', nombre: 'Económica' },
+                            { categoria: 'Dimensiones', nombre: 'Cultural' }
+                        ]
+                    }
+                ]
+            },
+            ciencias: {
+                nombre: 'Ciencias Naturales',
+                componentes: ['Biológico', 'Físico', 'Químico', 'CTS'],
+                competencias: [
+                    {
+                        id: 'uso_comprensivo',
+                        nombre: 'Uso comprensivo del conocimiento científico',
+                        afirmaciones: [
+                            { id: 'uc_af1', descripcion: 'Asociar fenómenos naturales con conceptos propios del conocimiento científico.' }
+                        ],
+                        temas: [
+                            { categoria: 'Física', nombre: 'Circuitos eléctricos: serie y paralelo' },
+                            { categoria: 'Física', nombre: 'Dinámica: Leyes de Newton' },
+                            { categoria: 'Biología', nombre: 'Dinámica de ecosistemas' },
+                            { categoria: 'Química', nombre: 'Tipos de reacciones químicas' }
+                        ]
+                    },
+                    {
+                        id: 'explicacion_fenomenos',
+                        nombre: 'Explicación de fenómenos',
+                        afirmaciones: [
+                            { id: 'ef_af1', descripcion: 'Analizar el potencial del uso de recursos naturales o artefactos.' }
+                        ],
+                        temas: [
+                            { categoria: 'CTS', nombre: 'Salud pública y principios científicos' },
+                            { categoria: 'CTS', nombre: 'Explotación de recursos naturales' }
+                        ]
+                    },
+                    {
+                        id: 'indagacion',
+                        nombre: 'Indagación',
+                        afirmaciones: [
+                            { id: 'in_af1', descripcion: 'Comprender que a partir de la investigación científica se construyen explicaciones.' }
+                        ],
+                        temas: [
+                            { categoria: 'Método Científico', nombre: 'Formulación de preguntas investigables' },
+                            { categoria: 'Datos', nombre: 'Interpretación de gráficas y tablas' }
+                        ]
+                    }
+                ]
+            },
+            ingles: {
+                nombre: 'Inglés',
+                componentes: ['A1', 'A2', 'B1', 'B+'],
+                competencias: [
+                    {
+                        id: 'nivel_a1',
+                        nombre: 'Nivel A - Principiante (A1)',
+                        afirmaciones: [
+                            { id: 'a1_af1', descripcion: 'Comprende y utiliza expresiones cotidianas y frases sencillas.' }
+                        ],
+                        temas: [
+                            { categoria: 'Vocabulario', nombre: 'Presentaciones personales' },
+                            { categoria: 'Gramática', nombre: 'Verb TO BE' }
+                        ]
+                    },
+                    {
+                        id: 'nivel_a2',
+                        nombre: 'Nivel A2 - Básico',
+                        afirmaciones: [
+                            { id: 'a2_af1', descripcion: 'Comprende frases de uso frecuente y se comunica en tareas cotidianas.' }
+                        ],
+                        temas: [
+                            { categoria: 'Gramática', nombre: 'Present Simple' },
+                            { categoria: 'Gramática', nombre: 'Past Simple' },
+                            { categoria: 'Gramática', nombre: 'Comparativos y superlativos' }
+                        ]
+                    },
+                    {
+                        id: 'nivel_b1',
+                        nombre: 'Nivel B1 - Pre-Intermedio',
+                        afirmaciones: [
+                            { id: 'b1_af1', descripcion: 'Comprende textos claros y produce textos coherentes sobre temas familiares.' }
+                        ],
+                        temas: [
+                            { categoria: 'Gramática', nombre: 'Present Perfect' },
+                            { categoria: 'Gramática', nombre: 'Condicionales 0, 1, 2' },
+                            { categoria: 'Gramática', nombre: 'Voz pasiva' }
+                        ]
+                    },
+                    {
+                        id: 'nivel_b2',
+                        nombre: 'Nivel B+ - Intermedio',
+                        afirmaciones: [
+                            { id: 'b2_af1', descripcion: 'Entiende textos complejos y se relaciona con fluidez.' }
+                        ],
+                        temas: [
+                            { categoria: 'Gramática', nombre: 'Third Conditional' },
+                            { categoria: 'Gramática', nombre: 'Reported Speech' },
+                            { categoria: 'Lectura', nombre: 'Lectura crítica en inglés' }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // State
+        let currentSubject = 'lectura';
+        let selectedComponentes = [];
+        let selectedCompetencias = [];
+        let selectedAfirmaciones = [];
+        let selectedTema = '';
+        
+        // DOM Elements
+        const saber11Card = document.getElementById('saber11Card');
+        const saber11Content = document.getElementById('saber11Content');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const componentesGrid = document.getElementById('componentesGrid');
+        const competenciasList = document.getElementById('competenciasList');
+        const afirmacionesPlaceholder = document.getElementById('afirmacionesPlaceholder');
+        const afirmacionesContainer = document.getElementById('afirmacionesContainer');
+        const temaSelect = document.getElementById('temaSelect');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupSubjectButtons();
+            setupToggleButton();
+            loadSubjectData(currentSubject);
+        });
+        
+        // Setup subject selector buttons
+        function setupSubjectButtons() {
+            const buttons = document.querySelectorAll('.subject-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentSubject = this.dataset.subject;
+                    resetSelections();
+                    loadSubjectData(currentSubject);
+                });
+            });
+        }
+        
+        // Setup toggle button
+        function setupToggleButton() {
+            toggleBtn.addEventListener('click', function() {
+                this.classList.toggle('collapsed');
+                saber11Content.classList.toggle('collapsed');
+            });
+        }
+        
+        // Reset all selections
+        function resetSelections() {
+            selectedComponentes = [];
+            selectedCompetencias = [];
+            selectedAfirmaciones = [];
+            selectedTema = '';
+            updateSummary();
+        }
+        
+        // Load subject data
+        function loadSubjectData(subject) {
+            const data = SABER11_ESTRUCTURA[subject];
+            if (!data) return;
+            
+            // Update card class for colors
+            saber11Card.className = 'saber11-card ' + subject;
+            
+            // Load componentes
+            loadComponentes(data.componentes);
+            
+            // Load competencias
+            loadCompetencias(data.competencias);
+            
+            // Load temas
+            loadTemas(data.competencias);
+            
+            // Reset afirmaciones
+            afirmacionesPlaceholder.style.display = 'flex';
+            afirmacionesContainer.style.display = 'none';
+        }
+        
+        // Load componentes
+        function loadComponentes(componentes) {
+            componentesGrid.innerHTML = '';
+            componentes.forEach(comp => {
+                const div = document.createElement('div');
+                div.className = 'componente-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="comp_${comp}">
+                    <span>${comp.toUpperCase()}</span>
+                `;
+                div.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                    this.classList.toggle('selected', this.querySelector('input').checked);
+                    updateSelectedComponentes();
+                });
+                componentesGrid.appendChild(div);
+            });
+        }
+        
+        // Load competencias
+        function loadCompetencias(competencias) {
+            competenciasList.innerHTML = '';
+            competencias.forEach(comp => {
+                const div = document.createElement('div');
+                div.className = 'competencia-item';
+                div.dataset.competenciaId = comp.id;
+                div.innerHTML = `
+                    <input type="checkbox" id="competencia_${comp.id}">
+                    <span>${comp.nombre.toUpperCase()}</span>
+                `;
+                div.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                    this.classList.toggle('selected', this.querySelector('input').checked);
+                    updateSelectedCompetencias();
+                });
+                competenciasList.appendChild(div);
+            });
+        }
+        
+        // Load temas
+        function loadTemas(competencias) {
+            temaSelect.innerHTML = '<option value="">-- Seleccionar tema --</option>';
+            
+            const temasMap = new Map();
+            competencias.forEach(comp => {
+                if (comp.temas) {
+                    comp.temas.forEach(tema => {
+                        if (!temasMap.has(tema.categoria)) {
+                            temasMap.set(tema.categoria, []);
+                        }
+                        if (!temasMap.get(tema.categoria).includes(tema.nombre)) {
+                            temasMap.get(tema.categoria).push(tema.nombre);
+                        }
+                    });
+                }
+            });
+            
+            temasMap.forEach((temas, categoria) => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = categoria;
+                temas.forEach(tema => {
+                    const option = document.createElement('option');
+                    option.value = tema;
+                    option.textContent = tema;
+                    optgroup.appendChild(option);
+                });
+                temaSelect.appendChild(optgroup);
+            });
+            
+            temaSelect.addEventListener('change', function() {
+                selectedTema = this.value;
+                updateSummary();
+            });
+        }
+
+        // Update selected componentes
+        function updateSelectedComponentes() {
+            selectedComponentes = [];
+            document.querySelectorAll('.componente-item input:checked').forEach(input => {
+                const text = input.parentElement.querySelector('span').textContent;
+                selectedComponentes.push(text);
+            });
+            updateSummary();
+        }
+        
+        // Update selected competencias
+        function updateSelectedCompetencias() {
+            selectedCompetencias = [];
+            const data = SABER11_ESTRUCTURA[currentSubject];
+            
+            document.querySelectorAll('.competencia-item input:checked').forEach(input => {
+                const id = input.parentElement.dataset.competenciaId;
+                const comp = data.competencias.find(c => c.id === id);
+                if (comp) {
+                    selectedCompetencias.push(comp);
+                }
+            });
+            
+            // Update afirmaciones
+            if (selectedCompetencias.length > 0) {
+                afirmacionesPlaceholder.style.display = 'none';
+                afirmacionesContainer.style.display = 'flex';
+                loadAfirmaciones();
+            } else {
+                afirmacionesPlaceholder.style.display = 'flex';
+                afirmacionesContainer.style.display = 'none';
+                selectedAfirmaciones = [];
+            }
+            
+            updateSummary();
+        }
+        
+        // Load afirmaciones for selected competencias
+        function loadAfirmaciones() {
+            afirmacionesContainer.innerHTML = '';
+            
+            selectedCompetencias.forEach(comp => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'afirmacion-group';
+                
+                let afirmacionesHTML = '';
+                comp.afirmaciones.forEach(af => {
+                    afirmacionesHTML += `
+                        <div class="afirmacion-item" data-afirmacion-id="${af.id}">
+                            <input type="checkbox" id="af_${af.id}">
+                            <span>${af.descripcion}</span>
+                        </div>
+                    `;
+                });
+                
+                groupDiv.innerHTML = `
+                    <div class="afirmacion-group-header">
+                        <i class="bi bi-bookmark-check"></i>
+                        <span>${comp.nombre}</span>
+                    </div>
+                    <div class="afirmacion-list">
+                        ${afirmacionesHTML}
+                    </div>
+                `;
+                
+                afirmacionesContainer.appendChild(groupDiv);
+            });
+            
+            // Add click events to afirmaciones
+            document.querySelectorAll('.afirmacion-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                    this.classList.toggle('selected', this.querySelector('input').checked);
+                    updateSelectedAfirmaciones();
+                });
+            });
+        }
+        
+        // Update selected afirmaciones
+        function updateSelectedAfirmaciones() {
+            selectedAfirmaciones = [];
+            document.querySelectorAll('.afirmacion-item input:checked').forEach(input => {
+                const text = input.parentElement.querySelector('span').textContent;
+                selectedAfirmaciones.push(text.substring(0, 50) + '...');
+            });
+            updateSummary();
+        }
+        
+        // Update summary
+        function updateSummary() {
+            const summaryContent = document.getElementById('summaryContent');
+            
+            if (selectedComponentes.length === 0 && selectedCompetencias.length === 0 && !selectedTema) {
+                summaryContent.innerHTML = '<p class="empty-summary">No hay selecciones aún</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            // Subject
+            const subjectName = SABER11_ESTRUCTURA[currentSubject].nombre;
+            html += `<div class="summary-item"><span class="summary-label">Materia:</span> ${subjectName}</div>`;
+            
+            // Componentes
+            if (selectedComponentes.length > 0) {
+                html += `<div class="summary-item"><span class="summary-label">Componentes:</span> ${selectedComponentes.join(', ')}</div>`;
+            }
+            
+            // Competencias
+            if (selectedCompetencias.length > 0) {
+                const compNames = selectedCompetencias.map(c => c.nombre).join(', ');
+                html += `<div class="summary-item"><span class="summary-label">Competencias:</span> ${compNames}</div>`;
+            }
+            
+            // Afirmaciones
+            if (selectedAfirmaciones.length > 0) {
+                html += `<div class="summary-item"><span class="summary-label">Afirmaciones:</span> ${selectedAfirmaciones.length} seleccionada(s)</div>`;
+            }
+            
+            // Tema
+            if (selectedTema) {
+                html += `<div class="summary-item"><span class="summary-label">Tema:</span> ${selectedTema}</div>`;
+            }
+            
+            summaryContent.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
