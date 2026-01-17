@@ -61,9 +61,9 @@ async function checkSuperAdminAccess(usuarioId) {
             
             // Mostrar botón de finanzas solo si es superusuario
             if (datosUsuario.rol === 'superusuario') {
-                const finanzasCard = document.getElementById('finanzasCard');
-                if (finanzasCard) {
-                    finanzasCard.style.display = 'block';
+                const btnFinanzas = document.getElementById('btnFinanzas');
+                if (btnFinanzas) {
+                    btnFinanzas.style.display = 'flex';
                 }
             }
         }
@@ -104,6 +104,7 @@ function mostrarFotoPerfil(urlFoto) {
         avatarDefault.style.display = 'none';
         avatarImage.src = urlFoto;
         avatarImage.style.display = 'block';
+        avatarImage.style.position = 'absolute';
     }
 }
 
@@ -124,13 +125,14 @@ function esperarFirebase() {
 // Update time display
 function updateTimeDisplay() {
     const now = new Date();
+    const hour = now.getHours();
     
-    // Format time
+    // Format time in 12-hour format
     const timeOptions = {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: true
     };
     const timeString = now.toLocaleTimeString('es-ES', timeOptions);
     
@@ -143,6 +145,28 @@ function updateTimeDisplay() {
     };
     const dateString = now.toLocaleDateString('es-ES', dateOptions);
     
+    // Update time icon based on hour
+    const timeIcon = document.getElementById('timeIcon');
+    if (timeIcon) {
+        // Remove all possible icon classes
+        timeIcon.className = '';
+        
+        // Add appropriate icon based on time of day
+        if (hour >= 6 && hour < 12) {
+            // Morning: sunrise
+            timeIcon.className = 'bi bi-sunrise-fill';
+        } else if (hour >= 12 && hour < 18) {
+            // Afternoon: sun
+            timeIcon.className = 'bi bi-sun-fill';
+        } else if (hour >= 18 && hour < 21) {
+            // Evening: sunset
+            timeIcon.className = 'bi bi-sunset-fill';
+        } else {
+            // Night: moon
+            timeIcon.className = 'bi bi-moon-stars-fill';
+        }
+    }
+    
     // Update display
     const timeElement = document.getElementById('currentTime');
     const dateElement = document.getElementById('currentDate');
@@ -151,44 +175,402 @@ function updateTimeDisplay() {
     if (dateElement) dateElement.textContent = dateString;
 }
 
+// Handle Desafios button click
+async function handleDesafiosClick() {
+    try {
+        // Esperar a que Firebase esté listo
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+
+        const db = window.firebaseDB;
+        
+        // Obtener todas las aulas
+        const aulasSnapshot = await db.collection('aulas').orderBy('nombre').get();
+        const aulas = [];
+        
+        aulasSnapshot.forEach(doc => {
+            aulas.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        if (aulas.length === 0) {
+            alert('No hay aulas disponibles. Por favor, crea un aula primero.');
+            return;
+        }
+
+        // Nombres de materias
+        const nombresMaterias = {
+            'matematicas': 'Matemáticas',
+            'lectura': 'Lectura Crítica',
+            'sociales': 'Ciencias Sociales',
+            'naturales': 'Ciencias Naturales',
+            'ingles': 'Inglés',
+            'anuncios': 'Anuncios'
+        };
+
+        // Crear opciones para el select de aulas
+        let aulasOptions = '<option value="">Selecciona un aula</option>';
+        aulas.forEach(aula => {
+            aulasOptions += `<option value="${aula.id}">${aula.nombre}</option>`;
+        });
+
+        // Mostrar modal con selector de aula y materia
+        const modalHTML = `
+            <div class="modal-overlay" id="aulaModal" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                backdrop-filter: blur(5px);
+            ">
+                <div style="
+                    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+                    border-radius: 24px;
+                    padding: 2.5rem;
+                    max-width: 550px;
+                    width: 90%;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+                    border: 2px solid rgba(156, 39, 176, 0.3);
+                ">
+                    <h2 style="
+                        color: white;
+                        font-size: 2rem;
+                        margin-bottom: 0.5rem;
+                        font-family: 'Montserrat', sans-serif;
+                        font-weight: 800;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                    ">
+                        <i class="bi bi-trophy-fill" style="color: #9c27b0; font-size: 2.2rem;"></i>
+                        Desafíos
+                    </h2>
+                    <p style="
+                        color: rgba(255, 255, 255, 0.6);
+                        margin-bottom: 2rem;
+                        font-family: 'Montserrat', sans-serif;
+                        font-size: 0.95rem;
+                    ">
+                        Selecciona el aula y la materia para comenzar
+                    </p>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="
+                            color: rgba(255, 255, 255, 0.9);
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 600;
+                            font-size: 0.9rem;
+                            display: block;
+                            margin-bottom: 0.5rem;
+                        ">
+                            <i class="bi bi-building" style="margin-right: 0.5rem;"></i>Aula
+                        </label>
+                        <div style="position: relative;">
+                            <select id="aulaSelect" style="
+                                width: 100%;
+                                padding: 1rem 1.25rem;
+                                padding-right: 3rem;
+                                border-radius: 14px;
+                                border: 2px solid rgba(156, 39, 176, 0.3);
+                                background: #000000;
+                                color: white;
+                                font-size: 1.05rem;
+                                font-family: 'Montserrat', sans-serif;
+                                font-weight: 500;
+                                cursor: pointer;
+                                transition: all 0.3s ease;
+                                outline: none;
+                                appearance: none;
+                                -webkit-appearance: none;
+                                -moz-appearance: none;
+                            ">
+                                ${aulasOptions}
+                            </select>
+                            <i class="bi bi-chevron-down" style="
+                                position: absolute;
+                                right: 1.25rem;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                color: #9c27b0;
+                                font-size: 1.2rem;
+                                pointer-events: none;
+                            "></i>
+                        </div>
+                    </div>
+                    
+                    <div id="materiaContainer" style="margin-bottom: 2rem; display: none;">
+                        <label style="
+                            color: rgba(255, 255, 255, 0.9);
+                            font-family: 'Montserrat', sans-serif;
+                            font-weight: 600;
+                            font-size: 0.9rem;
+                            display: block;
+                            margin-bottom: 0.5rem;
+                        ">
+                            <i class="bi bi-book" style="margin-right: 0.5rem;"></i>Materia
+                        </label>
+                        <div style="position: relative;">
+                            <select id="materiaSelect" style="
+                                width: 100%;
+                                padding: 1rem 1.25rem;
+                                padding-right: 3rem;
+                                border-radius: 14px;
+                                border: 2px solid rgba(156, 39, 176, 0.3);
+                                background: #000000;
+                                color: white;
+                                font-size: 1.05rem;
+                                font-family: 'Montserrat', sans-serif;
+                                font-weight: 500;
+                                cursor: pointer;
+                                transition: all 0.3s ease;
+                                outline: none;
+                                appearance: none;
+                                -webkit-appearance: none;
+                                -moz-appearance: none;
+                            ">
+                                <option value="">Selecciona una materia</option>
+                            </select>
+                            <i class="bi bi-chevron-down" style="
+                                position: absolute;
+                                right: 1.25rem;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                color: #9c27b0;
+                                font-size: 1.2rem;
+                                pointer-events: none;
+                            "></i>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="cancelAulaBtn" style="
+                            flex: 1;
+                            padding: 1.1rem;
+                            border-radius: 14px;
+                            border: 2px solid rgba(255, 255, 255, 0.15);
+                            background: rgba(255, 255, 255, 0.05);
+                            color: white;
+                            font-size: 1rem;
+                            font-weight: 700;
+                            cursor: pointer;
+                            font-family: 'Montserrat', sans-serif;
+                            transition: all 0.3s ease;
+                        ">
+                            Cancelar
+                        </button>
+                        <button id="confirmAulaBtn" style="
+                            flex: 1;
+                            padding: 1.1rem;
+                            border-radius: 14px;
+                            border: none;
+                            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+                            color: white;
+                            font-size: 1rem;
+                            font-weight: 700;
+                            cursor: pointer;
+                            font-family: 'Montserrat', sans-serif;
+                            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+                            transition: all 0.3s ease;
+                        ">
+                            Continuar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        const modal = document.getElementById('aulaModal');
+        const aulaSelect = document.getElementById('aulaSelect');
+        const materiaSelect = document.getElementById('materiaSelect');
+        const materiaContainer = document.getElementById('materiaContainer');
+        const cancelBtn = document.getElementById('cancelAulaBtn');
+        const confirmBtn = document.getElementById('confirmAulaBtn');
+
+        // Cuando se selecciona un aula, mostrar sus materias
+        aulaSelect.addEventListener('change', () => {
+            const selectedAulaId = aulaSelect.value;
+            if (selectedAulaId) {
+                const selectedAula = aulas.find(a => a.id === selectedAulaId);
+                const materias = selectedAula.materias || [];
+                
+                // Limpiar y llenar el select de materias
+                materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
+                materias.forEach(materiaId => {
+                    // Omitir la materia "anuncios"
+                    if (materiaId === 'anuncios') return;
+                    
+                    const nombreMateria = nombresMaterias[materiaId] || materiaId;
+                    materiaSelect.innerHTML += `<option value="${materiaId}">${nombreMateria}</option>`;
+                });
+                
+                materiaContainer.style.display = 'block';
+            } else {
+                materiaContainer.style.display = 'none';
+            }
+        });
+
+        // Estilos hover para los selects
+        aulaSelect.addEventListener('focus', () => {
+            aulaSelect.style.borderColor = '#9c27b0';
+            aulaSelect.style.boxShadow = '0 0 0 3px rgba(156, 39, 176, 0.2)';
+        });
+        aulaSelect.addEventListener('blur', () => {
+            aulaSelect.style.borderColor = 'rgba(156, 39, 176, 0.3)';
+            aulaSelect.style.boxShadow = 'none';
+        });
+        
+        materiaSelect.addEventListener('focus', () => {
+            materiaSelect.style.borderColor = '#9c27b0';
+            materiaSelect.style.boxShadow = '0 0 0 3px rgba(156, 39, 176, 0.2)';
+        });
+        materiaSelect.addEventListener('blur', () => {
+            materiaSelect.style.borderColor = 'rgba(156, 39, 176, 0.3)';
+            materiaSelect.style.boxShadow = 'none';
+        });
+
+        // Hover para botones
+        cancelBtn.addEventListener('mouseenter', () => {
+            cancelBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+            cancelBtn.style.transform = 'translateY(-2px)';
+        });
+        cancelBtn.addEventListener('mouseleave', () => {
+            cancelBtn.style.background = 'rgba(255, 255, 255, 0.05)';
+            cancelBtn.style.transform = 'translateY(0)';
+        });
+        
+        confirmBtn.addEventListener('mouseenter', () => {
+            confirmBtn.style.background = 'linear-gradient(135deg, #ba68c8, #8e24aa)';
+            confirmBtn.style.transform = 'translateY(-2px)';
+            confirmBtn.style.boxShadow = '0 8px 30px rgba(156, 39, 176, 0.6)';
+        });
+        confirmBtn.addEventListener('mouseleave', () => {
+            confirmBtn.style.background = 'linear-gradient(135deg, #9c27b0, #7b1fa2)';
+            confirmBtn.style.transform = 'translateY(0)';
+            confirmBtn.style.boxShadow = '0 6px 20px rgba(156, 39, 176, 0.4)';
+        });
+
+        // Cerrar modal
+        cancelBtn.addEventListener('click', () => {
+            modal.remove();
+        });
+
+        // Confirmar selección
+        confirmBtn.addEventListener('click', () => {
+            const selectedAulaId = aulaSelect.value;
+            const selectedMateriaId = materiaSelect.value;
+            
+            if (!selectedAulaId) {
+                alert('Por favor, selecciona un aula');
+                return;
+            }
+            
+            if (!selectedMateriaId) {
+                alert('Por favor, selecciona una materia');
+                return;
+            }
+
+            // Redirigir a Desafios.html con el aula y materia
+            window.location.href = `Desafios.html?aula=${selectedAulaId}&materia=${selectedMateriaId}`;
+        });
+
+        // Cerrar con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                modal.remove();
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al cargar aulas:', error);
+        alert('Error al cargar las aulas. Por favor, intenta de nuevo.');
+    }
+}
+
 // Setup event listeners
 function setupEventListeners() {
-    // Logout button en dropdown
-    const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
-    if (logoutBtnDropdown) {
-        logoutBtnDropdown.addEventListener('click', handleLogout);
+    // Logout button
+    const btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', handleLogout);
     }
     
-    // Dashboard cards
-    const dashboardCards = document.querySelectorAll('.dashboard-card');
+    // Profile button
+    const btnProfile = document.getElementById('btnProfile');
+    if (btnProfile) {
+        btnProfile.addEventListener('click', () => {
+            window.location.href = 'panelUsuario.html';
+        });
+    }
+    
+    // Home button
+    const btnHome = document.getElementById('btnHome');
+    if (btnHome) {
+        btnHome.addEventListener('click', () => {
+            window.location.href = '../index.html';
+        });
+    }
+    
+    // Finanzas button
+    const btnFinanzas = document.getElementById('btnFinanzas');
+    if (btnFinanzas) {
+        btnFinanzas.addEventListener('click', () => {
+            window.location.href = 'Finanzas.html';
+        });
+    }
+    
+    // Desafios button
+    const btnDesafios = document.getElementById('btnDesafios');
+    if (btnDesafios) {
+        btnDesafios.addEventListener('click', handleDesafiosClick);
+    }
+    
+    // Dashboard cards (nuevo diseño)
+    const dashboardCards = document.querySelectorAll('.card-modern');
     dashboardCards.forEach(card => {
         card.addEventListener('click', handleCardClick);
     });
-
-    // User menu dropdown
-    const userMenuBtn = document.getElementById('userMenuBtn');
-    const userDropdownMenu = document.getElementById('userDropdownMenu');
     
-    if (userMenuBtn && userDropdownMenu) {
-        userMenuBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            userDropdownMenu.classList.toggle('active');
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const sidebarPanel = document.getElementById('sidebarPanel');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    if (mobileMenuToggle && sidebarPanel && sidebarOverlay) {
+        // Show mobile menu toggle on small screens
+        if (window.innerWidth <= 768) {
+            mobileMenuToggle.style.display = 'block';
+        }
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            sidebarPanel.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
         });
-
-        // Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', function(e) {
-            if (!userMenuBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
-                userDropdownMenu.classList.remove('active');
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebarPanel.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                mobileMenuToggle.style.display = 'block';
+            } else {
+                mobileMenuToggle.style.display = 'none';
+                sidebarPanel.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
             }
-        });
-    }
-
-    // Click en avatar para ir a configuración
-    const userAvatar = document.getElementById('userAvatarContainer');
-    if (userAvatar) {
-        userAvatar.addEventListener('click', function(e) {
-            e.stopPropagation();
-            window.location.href = 'panelUsuario.html';
         });
     }
 }
@@ -408,11 +790,14 @@ async function handleLogout() {
 
 // Handle card clicks
 function handleCardClick(event) {
-    const card = event.currentTarget;
-    const section = card.getAttribute('data-section');
+    const element = event.currentTarget;
+    const section = element.getAttribute('data-section');
+    
+    // Skip if dashboard
+    if (section === 'dashboard') return;
     
     // Add loading effect
-    card.classList.add('loading');
+    element.classList.add('loading');
     
     // Navigate based on section
     setTimeout(() => {
@@ -453,46 +838,16 @@ function handleCardClick(event) {
             default:
                 console.log('Sección no encontrada:', section);
         }
-    }, 500);
+    }, 300);
 }
-
-// Add hover effects
-document.addEventListener('DOMContentLoaded', function() {
-    const cards = document.querySelectorAll('.dashboard-card');
-    
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-10px) scale(1.02)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
-});
 
 // Keyboard navigation
 document.addEventListener('keydown', function(event) {
     // ESC key to logout
     if (event.key === 'Escape') {
-        const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
-        if (logoutBtnDropdown) {
-            logoutBtnDropdown.click();
-        }
-    }
-    
-    // Number keys for quick navigation
-    const keyMap = {
-        '1': 'usuarios',
-        '2': 'pruebas',
-        '3': 'simulacros',
-        '4': 'reportes'
-    };
-    
-    if (keyMap[event.key]) {
-        const card = document.querySelector(`[data-section="${keyMap[event.key]}"]`);
-        if (card) {
-            card.click();
+        const btnLogout = document.getElementById('btnLogout');
+        if (btnLogout) {
+            btnLogout.click();
         }
     }
 });
