@@ -1087,7 +1087,7 @@ function createSaber11SelectorsHTML(question, index) {
                         <label><i class="bi bi-book"></i> Temas Asociados:</label>
                         <div class="temas-por-categoria">
                             ${Object.keys(temasPorCategoria).map(categoria => `
-                                <div class="categoria-section">
+                                <div class="categoria-section ${currentEditingSubject}">
                                     <div class="categoria-header">
                                         <i class="bi bi-folder2-open"></i>
                                         <span>${categoria}</span>

@@ -89,9 +89,9 @@
             </div>
 
             <div class="control-actions">
-                <button id="btnGenerarReporte" class="btn-primary" disabled>
-                    <i class="bi bi-file-earmark-pdf"></i>
-                    Generar Reporte
+                <button id="btnGenerarTodos" class="btn-primary" disabled>
+                    <i class="bi bi-file-earmark-plus"></i>
+                    Generar Reportes para Todos
                 </button>
                 <button id="btnDescargarPDF" class="btn-secondary" disabled>
                     <i class="bi bi-download"></i>
@@ -103,11 +103,16 @@
                 </button>
             </div>
 
-            <div class="info-panel">
-                <h3><i class="bi bi-info-circle"></i> Información</h3>
-                <div id="infoEstudiante" class="info-content">
-                    <p>Seleccione una prueba y un estudiante para generar el reporte.</p>
-                </div>
+            <div class="control-section danger-zone">
+                <h3><i class="bi bi-exclamation-triangle"></i> Zona de Peligro</h3>
+                <button id="btnEliminarReporteActual" class="btn-danger" disabled>
+                    <i class="bi bi-trash"></i>
+                    Eliminar Reporte Actual
+                </button>
+                <button id="btnEliminarReportesPrueba" class="btn-danger" disabled>
+                    <i class="bi bi-trash3"></i>
+                    Eliminar Todos los Reportes de esta Prueba
+                </button>
             </div>
         </aside>
 

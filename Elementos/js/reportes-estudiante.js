@@ -1,6 +1,7 @@
 // Reportes Estudiante JavaScript
 let graficoBarras;
 let reporteActual = null;
+let todosLosReportes = []; // Almacenar todos los reportes
 
 // Colores para cada materia
 const coloresMateria = {
@@ -46,6 +47,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Configurar botón de descarga
     document.getElementById('btnDescargarPDF').addEventListener('click', descargarPDF);
+
+    // Configurar filtro de pruebas
+    document.getElementById('filtroPrueba').addEventListener('change', filtrarReportes);
 
     // Inicializar foto de perfil y menú desplegable
     if (typeof inicializarPerfilCompartido === 'function') {
@@ -195,37 +199,28 @@ async function cargarReportesEstudiante() {
             return;
         }
 
-        let reportesHTML = '';
+        // Almacenar todos los reportes
+        todosLosReportes = [];
+        const pruebasUnicas = new Set();
 
         reportesSnapshot.forEach(doc => {
-            const reporte = doc.data();
-            const fechaGeneracion = reporte.fechaGeneracion?.toDate?.()?.toLocaleDateString() || 'Sin fecha';
-            const fechaPrueba = reporte.fechaPrueba?.toDate?.()?.toLocaleDateString() || 'Sin fecha';
-
-            reportesHTML += `
-                <div class="reporte-item" data-reporte-id="${doc.id}">
-                    <div class="reporte-header">
-                        <h4><i class="bi bi-file-earmark-pdf"></i> ${reporte.pruebaNombre}</h4>
-                        <span class="reporte-puntaje">${reporte.puntajeGlobal}</span>
-                    </div>
-                    <div class="reporte-info">
-                        <p><strong>Fecha de Prueba:</strong> ${fechaPrueba}</p>
-                        <p><strong>Generado:</strong> ${fechaGeneracion}</p>
-                        <p><strong>Percentil:</strong> ${reporte.percentilGeneral}%</p>
-                    </div>
-                    <div class="reporte-actions">
-                        <button class="btn-ver" onclick="verReporte('${doc.id}')">
-                            <i class="bi bi-eye"></i> Ver
-                        </button>
-                        <button class="btn-descargar" onclick="descargarReporte('${doc.id}')">
-                            <i class="bi bi-download"></i> Descargar
-                        </button>
-                    </div>
-                </div>
-            `;
+            const reporte = { id: doc.id, ...doc.data() };
+            todosLosReportes.push(reporte);
+            pruebasUnicas.add(reporte.pruebaNombre);
         });
 
-        reportesLista.innerHTML = reportesHTML;
+        // Llenar el filtro de pruebas
+        const filtroPrueba = document.getElementById('filtroPrueba');
+        filtroPrueba.innerHTML = '<option value="">Todas las pruebas</option>';
+        pruebasUnicas.forEach(prueba => {
+            const option = document.createElement('option');
+            option.value = prueba;
+            option.textContent = prueba;
+            filtroPrueba.appendChild(option);
+        });
+
+        // Mostrar todos los reportes inicialmente
+        mostrarReportes(todosLosReportes);
 
     } catch (error) {
         console.error('Error cargando reportes:', error);
@@ -236,6 +231,67 @@ async function cargarReportesEstudiante() {
                 <small>${error.message}</small>
             </div>
         `;
+    }
+}
+
+// Función para mostrar reportes en la lista
+function mostrarReportes(reportes) {
+    const reportesLista = document.getElementById('reportesLista');
+
+    if (reportes.length === 0) {
+        reportesLista.innerHTML = `
+            <div class="no-reportes">
+                <i class="bi bi-search"></i>
+                <p>No se encontraron reportes</p>
+                <small>Intenta con otro filtro</small>
+            </div>
+        `;
+        return;
+    }
+
+    let reportesHTML = '';
+
+    reportes.forEach(reporte => {
+        const fechaGeneracion = reporte.fechaGeneracion?.toDate?.()?.toLocaleDateString() || 'Sin fecha';
+        const fechaPrueba = reporte.fechaPrueba?.toDate?.()?.toLocaleDateString() || 'Sin fecha';
+
+        reportesHTML += `
+            <div class="reporte-item" data-reporte-id="${reporte.id}">
+                <div class="reporte-header">
+                    <h4><i class="bi bi-file-earmark-pdf"></i> ${reporte.pruebaNombre}</h4>
+                    <span class="reporte-puntaje">${reporte.puntajeGlobal}</span>
+                </div>
+                <div class="reporte-info">
+                    <p><strong>Fecha de Prueba:</strong> ${fechaPrueba}</p>
+                    <p><strong>Generado:</strong> ${fechaGeneracion}</p>
+                    <p><strong>Percentil:</strong> ${reporte.percentilGeneral}%</p>
+                </div>
+                <div class="reporte-actions">
+                    <button class="btn-ver" onclick="verReporte('${reporte.id}')">
+                        <i class="bi bi-eye"></i> Ver
+                    </button>
+                    <button class="btn-descargar" onclick="descargarReporte('${reporte.id}')">
+                        <i class="bi bi-download"></i> Descargar
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    reportesLista.innerHTML = reportesHTML;
+}
+
+// Función para filtrar reportes
+function filtrarReportes() {
+    const filtro = document.getElementById('filtroPrueba').value;
+
+    if (!filtro) {
+        // Mostrar todos los reportes
+        mostrarReportes(todosLosReportes);
+    } else {
+        // Filtrar por prueba seleccionada
+        const reportesFiltrados = todosLosReportes.filter(reporte => reporte.pruebaNombre === filtro);
+        mostrarReportes(reportesFiltrados);
     }
 }
 
@@ -254,9 +310,6 @@ async function verReporte(reporteId) {
 
         // Llenar datos del estudiante
         llenarDatosReporte(reporte);
-
-        // Actualizar información del panel
-        actualizarInfoPanel(reporte);
 
         // Habilitar botón de descarga
         document.getElementById('btnDescargarPDF').disabled = false;
@@ -305,6 +358,11 @@ function llenarDatosReporte(reporte) {
 
     // Puntaje global
     document.getElementById('puntajeGlobal').textContent = reporte.puntajeGlobal;
+
+    // Campo SG11
+    if (reporte.datosEstudiante.sg11Numero) {
+        document.getElementById('sg11Numero').value = reporte.datosEstudiante.sg11Numero;
+    }
 
     // Percentil general
     document.getElementById('percentilGeneral').textContent = reporte.percentilGeneral;
@@ -472,29 +530,6 @@ function actualizarNivelDesempeno(input, esIngles = false) {
             celdaNivel.textContent = nivel;
         }
     }
-}
-
-// Actualizar información del panel
-function actualizarInfoPanel(reporte) {
-    const infoPanel = document.getElementById('infoReporte');
-
-    let infoHTML = `
-        <h4>Información del Reporte</h4>
-        <p><strong>Prueba:</strong> ${reporte.pruebaNombre}</p>
-        <p><strong>Puntaje Global:</strong> ${reporte.puntajeGlobal}</p>
-        <p><strong>Percentil:</strong> ${reporte.percentilGeneral}%</p>
-        <p><strong>Fecha de Prueba:</strong> ${reporte.fechaPrueba?.toDate?.()?.toLocaleDateString() || 'Sin fecha'}</p>
-        <p><strong>Generado:</strong> ${reporte.fechaGeneracion?.toDate?.()?.toLocaleDateString() || 'Sin fecha'}</p>
-        
-        <h5>Puntajes por Materia:</h5>
-    `;
-
-    Object.keys(reporte.puntajes).forEach(materia => {
-        const datos = reporte.puntajes[materia];
-        infoHTML += `<p><strong>${materia}:</strong> ${datos.puntaje}% (${datos.correctas}/${datos.total})</p>`;
-    });
-
-    infoPanel.innerHTML = infoHTML;
 }
 
 // Descargar reporte específico

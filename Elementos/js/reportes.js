@@ -281,84 +281,535 @@ function validarSeccionesEstudiante() {
     return true;
 }
 
-// Función para mostrar información del estudiante seleccionado (actualizada)
+// Función para mostrar información del estudiante seleccionado y generar reporte automáticamente
 async function mostrarInfoEstudiante() {
     const pruebaId = document.getElementById('selectorPrueba').value;
     const estudianteId = document.getElementById('selectorEstudiante').value;
-    const infoPanel = document.getElementById('infoEstudiante');
 
     if (!pruebaId || !estudianteId) {
-        infoPanel.innerHTML = '<p>Seleccione una prueba y un estudiante para generar el reporte.</p>';
-        document.getElementById('btnGenerarReporte').disabled = true;
+        document.getElementById('btnDescargarPDF').disabled = true;
         return;
+    }
+
+    // Mostrar overlay de carga
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
     }
 
     try {
         const db = window.firebaseDB;
 
-        // Cargar información completa del estudiante
-        const estudianteSnapshot = await db.collection('usuarios')
-            .where('numeroDocumento', '==', estudianteId)
-            .get();
-
-        let datosEstudiante = null;
-        if (!estudianteSnapshot.empty) {
-            datosEstudiante = estudianteSnapshot.docs[0].data();
-        } else {
-            const estudianteSnapshot2 = await db.collection('usuarios')
-                .where('numeroIdentidad', '==', estudianteId)
-                .get();
-            if (!estudianteSnapshot2.empty) {
-                datosEstudiante = estudianteSnapshot2.docs[0].data();
-            }
-        }
-
-        const respuestasSnapshot = await db.collection('respuestas')
-            .where('pruebaId', '==', pruebaId)
-            .where('estudianteId', '==', estudianteId)
-            .get();
-
-        let infoHTML = '<h4>Información del Estudiante</h4>';
-        let bloques = [];
-
-        if (datosEstudiante) {
-            infoHTML += `<p><strong>Nombre:</strong> ${datosEstudiante.nombre || 'N/A'}</p>`;
-            infoHTML += `<p><strong>ID:</strong> ${estudianteId}</p>`;
-            infoHTML += `<p><strong>Teléfono:</strong> ${datosEstudiante.telefono || 'N/A'}</p>`;
-            infoHTML += `<p><strong>Departamento:</strong> ${datosEstudiante.departamento || 'N/A'}</p>`;
-            infoHTML += `<p><strong>Grado:</strong> ${datosEstudiante.grado || 'N/A'}</p>`;
-        }
-
-        respuestasSnapshot.forEach(doc => {
-            const respuesta = doc.data();
-            bloques.push({
-                numero: respuesta.bloque,
-                fecha: respuesta.fechaEnvio?.toDate?.()?.toLocaleDateString() || 'Sin fecha',
-                estadisticas: respuesta.estadisticas
+        // Verificar si ya existe un reporte generado
+        const reporteExistente = await buscarReporteExistente(pruebaId, estudianteId);
+        
+        if (reporteExistente) {
+            // Cargar el reporte existente
+            await cargarReporteExistente(reporteExistente);
+            
+            // Mostrar información en ventana emergente
+            Swal.fire({
+                icon: 'info',
+                title: 'Reporte Existente',
+                html: `
+                    <p><strong>Estudiante:</strong> ${reporteExistente.estudianteNombre}</p>
+                    <p><strong>Generado:</strong> ${reporteExistente.fechaGeneracion?.toDate?.()?.toLocaleDateString() || 'N/A'}</p>
+                    <p><strong>Puntaje Global:</strong> ${reporteExistente.puntajeGlobal}</p>
+                    ${reporteExistente.datosEstudiante?.sg11Numero ? `<p><strong>Código SG11:</strong> SG11-${reporteExistente.datosEstudiante.sg11Numero}</p>` : ''}
+                `,
+                confirmButtonColor: '#667eea',
+                confirmButtonText: 'Entendido'
             });
-        });
-
-        bloques.sort((a, b) => a.numero - b.numero);
-        infoHTML += `<p><strong>Bloques completados:</strong> ${bloques.map(b => b.numero).join(', ')}</p>`;
-
-        bloques.forEach(bloque => {
-            infoHTML += `<div class="bloque-info">`;
-            infoHTML += `<h5>Bloque ${bloque.numero} (${bloque.fecha})</h5>`;
-            if (bloque.estadisticas && bloque.estadisticas.estadisticasPorMateria) {
-                Object.keys(bloque.estadisticas.estadisticasPorMateria).forEach(materia => {
-                    const stats = bloque.estadisticas.estadisticasPorMateria[materia];
-                    infoHTML += `<p>${materia}: ${stats.correctas}/${stats.total} (${stats.porcentaje}%)</p>`;
-                });
+        } else {
+            // Pedir código SG11 antes de generar
+            const { value: sg11Codigo } = await Swal.fire({
+                title: 'Código SG11',
+                html: `
+                    <p style="margin-bottom: 1rem;">Ingrese el código SG11 para este estudiante:</p>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <span style="font-weight: bold; font-size: 1.2rem;">SG11-</span>
+                        <input id="swal-sg11-input" class="swal2-input" maxlength="4" placeholder="####" style="width: 120px; text-align: center; font-size: 1.2rem; margin: 0;">
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#667eea',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Generar Reporte',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const input = document.getElementById('swal-sg11-input');
+                    const valor = input.value.trim();
+                    if (!valor) {
+                        Swal.showValidationMessage('Debe ingresar un código SG11');
+                        return false;
+                    }
+                    return valor;
+                },
+                didOpen: () => {
+                    document.getElementById('swal-sg11-input').focus();
+                }
+            });
+            
+            if (!sg11Codigo) {
+                // Usuario canceló
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
+                return;
             }
-            infoHTML += `</div>`;
-        });
+            
+            // Generar nuevo reporte con el código SG11
+            await generarReporteAutomatico(pruebaId, estudianteId, sg11Codigo);
+            
+            // Mostrar confirmación
+            Swal.fire({
+                icon: 'success',
+                title: 'Reporte Generado',
+                html: `
+                    <p>El reporte se generó exitosamente</p>
+                    <p><strong>Código SG11:</strong> SG11-${sg11Codigo}</p>
+                `,
+                confirmButtonColor: '#667eea',
+                timer: 3000
+            });
+        }
 
-        infoPanel.innerHTML = infoHTML;
-        document.getElementById('btnGenerarReporte').disabled = false;
+        document.getElementById('btnDescargarPDF').disabled = false;
+        document.getElementById('btnGuardarCambios').disabled = false;
+        document.getElementById('btnEliminarReporteActual').disabled = false;
 
     } catch (error) {
         console.error('Error cargando información del estudiante:', error);
-        infoPanel.innerHTML = '<p>Error cargando información del estudiante.</p>';
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo cargar la información del estudiante'
+        });
+    } finally {
+        // Ocultar overlay de carga
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+    }
+}
+
+// Función para buscar un reporte existente
+async function buscarReporteExistente(pruebaId, estudianteId) {
+    try {
+        const db = window.firebaseDB;
+        const reportesSnapshot = await db.collection('reportes')
+            .where('pruebaId', '==', pruebaId)
+            .where('estudianteId', '==', estudianteId)
+            .orderBy('fechaGeneracion', 'desc')
+            .limit(1)
+            .get();
+        
+        if (!reportesSnapshot.empty) {
+            return reportesSnapshot.docs[0].data();
+        }
+        return null;
+    } catch (error) {
+        console.error('Error buscando reporte existente:', error);
+        return null;
+    }
+}
+
+// Función para cargar un reporte existente
+async function cargarReporteExistente(reporteData) {
+    try {
+        // Llenar datos del estudiante
+        const datosEstudiante = reporteData.datosEstudiante;
+        document.getElementById('nombreEstudiante').value = datosEstudiante.nombre?.toUpperCase() || 'USUARIO';
+        document.getElementById('identificacionEstudiante').value = datosEstudiante.numeroDocumento || '';
+        document.getElementById('telefonoEstudiante').value = datosEstudiante.telefono || '';
+        document.getElementById('municipioEstudiante').value = datosEstudiante.departamento || '';
+        document.getElementById('tipoDocumento').value = datosEstudiante.tipoDocumento || 'CC';
+        document.getElementById('calEstudiante').value = datosEstudiante.grado || 'ESTUDIANTE';
+        
+        // Llenar fecha
+        if (reporteData.fechaPrueba) {
+            const fecha = reporteData.fechaPrueba.toDate();
+            document.getElementById('fechaAplicacion').value = fecha.toISOString().split('T')[0];
+        }
+        
+        // Llenar campo SG11
+        if (datosEstudiante.sg11Numero) {
+            document.getElementById('sg11Numero').value = datosEstudiante.sg11Numero;
+        }
+        
+        // Llenar puntajes
+        const puntajes = reporteData.puntajes;
+        Object.keys(puntajes).forEach(materia => {
+            const codigoMateria = obtenerCodigoMateria(materia);
+            const input = document.querySelector(`.puntaje-input[data-materia="${codigoMateria}"]`);
+            if (input && puntajes[materia]) {
+                input.value = puntajes[materia].puntaje;
+                actualizarRangoActivo(input);
+                actualizarNivelVisual(input);
+                actualizarPercentilYNivel(input);
+            }
+        });
+        
+        // Actualizar gráfico y puntaje global
+        actualizarGrafico();
+        document.getElementById('puntajeGlobal').textContent = reporteData.puntajeGlobal;
+        document.getElementById('percentilGeneral').textContent = reporteData.percentilGeneral || 0;
+        
+    } catch (error) {
+        console.error('Error cargando reporte existente:', error);
+        throw error;
+    }
+}
+
+// Función para generar reportes para todos los estudiantes de una prueba
+async function generarReportesParaTodos() {
+    const pruebaId = document.getElementById('selectorPrueba').value;
+    
+    if (!pruebaId) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Seleccione una prueba',
+            text: 'Debe seleccionar una prueba primero'
+        });
+        return;
+    }
+    
+    // Pedir el código SG11 antes de generar
+    const { value: sg11Codigo } = await Swal.fire({
+        title: 'Código SG11',
+        html: `
+            <p style="margin-bottom: 1rem;">Ingrese el código SG11 para esta prueba:</p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <span style="font-weight: bold; font-size: 1.2rem;">SG11-</span>
+                <input id="swal-sg11-input" class="swal2-input" maxlength="4" placeholder="####" style="width: 120px; text-align: center; font-size: 1.2rem; margin: 0;">
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">Este código se aplicará a todos los reportes generados</p>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#667eea',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Continuar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            const input = document.getElementById('swal-sg11-input');
+            const valor = input.value.trim();
+            if (!valor) {
+                Swal.showValidationMessage('Debe ingresar un código SG11');
+                return false;
+            }
+            return valor;
+        },
+        didOpen: () => {
+            // Enfocar el input al abrir
+            document.getElementById('swal-sg11-input').focus();
+        }
+    });
+    
+    if (!sg11Codigo) return;
+    
+    // Confirmar acción
+    const confirmacion = await Swal.fire({
+        title: '¿Generar reportes para todos?',
+        html: `
+            <p>Se generarán reportes para todos los estudiantes que tomaron esta prueba</p>
+            <p style="margin-top: 1rem;"><strong>Código SG11:</strong> SG11-${sg11Codigo}</p>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#667eea',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, generar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (!confirmacion.isConfirmed) return;
+    
+    try {
+        const db = window.firebaseDB;
+        
+        // Obtener todos los estudiantes que tomaron la prueba
+        const respuestasSnapshot = await db.collection('respuestas')
+            .where('pruebaId', '==', pruebaId)
+            .get();
+        
+        const estudiantesMap = new Map();
+        respuestasSnapshot.forEach(doc => {
+            const respuesta = doc.data();
+            estudiantesMap.set(respuesta.estudianteId, respuesta.estudianteNombre);
+        });
+        
+        const totalEstudiantes = estudiantesMap.size;
+        
+        if (totalEstudiantes === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sin estudiantes',
+                text: 'No hay estudiantes que hayan tomado esta prueba'
+            });
+            return;
+        }
+        
+        // Mostrar ventana de progreso
+        let progresoSwal;
+        Swal.fire({
+            title: 'Generando Reportes',
+            html: `
+                <div style="margin: 20px 0;">
+                    <div style="background: #f0f0f0; border-radius: 10px; overflow: hidden; height: 30px;">
+                        <div id="swal-progress-bar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                    <p id="swal-progress-text" style="margin-top: 15px; font-size: 1.1rem;">0 de ${totalEstudiantes} reportes generados</p>
+                </div>
+            `,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        let procesados = 0;
+        let exitosos = 0;
+        let errores = 0;
+        
+        // Procesar cada estudiante
+        for (const [estudianteId, estudianteNombre] of estudiantesMap) {
+            try {
+                // Verificar si ya existe el reporte
+                const reporteExistente = await buscarReporteExistente(pruebaId, estudianteId);
+                
+                if (!reporteExistente) {
+                    // Generar nuevo reporte con el código SG11
+                    await generarReporteAutomatico(pruebaId, estudianteId, sg11Codigo);
+                    exitosos++;
+                } else {
+                    console.log(`Reporte ya existe para ${estudianteNombre}`);
+                    exitosos++;
+                }
+                
+            } catch (error) {
+                console.error(`Error generando reporte para ${estudianteNombre}:`, error);
+                errores++;
+            }
+            
+            procesados++;
+            const porcentaje = Math.round((procesados / totalEstudiantes) * 100);
+            
+            // Actualizar barra de progreso en la ventana emergente
+            const progressBar = document.getElementById('swal-progress-bar');
+            const progressText = document.getElementById('swal-progress-text');
+            if (progressBar) progressBar.style.width = `${porcentaje}%`;
+            if (progressText) progressText.textContent = `${procesados} de ${totalEstudiantes} reportes procesados`;
+        }
+        
+        // Cerrar ventana de progreso y mostrar resultado
+        Swal.close();
+        
+        // Mostrar resultado
+        Swal.fire({
+            icon: exitosos > 0 ? 'success' : 'error',
+            title: 'Proceso completado',
+            html: `
+                <p><strong>Total procesados:</strong> ${procesados}</p>
+                <p><strong>Exitosos:</strong> ${exitosos}</p>
+                <p><strong>Errores:</strong> ${errores}</p>
+            `
+        });
+        
+        // Recargar lista de estudiantes
+        await cargarEstudiantesPorPrueba();
+        
+    } catch (error) {
+        console.error('Error generando reportes masivos:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al generar los reportes'
+        });
+    }
+}
+
+// Función para eliminar el reporte actual (del estudiante seleccionado)
+async function eliminarReporteActual() {
+    const pruebaId = document.getElementById('selectorPrueba').value;
+    const estudianteId = document.getElementById('selectorEstudiante').value;
+    
+    if (!pruebaId || !estudianteId) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Seleccione un reporte',
+            text: 'Debe seleccionar una prueba y un estudiante primero'
+        });
+        return;
+    }
+    
+    // Confirmar eliminación
+    const confirmacion = await Swal.fire({
+        title: '¿Eliminar este reporte?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (!confirmacion.isConfirmed) return;
+    
+    try {
+        const db = window.firebaseDB;
+        
+        // Buscar el reporte
+        const reportesSnapshot = await db.collection('reportes')
+            .where('pruebaId', '==', pruebaId)
+            .where('estudianteId', '==', estudianteId)
+            .get();
+        
+        if (reportesSnapshot.empty) {
+            Swal.fire({
+                icon: 'info',
+                title: 'No hay reporte',
+                text: 'No se encontró un reporte para este estudiante'
+            });
+            return;
+        }
+        
+        // Eliminar todos los reportes encontrados
+        const batch = db.batch();
+        reportesSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Reporte eliminado',
+            text: 'El reporte se eliminó correctamente',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        
+        // Limpiar el formulario
+        limpiarReporte();
+        
+    } catch (error) {
+        console.error('Error eliminando reporte:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo eliminar el reporte'
+        });
+    }
+}
+
+// Función para eliminar todos los reportes de una prueba
+async function eliminarReportesPrueba() {
+    const pruebaId = document.getElementById('selectorPrueba').value;
+    
+    if (!pruebaId) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Seleccione una prueba',
+            text: 'Debe seleccionar una prueba primero'
+        });
+        return;
+    }
+    
+    try {
+        const db = window.firebaseDB;
+        
+        // Contar reportes
+        const reportesSnapshot = await db.collection('reportes')
+            .where('pruebaId', '==', pruebaId)
+            .get();
+        
+        const totalReportes = reportesSnapshot.size;
+        
+        if (totalReportes === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sin reportes',
+                text: 'No hay reportes para esta prueba'
+            });
+            return;
+        }
+        
+        // Confirmar eliminación
+        const confirmacion = await Swal.fire({
+            title: '¿Eliminar todos los reportes?',
+            html: `
+                <p>Se eliminarán <strong>${totalReportes}</strong> reportes de esta prueba.</p>
+                <p style="color: #dc3545; font-weight: 600;">Esta acción no se puede deshacer.</p>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar todos',
+            cancelButtonText: 'Cancelar',
+            input: 'checkbox',
+            inputPlaceholder: 'Confirmo que quiero eliminar todos los reportes',
+            inputValidator: (result) => {
+                return !result && 'Debes confirmar la eliminación'
+            }
+        });
+        
+        if (!confirmacion.isConfirmed) return;
+        
+        // Mostrar progreso con SweetAlert2
+        Swal.fire({
+            title: 'Eliminando reportes...',
+            html: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Eliminar en lotes de 500 (límite de Firestore)
+        const batchSize = 500;
+        let eliminados = 0;
+        
+        while (eliminados < totalReportes) {
+            const batch = db.batch();
+            const snapshot = await db.collection('reportes')
+                .where('pruebaId', '==', pruebaId)
+                .limit(batchSize)
+                .get();
+            
+            snapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            
+            await batch.commit();
+            eliminados += snapshot.size;
+            
+            // Actualizar mensaje de progreso
+            Swal.update({
+                html: `Eliminados ${eliminados} de ${totalReportes} reportes...`
+            });
+        }
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Reportes eliminados',
+            text: `Se eliminaron ${eliminados} reportes correctamente`
+        });
+        
+        // Limpiar el formulario
+        limpiarReporte();
+        
+    } catch (error) {
+        console.error('Error eliminando reportes:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al eliminar los reportes'
+        });
     }
 }
 
@@ -464,10 +915,12 @@ async function cargarPruebas() {
 async function cargarEstudiantesPorPrueba() {
     const pruebaId = document.getElementById('selectorPrueba').value;
     const selectorEstudiante = document.getElementById('selectorEstudiante');
+    const btnGenerarTodos = document.getElementById('btnGenerarTodos');
 
     if (!pruebaId) {
         selectorEstudiante.innerHTML = '<option value="">Primero seleccione una prueba</option>';
         selectorEstudiante.disabled = true;
+        btnGenerarTodos.disabled = true;
         return;
     }
 
@@ -505,24 +958,25 @@ async function cargarEstudiantesPorPrueba() {
         });
 
         selectorEstudiante.disabled = false;
+        btnGenerarTodos.disabled = estudiantesMap.size === 0;
+        
+        // Habilitar botón de eliminar reportes de prueba si hay estudiantes
+        const btnEliminarReportesPrueba = document.getElementById('btnEliminarReportesPrueba');
+        if (btnEliminarReportesPrueba) {
+            btnEliminarReportesPrueba.disabled = estudiantesMap.size === 0;
+        }
+        
         selectorEstudiante.addEventListener('change', mostrarInfoEstudiante);
 
     } catch (error) {
         console.error('Error cargando estudiantes:', error);
         selectorEstudiante.innerHTML = '<option value="">Error cargando estudiantes</option>';
+        btnGenerarTodos.disabled = true;
     }
 }
 
-// Función para generar el reporte completo
-async function generarReporte() {
-    const pruebaId = document.getElementById('selectorPrueba').value;
-    const estudianteId = document.getElementById('selectorEstudiante').value;
-
-    if (!pruebaId || !estudianteId) {
-        alert('Seleccione una prueba y un estudiante');
-        return;
-    }
-
+// Función para generar el reporte automáticamente (sin botón)
+async function generarReporteAutomatico(pruebaId, estudianteId, sg11Codigo = null) {
     try {
         const db = window.firebaseDB;
 
@@ -615,7 +1069,7 @@ async function generarReporte() {
         });
 
         // Llenar el formulario con los datos completos del estudiante
-        llenarDatosEstudianteCompleto(datosEstudiante, puntajesPorMateria, pruebaData.fechaCreacion?.toDate());
+        llenarDatosEstudianteCompleto(datosEstudiante, puntajesPorMateria, pruebaData.fechaCreacion?.toDate(), sg11Codigo);
 
         // Habilitar botón de descarga
         document.getElementById('btnDescargarPDF').disabled = false;
@@ -623,12 +1077,29 @@ async function generarReporte() {
         // Guardar el reporte en la base de datos
         await guardarReporteEnBD(pruebaId, estudianteId, datosEstudiante, puntajesPorMateria, pruebaData);
 
-        alert('Reporte generado exitosamente');
+        console.log('Reporte generado automáticamente');
 
     } catch (error) {
         console.error('Error generando reporte:', error);
-        alert('Error generando el reporte: ' + error.message);
+        throw error;
     }
+}
+
+// Función para generar el reporte manualmente (mantener por compatibilidad)
+async function generarReporte() {
+    const pruebaId = document.getElementById('selectorPrueba').value;
+    const estudianteId = document.getElementById('selectorEstudiante').value;
+
+    if (!pruebaId || !estudianteId) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Datos incompletos',
+            text: 'Seleccione una prueba y un estudiante'
+        });
+        return;
+    }
+
+    await generarReporteAutomatico(pruebaId, estudianteId);
 }
 
 // Función para guardar el reporte generado en la base de datos
@@ -642,6 +1113,9 @@ async function guardarReporteEnBD(pruebaId, estudianteId, datosEstudiante, punta
         const puntajesPonderados = puntajes.map((puntaje, index) => puntaje * ponderaciones[index]);
         const sumaPonderada = puntajesPonderados.reduce((a, b) => a + b, 0);
         const puntajeGlobal = Math.round((sumaPonderada / 13) * 5);
+        
+        // Obtener el valor del campo SG11
+        const sg11Numero = document.getElementById('sg11Numero')?.value || '';
         
         // Preparar datos del reporte
         const reporteData = {
@@ -657,7 +1131,8 @@ async function guardarReporteEnBD(pruebaId, estudianteId, datosEstudiante, punta
                 tipoDocumento: datosEstudiante.tipoDocumento || 'CC',
                 telefono: datosEstudiante.telefono || '',
                 departamento: datosEstudiante.departamento || '',
-                grado: datosEstudiante.grado || 'ESTUDIANTE'
+                grado: datosEstudiante.grado || 'ESTUDIANTE',
+                sg11Numero: sg11Numero
             },
             puntajes: puntajesPorMateria,
             puntajeGlobal: puntajeGlobal,
@@ -680,7 +1155,7 @@ async function guardarReporteEnBD(pruebaId, estudianteId, datosEstudiante, punta
 }
 
 // Función para llenar los datos completos del estudiante en el formulario
-function llenarDatosEstudianteCompleto(datosEstudiante, puntajesPorMateria, fechaPrueba) {
+function llenarDatosEstudianteCompleto(datosEstudiante, puntajesPorMateria, fechaPrueba, sg11Codigo = null) {
     // Llenar nombre
     document.getElementById('nombreEstudiante').value = datosEstudiante.nombre?.toUpperCase() || 'USUARIO';
     document.getElementById('identificacionEstudiante').value = datosEstudiante.numeroDocumento || datosEstudiante.numeroIdentidad || '';
@@ -718,6 +1193,11 @@ function llenarDatosEstudianteCompleto(datosEstudiante, puntajesPorMateria, fech
         const fechaFormateada = fechaPrueba.toISOString().split('T')[0];
         document.getElementById('fechaAplicacion').value = fechaFormateada;
     }
+    
+    // Llenar código SG11 si se proporcionó
+    if (sg11Codigo) {
+        document.getElementById('sg11Numero').value = sg11Codigo;
+    }
 
     // Llenar puntajes
     Object.keys(puntajesPorMateria).forEach(materia => {
@@ -747,9 +1227,6 @@ function limpiarReporte() {
     document.getElementById('selectorEstudiante').value = '';
     document.getElementById('selectorEstudiante').disabled = true;
 
-    // Limpiar información
-    document.getElementById('infoEstudiante').innerHTML = '<p>Seleccione una prueba y un estudiante para generar el reporte.</p>';
-
     // Limpiar formulario
     document.getElementById('nombreEstudiante').value = 'USUARIO';
     document.getElementById('identificacionEstudiante').value = '';
@@ -770,9 +1247,13 @@ function limpiarReporte() {
     actualizarPuntajeGlobal();
     actualizarPercentilGeneral();
 
-    // Deshabilitar botones
-    document.getElementById('btnGenerarReporte').disabled = true;
+    // Deshabilitar botón de descarga
     document.getElementById('btnDescargarPDF').disabled = true;
+    
+    // Deshabilitar botones de eliminación
+    document.getElementById('btnEliminarReporteActual').disabled = true;
+    document.getElementById('btnEliminarReportesPrueba').disabled = true;
+    document.getElementById('btnGenerarTodos').disabled = true;
 }
 
 // Función para descargar el reporte como PDF
@@ -844,6 +1325,46 @@ function cargarNombreAdministrador() {
     }
 }
 
+// Función para actualizar el reporte en la base de datos
+async function actualizarReporteEnBD() {
+    const pruebaId = document.getElementById('selectorPrueba').value;
+    const estudianteId = document.getElementById('selectorEstudiante').value;
+    
+    if (!pruebaId || !estudianteId) {
+        return;
+    }
+    
+    try {
+        const db = window.firebaseDB;
+        
+        // Buscar el reporte existente
+        const reportesSnapshot = await db.collection('reportes')
+            .where('pruebaId', '==', pruebaId)
+            .where('estudianteId', '==', estudianteId)
+            .orderBy('fechaGeneracion', 'desc')
+            .limit(1)
+            .get();
+        
+        if (reportesSnapshot.empty) {
+            console.log('No hay reporte para actualizar');
+            return;
+        }
+        
+        const reporteDoc = reportesSnapshot.docs[0];
+        const sg11Numero = document.getElementById('sg11Numero')?.value || '';
+        
+        // Actualizar solo el campo SG11
+        await reporteDoc.ref.update({
+            'datosEstudiante.sg11Numero': sg11Numero
+        });
+        
+        console.log('Campo SG11 actualizado en BD:', sg11Numero);
+        
+    } catch (error) {
+        console.error('Error actualizando campo SG11:', error);
+    }
+}
+
 // Función para cerrar sesión
 function handleLogout() {
     Swal.fire({
@@ -881,9 +1402,11 @@ document.addEventListener('DOMContentLoaded', function () {
     cargarPruebas();
 
     // Configurar eventos de botones
-    document.getElementById('btnGenerarReporte').addEventListener('click', generarReporte);
+    document.getElementById('btnGenerarTodos').addEventListener('click', generarReportesParaTodos);
     document.getElementById('btnDescargarPDF').addEventListener('click', descargarPDF);
     document.getElementById('btnLimpiarReporte').addEventListener('click', limpiarReporte);
+    document.getElementById('btnEliminarReporteActual').addEventListener('click', eliminarReporteActual);
+    document.getElementById('btnEliminarReportesPrueba').addEventListener('click', eliminarReportesPrueba);
 
     // Actualizar los eventos de los inputs
     document.querySelectorAll('.puntaje-input').forEach(input => {
@@ -904,6 +1427,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Inicializar percentil general
     actualizarPercentilGeneral();
+
+    // Configurar evento para el campo SG11 - actualizar en BD cuando cambie
+    const sg11Input = document.getElementById('sg11Numero');
+    if (sg11Input) {
+        sg11Input.addEventListener('blur', async function() {
+            await actualizarReporteEnBD();
+        });
+        
+        // También actualizar al presionar Enter
+        sg11Input.addEventListener('keypress', async function(e) {
+            if (e.key === 'Enter') {
+                await actualizarReporteEnBD();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Guardado',
+                    text: 'Campo SG11 actualizado',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
 
     // Configurar botón de logout - Usar delegación de eventos en el contenedor
     const userDropdownMenu = document.getElementById('userDropdownMenu');

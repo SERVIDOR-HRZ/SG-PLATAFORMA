@@ -69,17 +69,20 @@
                 <h2><i class="bi bi-file-earmark-pdf"></i> Mis Reportes</h2>
             </div>
 
+            <div class="control-section">
+                <label for="filtroPrueba">
+                    <i class="bi bi-funnel"></i>
+                    Filtrar por Prueba:
+                </label>
+                <select id="filtroPrueba" class="control-select">
+                    <option value="">Todas las pruebas</option>
+                </select>
+            </div>
+
             <div class="reportes-lista" id="reportesLista">
                 <div class="loading-message">
                     <i class="bi bi-hourglass-split"></i>
                     <p>Cargando reportes...</p>
-                </div>
-            </div>
-
-            <div class="info-panel">
-                <h3><i class="bi bi-info-circle"></i> Información</h3>
-                <div id="infoReporte" class="info-content">
-                    <p>Seleccione un reporte para visualizarlo y descargarlo.</p>
                 </div>
             </div>
         </aside>

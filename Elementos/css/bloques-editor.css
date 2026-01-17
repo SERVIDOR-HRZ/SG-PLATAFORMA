@@ -5356,7 +5356,6 @@ mjx-container {
 }
 
 .categoria-header {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     color: white;
     padding: 10px 15px;
     display: flex;
@@ -5368,6 +5367,27 @@ mjx-container {
 
 .categoria-header i {
     font-size: 14px;
+}
+
+/* Colores de categoría por materia */
+.matematicas .categoria-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.lectura .categoria-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+.sociales .categoria-header {
+    background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+}
+
+.ciencias .categoria-header {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+}
+
+.ingles .categoria-header {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
 }
 
 /* Checkboxes styles - Temas */
