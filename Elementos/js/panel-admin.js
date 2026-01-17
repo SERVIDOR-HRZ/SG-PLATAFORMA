@@ -134,7 +134,7 @@ function updateTimeDisplay() {
         second: '2-digit',
         hour12: true
     };
-    const timeString = now.toLocaleTimeString('es-ES', timeOptions);
+    const timeString = now.toLocaleTimeString('en-US', timeOptions);
     
     // Format date
     const dateOptions = {
@@ -549,27 +549,46 @@ function setupEventListeners() {
     if (mobileMenuToggle && sidebarPanel && sidebarOverlay) {
         // Show mobile menu toggle on small screens
         if (window.innerWidth <= 768) {
-            mobileMenuToggle.style.display = 'block';
+            mobileMenuToggle.style.display = 'flex';
         }
         
         mobileMenuToggle.addEventListener('click', () => {
-            sidebarPanel.classList.toggle('active');
+            const isActive = sidebarPanel.classList.toggle('active');
             sidebarOverlay.classList.toggle('active');
+            mobileMenuToggle.classList.toggle('active');
+            
+            // Cambiar icono entre chevron derecha y chevron izquierda
+            const icon = mobileMenuToggle.querySelector('i');
+            if (isActive) {
+                icon.className = 'bi bi-chevron-left';
+            } else {
+                icon.className = 'bi bi-chevron-right';
+            }
         });
         
         sidebarOverlay.addEventListener('click', () => {
             sidebarPanel.classList.remove('active');
             sidebarOverlay.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+            
+            // Volver al icono de chevron derecha
+            const icon = mobileMenuToggle.querySelector('i');
+            icon.className = 'bi bi-chevron-right';
         });
         
         // Handle window resize
         window.addEventListener('resize', () => {
             if (window.innerWidth <= 768) {
-                mobileMenuToggle.style.display = 'block';
+                mobileMenuToggle.style.display = 'flex';
             } else {
                 mobileMenuToggle.style.display = 'none';
                 sidebarPanel.classList.remove('active');
                 sidebarOverlay.classList.remove('active');
+                mobileMenuToggle.classList.remove('active');
+                
+                // Asegurar que el icono sea chevron derecha
+                const icon = mobileMenuToggle.querySelector('i');
+                icon.className = 'bi bi-chevron-right';
             }
         });
     }

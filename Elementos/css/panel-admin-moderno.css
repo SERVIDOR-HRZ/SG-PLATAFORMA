@@ -388,21 +388,37 @@ body {
     
     .mobile-menu-toggle {
         position: fixed;
-        top: 1.5rem;
-        left: 1.5rem;
+        top: 5px;
+        left: 5px;
         z-index: 1001;
         background: #000;
         color: white;
         border: none;
-        width: 55px;
-        height: 55px;
-        border-radius: 16px;
-        font-size: 1.6rem;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        font-size: 1.5rem;
         cursor: pointer;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-menu-toggle:hover {
+        background: #1a1a1a;
+        transform: scale(1.05);
+    }
+    
+    .mobile-menu-toggle.active {
+        left: auto;
+        right: 5px;
+        top: 5px;
+    }
+    
+    .mobile-menu-toggle i {
+        transition: all 0.3s ease;
     }
     
     .panel-header {
