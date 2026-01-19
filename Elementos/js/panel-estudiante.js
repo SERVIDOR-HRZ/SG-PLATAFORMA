@@ -606,6 +606,14 @@ function setupEventListeners() {
         btnDesafios.addEventListener('click', handleDesafiosClick);
     }
     
+    // Chat button
+    const btnChat = document.getElementById('btnChat');
+    if (btnChat) {
+        btnChat.addEventListener('click', () => {
+            window.location.href = 'Chat.html';
+        });
+    }
+    
     // Dashboard cards (nuevo diseño)
     const dashboardCards = document.querySelectorAll('.card-modern');
     dashboardCards.forEach(card => {
@@ -903,6 +911,9 @@ function handleCardClick(event) {
                 break;
             case 'reportes':
                 window.location.href = 'Reportes.html';
+                break;
+            case 'mis-resultados':
+                window.location.href = 'Mis-Reportes.html';
                 break;
             case 'chat':
                 window.location.href = 'Chat.html';

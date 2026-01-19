@@ -57,6 +57,10 @@
                     <i class="bi bi-trophy-fill"></i>
                     <span>Desafíos</span>
                 </button>
+                <button class="sidebar-btn btn-chat" id="btnChat">
+                    <i class="bi bi-chat-dots-fill"></i>
+                    <span>Mensajería</span>
+                </button>
             </div>
         </div>
 
@@ -87,6 +91,28 @@
 
         <!-- Dashboard Grid -->
         <div class="dashboard-grid-modern">
+            <!-- Calendario Card -->
+            <div class="card-modern" onclick="window.location.href='Calendario-Estudiante.html'">
+                <div class="card-modern-icon">
+                    <i class="bi bi-calendar-week-fill"></i>
+                </div>
+                <div class="card-modern-content">
+                    <h3>Mi Calendario</h3>
+                    <p>Revisa tu horario de clases y eventos</p>
+                </div>
+            </div>
+
+            <!-- Aulas Virtuales Card -->
+            <div class="card-modern" data-section="clases">
+                <div class="card-modern-icon">
+                    <i class="bi bi-book-half"></i>
+                </div>
+                <div class="card-modern-content">
+                    <h3>Aulas Virtuales</h3>
+                    <p>Accede a tus clases y materiales de estudio</p>
+                </div>
+            </div>
+
             <!-- Pruebas Card -->
             <div class="card-modern" data-section="pruebas">
                 <div class="card-modern-icon">
@@ -98,14 +124,14 @@
                 </div>
             </div>
 
-            <!-- Clases Card -->
-            <div class="card-modern" data-section="clases">
+            <!-- Mis Resultados Card -->
+            <div class="card-modern" data-section="mis-resultados">
                 <div class="card-modern-icon">
-                    <i class="bi bi-book-half"></i>
+                    <i class="bi bi-clipboard-data-fill"></i>
                 </div>
                 <div class="card-modern-content">
-                    <h3>Aulas Virtuales</h3>
-                    <p>Accede a tus clases y materiales de estudio</p>
+                    <h3>Mis Resultados</h3>
+                    <p>Consulta tus resultados de pruebas y simulacros</p>
                 </div>
             </div>
 
@@ -117,28 +143,6 @@
                 <div class="card-modern-content">
                     <h3>Mis Reportes</h3>
                     <p>Consulta tus calificaciones y progreso académico</p>
-                </div>
-            </div>
-
-            <!-- Chat Card -->
-            <div class="card-modern" data-section="chat">
-                <div class="card-modern-icon">
-                    <i class="bi bi-chat-dots-fill"></i>
-                </div>
-                <div class="card-modern-content">
-                    <h3>Mensajería</h3>
-                    <p>Comunícate con administradores y profesores</p>
-                </div>
-            </div>
-
-            <!-- Calendario Card -->
-            <div class="card-modern" onclick="window.location.href='Calendario-Estudiante.html'">
-                <div class="card-modern-icon">
-                    <i class="bi bi-calendar-week-fill"></i>
-                </div>
-                <div class="card-modern-content">
-                    <h3>Mi Calendario</h3>
-                    <p>Revisa tu horario de clases y eventos</p>
                 </div>
             </div>
         </div>

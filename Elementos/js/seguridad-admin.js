@@ -11,7 +11,7 @@ let allDownloads = [];
 let filteredDownloads = [];
 let currentPage = 1;
 const itemsPerPage = 10;
-const SUSPICIOUS_THRESHOLD = 3; // Más de 3 descargas = sospechoso
+const SUSPICIOUS_IP_THRESHOLD = 1; // Más de 1 IP diferente = sospechoso
 
 // Verificar autenticación
 function checkAuthentication() {
@@ -75,6 +75,7 @@ function setupEventListeners() {
     document.getElementById('exportBtn').addEventListener('click', exportToCSV);
     document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
     document.getElementById('nextPage').addEventListener('click', () => changePage(1));
+    document.getElementById('clearAllBtn').addEventListener('click', limpiarTodoElHistorial);
 }
 
 // Cargar datos de descargas
@@ -108,13 +109,29 @@ async function loadDownloadsData() {
 function calcularEstadisticas() {
     const totalDescargas = allDownloads.length;
     
-    // Contar descargas por usuario
+    // Contar descargas por usuario y contar IPs diferentes por usuario
     const descargasPorUsuario = {};
+    const ipsPorUsuario = {};
+    
     allDownloads.forEach(d => {
         descargasPorUsuario[d.usuarioId] = (descargasPorUsuario[d.usuarioId] || 0) + 1;
+        
+        // Guardar IPs únicas por usuario
+        if (!ipsPorUsuario[d.usuarioId]) {
+            ipsPorUsuario[d.usuarioId] = new Set();
+        }
+        ipsPorUsuario[d.usuarioId].add(d.ip);
     });
     
-    const usuariosSospechosos = Object.values(descargasPorUsuario).filter(c => c > SUSPICIOUS_THRESHOLD).length;
+    // Contar usuarios sospechosos (aquellos con más de 1 IP diferente)
+    let usuariosSospechosos = 0;
+    Object.keys(ipsPorUsuario).forEach(usuarioId => {
+        const cantidadIPs = ipsPorUsuario[usuarioId].size;
+        if (cantidadIPs > SUSPICIOUS_IP_THRESHOLD) {
+            usuariosSospechosos++;
+        }
+    });
+    
     const usuariosActivos = Object.keys(descargasPorUsuario).length;
     
     // Descargas de hoy
@@ -130,6 +147,8 @@ function calcularEstadisticas() {
 // Mostrar usuarios sospechosos
 function mostrarUsuariosSospechosos() {
     const descargasPorUsuario = {};
+    const ipsPorUsuario = {};
+    
     allDownloads.forEach(d => {
         if (!descargasPorUsuario[d.usuarioId]) {
             descargasPorUsuario[d.usuarioId] = {
@@ -137,19 +156,34 @@ function mostrarUsuariosSospechosos() {
                 email: d.usuarioEmail,
                 foto: d.usuarioFoto || '',
                 count: 0,
-                ultimaDescarga: d.fecha
+                ultimaDescarga: d.fecha,
+                ips: new Set()
             };
         }
         descargasPorUsuario[d.usuarioId].count++;
+        descargasPorUsuario[d.usuarioId].ips.add(d.ip);
+        
         // Actualizar foto si existe en algún registro
         if (d.usuarioFoto && !descargasPorUsuario[d.usuarioId].foto) {
             descargasPorUsuario[d.usuarioId].foto = d.usuarioFoto;
         }
     });
 
+    // Filtrar usuarios sospechosos (aquellos con más de 1 IP diferente)
     const sospechosos = Object.entries(descargasPorUsuario)
-        .filter(([_, data]) => data.count > SUSPICIOUS_THRESHOLD)
-        .map(([id, data]) => ({ id, ...data }));
+        .filter(([_, data]) => {
+            // Verificar si el usuario tiene más de 1 IP diferente
+            return data.ips.size > SUSPICIOUS_IP_THRESHOLD;
+        })
+        .map(([id, data]) => {
+            const ipsArray = Array.from(data.ips);
+            return { 
+                id, 
+                ...data,
+                cantidadIPs: data.ips.size,
+                listaIPs: ipsArray.join(', ')
+            };
+        });
 
     const alertSection = document.getElementById('alertSection');
     const alertList = document.getElementById('alertList');
@@ -166,7 +200,8 @@ function mostrarUsuariosSospechosos() {
                     <div class="alert-avatar">${avatarContent}</div>
                     <div class="alert-details">
                         <h4>${user.nombre}</h4>
-                        <p>${user.count} descargas detectadas - ${user.email || 'Sin email'}</p>
+                        <p>${user.count} descargas desde ${user.cantidadIPs} IPs diferentes - ${user.email || 'Sin email'}</p>
+                        <small style="color: #999; font-size: 0.8rem;">IPs: ${user.listaIPs}</small>
                     </div>
                 </div>
                 <button class="alert-action" onclick="verDetalleUsuario('${user.id}')">
@@ -185,15 +220,20 @@ function applyFilters() {
     const dateFilter = document.getElementById('filterDate').value;
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-    // Contar descargas por usuario
-    const descargasPorUsuario = {};
+    // Contar IPs diferentes por usuario
+    const ipsPorUsuario = {};
     allDownloads.forEach(d => {
-        descargasPorUsuario[d.usuarioId] = (descargasPorUsuario[d.usuarioId] || 0) + 1;
+        if (!ipsPorUsuario[d.usuarioId]) {
+            ipsPorUsuario[d.usuarioId] = new Set();
+        }
+        ipsPorUsuario[d.usuarioId].add(d.ip);
     });
 
     filteredDownloads = allDownloads.filter(download => {
-        // Filtro de estado
-        const isSuspicious = descargasPorUsuario[download.usuarioId] > SUSPICIOUS_THRESHOLD;
+        // Filtro de estado - verificar si el usuario tiene más de 1 IP diferente
+        const cantidadIPs = ipsPorUsuario[download.usuarioId]?.size || 0;
+        const isSuspicious = cantidadIPs > SUSPICIOUS_IP_THRESHOLD;
+        
         if (statusFilter === 'sospechoso' && !isSuspicious) return false;
         if (statusFilter === 'normal' && isSuspicious) return false;
 
@@ -216,7 +256,8 @@ function applyFilters() {
                 download.usuarioNombre,
                 download.usuarioEmail,
                 download.documento,
-                download.aula
+                download.aula,
+                download.ip
             ].join(' ').toLowerCase();
             if (!searchFields.includes(searchTerm)) return false;
         }
@@ -235,10 +276,17 @@ async function renderTable() {
     const end = start + itemsPerPage;
     const pageData = filteredDownloads.slice(start, end);
 
-    // Contar descargas por usuario
+    // Contar descargas por usuario y contar IPs diferentes
     const descargasPorUsuario = {};
+    const ipsPorUsuario = {};
+    
     allDownloads.forEach(d => {
         descargasPorUsuario[d.usuarioId] = (descargasPorUsuario[d.usuarioId] || 0) + 1;
+        
+        if (!ipsPorUsuario[d.usuarioId]) {
+            ipsPorUsuario[d.usuarioId] = new Set();
+        }
+        ipsPorUsuario[d.usuarioId].add(d.ip);
     });
 
     // Cargar fotos y estado de usuarios
@@ -248,7 +296,8 @@ async function renderTable() {
 
     tbody.innerHTML = pageData.map(download => {
         const userDownloads = descargasPorUsuario[download.usuarioId];
-        const isSuspicious = userDownloads > SUSPICIOUS_THRESHOLD;
+        const cantidadIPs = ipsPorUsuario[download.usuarioId]?.size || 0;
+        const isSuspicious = cantidadIPs > SUSPICIOUS_IP_THRESHOLD;
         const isInactive = estadoUsuarios[download.usuarioId] === false;
         const fecha = new Date(download.fecha);
         const fechaStr = fecha.toLocaleDateString('es-ES', { 
@@ -749,4 +798,98 @@ function mostrarNotificacion(mensaje, tipo) {
         notif.classList.remove('show');
         setTimeout(() => notif.remove(), 300);
     }, 3000);
+}
+
+// Limpiar todo el historial de descargas
+function limpiarTodoElHistorial() {
+    const modal = document.getElementById('confirmModal');
+    const body = document.getElementById('confirmBody');
+    
+    const totalRegistros = allDownloads.length;
+    
+    body.innerHTML = `
+        <div class="confirm-content">
+            <div class="confirm-icon delete">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h3>⚠️ ¿Limpiar TODO el historial?</h3>
+            <p>Estás a punto de eliminar <strong>TODOS los ${totalRegistros} registros</strong> de descargas del sistema.</p>
+            <p style="color: #ff0000; font-size: 0.9rem; margin-top: 1rem; font-weight: 600;">
+                <i class="bi bi-exclamation-octagon"></i> Esta acción es IRREVERSIBLE y eliminará permanentemente todo el historial de descargas de todos los usuarios.
+            </p>
+            <div style="margin-top: 1rem; padding: 1rem; background: rgba(255, 0, 0, 0.1); border-radius: 8px; border-left: 4px solid #ff0000;">
+                <p style="margin: 0; font-size: 0.85rem; color: #333;">
+                    <strong>Nota:</strong> Esta acción solo debe realizarse si estás completamente seguro. Se recomienda exportar los datos antes de eliminarlos.
+                </p>
+            </div>
+            <div class="confirm-actions" style="margin-top: 1.5rem;">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Cancelar</button>
+                <button class="btn-confirm delete" onclick="confirmarLimpiarTodoElHistorial()">
+                    <i class="bi bi-trash3"></i> Sí, Eliminar Todo
+                </button>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
+
+// Confirmar limpiar todo el historial
+async function confirmarLimpiarTodoElHistorial() {
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+        
+        // Mostrar mensaje de procesamiento
+        const body = document.getElementById('confirmBody');
+        body.innerHTML = `
+            <div class="confirm-content">
+                <div class="confirm-icon" style="background: #2196F3;">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <h3>Eliminando registros...</h3>
+                <p>Por favor espera mientras se eliminan todos los registros.</p>
+                <div style="margin-top: 1rem;">
+                    <div style="width: 100%; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden;">
+                        <div style="width: 100%; height: 100%; background: #2196F3; animation: progress 2s ease-in-out infinite;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Obtener todos los registros
+        const snapshot = await db.collection('registroDescargas').get();
+        
+        if (snapshot.empty) {
+            closeConfirmModal();
+            mostrarNotificacion('No hay registros para eliminar', 'error');
+            return;
+        }
+        
+        // Eliminar en lotes de 500 (límite de Firestore)
+        const batchSize = 500;
+        const totalDocs = snapshot.docs.length;
+        let deletedCount = 0;
+        
+        for (let i = 0; i < totalDocs; i += batchSize) {
+            const batch = db.batch();
+            const batchDocs = snapshot.docs.slice(i, i + batchSize);
+            
+            batchDocs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            
+            await batch.commit();
+            deletedCount += batchDocs.length;
+        }
+        
+        closeConfirmModal();
+        mostrarNotificacion(`Se eliminaron ${deletedCount} registro(s) correctamente`, 'success');
+        loadDownloadsData();
+        
+    } catch (error) {
+        console.error('Error al limpiar historial completo:', error);
+        closeConfirmModal();
+        mostrarNotificacion('Error al limpiar el historial completo', 'error');
+    }
 }

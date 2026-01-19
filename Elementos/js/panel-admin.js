@@ -535,6 +535,14 @@ function setupEventListeners() {
         btnDesafios.addEventListener('click', handleDesafiosClick);
     }
     
+    // Chat button
+    const btnChat = document.getElementById('btnChat');
+    if (btnChat) {
+        btnChat.addEventListener('click', () => {
+            window.location.href = 'Chat.html';
+        });
+    }
+    
     // Dashboard cards (nuevo diseño)
     const dashboardCards = document.querySelectorAll('.card-modern');
     dashboardCards.forEach(card => {
@@ -850,6 +858,9 @@ function handleCardClick(event) {
                 break;
             case 'finanzas':
                 window.location.href = 'Finanzas.html';
+                break;
+            case 'resultados':
+                window.location.href = 'Reportes.html';
                 break;
             case 'perfil':
                 window.location.href = 'panelUsuario.html';
