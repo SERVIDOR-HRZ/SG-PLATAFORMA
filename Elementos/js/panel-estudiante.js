@@ -146,6 +146,63 @@ function updateTimeDisplay() {
     if (dateElement) dateElement.textContent = dateString;
 }
 
+// Show custom alert modal
+function showCustomAlert(titulo, mensaje, icono = 'bi-exclamation-triangle-fill', iconColor = '#ffc107') {
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="panel-modal-overlay" id="customAlertOverlay">
+                <div class="panel-modal">
+                    <div class="panel-modal-body">
+                        <i class="bi ${icono} panel-modal-icon" style="color: ${iconColor};"></i>
+                        <h3 style="margin: 0 0 10px 0; color: #333; font-size: 22px; font-weight: 700;">${titulo}</h3>
+                        <p class="panel-modal-message">${mensaje}</p>
+                        <div class="panel-modal-footer">
+                            <button class="panel-modal-btn panel-btn-confirm" id="customAlertBtn" style="background: #9c27b0;">
+                                <i class="bi bi-check-lg"></i>
+                                Entendido
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const overlay = document.getElementById('customAlertOverlay');
+        const confirmBtn = document.getElementById('customAlertBtn');
+        
+        // Show modal with animation
+        setTimeout(() => {
+            overlay.classList.add('active');
+        }, 10);
+
+        // Handle confirm
+        confirmBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(true);
+        });
+
+        // Handle overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal(overlay);
+                resolve(true);
+            }
+        });
+
+        // Handle ESC key
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(overlay);
+                resolve(true);
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+    });
+}
+
 // Handle Desafios button click
 async function handleDesafiosClick() {
     try {
@@ -162,15 +219,25 @@ async function handleDesafiosClick() {
         const usuarioDoc = await db.collection('usuarios').doc(currentUser.id).get();
         
         if (!usuarioDoc.exists) {
-            alert('No se pudo cargar tu información. Por favor, intenta de nuevo.');
+            await showCustomAlert(
+                'Error',
+                'No se pudo cargar tu información. Por favor, intenta de nuevo.',
+                'bi-exclamation-circle-fill',
+                '#dc3545'
+            );
             return;
         }
 
         const usuarioData = usuarioDoc.data();
-        const aulasAsignadas = usuarioData.aulas || [];
+        const aulasAsignadas = usuarioData.aulasAsignadas || [];
 
         if (aulasAsignadas.length === 0) {
-            alert('No estás inscrito en ninguna aula. Por favor, contacta a tu administrador.');
+            await showCustomAlert(
+                'Sin Aulas Asignadas',
+                'No estás inscrito en ninguna aula. Por favor, contacta a tu administrador para que te asigne a un aula.',
+                'bi-info-circle-fill',
+                '#2196F3'
+            );
             return;
         }
 
@@ -189,7 +256,12 @@ async function handleDesafiosClick() {
         }
 
         if (aulas.length === 0) {
-            alert('No hay aulas disponibles.');
+            await showCustomAlert(
+                'Sin Aulas Disponibles',
+                'Las aulas asignadas no están disponibles. Por favor, contacta a tu administrador.',
+                'bi-exclamation-triangle-fill',
+                '#ff9800'
+            );
             return;
         }
 
@@ -463,12 +535,22 @@ async function handleDesafiosClick() {
             const selectedMateriaId = materiaSelect.value;
             
             if (!selectedAulaId) {
-                alert('Por favor, selecciona un aula');
+                showCustomAlert(
+                    'Selección Requerida',
+                    'Por favor, selecciona un aula para continuar.',
+                    'bi-info-circle-fill',
+                    '#2196F3'
+                );
                 return;
             }
             
             if (!selectedMateriaId) {
-                alert('Por favor, selecciona una materia');
+                showCustomAlert(
+                    'Selección Requerida',
+                    'Por favor, selecciona una materia para continuar.',
+                    'bi-info-circle-fill',
+                    '#2196F3'
+                );
                 return;
             }
 
@@ -485,7 +567,12 @@ async function handleDesafiosClick() {
 
     } catch (error) {
         console.error('Error al cargar aulas:', error);
-        alert('Error al cargar las aulas. Por favor, intenta de nuevo.');
+        await showCustomAlert(
+            'Error',
+            'Error al cargar las aulas. Por favor, intenta de nuevo.',
+            'bi-exclamation-circle-fill',
+            '#dc3545'
+        );
     }
 }
 
