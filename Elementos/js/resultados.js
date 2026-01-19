@@ -1,0 +1,438 @@
+// Resultados.js - Funcionalidad para la sección de resultados
+
+// Verificar autenticación al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    verificarAutenticacion();
+    inicializarReloj();
+    inicializarMenuTabs();
+    inicializarSidebar();
+    cargarDatosUsuario();
+});
+
+// Verificar si el usuario está autenticado
+function verificarAutenticacion() {
+    const usuarioActual = sessionStorage.getItem('currentUser');
+    
+    if (!usuarioActual) {
+        window.location.href = '../index.html';
+        return;
+    }
+}
+
+// Cargar datos del usuario
+async function cargarDatosUsuario() {
+    const usuarioActual = sessionStorage.getItem('currentUser');
+    
+    if (usuarioActual) {
+        try {
+            const usuario = JSON.parse(usuarioActual);
+            
+            // Actualizar nombre de usuario
+            const userNameElement = document.getElementById('userName');
+            if (userNameElement && usuario.nombre) {
+                userNameElement.textContent = usuario.nombre.toUpperCase();
+            }
+            
+            // Actualizar rol
+            const userRoleElement = document.getElementById('userRole');
+            if (userRoleElement && usuario.tipoUsuario) {
+                const roles = {
+                    'admin': 'Administrador',
+                    'coordinador': 'Coordinador',
+                    'estudiante': 'Estudiante',
+                    'profesor': 'Profesor'
+                };
+                userRoleElement.textContent = roles[usuario.tipoUsuario] || 'Usuario';
+            }
+            
+            // Cargar foto de perfil desde Firebase
+            await cargarFotoPerfil(usuario.id);
+        } catch (error) {
+            console.error('Error al cargar datos del usuario:', error);
+        }
+    }
+}
+
+// Cargar foto de perfil del usuario
+async function cargarFotoPerfil(usuarioId) {
+    try {
+        // Esperar a que Firebase esté listo
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+
+        const db = window.firebaseDB;
+        const usuarioDoc = await db.collection('usuarios').doc(usuarioId).get();
+
+        if (usuarioDoc.exists) {
+            const datosUsuario = usuarioDoc.data();
+            
+            if (datosUsuario.fotoPerfil) {
+                mostrarFotoPerfil(datosUsuario.fotoPerfil);
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar foto de perfil:', error);
+    }
+}
+
+// Mostrar foto de perfil
+function mostrarFotoPerfil(urlFoto) {
+    const avatarDefault = document.getElementById('userAvatarDefault');
+    const avatarImage = document.getElementById('userAvatarImage');
+
+    if (avatarDefault && avatarImage) {
+        avatarDefault.style.display = 'none';
+        avatarImage.src = urlFoto;
+        avatarImage.style.display = 'block';
+        avatarImage.style.position = 'absolute';
+    }
+}
+
+// Esperar a que Firebase esté listo
+function esperarFirebase() {
+    return new Promise(resolve => {
+        const verificar = () => {
+            if (window.firebaseDB) {
+                resolve();
+            } else {
+                setTimeout(verificar, 100);
+            }
+        };
+        verificar();
+    });
+}
+
+// Inicializar reloj y fecha
+function inicializarReloj() {
+    function actualizarReloj() {
+        const ahora = new Date();
+        
+        // Actualizar hora
+        const horas = ahora.getHours();
+        const minutos = ahora.getMinutes().toString().padStart(2, '0');
+        const segundos = ahora.getSeconds().toString().padStart(2, '0');
+        const ampm = horas >= 12 ? 'PM' : 'AM';
+        const horas12 = horas % 12 || 12;
+        
+        const timeElement = document.getElementById('currentTime');
+        if (timeElement) {
+            timeElement.textContent = `${horas12}:${minutos}:${segundos} ${ampm}`;
+        }
+        
+        // Actualizar icono según la hora
+        const timeIcon = document.getElementById('timeIcon');
+        if (timeIcon) {
+            if (horas >= 6 && horas < 12) {
+                timeIcon.className = 'bi bi-sunrise-fill';
+            } else if (horas >= 12 && horas < 18) {
+                timeIcon.className = 'bi bi-sun-fill';
+            } else if (horas >= 18 && horas < 20) {
+                timeIcon.className = 'bi bi-sunset-fill';
+            } else {
+                timeIcon.className = 'bi bi-moon-stars-fill';
+            }
+        }
+        
+        // Actualizar fecha
+        const opciones = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        };
+        const fechaFormateada = ahora.toLocaleDateString('es-ES', opciones);
+        
+        const dateElement = document.getElementById('currentDate');
+        if (dateElement) {
+            dateElement.textContent = fechaFormateada;
+        }
+    }
+    
+    actualizarReloj();
+    setInterval(actualizarReloj, 1000);
+}
+
+// Inicializar menú de tabs
+function inicializarMenuTabs() {
+    const menuTabs = document.querySelectorAll('.menu-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    menuTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            
+            // Remover clase active de todos los tabs
+            menuTabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Agregar clase active al tab seleccionado
+            this.classList.add('active');
+            
+            // Mostrar contenido correspondiente
+            const targetContent = document.getElementById(`${targetTab}-content`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+        });
+    });
+}
+
+// Inicializar sidebar móvil
+function inicializarSidebar() {
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const sidebarPanel = document.getElementById('sidebarPanel');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    // Mostrar botón móvil en pantallas pequeñas
+    function checkMobileView() {
+        if (window.innerWidth <= 768) {
+            if (mobileMenuToggle) {
+                mobileMenuToggle.style.display = 'flex';
+            }
+        } else {
+            if (mobileMenuToggle) {
+                mobileMenuToggle.style.display = 'none';
+            }
+            if (sidebarPanel) {
+                sidebarPanel.classList.remove('active');
+            }
+            if (sidebarOverlay) {
+                sidebarOverlay.classList.remove('active');
+            }
+            if (mobileMenuToggle) {
+                mobileMenuToggle.classList.remove('active');
+            }
+        }
+    }
+    
+    checkMobileView();
+    window.addEventListener('resize', checkMobileView);
+    
+    // Toggle sidebar móvil
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', function() {
+            const isActive = sidebarPanel.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+            this.classList.toggle('active');
+            
+            // Cambiar icono
+            const icon = this.querySelector('i');
+            if (isActive) {
+                icon.className = 'bi bi-chevron-left';
+            } else {
+                icon.className = 'bi bi-chevron-right';
+            }
+        });
+    }
+    
+    // Cerrar sidebar al hacer clic en overlay
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function() {
+            if (sidebarPanel) {
+                sidebarPanel.classList.remove('active');
+            }
+            this.classList.remove('active');
+            if (mobileMenuToggle) {
+                mobileMenuToggle.classList.remove('active');
+                const icon = mobileMenuToggle.querySelector('i');
+                icon.className = 'bi bi-chevron-right';
+            }
+        });
+    }
+}
+
+// Botón de perfil
+const btnProfile = document.getElementById('btnProfile');
+if (btnProfile) {
+    btnProfile.addEventListener('click', function() {
+        window.location.href = 'panelUsuario.html';
+    });
+}
+
+// Botón de inicio
+const btnHome = document.getElementById('btnHome');
+if (btnHome) {
+    btnHome.addEventListener('click', function() {
+        window.location.href = '../index.html';
+    });
+}
+
+// Botón de volver al panel
+const btnBack = document.getElementById('btnBack');
+if (btnBack) {
+    btnBack.addEventListener('click', function() {
+        const usuarioActual = sessionStorage.getItem('currentUser');
+        
+        if (usuarioActual) {
+            try {
+                const usuario = JSON.parse(usuarioActual);
+                
+                // Redirigir según el rol
+                switch(usuario.tipoUsuario) {
+                    case 'admin':
+                        window.location.href = 'Panel_Admin.html';
+                        break;
+                    case 'coordinador':
+                        window.location.href = 'Panel_Coordinador.html';
+                        break;
+                    case 'estudiante':
+                        window.location.href = 'Panel_Estudiantes.html';
+                        break;
+                    case 'profesor':
+                        window.location.href = 'Panel_Profesor.html';
+                        break;
+                    default:
+                        window.location.href = 'Panel_Estudiantes.html';
+                }
+            } catch (error) {
+                console.error('Error al redirigir:', error);
+                window.location.href = 'Panel_Estudiantes.html';
+            }
+        }
+    });
+}
+
+// Botón de cerrar sesión
+const btnLogout = document.getElementById('btnLogout');
+if (btnLogout) {
+    btnLogout.addEventListener('click', async function() {
+        const confirmed = await showLogoutModal();
+        if (confirmed) {
+            sessionStorage.removeItem('currentUser');
+            window.location.href = '../index.html';
+        }
+    });
+}
+
+// Mostrar modal de confirmación de logout
+function showLogoutModal() {
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="panel-modal-overlay" id="panelModalOverlay" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            ">
+                <div class="panel-modal" style="
+                    background: white;
+                    border-radius: 12px;
+                    padding: 0;
+                    max-width: 400px;
+                    width: 90%;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                    transform: scale(0.8);
+                    transition: all 0.3s ease;
+                    overflow: hidden;
+                ">
+                    <div class="panel-modal-body" style="padding: 30px; text-align: center;">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #ffc107; margin-bottom: 20px; display: block;"></i>
+                        <p style="font-size: 18px; color: #333; margin: 0 0 30px 0; line-height: 1.5;">¿Estás seguro de que deseas cerrar sesión?</p>
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button id="panelModalCancel" style="
+                                padding: 12px 24px;
+                                border: 1px solid #ddd;
+                                border-radius: 8px;
+                                background: #f5f5f5;
+                                color: #333;
+                                font-size: 16px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                min-width: 100px;
+                            ">
+                                <i class="bi bi-x-lg"></i> No
+                            </button>
+                            <button id="panelModalConfirm" style="
+                                padding: 12px 24px;
+                                border: none;
+                                border-radius: 8px;
+                                background: #dc3545;
+                                color: white;
+                                font-size: 16px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                min-width: 100px;
+                            ">
+                                <i class="bi bi-check-lg"></i> Sí
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const overlay = document.getElementById('panelModalOverlay');
+        const confirmBtn = document.getElementById('panelModalConfirm');
+        const cancelBtn = document.getElementById('panelModalCancel');
+        
+        // Show modal with animation
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            overlay.style.visibility = 'visible';
+            overlay.querySelector('.panel-modal').style.transform = 'scale(1)';
+        }, 10);
+
+        // Handle confirm
+        confirmBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(true);
+        });
+
+        // Handle cancel
+        cancelBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(false);
+        });
+
+        // Handle overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal(overlay);
+                resolve(false);
+            }
+        });
+
+        // Handle ESC key
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(overlay);
+                resolve(false);
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+    });
+}
+
+// Cerrar modal
+function closeModal(overlay) {
+    overlay.style.opacity = '0';
+    overlay.style.visibility = 'hidden';
+    setTimeout(() => {
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+        }
+    }, 300);
+}
+
+// Funcionalidad de botones "Ver Detalles" (placeholder)
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('btn-view-details') || 
+        e.target.closest('.btn-view-details')) {
+        alert('Funcionalidad de detalles en desarrollo');
+    }
+});

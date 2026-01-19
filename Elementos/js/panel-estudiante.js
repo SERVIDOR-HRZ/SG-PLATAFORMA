@@ -913,7 +913,7 @@ function handleCardClick(event) {
                 window.location.href = 'Reportes.html';
                 break;
             case 'mis-resultados':
-                window.location.href = 'Mis-Reportes.html';
+                window.location.href = 'Resultados.html';
                 break;
             case 'chat':
                 window.location.href = 'Chat.html';

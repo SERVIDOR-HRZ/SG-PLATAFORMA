@@ -860,7 +860,7 @@ function handleCardClick(event) {
                 window.location.href = 'Finanzas.html';
                 break;
             case 'resultados':
-                window.location.href = 'Reportes.html';
+                window.location.href = 'Resultados.html';
                 break;
             case 'perfil':
                 window.location.href = 'panelUsuario.html';
