@@ -4698,6 +4698,9 @@ function renderAulas() {
                     <div class="aula-info-item"><i class="bi bi-collection"></i> ${materias.length} materia${materias.length !== 1 ? 's' : ''}</div>
                 </div>
                 <div class="aula-card-actions">
+                    <button class="aula-action-btn aula-invitation-btn" onclick="openInvitationLinkModal('${aula.id}', '${aula.nombre.replace(/'/g, "\\'")}')">
+                        <i class="bi bi-link-45deg"></i> Invitación
+                    </button>
                     <button class="aula-action-btn aula-edit-btn" onclick="openEditAulaModal('${aula.id}')">
                         <i class="bi bi-pencil"></i> Editar
                     </button>

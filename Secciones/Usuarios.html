@@ -1861,6 +1861,56 @@
         </div>
     </div>
 
+    <!-- Invitation Link Modal -->
+    <div class="modal" id="invitationLinkModal">
+        <div class="modal-content invitation-link-modal">
+            <div class="modal-header">
+                <h3><i class="bi bi-link-45deg"></i> Enlace de Invitación</h3>
+                <button class="close-btn" id="closeInvitationLinkModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body invitation-link-content">
+                <div class="invitation-link-box">
+                    <label class="invitation-link-label">Enlace de Registro para: <strong id="invitationAulaName"></strong></label>
+                    <div class="invitation-link-display">
+                        <span class="invitation-link-text" id="invitationLinkText">Generando enlace...</span>
+                        <button class="copy-link-btn" id="copyInvitationLinkBtn">
+                            <i class="bi bi-clipboard"></i>
+                            Copiar
+                        </button>
+                    </div>
+                    <div class="invitation-status active" id="invitationStatus">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Enlace Activo</span>
+                    </div>
+                </div>
+
+                <div class="invitation-qr-section">
+                    <h4 style="margin-bottom: 1rem; color: #333;">Código QR</h4>
+                    <div class="invitation-qr-code" id="invitationQRCode">
+                        <!-- QR code will be generated here -->
+                    </div>
+                </div>
+
+                <div class="invitation-info">
+                    <p><i class="bi bi-info-circle-fill"></i> Comparte este enlace con los estudiantes para que se registren directamente en esta aula. Los estudiantes registrados con este enlace serán activados automáticamente.</p>
+                </div>
+
+                <div class="invitation-actions">
+                    <button class="download-qr-btn" id="downloadQRBtn">
+                        <i class="bi bi-download"></i>
+                        Descargar QR
+                    </button>
+                    <button class="toggle-invitation-btn active" id="toggleInvitationBtn">
+                        <i class="bi bi-toggle-on"></i>
+                        <span id="toggleInvitationText">Desactivar Enlace</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -1868,8 +1918,12 @@
     <!-- SheetJS for Excel export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+    <!-- QRCode.js for QR generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/perfil-compartido.js"></script>
+    <script src="../Elementos/js/invitaciones-aula.js"></script>
     <script src="../Elementos/js/usuarios.js"></script>
 
 </body>

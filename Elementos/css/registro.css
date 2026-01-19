@@ -971,3 +971,46 @@
         font-size: 12px;
     }
 }
+
+/* Aula Info Banner */
+.aula-info-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+    border: 2px solid rgba(102, 126, 234, 0.5);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.aula-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.aula-details {
+    flex: 1;
+}
+
+.aula-details h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    color: white;
+    font-weight: 600;
+}
+
+.aula-details p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
