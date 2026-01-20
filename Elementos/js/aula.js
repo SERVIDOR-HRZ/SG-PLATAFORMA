@@ -770,6 +770,9 @@ function setupTabs() {
                 case 'foro':
                     loadForo();
                     break;
+                case 'asistencia':
+                    loadAsistencia();
+                    break;
                 case 'estudiantes':
                     loadEstudiantes();
                     break;
@@ -7924,5 +7927,963 @@ async function editarPublicacionForo(e) {
     } catch (error) {
         console.error('Error editando publicación:', error);
         alert('Error al editar la publicación');
+    }
+}
+
+
+// ============ SISTEMA DE ASISTENCIA ============
+
+// Cargar asistencia
+// Cargar asistencia
+async function loadAsistencia() {
+    const asistenciaContainer = document.getElementById('asistenciaContainer');
+    asistenciaContainer.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>';
+
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+
+        // Obtener color de la materia actual
+        const materiaColor = window.currentMateriaColor || '#667eea';
+
+        const esAdmin = currentUser.tipoUsuario === 'admin';
+
+        // 1. Cargar clases programadas
+        const clasesSnapshot = await db.collection('clases_programadas')
+            .where('aulaId', '==', currentAulaId)
+            .where('materia', '==', currentMateria)
+            .get();
+
+        if (clasesSnapshot.empty) {
+            asistenciaContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x"></i>
+                    <p>No hay clases programadas para esta materia</p>
+                    ${esAdmin ? '<small>Las clases se programan desde el Calendario</small>' : ''}
+                </div>
+            `;
+            return;
+        }
+
+        // 2. Pre-cargar estudiantes del aula (solo si es admin)
+        let estudiantesDelAula = [];
+        if (esAdmin) {
+            const estudiantesSnapshot = await db.collection('usuarios')
+                .where('tipoUsuario', '==', 'estudiante')
+                .get();
+
+            estudiantesSnapshot.forEach(doc => {
+                const estudiante = { id: doc.id, ...doc.data() };
+                const aulasEstudiante = estudiante.aulasAsignadas || estudiante.aulas || [];
+
+                let perteneceAlAula = false;
+                if (Array.isArray(aulasEstudiante)) {
+                    if (aulasEstudiante.includes(currentAulaId)) perteneceAlAula = true;
+                } else if (aulasEstudiante === currentAulaId) {
+                    perteneceAlAula = true;
+                }
+
+                if (perteneceAlAula) {
+                    estudiantesDelAula.push(estudiante);
+                }
+            });
+
+            // Ordenar alfabéticamente
+            estudiantesDelAula.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+        }
+
+        // 3. Pre-cargar TODA la asistencia del aula y materia
+        const asistenciaGlobalMap = new Map(); // Map de Maps: claseId -> (estudianteId -> asistencia)
+
+        try {
+            const asistenciaSnapshot = await db.collection('asistencia')
+                .where('aulaId', '==', currentAulaId)
+                .where('materia', '==', currentMateria)
+                .get();
+
+            asistenciaSnapshot.forEach(doc => {
+                const data = doc.data();
+                const claseId = data.claseId;
+                const estudianteId = data.estudianteId;
+
+                if (!asistenciaGlobalMap.has(claseId)) {
+                    asistenciaGlobalMap.set(claseId, new Map());
+                }
+
+                asistenciaGlobalMap.get(claseId).set(estudianteId, { id: doc.id, ...data });
+            });
+        } catch (e) {
+            console.error("Error cargando historial de asistencia:", e);
+        }
+
+        // Organizar clases por fecha
+        const clases = [];
+        clasesSnapshot.forEach(doc => {
+            clases.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Ordenar por fecha (más recientes primero)
+        clases.sort((a, b) => {
+            const fechaA = a.fecha || '';
+            const fechaB = b.fecha || '';
+            return fechaB.localeCompare(fechaA);
+        });
+
+        // Calcular resumen de asistencia para estudiante
+        let resumenHTML = '';
+        if (!esAdmin) {
+            let totalClases = 0;
+            let asistencias = 0;
+            let faltas = 0;
+            let pendientes = 0;
+
+            const ahora = new Date();
+
+            clases.forEach(clase => {
+                const [yearClase, monthClase, dayClase] = (clase.fecha || '').split('-');
+                const [horaFinH, horaFinM] = (clase.horaFin || clase.horaInicio || '00:00').split(':');
+                const fechaFinClase = new Date(yearClase, monthClase - 1, dayClase, horaFinH, horaFinM);
+                
+                const claseYaPaso = ahora > fechaFinClase;
+                
+                if (claseYaPaso) {
+                    totalClases++;
+                    const asistenciaDeClase = asistenciaGlobalMap.get(clase.id) || new Map();
+                    const miAsistencia = asistenciaDeClase.get(currentUser.id);
+                    
+                    if (miAsistencia && miAsistencia.presente) {
+                        asistencias++;
+                    } else {
+                        faltas++;
+                    }
+                } else {
+                    pendientes++;
+                }
+            });
+
+            const porcentajeAsistencia = totalClases > 0 ? ((asistencias / totalClases) * 100).toFixed(1) : 0;
+
+            resumenHTML = `
+                <div class="asistencia-resumen-estudiante" style="--materia-color: ${materiaColor};">
+                    <div class="resumen-header">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <h3>Resumen de Asistencia</h3>
+                    </div>
+                    <div class="resumen-stats">
+                        <div class="resumen-stat-card asistencias">
+                            <div class="stat-icon">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">${asistencias}</span>
+                                <span class="stat-label">Asistencias</span>
+                            </div>
+                        </div>
+                        <div class="resumen-stat-card faltas">
+                            <div class="stat-icon">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">${faltas}</span>
+                                <span class="stat-label">Faltas</span>
+                            </div>
+                        </div>
+                        <div class="resumen-stat-card total">
+                            <div class="stat-icon">
+                                <i class="bi bi-calendar-check-fill"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">${totalClases}</span>
+                                <span class="stat-label">Total Clases</span>
+                            </div>
+                        </div>
+                        <div class="resumen-stat-card porcentaje">
+                            <div class="stat-icon">
+                                <i class="bi bi-percent"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">${porcentajeAsistencia}%</span>
+                                <span class="stat-label">Asistencia</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderizar lista de clases usando datos pre-cargados
+        let clasesHTML = '';
+        for (const clase of clases) {
+            // Obtenemos la asistencia específica para esta clase del mapa global
+            const asistenciaDeClase = asistenciaGlobalMap.get(clase.id) || new Map();
+
+            // Renderizamos pasando los datos ya listos
+            clasesHTML += renderClaseAsistencia(clase, estudiantesDelAula, asistenciaDeClase, esAdmin, materiaColor);
+        }
+
+        // Crear filtros
+        const filtrosHTML = `
+            <div class="asistencia-filtros">
+                <div class="filtro-busqueda">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="buscarClaseAsistencia" placeholder="Buscar clase..." class="filtro-input">
+                </div>
+                <div class="filtro-periodo">
+                    <i class="bi bi-calendar-range"></i>
+                    <select id="filtroPeriodoAsistencia" class="filtro-input">
+                        <option value="">Todos los períodos</option>
+                        <option value="hoy">Hoy</option>
+                        <option value="semana">Esta semana</option>
+                        <option value="mes">Este mes</option>
+                        <option value="mes-anterior">Mes anterior</option>
+                    </select>
+                </div>
+                <div class="filtro-estado">
+                    <i class="bi bi-funnel"></i>
+                    <select id="filtroEstadoAsistencia" class="filtro-input">
+                        <option value="">Todos los estados</option>
+                        <option value="en-curso">En curso</option>
+                        <option value="finalizada">Finalizadas</option>
+                        <option value="proxima">Próximas</option>
+                    </select>
+                </div>
+            </div>
+        `;
+
+        asistenciaContainer.innerHTML = `
+            ${resumenHTML}
+            ${filtrosHTML}
+            <div class="clases-asistencia-list" id="clasesAsistenciaList">
+                ${clasesHTML}
+            </div>
+        `;
+
+        // Event listeners para filtros
+        setupAsistenciaFiltros();
+        setupAsistenciaEventListeners();
+
+    } catch (error) {
+        console.error('Error al cargar asistencia:', error);
+        asistenciaContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>Error al cargar la asistencia</p>
+            </div>
+        `;
+    }
+}
+
+// Renderizar una clase para asistencia
+function renderClaseAsistencia(clase, estudiantesDelAula, asistenciaMap, esAdmin, materiaColor) {
+    const fecha = clase.fecha || '';
+    const horaInicio = clase.horaInicio || clase.hora || '00:00';
+    const horaFin = clase.horaFin || '';
+    const titulo = clase.titulo || 'Clase';
+
+    // Formatear fecha
+    let fechaFormateada = 'Fecha no disponible';
+    if (fecha) {
+        const [year, month, day] = fecha.split('-');
+        const fechaObj = new Date(year, month - 1, day);
+        fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        fechaFormateada = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+    }
+
+    // Verificar si la clase ya pasó y si está en horario
+    const ahora = new Date();
+    const [yearClase, monthClase, dayClase] = fecha.split('-');
+    const [horaInicioH, horaInicioM] = horaInicio.split(':');
+    const [horaFinH, horaFinM] = horaFin ? horaFin.split(':') : [horaInicioH, horaInicioM];
+
+    const fechaInicioClase = new Date(yearClase, monthClase - 1, dayClase, horaInicioH, horaInicioM);
+    const fechaFinClase = new Date(yearClase, monthClase - 1, dayClase, horaFinH, horaFinM);
+
+    const claseYaPaso = ahora > fechaFinClase;
+    const claseEnCurso = ahora >= fechaInicioClase && ahora <= fechaFinClase;
+
+    // Estado de la clase
+    let estadoHTML = '';
+    if (claseEnCurso) {
+        estadoHTML = `<span class="clase-estado en-curso" style="background: ${materiaColor};"><i class="bi bi-circle-fill"></i> En curso</span>`;
+    } else if (claseYaPaso) {
+        estadoHTML = `<span class="clase-estado finalizada"><i class="bi bi-check-circle"></i> Finalizada</span>`;
+    } else {
+        estadoHTML = `<span class="clase-estado proxima"><i class="bi bi-clock"></i> Próxima</span>`;
+    }
+
+    // Si es estudiante, mostrar solo su asistencia
+    if (!esAdmin) {
+        const miAsistencia = asistenciaMap.get(currentUser.id);
+        const tieneRegistro = miAsistencia !== undefined;
+        const asistio = miAsistencia?.presente || false;
+
+        let estadoAsistenciaHTML = '';
+        if (!tieneRegistro) {
+            // No hay registro de asistencia
+            if (claseYaPaso) {
+                // Clase ya pasó y no se marcó = Ausente
+                estadoAsistenciaHTML = `
+                    <div class="mi-asistencia-status ausente">
+                        <i class="bi bi-x-circle-fill"></i>
+                        <span>Ausente</span>
+                    </div>
+                `;
+            } else {
+                // Clase en curso o futura = Pendiente
+                estadoAsistenciaHTML = `
+                    <div class="mi-asistencia-status pendiente">
+                        <i class="bi bi-clock-fill"></i>
+                        <span>Pendiente de registro</span>
+                    </div>
+                `;
+            }
+        } else {
+            // Hay registro de asistencia
+            estadoAsistenciaHTML = `
+                <div class="mi-asistencia-status ${asistio ? 'presente' : 'ausente'}">
+                    <i class="bi ${asistio ? 'bi-check-circle-fill' : 'bi-x-circle-fill'}"></i>
+                    <span>${asistio ? 'Presente' : 'Ausente'}</span>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="clase-asistencia-card">
+                <div class="clase-asistencia-header">
+                    <div class="clase-info">
+                        <h4>${titulo}</h4>
+                        <p class="clase-fecha"><i class="bi bi-calendar3"></i> ${fechaFormateada}</p>
+                        <p class="clase-hora"><i class="bi bi-clock"></i> ${horaInicio}${horaFin ? ` - ${horaFin}` : ''}</p>
+                    </div>
+                    ${estadoHTML}
+                </div>
+                <div class="clase-asistencia-body">
+                    ${estadoAsistenciaHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    // Si es admin, mostrar lista de estudiantes
+    // Contar presentes, ausentes y pendientes
+    const totalEstudiantes = estudiantesDelAula.length;
+    let presentes = 0;
+    let ausentes = 0;
+    let pendientes = 0;
+
+    estudiantesDelAula.forEach(e => {
+        const asistencia = asistenciaMap.get(e.id);
+        if (asistencia === undefined) {
+            if (claseYaPaso) {
+                ausentes++; // No se marcó y ya pasó = ausente
+            } else {
+                pendientes++; // No se ha marcado aún = pendiente
+            }
+        } else if (asistencia.presente) {
+            presentes++;
+        } else {
+            ausentes++;
+        }
+    });
+
+    // Renderizar lista de estudiantes
+    let estudiantesHTML = '';
+    estudiantesDelAula.forEach(estudiante => {
+        const asistencia = asistenciaMap.get(estudiante.id);
+        const tieneRegistro = asistencia !== undefined;
+        const presente = asistencia?.presente || false;
+        const foto = estudiante.fotoPerfil || '';
+
+        // Solo permitir marcar asistencia si la clase está en curso o ya pasó (para correcciones)
+        // No permitir si es una clase futura
+        const puedeMarcar = claseEnCurso || claseYaPaso;
+
+        // Determinar el estado visual
+        let estadoClase = '';
+        if (!tieneRegistro) {
+            if (claseYaPaso) {
+                estadoClase = 'ausente'; // No se marcó y ya pasó = ausente
+            } else {
+                estadoClase = 'pendiente'; // No se ha marcado aún
+            }
+        } else {
+            estadoClase = presente ? 'presente' : 'ausente';
+        }
+
+        estudiantesHTML += `
+            <div class="estudiante-asistencia-item ${estadoClase}">
+                <div class="estudiante-asistencia-info">
+                    <div class="estudiante-asistencia-avatar" style="background: ${materiaColor};">
+                        ${foto ? `<img src="${foto}" alt="${estudiante.nombre}">` : '<i class="bi bi-person-fill"></i>'}
+                    </div>
+                    <span class="estudiante-asistencia-nombre">${estudiante.nombre}</span>
+                </div>
+                <div class="asistencia-actions" 
+                     data-clase-id="${clase.id}" 
+                     data-estudiante-id="${estudiante.id}"
+                     data-asistencia-id="${asistencia?.id || ''}">
+                    <button class="btn-asistencia presente ${presente ? 'active' : ''}" 
+                            onclick="marcarAsistencia('${clase.id}', '${estudiante.id}', null, true)"
+                            ${!puedeMarcar ? 'disabled' : ''}>
+                        <i class="bi bi-check-circle${presente ? '-fill' : ''}"></i> Presente
+                    </button>
+                    <button class="btn-asistencia ausente ${!presente && tieneRegistro ? 'active' : ''}" 
+                            onclick="marcarAsistencia('${clase.id}', '${estudiante.id}', null, false)"
+                            ${!puedeMarcar ? 'disabled' : ''}>
+                        <i class="bi bi-x-circle${!presente && tieneRegistro ? '-fill' : ''}"></i> Ausente
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    // Determinar si la clase debe iniciar expandida (solo si está en curso)
+    const expandida = claseEnCurso;
+
+    return `
+        <div class="clase-asistencia-card admin ${expandida ? 'expanded' : 'collapsed'}" data-clase-id="${clase.id}">
+            <div class="clase-asistencia-header collapsible-header" onclick="toggleClaseAsistencia(this)">
+                <div class="clase-info">
+                    <div class="toggle-indicator">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                    <div class="clase-details">
+                        <h4>${titulo}</h4>
+                        <p class="clase-fecha"><i class="bi bi-calendar3"></i> ${fechaFormateada}</p>
+                        <p class="clase-hora"><i class="bi bi-clock"></i> ${horaInicio}${horaFin ? ` - ${horaFin}` : ''}</p>
+                    </div>
+                </div>
+                <div class="clase-header-right">
+                    ${estadoHTML}
+                    <div class="asistencia-stats">
+                        <span class="stat-item presentes" style="color: ${materiaColor};">
+                            <i class="bi bi-check-circle-fill"></i> ${presentes}
+                        </span>
+                        <span class="stat-item ausentes">
+                            <i class="bi bi-x-circle-fill"></i> ${ausentes}
+                        </span>
+                        ${pendientes > 0 ? `
+                            <span class="stat-item pendientes">
+                                <i class="bi bi-clock-fill"></i> ${pendientes}
+                            </span>
+                        ` : ''}
+                        <span class="stat-item total">
+                            <i class="bi bi-people-fill"></i> ${totalEstudiantes}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="clase-asistencia-body collapsible-content">
+                ${!claseEnCurso && !claseYaPaso ? `
+                    <div class="asistencia-warning">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Esta clase aún no ha comenzado. La asistencia se podrá marcar a partir de las ${horaInicio}</span>
+                    </div>
+                ` : ''}
+                <div class="clase-asistencia-tools">
+                    <div class="clase-search-container">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="clase-search-input" placeholder="Buscar estudiante..." data-clase-id="${clase.id}" oninput="filtrarEstudiantesEnClase(this)">
+                    </div>
+                    <div class="clase-quick-actions">
+                        <button class="btn-marcar-todos-presente" onclick="marcarTodosAsistencia('${clase.id}', true)" style="--materia-color: ${materiaColor};" ${!claseEnCurso && !claseYaPaso ? 'disabled' : ''}>
+                            <i class="bi bi-check-all"></i>
+                            Todos presentes
+                        </button>
+                        <button class="btn-marcar-todos-ausente" onclick="marcarTodosAsistencia('${clase.id}', false)" ${!claseEnCurso && !claseYaPaso ? 'disabled' : ''}>
+                            <i class="bi bi-x-lg"></i>
+                            Todos ausentes
+                        </button>
+                    </div>
+                </div>
+                <div class="estudiantes-asistencia-list" data-clase-id="${clase.id}">
+                    ${estudiantesHTML || '<p class="no-estudiantes">No hay estudiantes en esta aula</p>'}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Setup event listeners para asistencia
+function setupAsistenciaEventListeners() {
+    // Los botones y acciones ahora usan eventos inline (onclick) definidos en el HTML
+
+    // Buscador de estudiantes
+    const searchInput = document.getElementById('asistenciaSearchInput');
+    const clearBtn = document.getElementById('clearAsistenciaSearch');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            filterEstudiantesAsistencia(query);
+
+            if (clearBtn) {
+                clearBtn.style.display = query ? 'flex' : 'none';
+            }
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (searchInput) {
+                searchInput.value = '';
+                filterEstudiantesAsistencia('');
+                clearBtn.style.display = 'none';
+            }
+        });
+    }
+
+    // Botón expandir todas las clases
+    const expandAllBtn = document.getElementById('expandAllClases');
+    if (expandAllBtn) {
+        expandAllBtn.addEventListener('click', () => {
+            document.querySelectorAll('.clase-asistencia-card').forEach(card => {
+                card.classList.remove('collapsed');
+                card.classList.add('expanded');
+            });
+        });
+    }
+
+    // Botón colapsar todas las clases
+    const collapseAllBtn = document.getElementById('collapseAllClases');
+    if (collapseAllBtn) {
+        collapseAllBtn.addEventListener('click', () => {
+            document.querySelectorAll('.clase-asistencia-card').forEach(card => {
+                card.classList.remove('expanded');
+                card.classList.add('collapsed');
+            });
+        });
+    }
+}
+
+// Toggle clase asistencia (expandir/colapsar)
+function toggleClaseAsistencia(header) {
+    const card = header.closest('.clase-asistencia-card');
+    if (card) {
+        const isExpanded = card.classList.contains('expanded');
+        if (isExpanded) {
+            card.classList.remove('expanded');
+            card.classList.add('collapsed');
+        } else {
+            card.classList.remove('collapsed');
+            card.classList.add('expanded');
+        }
+    }
+}
+
+// Filtrar estudiantes dentro de una clase específica
+function filtrarEstudiantesEnClase(input) {
+    const claseId = input.getAttribute('data-clase-id');
+    const query = input.value.toLowerCase().trim();
+    const lista = document.querySelector(`.estudiantes-asistencia-list[data-clase-id="${claseId}"]`);
+
+    if (!lista) return;
+
+    const items = lista.querySelectorAll('.estudiante-asistencia-item');
+
+    items.forEach(item => {
+        const nombre = item.querySelector('.estudiante-asistencia-nombre')?.textContent.toLowerCase() || '';
+        if (!query || nombre.includes(query)) {
+            item.style.display = '';
+            if (query) {
+                item.classList.add('highlight-search');
+            } else {
+                item.classList.remove('highlight-search');
+            }
+        } else {
+            item.style.display = 'none';
+            item.classList.remove('highlight-search');
+        }
+    });
+}
+
+// Setup filtros de asistencia
+function setupAsistenciaFiltros() {
+    const buscarInput = document.getElementById('buscarClaseAsistencia');
+    const filtroPeriodo = document.getElementById('filtroPeriodoAsistencia');
+    const filtroEstado = document.getElementById('filtroEstadoAsistencia');
+
+    if (buscarInput) {
+        buscarInput.addEventListener('input', aplicarFiltrosAsistencia);
+    }
+
+    if (filtroPeriodo) {
+        filtroPeriodo.addEventListener('change', aplicarFiltrosAsistencia);
+    }
+
+    if (filtroEstado) {
+        filtroEstado.addEventListener('change', aplicarFiltrosAsistencia);
+    }
+}
+
+// Aplicar filtros de asistencia
+function aplicarFiltrosAsistencia() {
+    const buscarInput = document.getElementById('buscarClaseAsistencia');
+    const filtroPeriodo = document.getElementById('filtroPeriodoAsistencia');
+    const filtroEstado = document.getElementById('filtroEstadoAsistencia');
+
+    const queryBusqueda = buscarInput ? buscarInput.value.toLowerCase().trim() : '';
+    const periodoSeleccionado = filtroPeriodo ? filtroPeriodo.value : '';
+    const estadoSeleccionado = filtroEstado ? filtroEstado.value : '';
+
+    const clases = document.querySelectorAll('.clase-asistencia-card');
+    let clasesVisibles = 0;
+
+    // Calcular rangos de fechas según el período
+    const ahora = new Date();
+    let fechaInicio = null;
+    let fechaFin = null;
+
+    if (periodoSeleccionado === 'hoy') {
+        fechaInicio = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+        fechaFin = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 59);
+    } else if (periodoSeleccionado === 'semana') {
+        const diaSemana = ahora.getDay();
+        const diff = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+        fechaInicio = new Date(ahora.getFullYear(), ahora.getMonth(), diff);
+        fechaFin = new Date(fechaInicio);
+        fechaFin.setDate(fechaInicio.getDate() + 6);
+        fechaFin.setHours(23, 59, 59);
+    } else if (periodoSeleccionado === 'mes') {
+        fechaInicio = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+        fechaFin = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59);
+    } else if (periodoSeleccionado === 'mes-anterior') {
+        fechaInicio = new Date(ahora.getFullYear(), ahora.getMonth() - 1, 1);
+        fechaFin = new Date(ahora.getFullYear(), ahora.getMonth(), 0, 23, 59, 59);
+    }
+
+    clases.forEach(clase => {
+        let mostrar = true;
+
+        // Filtro por búsqueda de nombre
+        if (queryBusqueda) {
+            const titulo = clase.querySelector('.clase-details h4')?.textContent.toLowerCase() || '';
+            if (!titulo.includes(queryBusqueda)) {
+                mostrar = false;
+            }
+        }
+
+        // Filtro por período
+        if (periodoSeleccionado && mostrar) {
+            const fechaTexto = clase.querySelector('.clase-fecha')?.textContent || '';
+            
+            // Extraer fecha del atributo data o del texto
+            const claseDataId = clase.getAttribute('data-clase-id');
+            
+            // Intentar extraer la fecha del texto
+            // Buscar patrón de fecha en el texto
+            const fechaMatch = fechaTexto.match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
+            
+            if (fechaMatch) {
+                const meses = {
+                    'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3,
+                    'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7,
+                    'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+                };
+                
+                const dia = parseInt(fechaMatch[1]);
+                const mes = meses[fechaMatch[2].toLowerCase()];
+                const año = parseInt(fechaMatch[3]);
+                
+                const fechaClase = new Date(año, mes, dia);
+                
+                if (fechaInicio && fechaFin) {
+                    if (fechaClase < fechaInicio || fechaClase > fechaFin) {
+                        mostrar = false;
+                    }
+                }
+            }
+        }
+
+        // Filtro por estado
+        if (estadoSeleccionado && mostrar) {
+            const estadoBadge = clase.querySelector('.clase-estado');
+            if (estadoBadge) {
+                const tieneEstado = estadoBadge.classList.contains(estadoSeleccionado);
+                if (!tieneEstado) {
+                    mostrar = false;
+                }
+            }
+        }
+
+        if (mostrar) {
+            clase.style.display = '';
+            clasesVisibles++;
+        } else {
+            clase.style.display = 'none';
+        }
+    });
+
+    // Mostrar mensaje si no hay resultados
+    const lista = document.getElementById('clasesAsistenciaList');
+    if (lista) {
+        let mensajeNoResultados = lista.querySelector('.no-resultados-filtro');
+        
+        if (clasesVisibles === 0) {
+            if (!mensajeNoResultados) {
+                mensajeNoResultados = document.createElement('div');
+                mensajeNoResultados.className = 'no-resultados-filtro empty-state';
+                mensajeNoResultados.innerHTML = `
+                    <i class="bi bi-search"></i>
+                    <p>No se encontraron clases con los filtros aplicados</p>
+                    <small>Intenta ajustar los filtros de búsqueda</small>
+                `;
+                lista.appendChild(mensajeNoResultados);
+            }
+        } else {
+            if (mensajeNoResultados) {
+                mensajeNoResultados.remove();
+            }
+        }
+    }
+}
+
+// Marcar todos los estudiantes visibles como presentes o ausentes
+async function marcarTodosAsistencia(claseId, presente) {
+    const lista = document.querySelector(`.estudiantes-asistencia-list[data-clase-id="${claseId}"]`);
+    if (!lista) return;
+
+    // Obtener solo los items visibles (no ocultos por el filtro)
+    // Usamos getComputedStyle para estar seguros de qué se ve realmente
+    const items = Array.from(lista.querySelectorAll('.estudiante-asistencia-item'));
+    const itemsVisibles = items.filter(item => {
+        return window.getComputedStyle(item).display !== 'none';
+    });
+
+    // Obtener contenedores de acciones válidos (no deshabilitados)
+    const validActions = itemsVisibles
+        .map(item => {
+            const actions = item.querySelector('.asistencia-actions');
+            const btn = actions ? actions.querySelector('.btn-asistencia') : null;
+            if (btn && !btn.disabled) return actions;
+            return null;
+        })
+        .filter(action => action !== null);
+
+    if (validActions.length === 0) {
+        alert('No hay estudiantes visibles para marcar. Revise su filtro de búsqueda.');
+        return;
+    }
+
+    const confirmMsg = presente
+        ? `¿Marcar ${validActions.length} estudiantes como PRESENTES?`
+        : `¿Marcar ${validActions.length} estudiantes como AUSENTES?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    // Mostrar estado de carga visual en la tarjeta
+    const card = document.querySelector(`.clase-asistencia-card[data-clase-id="${claseId}"]`);
+    if (card) {
+        card.style.opacity = '0.7';
+        card.style.pointerEvents = 'none'; // Prevenir clicks múltiples
+        card.style.cursor = 'wait';
+    }
+
+    try {
+        const db = window.firebaseDB;
+        const batch = db.batch(); // Usar batch para atomicidad y velocidad
+        const updatesUI = []; // Array para guardar info necesaria para actualizar UI después
+
+        for (const actionContainer of validActions) {
+            const estudianteId = actionContainer.getAttribute('data-estudiante-id');
+            const asistenciaId = actionContainer.getAttribute('data-asistencia-id');
+            const data = {
+                claseId: claseId,
+                estudianteId: estudianteId,
+                aulaId: currentAulaId,
+                materia: currentMateria,
+                presente: presente,
+                fechaRegistro: firebase.firestore.Timestamp.now(),
+                registradoPor: currentUser.id
+            };
+
+            const updateInfo = { actionContainer, asistenciaId, estudianteId };
+
+            if (asistenciaId) {
+                // Actualizar existente
+                const ref = db.collection('asistencia').doc(asistenciaId);
+                batch.update(ref, {
+                    presente: presente,
+                    fechaRegistro: data.fechaRegistro,
+                    registradoPor: data.registradoPor
+                });
+            } else {
+                // Crear nueva
+                const newRef = db.collection('asistencia').doc();
+                batch.set(newRef, data);
+                // Guardar el nuevo ID para actualizar el DOM luego
+                updateInfo.newId = newRef.id;
+            }
+            updatesUI.push(updateInfo);
+        }
+
+        await batch.commit();
+
+        // Actualizar UI Localmente
+        for (const update of updatesUI) {
+            const { actionContainer, newId, estudianteId } = update;
+
+            // Si es nuevo, asignar el ID creado
+            if (newId) {
+                actionContainer.setAttribute('data-asistencia-id', newId);
+            }
+
+            // Actualizar estilos
+            actualizarEstiloEstudiante(claseId, estudianteId, presente);
+        }
+
+        // Actualizar contadores globales de la clase
+        actualizarContadoresClase(claseId);
+
+    } catch (error) {
+        console.error('Error al marcar asistencia masiva:', error);
+        alert('Error al marcar la asistencia. Intente nuevamente.');
+    } finally {
+        if (card) {
+            card.style.opacity = '1';
+            card.style.pointerEvents = 'all';
+            card.style.cursor = 'default';
+        }
+    }
+}
+
+// Marcar asistencia individual
+async function marcarAsistencia(claseId, estudianteId, asistenciaId, presente) {
+    try {
+        const db = window.firebaseDB;
+
+        // Si no se pasa ID, intentar buscarlo en el DOM (del contenedor de botones)
+        let currentAsistenciaId = asistenciaId;
+        const actionsContainer = document.querySelector(`.asistencia-actions[data-clase-id="${claseId}"][data-estudiante-id="${estudianteId}"]`);
+
+        if (!currentAsistenciaId && actionsContainer) {
+            currentAsistenciaId = actionsContainer.getAttribute('data-asistencia-id');
+        }
+
+        if (currentAsistenciaId) {
+            // Actualizar asistencia existente
+            await db.collection('asistencia').doc(currentAsistenciaId).update({
+                presente: presente,
+                fechaRegistro: firebase.firestore.Timestamp.now(),
+                registradoPor: currentUser.id
+            });
+        } else {
+            // Crear nueva asistencia
+            const docRef = await db.collection('asistencia').add({
+                claseId: claseId,
+                estudianteId: estudianteId,
+                aulaId: currentAulaId,
+                materia: currentMateria,
+                presente: presente,
+                fechaRegistro: firebase.firestore.Timestamp.now(),
+                registradoPor: currentUser.id
+            });
+
+            // Guardar el nuevo ID en el contenedor para futuras ediciones
+            if (actionsContainer) {
+                actionsContainer.setAttribute('data-asistencia-id', docRef.id);
+            }
+        }
+
+        // Actualizar UI localmente (contadores y estilos visuales)
+        // IMPORTANTE: Primero actualizar estilo (clases CSS) y luego contar
+        actualizarEstiloEstudiante(claseId, estudianteId, presente);
+        actualizarContadoresClase(claseId);
+
+    } catch (error) {
+        console.error('Error al marcar asistencia:', error);
+        alert('Error al registrar la asistencia');
+        // No hay checkbox para revertir, pero podríamos actualizar el estilo al estado anterior si fuera necesario
+    }
+}
+
+// Función auxiliar para actualizar contadores sin recargar
+function actualizarContadoresClase(claseId) {
+    const card = document.querySelector(`.clase-asistencia-card[data-clase-id="${claseId}"]`);
+    if (!card) return;
+
+    // Contar basándose en las clases visuales de los items
+    const items = card.querySelectorAll('.estudiante-asistencia-item');
+    let presentes = 0;
+    let ausentes = 0;
+    let pendientes = 0;
+
+    items.forEach(item => {
+        if (item.classList.contains('presente')) presentes++;
+        else if (item.classList.contains('ausente')) ausentes++;
+        else pendientes++;
+    });
+
+    // Actualizar números
+    const statPresentes = card.querySelector('.stat-item.presentes');
+    if (statPresentes) statPresentes.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${presentes}`;
+
+    const statAusentes = card.querySelector('.stat-item.ausentes');
+    if (statAusentes) statAusentes.innerHTML = `<i class="bi bi-x-circle-fill"></i> ${ausentes}`;
+
+    // Actualizar pendientes
+    let statPendientes = card.querySelector('.stat-item.pendientes');
+
+    if (pendientes > 0) {
+        if (statPendientes) {
+            statPendientes.innerHTML = `<i class="bi bi-clock-fill"></i> ${pendientes}`;
+            statPendientes.style.display = '';
+        } else {
+            const statTotal = card.querySelector('.stat-item.total');
+            if (statTotal) {
+                const span = document.createElement('span');
+                span.className = 'stat-item pendientes';
+                span.innerHTML = `<i class="bi bi-clock-fill"></i> ${pendientes}`;
+                statTotal.parentNode.insertBefore(span, statTotal);
+            }
+        }
+    } else {
+        if (statPendientes) statPendientes.style.display = 'none';
+    }
+}
+
+// Función auxiliar para actualizar estilo de estudiante individual
+function actualizarEstiloEstudiante(claseId, estudianteId, presente) {
+    const actions = document.querySelector(`.asistencia-actions[data-clase-id="${claseId}"][data-estudiante-id="${estudianteId}"]`);
+    if (!actions) return;
+
+    const item = actions.closest('.estudiante-asistencia-item');
+    if (item) {
+        // Remover clases anteriores
+        item.classList.remove('presente', 'ausente', 'pendiente');
+
+        // Agregar nueva clase
+        item.classList.add(presente ? 'presente' : 'ausente');
+    }
+
+    // Actualizar botones
+    const btnPresente = actions.querySelector('.btn-asistencia.presente');
+    const btnAusente = actions.querySelector('.btn-asistencia.ausente');
+
+    if (btnPresente && btnAusente) {
+        if (presente) {
+            btnPresente.classList.add('active');
+            btnAusente.classList.remove('active');
+            // Update icons
+            const iconP = btnPresente.querySelector('i');
+            if (iconP) iconP.className = 'bi bi-check-circle-fill';
+
+            const iconA = btnAusente.querySelector('i');
+            if (iconA) iconA.className = 'bi bi-x-circle';
+        } else {
+            btnPresente.classList.remove('active');
+            btnAusente.classList.add('active');
+            // Update icons
+            const iconP = btnPresente.querySelector('i');
+            if (iconP) iconP.className = 'bi bi-check-circle';
+
+            const iconA = btnAusente.querySelector('i');
+            if (iconA) iconA.className = 'bi bi-x-circle-fill';
+        }
     }
 }
