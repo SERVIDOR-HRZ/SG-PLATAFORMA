@@ -277,8 +277,8 @@ function renderCalendarioMensualEst() {
 
     grid.innerHTML = '';
 
-    // Headers de días
-    const dias = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+    // Headers de días (Lunes a Domingo)
+    const dias = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
     dias.forEach(dia => {
         const header = document.createElement('div');
         header.className = 'dia-header';
@@ -290,7 +290,10 @@ function renderCalendarioMensualEst() {
     const month = calendarioEstCurrentMonth.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const startDay = firstDay.getDay();
+    
+    // Ajustar para que Lunes sea el primer día (0=Domingo, 1=Lunes, etc.)
+    let startDay = firstDay.getDay();
+    startDay = startDay === 0 ? 6 : startDay - 1; // Convertir Domingo (0) a 6, y restar 1 al resto
 
     // Días del mes anterior
     const prevMonthLastDay = new Date(year, month, 0).getDate();
@@ -326,11 +329,19 @@ function crearCeldaDiaEst(date, isOtherMonth, grid) {
     if (isOtherMonth) cell.classList.add('otro-mes');
 
     const today = new Date();
-    if (date.toDateString() === today.toDateString()) {
+    today.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0);
+    
+    if (compareDate.getTime() === today.getTime()) {
         cell.classList.add('hoy');
     }
 
-    const dateStr = date.toISOString().split('T')[0];
+    // Formatear fecha correctamente sin problemas de zona horaria
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
 
     const dayNumber = document.createElement('div');
     dayNumber.className = 'dia-numero';
@@ -386,8 +397,18 @@ function renderCalendarioSemanalEst() {
     for (let i = 0; i < 7; i++) {
         const currentDate = new Date(startOfWeek);
         currentDate.setDate(startOfWeek.getDate() + i);
-        const dateStr = currentDate.toISOString().split('T')[0];
-        const isToday = currentDate.toDateString() === today.toDateString();
+        
+        // Formatear fecha correctamente sin problemas de zona horaria
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        
+        const todayCompare = new Date(today);
+        todayCompare.setHours(0, 0, 0, 0);
+        const currentCompare = new Date(currentDate);
+        currentCompare.setHours(0, 0, 0, 0);
+        const isToday = currentCompare.getTime() === todayCompare.getTime();
 
         const card = document.createElement('div');
         card.className = `dia-semana-card ${isToday ? 'hoy' : ''}`;
@@ -464,7 +485,9 @@ function mostrarDetalleClaseEst(clase) {
     // Body
     const body = modal.querySelector('.modal-clase-body');
     
-    const fecha = new Date(clase.fecha + 'T00:00:00');
+    // Parsear fecha correctamente sin problemas de zona horaria
+    const [year, month, day] = clase.fecha.split('-').map(Number);
+    const fecha = new Date(year, month - 1, day);
     const fechaStr = fecha.toLocaleDateString('es-ES', { 
         weekday: 'long', 
         day: 'numeric', 

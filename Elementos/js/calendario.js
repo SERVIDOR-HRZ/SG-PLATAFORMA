@@ -603,9 +603,17 @@ function createDayCell(date, isOtherMonth) {
     if (isOtherMonth) cell.classList.add('other-month');
 
     const today = new Date();
-    if (date.toDateString() === today.toDateString()) cell.classList.add('today');
+    today.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0);
+    
+    if (compareDate.getTime() === today.getTime()) cell.classList.add('today');
 
-    const dateStr = date.toISOString().split('T')[0];
+    // Formatear fecha correctamente sin problemas de zona horaria
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
     cell.dataset.date = dateStr;
 
     const dayNumber = document.createElement('div');
@@ -648,8 +656,9 @@ async function loadClasses() {
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
 
-        const startDate = firstDay.toISOString().split('T')[0];
-        const endDate = lastDay.toISOString().split('T')[0];
+        // Formatear fechas correctamente sin problemas de zona horaria
+        const startDate = `${firstDay.getFullYear()}-${String(firstDay.getMonth() + 1).padStart(2, '0')}-${String(firstDay.getDate()).padStart(2, '0')}`;
+        const endDate = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
 
         // Obtener clases filtradas por aula
         const clasesSnapshot = await db.collection('clases_programadas')
@@ -776,7 +785,9 @@ function renderClassList(clasesSnapshot) {
         classCard.dataset.materia = clase.materia;
         classCard.dataset.estado = estadoClase;
 
-        const fecha = new Date(clase.fecha + 'T00:00:00');
+        // Parsear fecha correctamente sin problemas de zona horaria
+        const [year, month, day] = clase.fecha.split('-').map(Number);
+        const fecha = new Date(year, month - 1, day);
         const fechaStr = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         const fechaCorta = fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 
@@ -937,7 +948,11 @@ function openNewClassModal(date = null) {
     modal.classList.add('active');
 
     if (date) {
-        document.getElementById('fechaClase').value = date.toISOString().split('T')[0];
+        // Formatear fecha correctamente sin problemas de zona horaria
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        document.getElementById('fechaClase').value = `${year}-${month}-${day}`;
     }
 }
 
@@ -1074,7 +1089,9 @@ async function viewClassModal(claseId) {
         document.getElementById('verClaseTema').textContent = clase.tema || '-';
         document.getElementById('verClaseTutor').textContent = clase.tutorNombre || '-';
 
-        const fecha = new Date(clase.fecha + 'T00:00:00');
+        // Parsear fecha correctamente sin problemas de zona horaria
+        const [year, month, day] = clase.fecha.split('-').map(Number);
+        const fecha = new Date(year, month - 1, day);
         const fechaStr = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         document.getElementById('verClaseFecha').textContent = fechaStr;
 
@@ -1405,7 +1422,9 @@ function viewClassDetails(clase) {
         'ingles': 'Inglés'
     };
 
-    const fecha = new Date(clase.fecha + 'T00:00:00');
+    // Parsear fecha correctamente sin problemas de zona horaria
+    const [year, month, day] = clase.fecha.split('-').map(Number);
+    const fecha = new Date(year, month - 1, day);
     const fechaStr = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
     let mensaje = `📚 ${clase.titulo}\n\n`;
@@ -1428,7 +1447,9 @@ async function crearAnuncioClase(clase) {
     try {
         const db = window.firebaseDB;
 
-        const fecha = new Date(clase.fecha + 'T00:00:00');
+        // Parsear fecha correctamente sin problemas de zona horaria
+        const [year, month, day] = clase.fecha.split('-').map(Number);
+        const fecha = new Date(year, month - 1, day);
         const fechaStr = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
         const tipologiasNombres = {
@@ -1473,7 +1494,9 @@ async function actualizarAnuncioClase(claseId, clase) {
     try {
         const db = window.firebaseDB;
 
-        const fecha = new Date(clase.fecha + 'T00:00:00');
+        // Parsear fecha correctamente sin problemas de zona horaria
+        const [year, month, day] = clase.fecha.split('-').map(Number);
+        const fecha = new Date(year, month - 1, day);
         const fechaStr = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
         const tipologiasNombres = {
@@ -1526,7 +1549,9 @@ async function actualizarAnuncioCancelacion(clase) {
     try {
         const db = window.firebaseDB;
 
-        const fecha = new Date(clase.fecha + 'T00:00:00');
+        // Parsear fecha correctamente sin problemas de zona horaria
+        const [year, month, day] = clase.fecha.split('-').map(Number);
+        const fecha = new Date(year, month - 1, day);
         const fechaStr = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         const horaDisplay = clase.horaInicio && clase.horaFin ? `${clase.horaInicio} - ${clase.horaFin}` : '';
 
