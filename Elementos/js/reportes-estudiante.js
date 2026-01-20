@@ -273,6 +273,9 @@ function mostrarReportes(reportes) {
                     <button class="btn-descargar" onclick="descargarReporte('${reporte.id}')">
                         <i class="bi bi-download"></i> Descargar
                     </button>
+                    <button class="btn-eliminar" onclick="eliminarReporte('${reporte.id}', '${reporte.pruebaNombre}')">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
                 </div>
             </div>
         `;
@@ -672,4 +675,99 @@ function handleLogout() {
             window.location.href = '../index.html';
         }
     });
+}
+
+
+// Función para eliminar un reporte
+async function eliminarReporte(reporteId, pruebaNombre) {
+    // Confirmar eliminación
+    const confirmacion = await Swal.fire({
+        title: '¿Eliminar este reporte?',
+        html: `
+            <p>Estás a punto de eliminar el reporte de:</p>
+            <p style="font-weight: bold; margin-top: 1rem;">${pruebaNombre}</p>
+            <p style="color: #dc3545; font-weight: 600; margin-top: 1rem;">Esta acción no se puede deshacer.</p>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (!confirmacion.isConfirmed) return;
+    
+    try {
+        // Mostrar loading
+        Swal.fire({
+            title: 'Eliminando reporte...',
+            text: 'Por favor espere',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        const db = window.firebaseDB;
+        
+        // Eliminar el reporte
+        await db.collection('reportes').doc(reporteId).delete();
+        
+        Swal.close();
+        
+        // Mostrar confirmación
+        Swal.fire({
+            icon: 'success',
+            title: 'Reporte eliminado',
+            text: 'El reporte se eliminó correctamente',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        
+        // Si el reporte eliminado era el actual, limpiar la vista
+        if (reporteActual && reporteActual.id === reporteId) {
+            reporteActual = null;
+            document.getElementById('btnDescargarPDF').disabled = true;
+            limpiarVistaReporte();
+        }
+        
+        // Recargar la lista de reportes
+        await cargarReportesEstudiante();
+        
+    } catch (error) {
+        console.error('Error eliminando reporte:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo eliminar el reporte: ' + error.message
+        });
+    }
+}
+
+// Función para limpiar la vista del reporte
+function limpiarVistaReporte() {
+    // Limpiar formulario
+    document.getElementById('nombreEstudiante').value = 'USUARIO';
+    document.getElementById('identificacionEstudiante').value = '';
+    document.getElementById('telefonoEstudiante').value = '';
+    document.getElementById('municipioEstudiante').value = '';
+    document.getElementById('tipoDocumento').value = 'CC';
+    document.getElementById('calEstudiante').value = 'ESTUDIANTE';
+    document.getElementById('sg11Numero').value = '';
+    
+    // Resetear puntajes
+    document.querySelectorAll('.puntaje-input').forEach(input => {
+        input.value = 0;
+        actualizarRangoActivo(input);
+        actualizarNivelVisual(input);
+    });
+    
+    // Actualizar gráfico
+    graficoBarras.data.datasets[0].data = [0, 0, 0, 0, 0];
+    graficoBarras.update('active');
+    
+    // Resetear puntaje global y percentil
+    document.getElementById('puntajeGlobal').textContent = '0';
+    document.getElementById('percentilGeneral').textContent = '0';
 }

@@ -1217,7 +1217,7 @@ Estilos específicos para la vista de estudiantes */
     gap: 0.5rem;
 }
 
-.btn-ver, .btn-descargar {
+.btn-ver, .btn-descargar, .btn-eliminar {
     padding: 0.4rem 0.8rem;
     border: none;
     border-radius: 6px;
@@ -1247,6 +1247,16 @@ Estilos específicos para la vista de estudiantes */
 
 .btn-descargar:hover {
     background: #218838;
+    transform: translateY(-1px);
+}
+
+.btn-eliminar {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-eliminar:hover {
+    background: #c82333;
     transform: translateY(-1px);
 }
 
@@ -1318,7 +1328,7 @@ Estilos específicos para la vista de estudiantes */
         flex-direction: column;
     }
     
-    .btn-ver, .btn-descargar {
+    .btn-ver, .btn-descargar, .btn-eliminar {
         justify-content: center;
     }
 }

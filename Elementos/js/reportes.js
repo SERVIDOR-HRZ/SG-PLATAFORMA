@@ -321,6 +321,60 @@ async function mostrarInfoEstudiante() {
                 confirmButtonText: 'Entendido'
             });
         } else {
+            // VALIDAR BLOQUES ANTES DE PEDIR EL CÓDIGO SG11
+            console.log('=== VALIDANDO BLOQUES ANTES DE GENERAR ===');
+            
+            // Cargar información de la prueba
+            const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
+            if (!pruebaDoc.exists) {
+                throw new Error('No se encontró la prueba');
+            }
+            
+            const pruebaData = pruebaDoc.data();
+            
+            // Determinar cuántos bloques tiene la prueba
+            const bloquesEnPrueba = [];
+            if (pruebaData.bloque1 && pruebaData.bloque1.habilitado !== false) {
+                bloquesEnPrueba.push(1);
+            }
+            if (pruebaData.bloque2 && pruebaData.bloque2.habilitado !== false) {
+                bloquesEnPrueba.push(2);
+            }
+            
+            console.log('Bloques en prueba:', bloquesEnPrueba);
+            
+            // Obtener los bloques que completó el estudiante
+            const respuestasSnapshot = await db.collection('respuestas')
+                .where('pruebaId', '==', pruebaId)
+                .where('estudianteId', '==', estudianteId)
+                .get();
+            
+            const bloquesCompletados = [];
+            respuestasSnapshot.forEach(doc => {
+                const respuesta = doc.data();
+                if (respuesta.bloque && !bloquesCompletados.includes(respuesta.bloque)) {
+                    bloquesCompletados.push(respuesta.bloque);
+                }
+            });
+            
+            console.log('Bloques completados por estudiante:', bloquesCompletados);
+            
+            // Validar si completó todos los bloques
+            if (bloquesEnPrueba.length > 1 && bloquesCompletados.length < bloquesEnPrueba.length) {
+                const bloquesFaltantes = bloquesEnPrueba.filter(b => !bloquesCompletados.includes(b));
+                console.log('❌ FALTAN BLOQUES:', bloquesFaltantes);
+                
+                // Lanzar error inmediatamente
+                throw new Error(`BLOQUES_INCOMPLETOS:El estudiante no ha completado todos los bloques de la prueba. Faltan: Bloque ${bloquesFaltantes.join(', Bloque ')}`);
+            }
+            
+            console.log('✅ Todos los bloques completados, procediendo a pedir código SG11');
+            
+            // Ocultar overlay de carga antes de mostrar el diálogo
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+            
             // Pedir código SG11 antes de generar
             const { value: sg11Codigo } = await Swal.fire({
                 title: 'Código SG11',
@@ -353,14 +407,21 @@ async function mostrarInfoEstudiante() {
             
             if (!sg11Codigo) {
                 // Usuario canceló
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'none';
-                }
                 return;
+            }
+            
+            // Mostrar overlay de carga mientras se genera el reporte
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
             }
             
             // Generar nuevo reporte con el código SG11
             await generarReporteAutomatico(pruebaId, estudianteId, sg11Codigo);
+            
+            // Ocultar overlay
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
             
             // Mostrar confirmación
             Swal.fire({
@@ -376,17 +437,39 @@ async function mostrarInfoEstudiante() {
         }
 
         document.getElementById('btnDescargarPDF').disabled = false;
-        document.getElementById('btnGuardarCambios').disabled = false;
         document.getElementById('btnEliminarReporteActual').disabled = false;
 
     } catch (error) {
         console.error('Error cargando información del estudiante:', error);
+        console.error('Tipo de error:', error.constructor.name);
+        console.error('Mensaje completo:', error.message);
         
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'No se pudo cargar la información del estudiante'
-        });
+        // Verificar si es un error de bloques incompletos
+        if (error.message && error.message.includes('BLOQUES_INCOMPLETOS:')) {
+            const mensaje = error.message.replace('BLOQUES_INCOMPLETOS:', '');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Bloques Incompletos',
+                html: `
+                    <p style="font-size: 1.1rem;">${mensaje}</p>
+                    <p style="margin-top: 1.5rem; font-weight: bold; color: #ff6b6b;">
+                        ⚠️ No se puede generar el reporte hasta que el estudiante complete todos los bloques de la prueba.
+                    </p>
+                `,
+                confirmButtonColor: '#667eea',
+                confirmButtonText: 'Entendido'
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                html: `
+                    <p>No se pudo cargar la información del estudiante</p>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">${error.message || 'Error desconocido'}</p>
+                `,
+                confirmButtonColor: '#667eea'
+            });
+        }
     } finally {
         // Ocultar overlay de carga
         if (loadingOverlay) {
@@ -399,10 +482,43 @@ async function mostrarInfoEstudiante() {
 async function buscarReporteExistente(pruebaId, estudianteId) {
     try {
         const db = window.firebaseDB;
+        // Buscar sin orderBy para evitar necesidad de índice compuesto
         const reportesSnapshot = await db.collection('reportes')
             .where('pruebaId', '==', pruebaId)
             .where('estudianteId', '==', estudianteId)
-            .orderBy('fechaGeneracion', 'desc')
+            .get();
+        
+        if (!reportesSnapshot.empty) {
+            // Si hay múltiples reportes, tomar el más reciente manualmente
+            let reporteMasReciente = null;
+            let fechaMasReciente = null;
+            
+            reportesSnapshot.forEach(doc => {
+                const data = doc.data();
+                const fecha = data.fechaGeneracion?.toDate?.() || new Date(0);
+                
+                if (!fechaMasReciente || fecha > fechaMasReciente) {
+                    fechaMasReciente = fecha;
+                    reporteMasReciente = data;
+                }
+            });
+            
+            return reporteMasReciente;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error buscando reporte existente:', error);
+        return null;
+    }
+}
+
+// Función auxiliar para buscar reporte (versión simplificada sin fecha)
+async function buscarReporteExistenteSimple(pruebaId, estudianteId) {
+    try {
+        const db = window.firebaseDB;
+        const reportesSnapshot = await db.collection('reportes')
+            .where('pruebaId', '==', pruebaId)
+            .where('estudianteId', '==', estudianteId)
             .limit(1)
             .get();
         
@@ -574,6 +690,7 @@ async function generarReportesParaTodos() {
         let procesados = 0;
         let exitosos = 0;
         let errores = 0;
+        let bloquesIncompletos = 0;
         
         // Procesar cada estudiante
         for (const [estudianteId, estudianteNombre] of estudiantesMap) {
@@ -592,7 +709,13 @@ async function generarReportesParaTodos() {
                 
             } catch (error) {
                 console.error(`Error generando reporte para ${estudianteNombre}:`, error);
-                errores++;
+                
+                // Verificar si es error de bloques incompletos
+                if (error.message && error.message.startsWith('BLOQUES_INCOMPLETOS:')) {
+                    bloquesIncompletos++;
+                } else {
+                    errores++;
+                }
             }
             
             procesados++;
@@ -609,14 +732,17 @@ async function generarReportesParaTodos() {
         Swal.close();
         
         // Mostrar resultado
+        const mensajeHTML = `
+            <p><strong>Total procesados:</strong> ${procesados}</p>
+            <p><strong>Exitosos:</strong> ${exitosos}</p>
+            ${bloquesIncompletos > 0 ? `<p style="color: #ff9800;"><strong>Bloques incompletos:</strong> ${bloquesIncompletos}</p>` : ''}
+            <p><strong>Errores:</strong> ${errores}</p>
+        `;
+        
         Swal.fire({
             icon: exitosos > 0 ? 'success' : 'error',
             title: 'Proceso completado',
-            html: `
-                <p><strong>Total procesados:</strong> ${procesados}</p>
-                <p><strong>Exitosos:</strong> ${exitosos}</p>
-                <p><strong>Errores:</strong> ${errores}</p>
-            `
+            html: mensajeHTML
         });
         
         // Recargar lista de estudiantes
@@ -1010,7 +1136,53 @@ async function generarReporteAutomatico(pruebaId, estudianteId, sg11Codigo = nul
 
         // Cargar información de la prueba
         const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
+        
+        if (!pruebaDoc.exists) {
+            throw new Error('No se encontró la prueba');
+        }
+        
         const pruebaData = pruebaDoc.data();
+        
+        console.log('=== DATOS DE LA PRUEBA ===');
+        console.log('Prueba ID:', pruebaId);
+        console.log('Bloque 1:', pruebaData.bloque1);
+        console.log('Bloque 2:', pruebaData.bloque2);
+        
+        // VALIDAR BLOQUES COMPLETADOS
+        // Determinar cuántos bloques tiene la prueba
+        const bloquesEnPrueba = [];
+        if (pruebaData.bloque1 && pruebaData.bloque1.habilitado !== false) {
+            bloquesEnPrueba.push(1);
+        }
+        if (pruebaData.bloque2 && pruebaData.bloque2.habilitado !== false) {
+            bloquesEnPrueba.push(2);
+        }
+        
+        const totalBloquesPrueba = bloquesEnPrueba.length;
+        
+        // Obtener los bloques que completó el estudiante
+        const bloquesCompletados = [];
+        respuestasSnapshot.forEach(doc => {
+            const respuesta = doc.data();
+            console.log('Respuesta bloque:', respuesta.bloque);
+            if (respuesta.bloque && !bloquesCompletados.includes(respuesta.bloque)) {
+                bloquesCompletados.push(respuesta.bloque);
+            }
+        });
+        
+        console.log('=== VALIDACIÓN DE BLOQUES ===');
+        console.log(`Prueba tiene ${totalBloquesPrueba} bloques habilitados:`, bloquesEnPrueba);
+        console.log(`Estudiante completó ${bloquesCompletados.length} bloques:`, bloquesCompletados);
+        
+        // Validar si completó todos los bloques
+        if (totalBloquesPrueba > 1 && bloquesCompletados.length < totalBloquesPrueba) {
+            const bloquesFaltantes = bloquesEnPrueba.filter(b => !bloquesCompletados.includes(b));
+            const mensajeError = `BLOQUES_INCOMPLETOS:El estudiante no ha completado todos los bloques de la prueba. Faltan: Bloque ${bloquesFaltantes.join(', Bloque ')}`;
+            console.log('❌ VALIDACIÓN FALLIDA:', mensajeError);
+            throw new Error(mensajeError);
+        }
+        
+        console.log('✅ VALIDACIÓN EXITOSA: Todos los bloques completados');
 
         // Consolidar respuestas de todos los bloques
         const respuestasConsolidadas = {};

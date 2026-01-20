@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="../Elementos/css/panel.css">
     <link rel="stylesheet" href="../Elementos/css/reportes.css">
-    <link rel="stylesheet" href="../Elementos/css/seguridad.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
 
     <!-- Security headers -->
@@ -22,6 +22,7 @@
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
 </head>
+
 <body>
     <!-- Header -->
     <header class="header">
@@ -39,7 +40,8 @@
                     <div class="user-avatar-default" id="userAvatarDefault">
                         <i class="bi bi-person-fill"></i>
                     </div>
-                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto de perfil">
+                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src=""
+                        alt="Foto de perfil">
                 </div>
                 <div class="user-dropdown">
                     <button class="user-menu-btn" id="userMenuBtn">
@@ -67,7 +69,7 @@
             <div class="panel-header">
                 <h2><i class="bi bi-gear-fill"></i> Control de Reportes</h2>
             </div>
-            
+
             <div class="control-section">
                 <label for="selectorPrueba">
                     <i class="bi bi-file-earmark-text"></i>
@@ -127,7 +129,10 @@
                     <div class="header-content">
                         <div class="titulo-descripcion">
                             <h1>INFORME INDIVIDUAL DE RESULTADOS</h1>
-                            <p class="descripcion">Este informe presenta los resultados obtenidos por el estudiante en la prueba diagnóstica basada en los estándares del ICFES. El objetivo de este diagnóstico es identificar fortalezas y aspectos por mejorar en las diferentes áreas evaluadas.</p>
+                            <p class="descripcion">Este informe presenta los resultados obtenidos por el estudiante en
+                                la prueba diagnóstica basada en los estándares del ICFES. El objetivo de este
+                                diagnóstico es identificar fortalezas y aspectos por mejorar en las diferentes áreas
+                                evaluadas.</p>
                         </div>
                         <div class="logo-container">
                             <img src="../Elementos/img/logo1.png" alt="Logo SeamosGenios" class="logo">
@@ -154,7 +159,8 @@
                             </div>
                             <div class="campo">
                                 <label>TELÉFONO:</label>
-                                <input type="tel" id="telefonoEstudiante" placeholder="Número de teléfono" pattern="[0-9]*">
+                                <input type="tel" id="telefonoEstudiante" placeholder="Número de teléfono"
+                                    pattern="[0-9]*">
                             </div>
                             <div class="campo">
                                 <label>DEPARTAMENTO:</label>
@@ -206,7 +212,8 @@
                                         <option value="PA">PA</option>
                                         <option value="NIT">NIT</option>
                                     </select>
-                                    <input type="number" id="identificacionEstudiante" class="numero-documento" placeholder="Número de documento" min="0" pattern="[0-9]*">
+                                    <input type="number" id="identificacionEstudiante" class="numero-documento"
+                                        placeholder="Número de documento" min="0" pattern="[0-9]*">
                                 </div>
                             </div>
                             <div class="campo">
@@ -257,11 +264,16 @@
                         <tbody>
                             <tr class="fila-puntaje">
                                 <td class="celda-nivel">Puntaje</td>
-                                <td><input type="number" class="puntaje-input" data-materia="LC" value="0" readonly></td>
-                                <td><input type="number" class="puntaje-input" data-materia="MT" value="0" readonly></td>
-                                <td><input type="number" class="puntaje-input" data-materia="SC" value="0" readonly></td>
-                                <td><input type="number" class="puntaje-input" data-materia="CN" value="0" readonly></td>
-                                <td><input type="number" class="puntaje-input" data-materia="IN" value="0" readonly></td>
+                                <td><input type="number" class="puntaje-input" data-materia="LC" value="0" readonly>
+                                </td>
+                                <td><input type="number" class="puntaje-input" data-materia="MT" value="0" readonly>
+                                </td>
+                                <td><input type="number" class="puntaje-input" data-materia="SC" value="0" readonly>
+                                </td>
+                                <td><input type="number" class="puntaje-input" data-materia="CN" value="0" readonly>
+                                </td>
+                                <td><input type="number" class="puntaje-input" data-materia="IN" value="0" readonly>
+                                </td>
                             </tr>
                             <tr class="fila-nivel">
                                 <td class="celda-nivel">BAJO</td>
@@ -297,7 +309,8 @@
                             </tr>
                             <tr class="fila-percentil">
                                 <td class="celda-nivel">Percentil General</td>
-                                <td colspan="5" class="percentil" style="text-align: center; font-size: 1.2rem;">Su puntaje superó al <span id="percentilGeneral">0</span>% de estudiantes </td>
+                                <td colspan="5" class="percentil" style="text-align: center; font-size: 1.2rem;">Su
+                                    puntaje superó al <span id="percentilGeneral">0</span>% de estudiantes </td>
                             </tr>
                             <tr class="fila-desempeno">
                                 <td class="celda-nivel">Nivel Desempeño</td>
@@ -329,6 +342,6 @@
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/perfil-compartido.js"></script>
     <script src="../Elementos/js/reportes.js"></script>
-    <script src="../Elementos/js/seguridad.js"></script>
 </body>
+
 </html>
