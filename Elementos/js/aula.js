@@ -419,7 +419,9 @@ function enterMateria(materiaId) {
     const tabContent = document.querySelector('.tab-content');
     const mainContent = document.querySelector('.main-content');
 
-    // Aplicar color de la materia a los elementos principales
+    // Aplicar color de la materia a los elementos principales y GLOBALMENTE
+    document.documentElement.style.setProperty('--materia-color', config.color);
+
     if (mainContent) {
         mainContent.style.setProperty('--materia-color', config.color);
     }
@@ -748,6 +750,9 @@ function setupTabs() {
             btn.classList.add('active');
             document.getElementById(`${tabName}Pane`).classList.add('active');
 
+            // Actualizar URL con el tab actual (sin recargar la página)
+            updateUrlWithTab(tabName);
+
             // Load content based on tab
             switch (tabName) {
                 case 'anuncios':
@@ -780,6 +785,20 @@ function setupTabs() {
 
     // Verificar si hay parámetros de URL para abrir un tab específico
     checkUrlTabParams();
+}
+
+// Actualizar URL con el tab actual
+function updateUrlWithTab(tabName, subtabName = null) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', tabName);
+
+    if (subtabName) {
+        url.searchParams.set('subtab', subtabName);
+    } else {
+        url.searchParams.delete('subtab');
+    }
+
+    window.history.replaceState({}, '', url);
 }
 
 // Verificar parámetros de URL para abrir tabs específicos
@@ -822,6 +841,9 @@ function setupDesafiosSubmenu() {
             // Add active to clicked
             btn.classList.add('active');
             document.getElementById(`${subtab}Subtab`).classList.add('active');
+
+            // Actualizar URL con el subtab actual
+            updateUrlWithTab('desafios', subtab);
 
             // Cargar datos según la pestaña
             if (subtab === 'tienda') {
@@ -1256,7 +1278,7 @@ function setupTiendaButtons() {
             });
         }
     });
-    
+
     // Setup compra personalizada
     setupCustomPurchase();
 }
@@ -1273,14 +1295,14 @@ function setupCustomPurchase() {
     const energiaPlusBtn = document.getElementById('energiaPlusBtn');
     const energiaPriceDisplay = document.getElementById('customEnergiaPrice');
     const buyEnergiaBtn = document.getElementById('buyCustomEnergiaBtn');
-    
+
     // Pista personalizada
     const pistaInput = document.getElementById('customPistaInput');
     const pistaMinusBtn = document.getElementById('pistaMinusBtn');
     const pistaPlusBtn = document.getElementById('pistaPlusBtn');
     const pistaPriceDisplay = document.getElementById('customPistaPrice');
     const buyPistaBtn = document.getElementById('buyCustomPistaBtn');
-    
+
     // Funciones de actualización de precio
     function updateEnergiaPrice() {
         if (!energiaInput || !energiaPriceDisplay) return;
@@ -1288,14 +1310,14 @@ function setupCustomPurchase() {
         const precio = calcularPrecioEnergia(cantidad);
         energiaPriceDisplay.innerHTML = `<i class="bi bi-coin"></i> ${precio}`;
     }
-    
+
     function updatePistaPrice() {
         if (!pistaInput || !pistaPriceDisplay) return;
         const cantidad = parseInt(pistaInput.value) || 1;
         const precio = calcularPrecioPista(cantidad);
         pistaPriceDisplay.innerHTML = `<i class="bi bi-coin"></i> ${precio}`;
     }
-    
+
     // Event listeners para energía
     if (energiaInput) {
         energiaInput.addEventListener('input', () => {
@@ -1306,7 +1328,7 @@ function setupCustomPurchase() {
             updateEnergiaPrice();
         });
     }
-    
+
     if (energiaMinusBtn) {
         energiaMinusBtn.addEventListener('click', () => {
             let val = parseInt(energiaInput.value) || 1;
@@ -1316,7 +1338,7 @@ function setupCustomPurchase() {
             }
         });
     }
-    
+
     if (energiaPlusBtn) {
         energiaPlusBtn.addEventListener('click', () => {
             let val = parseInt(energiaInput.value) || 1;
@@ -1326,7 +1348,7 @@ function setupCustomPurchase() {
             }
         });
     }
-    
+
     if (buyEnergiaBtn) {
         buyEnergiaBtn.addEventListener('click', () => {
             const cantidad = parseInt(energiaInput.value) || 1;
@@ -1334,7 +1356,7 @@ function setupCustomPurchase() {
             mostrarConfirmacionCompra(`customEnergia${cantidad}`, precio);
         });
     }
-    
+
     // Event listeners para pistas
     if (pistaInput) {
         pistaInput.addEventListener('input', () => {
@@ -1345,7 +1367,7 @@ function setupCustomPurchase() {
             updatePistaPrice();
         });
     }
-    
+
     if (pistaMinusBtn) {
         pistaMinusBtn.addEventListener('click', () => {
             let val = parseInt(pistaInput.value) || 1;
@@ -1355,7 +1377,7 @@ function setupCustomPurchase() {
             }
         });
     }
-    
+
     if (pistaPlusBtn) {
         pistaPlusBtn.addEventListener('click', () => {
             let val = parseInt(pistaInput.value) || 1;
@@ -1365,7 +1387,7 @@ function setupCustomPurchase() {
             }
         });
     }
-    
+
     if (buyPistaBtn) {
         buyPistaBtn.addEventListener('click', () => {
             const cantidad = parseInt(pistaInput.value) || 1;
@@ -1383,7 +1405,7 @@ function calcularPrecioEnergia(cantidad) {
     else if (cantidad >= 20) descuento = 0.15; // 15% descuento
     else if (cantidad >= 10) descuento = 0.10; // 10% descuento
     else if (cantidad >= 5) descuento = 0.05; // 5% descuento
-    
+
     const precioBase = cantidad * PRECIO_ENERGIA_UNITARIO;
     return Math.floor(precioBase * (1 - descuento));
 }
@@ -1396,7 +1418,7 @@ function calcularPrecioPista(cantidad) {
     else if (cantidad >= 20) descuento = 0.20; // 20% descuento
     else if (cantidad >= 10) descuento = 0.10; // 10% descuento
     else if (cantidad >= 5) descuento = 0.05; // 5% descuento
-    
+
     const precioBase = cantidad * PRECIO_PISTA_UNITARIO;
     return Math.floor(precioBase * (1 - descuento));
 }
@@ -1581,7 +1603,7 @@ function getItemName(itemType) {
         'packUltimate': 'Pack Ultimate (20 Energías + 10 Pistas)',
         'packMega': 'Pack Mega (50 Energías + 20 Pistas)'
     };
-    
+
     // Para compras personalizadas
     if (itemType.startsWith('customEnergia')) {
         const cantidad = itemType.replace('customEnergia', '');
@@ -1591,7 +1613,7 @@ function getItemName(itemType) {
         const cantidad = itemType.replace('customPista', '');
         return `${cantidad} Pista${cantidad > 1 ? 's' : ''}`;
     }
-    
+
     return names[itemType] || itemType;
 }
 
@@ -1660,14 +1682,463 @@ function loadDesafios() {
 }
 
 // Load foro
-function loadForo() {
+async function loadForo() {
     const foroContainer = document.getElementById('foroContainer');
-    foroContainer.innerHTML = `
-        <div class="empty-state">
-            <i class="bi bi-chat-dots"></i>
-            <p>Próximamente: Foro</p>
+    foroContainer.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i></div>';
+
+    try {
+        await esperarFirebase();
+        const db = window.firebaseDB;
+
+        // Obtener color de la materia actual
+        const materiaColor = window.currentMateriaColor || '#667eea';
+
+        // Verificar si el usuario es admin o tutor
+        const esAdmin = currentUser.tipoUsuario === 'admin';
+        const esTutor = await verificarSiEsTutor(db);
+
+        // Mostrar botones de gestión si es admin
+        let headerHTML = '';
+        if (esAdmin) {
+            headerHTML = `
+                <div class="foro-header">
+                    <button class="btn-gestionar-tutores" id="gestionarTutoresBtn">
+                        <i class="bi bi-people-fill"></i>
+                        Gestionar Tutores
+                    </button>
+                </div>
+            `;
+        }
+
+        // Mostrar botón de crear publicación si es tutor o admin
+        let createPostHTML = '';
+        if (esTutor || esAdmin) {
+            createPostHTML = `
+                <div class="foro-create-post-container">
+                    <button class="btn-crear-publicacion-foro" id="crearPublicacionForoBtn">
+                        <i class="bi bi-plus-circle"></i>
+                        Crear Publicación
+                    </button>
+                </div>
+            `;
+        }
+
+        // Cargar publicaciones del foro
+        // Primero obtenemos todas las publicaciones del aula
+        const publicacionesSnapshot = await db.collection('foro')
+            .where('aulaId', '==', currentAulaId)
+            .where('materia', '==', currentMateria)
+            .get();
+
+        // Filtrar y ordenar en el cliente
+        const publicaciones = [];
+        publicacionesSnapshot.forEach(doc => {
+            publicaciones.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Ordenar por fecha de creación (más recientes primero)
+        publicaciones.sort((a, b) => {
+            const fechaA = a.fechaCreacion ? a.fechaCreacion.seconds : 0;
+            const fechaB = b.fechaCreacion ? b.fechaCreacion.seconds : 0;
+            return fechaB - fechaA;
+        });
+
+        let publicacionesHTML = '';
+        if (publicaciones.length === 0) {
+            publicacionesHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-chat-dots"></i>
+                    <p>No hay publicaciones en el foro</p>
+                    ${esTutor || esAdmin ? '<small>Sé el primero en crear una publicación</small>' : ''}
+                </div>
+            `;
+        } else {
+            for (const publicacion of publicaciones) {
+                publicacionesHTML += await renderPublicacionForo(publicacion, db, esTutor, esAdmin);
+            }
+        }
+
+        foroContainer.innerHTML = `
+            ${headerHTML}
+            ${createPostHTML}
+            <div class="foro-publicaciones-container">
+                ${publicacionesHTML}
+            </div>
+        `;
+
+        // Event listeners
+        if (esAdmin) {
+            document.getElementById('gestionarTutoresBtn')?.addEventListener('click', abrirModalGestionarTutores);
+        }
+        if (esTutor || esAdmin) {
+            document.getElementById('crearPublicacionForoBtn')?.addEventListener('click', abrirModalCrearPublicacionForo);
+        }
+
+        // Event listeners para comentarios
+        setupForoCommentListeners();
+
+    } catch (error) {
+        console.error('Error al cargar foro:', error);
+        foroContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>Error al cargar el foro</p>
+            </div>
+        `;
+    }
+}
+
+// Verificar si el usuario actual es tutor en esta aula/materia
+async function verificarSiEsTutor(db) {
+    try {
+        const tutorDoc = await db.collection('tutores')
+            .where('aulaId', '==', currentAulaId)
+            .where('materia', '==', currentMateria)
+            .where('estudianteId', '==', currentUser.id)
+            .get();
+
+        return !tutorDoc.empty;
+    } catch (error) {
+        console.error('Error verificando tutor:', error);
+        return false;
+    }
+}
+
+// Renderizar una publicación del foro
+async function renderPublicacionForo(publicacion, db, esTutor, esAdmin) {
+    // Obtener color de la materia actual
+    const materiaColor = window.currentMateriaColor || '#667eea';
+
+    // Obtener datos del autor
+    let autorNombre = 'Usuario';
+    let autorFoto = '';
+    try {
+        const autorDoc = await db.collection('usuarios').doc(publicacion.autorId).get();
+        if (autorDoc.exists) {
+            const autorData = autorDoc.data();
+            autorNombre = autorData.nombre || 'Usuario';
+            autorFoto = autorData.fotoPerfil || '';
+        }
+    } catch (error) {
+        console.error('Error obteniendo autor:', error);
+    }
+
+    // Formatear fecha
+    const fecha = publicacion.fechaCreacion ? new Date(publicacion.fechaCreacion.seconds * 1000) : new Date();
+    const fechaFormateada = formatearFechaRelativa(fecha);
+
+    // Renderizar imágenes
+    let imagenesHTML = '';
+    if (publicacion.imagenes && publicacion.imagenes.length > 0) {
+        imagenesHTML = `
+            <div class="foro-post-images">
+                ${publicacion.imagenes.map(img => `
+                    <img src="${img}" alt="Imagen" class="foro-post-image" onclick="openMediaModal('${img}', 'image')">
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // Renderizar videos
+    let videosHTML = '';
+    if (publicacion.videos && publicacion.videos.length > 0) {
+        videosHTML = `<div class="foro-post-videos">`;
+        publicacion.videos.forEach(video => {
+            if (video.tipo === 'youtube') {
+                const videoId = extractYouTubeID(video.url);
+                videosHTML += `
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                `;
+            } else if (video.tipo === 'drive') {
+                const driveId = extractDriveVideoID(video.url);
+                videosHTML += `
+                    <div class="video-container">
+                        <iframe src="https://drive.google.com/file/d/${driveId}/preview" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                `;
+            }
+        });
+        videosHTML += `</div>`;
+    }
+
+    // Renderizar archivos
+    let archivosHTML = '';
+    if (publicacion.archivos && publicacion.archivos.length > 0) {
+        archivosHTML = `
+            <div class="foro-post-files">
+                ${publicacion.archivos.map(archivo => `
+                    <a href="${archivo.url}" target="_blank" class="foro-file-link">
+                        <i class="bi ${getFileIcon(archivo.url)}"></i>
+                        <span>${archivo.nombre || 'Archivo'}</span>
+                    </a>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // Obtener comentarios
+    const comentariosSnapshot = await db.collection('foro').doc(publicacion.id).collection('comentarios')
+        .get();
+
+    // Ordenar comentarios en el cliente
+    const comentarios = [];
+    comentariosSnapshot.forEach(doc => {
+        comentarios.push({ id: doc.id, ...doc.data() });
+    });
+
+    comentarios.sort((a, b) => {
+        const fechaA = a.fecha ? a.fecha.seconds : 0;
+        const fechaB = b.fecha ? b.fecha.seconds : 0;
+        return fechaA - fechaB; // Más antiguos primero
+    });
+
+    let comentariosHTML = '';
+    for (const comentario of comentarios) {
+        comentariosHTML += await renderComentarioForo(comentario, db);
+    }
+
+    // Botones de acción (solo para el autor o admin)
+    let accionesHTML = '';
+    if (publicacion.autorId === currentUser.id || esAdmin) {
+        accionesHTML = `
+            <div class="foro-post-actions">
+                <button class="btn-editar-publicacion-foro" data-id="${publicacion.id}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn-eliminar-publicacion-foro" data-id="${publicacion.id}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="foro-publicacion" data-id="${publicacion.id}">
+            <div class="foro-post-header">
+                <div class="foro-post-author">
+                    <div class="foro-author-avatar" style="background: ${materiaColor};">
+                        ${autorFoto ? `<img src="${autorFoto}" alt="${autorNombre}">` : '<i class="bi bi-person-fill"></i>'}
+                    </div>
+                    <div class="foro-author-info">
+                        <span class="foro-author-name">${autorNombre}</span>
+                        <span class="foro-author-badge" style="background: ${materiaColor};"><i class="bi bi-mortarboard-fill"></i> Tutor</span>
+                        <span class="foro-post-date">${fechaFormateada}</span>
+                    </div>
+                </div>
+                ${accionesHTML}
+            </div>
+            <div class="foro-post-body">
+                ${publicacion.titulo ? `<h3 class="foro-post-title">${publicacion.titulo}</h3>` : ''}
+                <p class="foro-post-content">${publicacion.contenido}</p>
+                ${imagenesHTML}
+                ${videosHTML}
+                ${archivosHTML}
+            </div>
+            <div class="foro-post-footer">
+                <button class="btn-comentar-foro" data-id="${publicacion.id}" style="color: ${materiaColor};">
+                    <i class="bi bi-chat-left-text"></i>
+                    Comentar (${comentarios.length})
+                </button>
+            </div>
+            <div class="foro-comentarios-container" id="comentarios-${publicacion.id}" style="display: none;">
+                <div class="foro-comentarios-list">
+                    ${comentariosHTML}
+                </div>
+                <div class="foro-comentario-form">
+                    <textarea class="foro-comentario-input" placeholder="Escribe un comentario..." data-publicacion-id="${publicacion.id}" style="border-color: ${materiaColor};"></textarea>
+                    <button class="btn-enviar-comentario" data-publicacion-id="${publicacion.id}" style="background: ${materiaColor};">
+                        <i class="bi bi-send"></i>
+                        Enviar
+                    </button>
+                </div>
+            </div>
         </div>
     `;
+}
+
+// Renderizar un comentario
+async function renderComentarioForo(comentario, db) {
+    // Obtener datos del autor del comentario
+    let autorNombre = 'Usuario';
+    let autorFoto = '';
+    try {
+        const autorDoc = await db.collection('usuarios').doc(comentario.autorId).get();
+        if (autorDoc.exists) {
+            const autorData = autorDoc.data();
+            autorNombre = autorData.nombre || 'Usuario';
+            autorFoto = autorData.fotoPerfil || '';
+        }
+    } catch (error) {
+        console.error('Error obteniendo autor del comentario:', error);
+    }
+
+    const fecha = comentario.fecha ? new Date(comentario.fecha.seconds * 1000) : new Date();
+    const fechaFormateada = formatearFechaRelativa(fecha);
+
+    // Botón de eliminar (solo para el autor del comentario o admin)
+    let deleteBtn = '';
+    if (comentario.autorId === currentUser.id || currentUser.tipoUsuario === 'admin') {
+        deleteBtn = `
+            <button class="btn-eliminar-comentario" data-publicacion-id="${comentario.publicacionId}" data-comentario-id="${comentario.id}">
+                <i class="bi bi-trash"></i>
+            </button>
+        `;
+    }
+
+    return `
+        <div class="foro-comentario" data-id="${comentario.id}">
+            <div class="foro-comentario-avatar">
+                ${autorFoto ? `<img src="${autorFoto}" alt="${autorNombre}">` : '<i class="bi bi-person-fill"></i>'}
+            </div>
+            <div class="foro-comentario-content">
+                <div class="foro-comentario-header">
+                    <span class="foro-comentario-author">${autorNombre}</span>
+                    <span class="foro-comentario-date">${fechaFormateada}</span>
+                    ${deleteBtn}
+                </div>
+                <p class="foro-comentario-text">${comentario.texto}</p>
+            </div>
+        </div>
+    `;
+}
+
+// Setup event listeners para comentarios
+function setupForoCommentListeners() {
+    // Botones de comentar (mostrar/ocultar sección de comentarios)
+    document.querySelectorAll('.btn-comentar-foro').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const publicacionId = btn.getAttribute('data-id');
+            const comentariosContainer = document.getElementById(`comentarios-${publicacionId}`);
+            if (comentariosContainer) {
+                comentariosContainer.style.display = comentariosContainer.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    });
+
+    // Botones de enviar comentario
+    document.querySelectorAll('.btn-enviar-comentario').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const publicacionId = btn.getAttribute('data-publicacion-id');
+            const textarea = document.querySelector(`.foro-comentario-input[data-publicacion-id="${publicacionId}"]`);
+            if (textarea && textarea.value.trim()) {
+                await enviarComentarioForo(publicacionId, textarea.value.trim());
+                textarea.value = '';
+            }
+        });
+    });
+
+    // Botones de eliminar comentario
+    document.querySelectorAll('.btn-eliminar-comentario').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const publicacionId = btn.getAttribute('data-publicacion-id');
+            const comentarioId = btn.getAttribute('data-comentario-id');
+            if (confirm('¿Eliminar este comentario?')) {
+                await eliminarComentarioForo(publicacionId, comentarioId);
+            }
+        });
+    });
+
+    // Botones de editar publicación
+    document.querySelectorAll('.btn-editar-publicacion-foro').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const publicacionId = btn.getAttribute('data-id');
+            abrirModalEditarPublicacionForo(publicacionId);
+        });
+    });
+
+    // Botones de eliminar publicación
+    document.querySelectorAll('.btn-eliminar-publicacion-foro').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const publicacionId = btn.getAttribute('data-id');
+            if (confirm('¿Eliminar esta publicación y todos sus comentarios?')) {
+                await eliminarPublicacionForo(publicacionId);
+            }
+        });
+    });
+}
+
+// Enviar comentario
+async function enviarComentarioForo(publicacionId, texto) {
+    try {
+        const db = window.firebaseDB;
+        await db.collection('foro').doc(publicacionId).collection('comentarios').add({
+            autorId: currentUser.id,
+            texto: texto,
+            fecha: firebase.firestore.Timestamp.now(),
+            publicacionId: publicacionId
+        });
+
+        // Recargar foro
+        loadForo();
+    } catch (error) {
+        console.error('Error enviando comentario:', error);
+        alert('Error al enviar el comentario');
+    }
+}
+
+// Eliminar comentario
+async function eliminarComentarioForo(publicacionId, comentarioId) {
+    try {
+        const db = window.firebaseDB;
+        await db.collection('foro').doc(publicacionId).collection('comentarios').doc(comentarioId).delete();
+        loadForo();
+    } catch (error) {
+        console.error('Error eliminando comentario:', error);
+        alert('Error al eliminar el comentario');
+    }
+}
+
+// Eliminar publicación
+async function eliminarPublicacionForo(publicacionId) {
+    try {
+        const db = window.firebaseDB;
+
+        // Eliminar todos los comentarios
+        const comentariosSnapshot = await db.collection('foro').doc(publicacionId).collection('comentarios').get();
+        const batch = db.batch();
+        comentariosSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+
+        // Eliminar la publicación
+        await db.collection('foro').doc(publicacionId).delete();
+
+        loadForo();
+    } catch (error) {
+        console.error('Error eliminando publicación:', error);
+        alert('Error al eliminar la publicación');
+    }
+}
+
+// Obtener icono según tipo de archivo
+function getFileIcon(url) {
+    const urlLower = url.toLowerCase();
+    if (urlLower.includes('pdf')) return 'bi-file-pdf';
+    if (urlLower.includes('doc')) return 'bi-file-word';
+    if (urlLower.includes('xls')) return 'bi-file-excel';
+    if (urlLower.includes('ppt')) return 'bi-file-ppt';
+    if (urlLower.includes('folder') || urlLower.includes('drive.google.com/drive')) return 'bi-folder';
+    return 'bi-file-earmark';
+}
+
+// Formatear fecha relativa
+function formatearFechaRelativa(fecha) {
+    const ahora = new Date();
+    const diff = ahora - fecha;
+    const segundos = Math.floor(diff / 1000);
+    const minutos = Math.floor(segundos / 60);
+    const horas = Math.floor(minutos / 60);
+    const dias = Math.floor(horas / 24);
+
+    if (segundos < 60) return 'Hace un momento';
+    if (minutos < 60) return `Hace ${minutos} minuto${minutos > 1 ? 's' : ''}`;
+    if (horas < 24) return `Hace ${horas} hora${horas > 1 ? 's' : ''}`;
+    if (dias < 7) return `Hace ${dias} día${dias > 1 ? 's' : ''}`;
+
+    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 // Load notas
@@ -6294,7 +6765,7 @@ async function registerDownload(fileId, fileName) {
 
         // Obtener información del dispositivo
         const deviceInfo = getDeviceInfo();
-        
+
         // Obtener nombre del aula
         let aulaNombre = '';
         if (currentAulaData && currentAulaData.nombre) {
@@ -6317,7 +6788,7 @@ async function registerDownload(fileId, fileName) {
         // Obtener email del usuario desde Firebase si no está en currentUser
         let userEmail = currentUser.usuario || currentUser.email || '';
         let userFoto = currentUser.fotoPerfil || '';
-        
+
         if (!userEmail || !userFoto) {
             try {
                 const userDoc = await db.collection('usuarios').doc(currentUser.id).get();
@@ -6330,7 +6801,7 @@ async function registerDownload(fileId, fileName) {
                 console.log('No se pudo obtener datos adicionales del usuario');
             }
         }
-        
+
         // Obtener nombre de la materia legible
         const materiasNombres = {
             'anuncios': 'Anuncios',
@@ -6341,7 +6812,7 @@ async function registerDownload(fileId, fileName) {
             'ingles': 'Inglés'
         };
         const materiaNombre = materiasNombres[currentMateria] || currentMateria || '';
-        
+
         await db.collection('registroDescargas').add({
             usuarioId: currentUser.id,
             usuarioNombre: currentUser.nombre || 'Sin nombre',
@@ -6849,5 +7320,609 @@ async function saveMaterialsOrder(container) {
     } catch (error) {
         console.error('Error al guardar el orden de materiales:', error);
         showAlertModal('Error', 'No se pudo guardar el nuevo orden de los materiales');
+    }
+}
+
+
+// ============ FUNCIONES PARA GESTIÓN DE TUTORES Y FORO ============
+
+// Abrir modal para gestionar tutores
+async function abrirModalGestionarTutores() {
+    try {
+        const db = window.firebaseDB;
+
+        // Obtener color de la materia actual
+        const materiaColor = window.currentMateriaColor || '#667eea';
+
+        // Obtener TODOS los estudiantes y filtrar en el cliente
+        const estudiantesSnapshot = await db.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        // Filtrar estudiantes que pertenecen a esta aula (usando aulasAsignadas)
+        const estudiantesDelAula = [];
+        estudiantesSnapshot.forEach(doc => {
+            const estudiante = { id: doc.id, ...doc.data() };
+            // Verificar si el estudiante tiene este aula en su array de aulasAsignadas
+            if (estudiante.aulasAsignadas && Array.isArray(estudiante.aulasAsignadas) && estudiante.aulasAsignadas.includes(currentAulaId)) {
+                estudiantesDelAula.push(estudiante);
+            }
+        });
+
+        // Obtener tutores actuales de esta materia
+        const tutoresSnapshot = await db.collection('tutores')
+            .where('aulaId', '==', currentAulaId)
+            .where('materia', '==', currentMateria)
+            .get();
+
+        const tutoresIds = new Set();
+        tutoresSnapshot.forEach(doc => {
+            tutoresIds.add(doc.data().estudianteId);
+        });
+
+        let estudiantesHTML = '';
+        console.log('DEBUG - currentAulaId:', currentAulaId, '| Estudiantes totales:', estudiantesSnapshot.size, '| Estudiantes del aula (aulasAsignadas):', estudiantesDelAula.length);
+        if (estudiantesDelAula.length === 0) {
+            estudiantesHTML = '<p class="empty-message">No hay estudiantes en esta aula</p>';
+        } else {
+            // Ordenar alfabéticamente
+            estudiantesDelAula.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+
+            estudiantesDelAula.forEach(estudiante => {
+                const esTutor = tutoresIds.has(estudiante.id);
+                const foto = estudiante.fotoPerfil || '';
+
+                estudiantesHTML += `
+                    <div class="tutor-item">
+                        <div class="tutor-info">
+                            <div class="tutor-avatar" style="background: ${materiaColor};">
+                                ${foto ? `<img src="${foto}" alt="${estudiante.nombre}">` : '<i class="bi bi-person-fill"></i>'}
+                            </div>
+                            <span class="tutor-nombre">${estudiante.nombre}</span>
+                        </div>
+                        <label class="tutor-switch">
+                            <input type="checkbox" class="tutor-checkbox" data-estudiante-id="${estudiante.id}" ${esTutor ? 'checked' : ''}>
+                            <span class="tutor-slider" style="--materia-color: ${materiaColor};"></span>
+                        </label>
+                    </div>
+                `;
+            });
+        }
+
+        // Crear modal
+        const modalHTML = `
+            <div class="modal active" id="gestionarTutoresModal" style="--materia-color: ${materiaColor};">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Gestionar Tutores - ${currentMateria}</h3>
+                        <button class="close-btn" onclick="cerrarModalGestionarTutores()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-description">Selecciona los estudiantes que podrán publicar en el foro como tutores:</p>
+                        <div class="tutores-search-container">
+                            <div class="search-input-wrapper">
+                                <i class="bi bi-search"></i>
+                                <input type="text" id="tutoresSearchInput" placeholder="Buscar estudiante por nombre..." autocomplete="off">
+                                <button class="clear-search-btn" id="clearTutoresSearch" style="display: none;">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="tutores-list" id="tutoresList">
+                            ${estudiantesHTML}
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" onclick="cerrarModalGestionarTutores()">Cerrar</button>
+                        <button type="button" class="submit-btn" onclick="guardarTutores()">
+                            <i class="bi bi-check-lg"></i>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Insertar modal en el body
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Configurar eventos de búsqueda
+        setupTutoresSearch();
+
+    } catch (error) {
+        console.error('Error abriendo modal de tutores:', error);
+        alert('Error al cargar los estudiantes: ' + error.message);
+    }
+}
+
+// Cerrar modal de gestionar tutores
+function cerrarModalGestionarTutores() {
+    const modal = document.getElementById('gestionarTutoresModal');
+    if (modal) modal.remove();
+}
+
+// Configurar búsqueda de tutores
+function setupTutoresSearch() {
+    const searchInput = document.getElementById('tutoresSearchInput');
+    const clearBtn = document.getElementById('clearTutoresSearch');
+    const tutoresList = document.getElementById('tutoresList');
+
+    if (!searchInput || !tutoresList) return;
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+        const tutorItems = tutoresList.querySelectorAll('.tutor-item');
+
+        // Mostrar/ocultar botón de limpiar
+        if (clearBtn) {
+            clearBtn.style.display = query ? 'flex' : 'none';
+        }
+
+        let visibleCount = 0;
+        tutorItems.forEach(item => {
+            const nombre = item.querySelector('.tutor-nombre');
+            if (nombre) {
+                const nombreText = nombre.textContent.toLowerCase();
+                if (nombreText.includes(query)) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            }
+        });
+
+        // Mostrar mensaje si no hay resultados
+        let noResults = tutoresList.querySelector('.no-tutores-results');
+        if (visibleCount === 0 && query) {
+            if (!noResults) {
+                noResults = document.createElement('p');
+                noResults.className = 'no-tutores-results empty-message';
+                noResults.textContent = 'No se encontraron estudiantes';
+                tutoresList.appendChild(noResults);
+            }
+        } else if (noResults) {
+            noResults.remove();
+        }
+    });
+
+    // Limpiar búsqueda
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            searchInput.focus();
+        });
+    }
+}
+
+// Guardar tutores
+async function guardarTutores() {
+    try {
+        const db = window.firebaseDB;
+        const checkboxes = document.querySelectorAll('.tutor-checkbox');
+
+        // Obtener tutores actuales
+        const tutoresSnapshot = await db.collection('tutores')
+            .where('aulaId', '==', currentAulaId)
+            .where('materia', '==', currentMateria)
+            .get();
+
+        const tutoresActuales = new Map();
+        tutoresSnapshot.forEach(doc => {
+            tutoresActuales.set(doc.data().estudianteId, doc.id);
+        });
+
+        // Procesar cambios
+        for (const checkbox of checkboxes) {
+            const estudianteId = checkbox.getAttribute('data-estudiante-id');
+            const estaSeleccionado = checkbox.checked;
+            const yaEsTutor = tutoresActuales.has(estudianteId);
+
+            if (estaSeleccionado && !yaEsTutor) {
+                // Agregar como tutor
+                await db.collection('tutores').add({
+                    aulaId: currentAulaId,
+                    materia: currentMateria,
+                    estudianteId: estudianteId,
+                    fechaAsignacion: firebase.firestore.Timestamp.now()
+                });
+            } else if (!estaSeleccionado && yaEsTutor) {
+                // Remover como tutor
+                const tutorDocId = tutoresActuales.get(estudianteId);
+                await db.collection('tutores').doc(tutorDocId).delete();
+            }
+        }
+
+        cerrarModalGestionarTutores();
+        loadForo();
+        alert('Tutores actualizados correctamente');
+
+    } catch (error) {
+        console.error('Error guardando tutores:', error);
+        alert('Error al guardar los cambios');
+    }
+}
+
+// Abrir modal para crear publicación en el foro
+function abrirModalCrearPublicacionForo() {
+    const modalHTML = `
+        <div class="modal active" id="crearPublicacionForoModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Crear Publicación en el Foro</h3>
+                    <button class="close-btn" onclick="cerrarModalCrearPublicacionForo()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <form id="crearPublicacionForoForm">
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <label for="foroPublicacionTitulo">Título (opcional)</label>
+                            <input type="text" id="foroPublicacionTitulo" placeholder="Título de la publicación">
+                        </div>
+                        <div class="input-group">
+                            <label for="foroPublicacionContenido">Contenido</label>
+                            <textarea id="foroPublicacionContenido" rows="5" required placeholder="Escribe el contenido de tu publicación..."></textarea>
+                        </div>
+
+                        <!-- Imágenes -->
+                        <div class="input-group">
+                            <label>Imágenes (opcional)</label>
+                            <input type="file" id="foroPublicacionImagenes" accept="image/*" multiple style="display: none;">
+                            <button type="button" class="upload-btn" onclick="document.getElementById('foroPublicacionImagenes').click()">
+                                <i class="bi bi-image"></i>
+                                Subir Imágenes
+                            </button>
+                            <div id="foroPublicacionImagenesPreview" class="images-preview"></div>
+                        </div>
+
+                        <!-- Videos -->
+                        <div class="input-group">
+                            <label>Videos (opcional)</label>
+                            <div class="video-input-container">
+                                <select id="foroPublicacionVideoType" class="video-type-select">
+                                    <option value="">Tipo de video</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="drive">Google Drive</option>
+                                </select>
+                                <input type="url" id="foroPublicacionVideoUrl" placeholder="URL del video" class="video-url-input">
+                                <button type="button" class="add-video-btn" onclick="agregarVideoForo()">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Agregar
+                                </button>
+                            </div>
+                            <div id="foroPublicacionVideosPreview" class="videos-preview"></div>
+                        </div>
+
+                        <!-- Archivos / Enlaces -->
+                        <div class="input-group">
+                            <label>Archivos y Enlaces (opcional)</label>
+                            <div class="drive-file-input-container">
+                                <input type="url" id="foroPublicacionArchivoUrl" placeholder="URL de Drive, PDF, carpeta, etc." class="drive-file-url-input">
+                                <button type="button" class="add-drive-file-btn" onclick="agregarArchivoForo()">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Agregar
+                                </button>
+                            </div>
+                            <small>Puedes agregar enlaces de Google Drive (PDFs, carpetas, documentos), Canva, GitHub, etc.</small>
+                            <div id="foroPublicacionArchivosPreview" class="drive-files-preview"></div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" onclick="cerrarModalCrearPublicacionForo()">Cancelar</button>
+                        <button type="submit" class="submit-btn">
+                            <i class="bi bi-send"></i>
+                            Publicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Event listeners
+    document.getElementById('foroPublicacionImagenes').addEventListener('change', previsualizarImagenesForo);
+    document.getElementById('crearPublicacionForoForm').addEventListener('submit', crearPublicacionForo);
+}
+
+// Cerrar modal de crear publicación
+function cerrarModalCrearPublicacionForo() {
+    const modal = document.getElementById('crearPublicacionForoModal');
+    if (modal) modal.remove();
+}
+
+// Variables temporales para almacenar videos y archivos
+let foroVideosTemp = [];
+let foroArchivosTemp = [];
+
+// Previsualizar imágenes del foro
+function previsualizarImagenesForo(e) {
+    const preview = document.getElementById('foroPublicacionImagenesPreview');
+    preview.innerHTML = '';
+
+    const files = e.target.files;
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const div = document.createElement('div');
+            div.className = 'image-preview-item';
+            div.innerHTML = `
+                <img src="${e.target.result}" alt="Preview">
+                <button type="button" class="remove-preview-btn" onclick="this.parentElement.remove()">
+                    <i class="bi bi-x"></i>
+                </button>
+            `;
+            preview.appendChild(div);
+        };
+
+        reader.readAsDataURL(file);
+    }
+}
+
+// Agregar video al foro
+function agregarVideoForo() {
+    const tipo = document.getElementById('foroPublicacionVideoType').value;
+    const url = document.getElementById('foroPublicacionVideoUrl').value.trim();
+
+    if (!tipo || !url) {
+        alert('Selecciona el tipo de video e ingresa la URL');
+        return;
+    }
+
+    foroVideosTemp.push({ tipo, url });
+
+    const preview = document.getElementById('foroPublicacionVideosPreview');
+    const div = document.createElement('div');
+    div.className = 'video-preview-item';
+    div.innerHTML = `
+        <i class="bi bi-play-circle"></i>
+        <span>${tipo === 'youtube' ? 'YouTube' : 'Google Drive'}: ${url.substring(0, 50)}...</span>
+        <button type="button" class="remove-preview-btn" onclick="removerVideoForo(${foroVideosTemp.length - 1})">
+            <i class="bi bi-x"></i>
+        </button>
+    `;
+    preview.appendChild(div);
+
+    document.getElementById('foroPublicacionVideoType').value = '';
+    document.getElementById('foroPublicacionVideoUrl').value = '';
+}
+
+// Remover video del foro
+function removerVideoForo(index) {
+    foroVideosTemp.splice(index, 1);
+    const preview = document.getElementById('foroPublicacionVideosPreview');
+    preview.innerHTML = '';
+    foroVideosTemp.forEach((video, i) => {
+        const div = document.createElement('div');
+        div.className = 'video-preview-item';
+        div.innerHTML = `
+            <i class="bi bi-play-circle"></i>
+            <span>${video.tipo === 'youtube' ? 'YouTube' : 'Google Drive'}: ${video.url.substring(0, 50)}...</span>
+            <button type="button" class="remove-preview-btn" onclick="removerVideoForo(${i})">
+                <i class="bi bi-x"></i>
+            </button>
+        `;
+        preview.appendChild(div);
+    });
+}
+
+// Agregar archivo al foro
+function agregarArchivoForo() {
+    const url = document.getElementById('foroPublicacionArchivoUrl').value.trim();
+
+    if (!url) {
+        alert('Ingresa la URL del archivo');
+        return;
+    }
+
+    // Extraer nombre del archivo de la URL
+    let nombre = 'Archivo';
+    try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname.includes('drive.google.com')) {
+            if (url.includes('/folders/')) {
+                nombre = 'Carpeta de Drive';
+            } else if (url.includes('.pdf')) {
+                nombre = 'Documento PDF';
+            } else {
+                nombre = 'Archivo de Drive';
+            }
+        } else if (urlObj.hostname.includes('canva.com')) {
+            nombre = 'Diseño de Canva';
+        } else if (urlObj.hostname.includes('github.com')) {
+            nombre = 'Repositorio de GitHub';
+        } else {
+            nombre = urlObj.hostname;
+        }
+    } catch (e) {
+        nombre = url.substring(0, 30);
+    }
+
+    foroArchivosTemp.push({ url, nombre });
+
+    const preview = document.getElementById('foroPublicacionArchivosPreview');
+    const div = document.createElement('div');
+    div.className = 'drive-file-preview-item';
+    div.innerHTML = `
+        <i class="bi ${getFileIcon(url)}"></i>
+        <span>${nombre}</span>
+        <button type="button" class="remove-preview-btn" onclick="removerArchivoForo(${foroArchivosTemp.length - 1})">
+            <i class="bi bi-x"></i>
+        </button>
+    `;
+    preview.appendChild(div);
+
+    document.getElementById('foroPublicacionArchivoUrl').value = '';
+}
+
+// Remover archivo del foro
+function removerArchivoForo(index) {
+    foroArchivosTemp.splice(index, 1);
+    const preview = document.getElementById('foroPublicacionArchivosPreview');
+    preview.innerHTML = '';
+    foroArchivosTemp.forEach((archivo, i) => {
+        const div = document.createElement('div');
+        div.className = 'drive-file-preview-item';
+        div.innerHTML = `
+            <i class="bi ${getFileIcon(archivo.url)}"></i>
+            <span>${archivo.nombre}</span>
+            <button type="button" class="remove-preview-btn" onclick="removerArchivoForo(${i})">
+                <i class="bi bi-x"></i>
+            </button>
+        `;
+        preview.appendChild(div);
+    });
+}
+
+// Crear publicación en el foro
+async function crearPublicacionForo(e) {
+    e.preventDefault();
+
+    const titulo = document.getElementById('foroPublicacionTitulo').value.trim();
+    const contenido = document.getElementById('foroPublicacionContenido').value.trim();
+
+    if (!contenido) {
+        alert('El contenido es obligatorio');
+        return;
+    }
+
+    try {
+        const db = window.firebaseDB;
+
+        // Subir imágenes
+        const imagenesUrls = [];
+        const imagenesInput = document.getElementById('foroPublicacionImagenes');
+        if (imagenesInput.files.length > 0) {
+            for (let i = 0; i < imagenesInput.files.length; i++) {
+                const file = imagenesInput.files[i];
+                const url = await uploadImageToImgBB(file);
+                if (url) imagenesUrls.push(url);
+            }
+        }
+
+        // Crear publicación
+        await db.collection('foro').add({
+            aulaId: currentAulaId,
+            materia: currentMateria,
+            autorId: currentUser.id,
+            titulo: titulo,
+            contenido: contenido,
+            imagenes: imagenesUrls,
+            videos: foroVideosTemp,
+            archivos: foroArchivosTemp,
+            fechaCreacion: firebase.firestore.Timestamp.now()
+        });
+
+        // Limpiar variables temporales
+        foroVideosTemp = [];
+        foroArchivosTemp = [];
+
+        cerrarModalCrearPublicacionForo();
+        loadForo();
+        alert('Publicación creada correctamente');
+
+    } catch (error) {
+        console.error('Error creando publicación:', error);
+        alert('Error al crear la publicación');
+    }
+}
+
+// Abrir modal para editar publicación (similar a crear pero con datos precargados)
+async function abrirModalEditarPublicacionForo(publicacionId) {
+    try {
+        const db = window.firebaseDB;
+        const publicacionDoc = await db.collection('foro').doc(publicacionId).get();
+
+        if (!publicacionDoc.exists) {
+            alert('Publicación no encontrada');
+            return;
+        }
+
+        const publicacion = publicacionDoc.data();
+
+        const modalHTML = `
+            <div class="modal active" id="editarPublicacionForoModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Editar Publicación</h3>
+                        <button class="close-btn" onclick="cerrarModalEditarPublicacionForo()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                    <form id="editarPublicacionForoForm">
+                        <input type="hidden" id="editPublicacionId" value="${publicacionId}">
+                        <div class="modal-body">
+                            <div class="input-group">
+                                <label for="editForoPublicacionTitulo">Título (opcional)</label>
+                                <input type="text" id="editForoPublicacionTitulo" value="${publicacion.titulo || ''}" placeholder="Título de la publicación">
+                            </div>
+                            <div class="input-group">
+                                <label for="editForoPublicacionContenido">Contenido</label>
+                                <textarea id="editForoPublicacionContenido" rows="5" required placeholder="Escribe el contenido...">${publicacion.contenido}</textarea>
+                            </div>
+                            <p class="info-text"><i class="bi bi-info-circle"></i> Para cambiar imágenes, videos o archivos, elimina la publicación y créala nuevamente.</p>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="cancel-btn" onclick="cerrarModalEditarPublicacionForo()">Cancelar</button>
+                            <button type="submit" class="submit-btn">
+                                <i class="bi bi-check-lg"></i>
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.getElementById('editarPublicacionForoForm').addEventListener('submit', editarPublicacionForo);
+
+    } catch (error) {
+        console.error('Error abriendo modal de edición:', error);
+        alert('Error al cargar la publicación');
+    }
+}
+
+// Cerrar modal de editar publicación
+function cerrarModalEditarPublicacionForo() {
+    const modal = document.getElementById('editarPublicacionForoModal');
+    if (modal) modal.remove();
+}
+
+// Editar publicación
+async function editarPublicacionForo(e) {
+    e.preventDefault();
+
+    const publicacionId = document.getElementById('editPublicacionId').value;
+    const titulo = document.getElementById('editForoPublicacionTitulo').value.trim();
+    const contenido = document.getElementById('editForoPublicacionContenido').value.trim();
+
+    if (!contenido) {
+        alert('El contenido es obligatorio');
+        return;
+    }
+
+    try {
+        const db = window.firebaseDB;
+        await db.collection('foro').doc(publicacionId).update({
+            titulo: titulo,
+            contenido: contenido,
+            fechaEdicion: firebase.firestore.Timestamp.now()
+        });
+
+        cerrarModalEditarPublicacionForo();
+        loadForo();
+        alert('Publicación actualizada correctamente');
+
+    } catch (error) {
+        console.error('Error editando publicación:', error);
+        alert('Error al editar la publicación');
     }
 }

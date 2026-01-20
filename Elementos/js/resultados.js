@@ -796,7 +796,7 @@ async function cargarTodosLosResultados(db) {
             // Obtener información de la prueba del cache
             const pruebaData = pruebasCache.get(pruebaId);
             
-            // Si la prueba no existe en el cache, es una respuesta huérfana - saltarla
+            // Si la prueba no existe, saltarla
             if (!pruebaData) return;
 
             const tipoPrueba = pruebaData.tipo || 'prueba';
@@ -888,6 +888,9 @@ function mostrarPruebasAdmin(pruebasMap) {
     // Guardar en variable global
     todasLasPruebas = pruebas;
 
+    // Poblar selector de nombres de pruebas
+    poblarSelectorPruebas();
+
     // Crear tarjetas
     pruebas.forEach(prueba => {
         const pruebaCard = crearTarjetaPruebaAdmin(prueba);
@@ -928,6 +931,9 @@ function mostrarMinisimulacrosAdmin(minisimulacrosMap) {
 
     // Guardar en variable global
     todosLosMinisimulacros = minisimulacros;
+
+    // Poblar selector de nombres de minisimulacros
+    poblarSelectorMinisimulacros();
 
     // Crear tarjetas
     minisimulacros.forEach(minisimu => {
@@ -1082,6 +1088,9 @@ function mostrarPruebas(pruebasMap) {
     // Guardar en variable global
     todasLasPruebas = pruebas;
 
+    // Poblar selector de nombres de pruebas
+    poblarSelectorPruebas();
+
     // Crear tarjetas
     pruebas.forEach(prueba => {
         const pruebaCard = crearTarjetaPrueba(prueba);
@@ -1122,6 +1131,9 @@ function mostrarMinisimulacros(minisimulacrosMap) {
 
     // Guardar en variable global
     todosLosMinisimulacros = minisimulacros;
+
+    // Poblar selector de nombres de minisimulacros
+    poblarSelectorMinisimulacros();
 
     // Crear tarjetas
     minisimulacros.forEach(minisimu => {
@@ -1319,18 +1331,14 @@ document.addEventListener('click', function (e) {
 function inicializarFiltros() {
     // Filtros de Pruebas
     const searchPruebas = document.getElementById('searchPruebas');
-    const filterPruebasDesde = document.getElementById('filterPruebasDesde');
-    const filterPruebasHasta = document.getElementById('filterPruebasHasta');
+    const filterNombrePrueba = document.getElementById('filterNombrePrueba');
     const clearFiltersPruebas = document.getElementById('clearFiltersPruebas');
 
     if (searchPruebas) {
         searchPruebas.addEventListener('input', () => filtrarPruebas());
     }
-    if (filterPruebasDesde) {
-        filterPruebasDesde.addEventListener('change', () => filtrarPruebas());
-    }
-    if (filterPruebasHasta) {
-        filterPruebasHasta.addEventListener('change', () => filtrarPruebas());
+    if (filterNombrePrueba) {
+        filterNombrePrueba.addEventListener('change', () => filtrarPruebas());
     }
     if (clearFiltersPruebas) {
         clearFiltersPruebas.addEventListener('click', () => limpiarFiltrosPruebas());
@@ -1338,55 +1346,78 @@ function inicializarFiltros() {
 
     // Filtros de Minisimulacros
     const searchMinisimu = document.getElementById('searchMinisimulacros');
-    const filterMinisimuDesde = document.getElementById('filterMinisimuDesde');
-    const filterMinisimuHasta = document.getElementById('filterMinisimuHasta');
+    const filterNombreMinisimu = document.getElementById('filterNombreMinisimu');
     const clearFiltersMinisimu = document.getElementById('clearFiltersMinisimu');
 
     if (searchMinisimu) {
         searchMinisimu.addEventListener('input', () => filtrarMinisimulacros());
     }
-    if (filterMinisimuDesde) {
-        filterMinisimuDesde.addEventListener('change', () => filtrarMinisimulacros());
-    }
-    if (filterMinisimuHasta) {
-        filterMinisimuHasta.addEventListener('change', () => filtrarMinisimulacros());
+    if (filterNombreMinisimu) {
+        filterNombreMinisimu.addEventListener('change', () => filtrarMinisimulacros());
     }
     if (clearFiltersMinisimu) {
         clearFiltersMinisimu.addEventListener('click', () => limpiarFiltrosMinisimu());
     }
 }
 
+// Poblar selector de nombres de pruebas
+function poblarSelectorPruebas() {
+    const select = document.getElementById('filterNombrePrueba');
+    if (!select) return;
+    
+    // Obtener nombres únicos de pruebas
+    const nombresUnicos = [...new Set(todasLasPruebas.map(p => p.nombrePrueba))].sort();
+    
+    // Limpiar y llenar el selector
+    select.innerHTML = '<option value="">Todas las pruebas</option>';
+    nombresUnicos.forEach(nombre => {
+        const option = document.createElement('option');
+        option.value = nombre;
+        option.textContent = nombre;
+        select.appendChild(option);
+    });
+}
+
+// Poblar selector de nombres de minisimulacros
+function poblarSelectorMinisimulacros() {
+    const select = document.getElementById('filterNombreMinisimu');
+    if (!select) return;
+    
+    // Obtener nombres únicos de minisimulacros
+    const nombresUnicos = [...new Set(todosLosMinisimulacros.map(m => m.nombrePrueba))].sort();
+    
+    // Limpiar y llenar el selector
+    select.innerHTML = '<option value="">Todos los simulacros</option>';
+    nombresUnicos.forEach(nombre => {
+        const option = document.createElement('option');
+        option.value = nombre;
+        option.textContent = nombre;
+        select.appendChild(option);
+    });
+}
+
 // Filtrar pruebas
 function filtrarPruebas() {
     const searchTerm = document.getElementById('searchPruebas').value.toLowerCase();
-    const fechaDesde = document.getElementById('filterPruebasDesde').value;
-    const fechaHasta = document.getElementById('filterPruebasHasta').value;
+    const nombreSeleccionado = document.getElementById('filterNombrePrueba').value;
 
     let pruebasFiltradas = todasLasPruebas.filter(prueba => {
-        // Filtro por nombre de prueba
+        // Filtro por búsqueda de texto (nombre de prueba o estudiante)
         const nombrePruebaMatch = prueba.nombrePrueba.toLowerCase().includes(searchTerm);
         
         // Filtro por nombre de estudiante (solo admin)
         const nombreEstudianteMatch = esAdmin && prueba.nombreEstudiante ? 
             prueba.nombreEstudiante.toLowerCase().includes(searchTerm) : false;
         
-        const nombreMatch = nombrePruebaMatch || nombreEstudianteMatch;
+        const searchMatch = nombrePruebaMatch || nombreEstudianteMatch;
 
-        // Filtro por fecha
-        let fechaMatch = true;
-        if (prueba.fechaRealizacion) {
-            const fechaPrueba = prueba.fechaRealizacion.toDate();
-            const fechaPruebaStr = fechaPrueba.toISOString().split('T')[0];
-
-            if (fechaDesde && fechaPruebaStr < fechaDesde) {
-                fechaMatch = false;
-            }
-            if (fechaHasta && fechaPruebaStr > fechaHasta) {
-                fechaMatch = false;
-            }
+        // Filtro por nombre específico de prueba
+        let nombreMatch = true;
+        if (nombreSeleccionado) {
+            nombreMatch = prueba.nombrePrueba === nombreSeleccionado;
         }
 
-        return nombreMatch && fechaMatch;
+        return searchMatch && nombreMatch;
     });
 
     // Mostrar resultados filtrados
@@ -1396,34 +1427,25 @@ function filtrarPruebas() {
 // Filtrar minisimulacros
 function filtrarMinisimulacros() {
     const searchTerm = document.getElementById('searchMinisimulacros').value.toLowerCase();
-    const fechaDesde = document.getElementById('filterMinisimuDesde').value;
-    const fechaHasta = document.getElementById('filterMinisimuHasta').value;
+    const nombreSeleccionado = document.getElementById('filterNombreMinisimu').value;
 
     let minisimuFiltrados = todosLosMinisimulacros.filter(minisimu => {
-        // Filtro por nombre de minisimulacro
+        // Filtro por búsqueda de texto (nombre de minisimulacro o estudiante)
         const nombreMinisimuMatch = minisimu.nombrePrueba.toLowerCase().includes(searchTerm);
         
         // Filtro por nombre de estudiante (solo admin)
         const nombreEstudianteMatch = esAdmin && minisimu.nombreEstudiante ? 
             minisimu.nombreEstudiante.toLowerCase().includes(searchTerm) : false;
         
-        const nombreMatch = nombreMinisimuMatch || nombreEstudianteMatch;
+        const searchMatch = nombreMinisimuMatch || nombreEstudianteMatch;
 
-        // Filtro por fecha
-        let fechaMatch = true;
-        if (minisimu.fechaRealizacion) {
-            const fechaMinisimu = minisimu.fechaRealizacion.toDate();
-            const fechaMinisimuStr = fechaMinisimu.toISOString().split('T')[0];
-
-            if (fechaDesde && fechaMinisimuStr < fechaDesde) {
-                fechaMatch = false;
-            }
-            if (fechaHasta && fechaMinisimuStr > fechaHasta) {
-                fechaMatch = false;
-            }
+        // Filtro por nombre específico de minisimulacro
+        let nombreMatch = true;
+        if (nombreSeleccionado) {
+            nombreMatch = minisimu.nombrePrueba === nombreSeleccionado;
         }
 
-        return nombreMatch && fechaMatch;
+        return searchMatch && nombreMatch;
     });
 
     // Mostrar resultados filtrados
@@ -1433,16 +1455,14 @@ function filtrarMinisimulacros() {
 // Limpiar filtros de pruebas
 function limpiarFiltrosPruebas() {
     document.getElementById('searchPruebas').value = '';
-    document.getElementById('filterPruebasDesde').value = '';
-    document.getElementById('filterPruebasHasta').value = '';
+    document.getElementById('filterNombrePrueba').value = '';
     filtrarPruebas();
 }
 
 // Limpiar filtros de minisimulacros
 function limpiarFiltrosMinisimu() {
     document.getElementById('searchMinisimulacros').value = '';
-    document.getElementById('filterMinisimuDesde').value = '';
-    document.getElementById('filterMinisimuHasta').value = '';
+    document.getElementById('filterNombreMinisimu').value = '';
     filtrarMinisimulacros();
 }
 
@@ -1492,244 +1512,6 @@ function mostrarMinisimuFiltrados(minisimulacros) {
             crearTarjetaMinisimulacroAdmin(minisimu) : crearTarjetaMinisimulacro(minisimu);
         minisimuContainer.appendChild(minisimuCard);
     });
-}
-
-// ================ FUNCIONES PARA LIMPIAR RESPUESTAS HUÉRFANAS ================
-
-// Event listener para botón de limpiar respuestas huérfanas
-document.addEventListener('DOMContentLoaded', function() {
-    const btnLimpiarHuerfanas = document.getElementById('btnLimpiarHuerfanas');
-    if (btnLimpiarHuerfanas) {
-        btnLimpiarHuerfanas.addEventListener('click', limpiarRespuestasHuerfanas);
-    }
-});
-
-// Función principal para limpiar respuestas huérfanas
-async function limpiarRespuestasHuerfanas() {
-    // Confirmar con el usuario
-    const confirmacion = await Swal.fire({
-        title: '¿Limpiar respuestas huérfanas?',
-        html: `
-            <p>Esta acción buscará y eliminará todas las respuestas de pruebas que ya no existen en el sistema.</p>
-            <p><strong>⚠️ Esta acción no se puede deshacer.</strong></p>
-        `,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: '<i class="bi bi-trash3"></i> Sí, limpiar',
-        cancelButtonText: 'Cancelar',
-        background: '#1a1a1a',
-        color: '#fff'
-    });
-
-    if (!confirmacion.isConfirmed) {
-        return;
-    }
-
-    // Mostrar loading
-    Swal.fire({
-        title: 'Buscando respuestas huérfanas...',
-        html: '<p>Por favor espera mientras se analizan las respuestas...</p>',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        },
-        background: '#1a1a1a',
-        color: '#fff'
-    });
-
-    try {
-        if (!window.firebaseDB) {
-            await esperarFirebase();
-        }
-        
-        const db = window.firebaseDB;
-        
-        // Obtener todas las respuestas
-        const respuestasSnapshot = await db.collection('respuestas').get();
-        
-        if (respuestasSnapshot.empty) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Sin respuestas',
-                text: 'No hay respuestas en el sistema.',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
-            return;
-        }
-
-        // Obtener IDs únicos de pruebas referenciadas
-        const pruebaIdsReferenciados = new Set();
-        // También contar respuestas únicas (por prueba+estudiante)
-        const respuestasUnicas = new Set();
-        
-        respuestasSnapshot.forEach(doc => {
-            const respuesta = doc.data();
-            if (respuesta.pruebaId) {
-                pruebaIdsReferenciados.add(respuesta.pruebaId);
-                // Clave única: pruebaId + estudianteId (esto agrupa bloques de la misma prueba)
-                const claveUnica = `${respuesta.pruebaId}_${respuesta.estudianteId || 'unknown'}`;
-                respuestasUnicas.add(claveUnica);
-            }
-        });
-
-        // Verificar cuáles pruebas existen
-        const pruebasExistentes = new Set();
-        const pruebasNoExistentes = new Set();
-        
-        for (const pruebaId of pruebaIdsReferenciados) {
-            const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
-            if (pruebaDoc.exists) {
-                pruebasExistentes.add(pruebaId);
-            } else {
-                pruebasNoExistentes.add(pruebaId);
-            }
-        }
-
-        // Identificar respuestas huérfanas
-        const respuestasHuerfanas = [];
-        const respuestasHuerfanasUnicas = new Set(); // Para contar pruebas únicas huérfanas
-        
-        respuestasSnapshot.forEach(doc => {
-            const respuesta = doc.data();
-            // Una respuesta es huérfana si:
-            // 1. No tiene pruebaId
-            // 2. Su pruebaId no existe en la colección de pruebas
-            if (!respuesta.pruebaId || pruebasNoExistentes.has(respuesta.pruebaId)) {
-                respuestasHuerfanas.push({
-                    id: doc.id,
-                    pruebaId: respuesta.pruebaId || 'Sin ID',
-                    estudianteId: respuesta.estudianteId || 'Desconocido',
-                    fecha: respuesta.fechaEnvio ? respuesta.fechaEnvio.toDate().toLocaleDateString() : 'Sin fecha'
-                });
-                // Contar respuestas únicas huérfanas
-                const claveUnica = `${respuesta.pruebaId || 'none'}_${respuesta.estudianteId || 'unknown'}`;
-                respuestasHuerfanasUnicas.add(claveUnica);
-            }
-        });
-
-        if (respuestasHuerfanas.length === 0) {
-            Swal.fire({
-                icon: 'success',
-                title: '¡Todo limpio!',
-                html: `
-                    <p>No se encontraron respuestas huérfanas.</p>
-                    <p><strong>Total de pruebas respondidas:</strong> ${respuestasUnicas.size}</p>
-                    <p><strong>Pruebas en el sistema:</strong> ${pruebaIdsReferenciados.size}</p>
-                `,
-                background: '#1a1a1a',
-                color: '#fff'
-            });
-            return;
-        }
-
-        // Mostrar confirmación con detalles
-        const confirmarEliminacion = await Swal.fire({
-            title: `Se encontraron ${respuestasHuerfanasUnicas.size} pruebas huérfanas`,
-            html: `
-                <div style="text-align: left; max-height: 300px; overflow-y: auto;">
-                    <p><strong>Pruebas eliminadas que tienen respuestas guardadas:</strong></p>
-                    <ul style="list-style: none; padding: 0;">
-                        ${Array.from(pruebasNoExistentes).slice(0, 10).map(id => 
-                            `<li style="padding: 5px; background: rgba(255,0,0,0.1); margin: 5px 0; border-radius: 5px;">
-                                <i class="bi bi-exclamation-triangle text-warning"></i> ${id}
-                            </li>`
-                        ).join('')}
-                        ${pruebasNoExistentes.size > 10 ? `<li>... y ${pruebasNoExistentes.size - 10} más</li>` : ''}
-                    </ul>
-                    <p><strong>${respuestasHuerfanasUnicas.size} prueba(s) respondida(s) de ${pruebasNoExistentes.size} prueba(s) eliminada(s)</strong></p>
-                    <p style="font-size: 0.9em; color: #aaa;">(${respuestasHuerfanas.length} documentos de respuesta serán eliminados)</p>
-                </div>
-            `,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: `<i class="bi bi-trash3"></i> Eliminar ${respuestasHuerfanasUnicas.size} prueba(s) huérfana(s)`,
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
-        });
-
-        if (!confirmarEliminacion.isConfirmed) {
-            return;
-        }
-
-        // Eliminar respuestas huérfanas
-        Swal.fire({
-            title: 'Eliminando respuestas huérfanas...',
-            html: `<p>Eliminando 0 de ${respuestasHuerfanas.length}...</p>`,
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-            background: '#1a1a1a',
-            color: '#fff'
-        });
-
-        let eliminadas = 0;
-        let errores = 0;
-        const batch = db.batch();
-        
-        // Firebase permite máximo 500 operaciones por batch
-        const batchSize = 500;
-        
-        for (let i = 0; i < respuestasHuerfanas.length; i += batchSize) {
-            const chunk = respuestasHuerfanas.slice(i, i + batchSize);
-            const batchActual = db.batch();
-            
-            for (const respuesta of chunk) {
-                try {
-                    const docRef = db.collection('respuestas').doc(respuesta.id);
-                    batchActual.delete(docRef);
-                } catch (err) {
-                    errores++;
-                    console.error('Error preparando eliminación:', err);
-                }
-            }
-            
-            try {
-                await batchActual.commit();
-                eliminadas += chunk.length;
-                
-                // Actualizar progreso
-                Swal.update({
-                    html: `<p>Eliminando ${eliminadas} de ${respuestasHuerfanas.length}...</p>`
-                });
-            } catch (err) {
-                errores += chunk.length;
-                console.error('Error en batch commit:', err);
-            }
-        }
-
-        // Mostrar resultado
-        Swal.fire({
-            icon: errores === 0 ? 'success' : 'warning',
-            title: 'Limpieza completada',
-            html: `
-                <p><strong>Respuestas eliminadas:</strong> ${eliminadas}</p>
-                ${errores > 0 ? `<p><strong>Errores:</strong> ${errores}</p>` : ''}
-                <p>La página se recargará para actualizar los datos.</p>
-            `,
-            background: '#1a1a1a',
-            color: '#fff'
-        }).then(() => {
-            // Recargar la página para actualizar los datos
-            window.location.reload();
-        });
-
-    } catch (error) {
-        console.error('Error al limpiar respuestas huérfanas:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Ocurrió un error al limpiar las respuestas: ' + error.message,
-            background: '#1a1a1a',
-            color: '#fff'
-        });
-    }
 }
 
 // ========== PLAN DE ESTUDIO ==========

@@ -133,24 +133,22 @@
                     Limpiar Filtros
                 </button>
                 
-                <!-- Botón Limpiar Respuestas Huérfanas -->
-                <button class="btn-limpiar-huerfanas-admin" id="btnLimpiarHuerfanas" title="Eliminar respuestas de pruebas que ya no existen">
-                    <i class="bi bi-trash3"></i>
-                    Limpiar Huérfanas
-                </button>
-            </div>
-            
-            <!-- Estadísticas -->
-            <div class="admin-stats" id="adminStats">
-                <div class="admin-stat">
-                    <i class="bi bi-people"></i>
-                    <span id="totalEstudiantes">0</span>
-                    <label>Estudiantes</label>
-                </div>
-                <div class="admin-stat">
-                    <i class="bi bi-file-earmark-check"></i>
-                    <span id="totalRespuestas">0</span>
-                    <label>Pruebas Respondidas</label>
+                <!-- Estadísticas -->
+                <div class="admin-stats-inline" id="adminStatsInline">
+                    <div class="admin-stat">
+                        <i class="bi bi-people"></i>
+                        <div class="admin-stat-content">
+                            <span id="totalEstudiantes">0</span>
+                            <label>Estudiantes</label>
+                        </div>
+                    </div>
+                    <div class="admin-stat">
+                        <i class="bi bi-file-earmark-check"></i>
+                        <div class="admin-stat-content">
+                            <span id="totalRespuestas">0</span>
+                            <label>Pruebas Respondidas</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -191,14 +189,11 @@
                         aria-label="Buscar por nombre de prueba">
                 </div>
                 <div class="filter-group">
-                    <label for="filterPruebasDesde"><i class="bi bi-calendar-range" aria-hidden="true"></i>
-                        Desde:</label>
-                    <input type="date" id="filterPruebasDesde" aria-label="Filtrar desde fecha">
-                </div>
-                <div class="filter-group">
-                    <label for="filterPruebasHasta"><i class="bi bi-calendar-range" aria-hidden="true"></i>
-                        Hasta:</label>
-                    <input type="date" id="filterPruebasHasta" aria-label="Filtrar hasta fecha">
+                    <label for="filterNombrePrueba"><i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                        Prueba:</label>
+                    <select id="filterNombrePrueba" aria-label="Filtrar por nombre de prueba">
+                        <option value="">Todas las pruebas</option>
+                    </select>
                 </div>
                 <button class="btn-clear-filters" id="clearFiltersPruebas" aria-label="Limpiar todos los filtros">
                     <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
@@ -226,14 +221,11 @@
                         aria-label="Buscar por nombre de minisimulacro">
                 </div>
                 <div class="filter-group">
-                    <label for="filterMinisimuDesde"><i class="bi bi-calendar-range" aria-hidden="true"></i>
-                        Desde:</label>
-                    <input type="date" id="filterMinisimuDesde" aria-label="Filtrar desde fecha">
-                </div>
-                <div class="filter-group">
-                    <label for="filterMinisimuHasta"><i class="bi bi-calendar-range" aria-hidden="true"></i>
-                        Hasta:</label>
-                    <input type="date" id="filterMinisimuHasta" aria-label="Filtrar hasta fecha">
+                    <label for="filterNombreMinisimu"><i class="bi bi-clipboard-check" aria-hidden="true"></i>
+                        Simulacro:</label>
+                    <select id="filterNombreMinisimu" aria-label="Filtrar por nombre de minisimulacro">
+                        <option value="">Todos los simulacros</option>
+                    </select>
                 </div>
                 <button class="btn-clear-filters" id="clearFiltersMinisimu" aria-label="Limpiar todos los filtros">
                     <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
