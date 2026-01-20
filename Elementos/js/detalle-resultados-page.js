@@ -323,6 +323,7 @@ async function cargarResultadosDesdeURL() {
     const respuestaId = params.get('id');
     const pruebaId = params.get('pruebaId');
     const tipo = params.get('tipo') || 'prueba';
+    const estudianteIdParam = params.get('estudianteId'); // Para cuando admin ve resultados de otro
     
     if (!pruebaId) {
         mostrarError('No se encontró la información de la prueba');
@@ -340,7 +341,7 @@ async function cargarResultadosDesdeURL() {
         // Obtener datos de la prueba
         const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
         if (!pruebaDoc.exists) {
-            throw new Error('No se encontró la prueba');
+            throw new Error('No se encontró la prueba. Es posible que haya sido eliminada.');
         }
         
         const pruebaData = pruebaDoc.data();
@@ -361,9 +362,20 @@ async function cargarResultadosDesdeURL() {
             tipoPruebaIcon.className = tipo === 'minisimulacro' ? 'bi bi-lightning-fill' : 'bi bi-clipboard-check-fill';
         }
         
-        // Obtener TODAS las respuestas del estudiante
-        const estudianteId = JSON.parse(sessionStorage.getItem('currentUser') || '{}').numeroDocumento ||
-            JSON.parse(sessionStorage.getItem('currentUser') || '{}').numeroIdentidad;
+        // Determinar el estudianteId a usar
+        // Si viene en la URL (admin viendo resultados de otro), usar ese
+        // Si no, usar el del usuario actual
+        let estudianteId = estudianteIdParam;
+        
+        if (!estudianteId) {
+            const usuarioActual = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            estudianteId = usuarioActual.numeroDocumento || usuarioActual.numeroIdentidad || usuarioActual.id;
+        }
+        
+        // Validar que tenemos un estudianteId válido
+        if (!estudianteId) {
+            throw new Error('No se pudo identificar al estudiante. Por favor, vuelve a iniciar sesión.');
+        }
         
         const respuestasEstudianteSnapshot = await db.collection('respuestas')
             .where('pruebaId', '==', pruebaId)

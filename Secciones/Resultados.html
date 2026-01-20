@@ -127,10 +127,16 @@
                     </select>
                 </div>
                 
-                <!-- Botón Limpiar -->
+                <!-- Botón Limpiar Filtros -->
                 <button class="btn-limpiar-filtros-admin" id="btnLimpiarFiltrosAdmin">
                     <i class="bi bi-arrow-clockwise"></i>
-                    Limpiar
+                    Limpiar Filtros
+                </button>
+                
+                <!-- Botón Limpiar Respuestas Huérfanas -->
+                <button class="btn-limpiar-huerfanas-admin" id="btnLimpiarHuerfanas" title="Eliminar respuestas de pruebas que ya no existen">
+                    <i class="bi bi-trash3"></i>
+                    Limpiar Huérfanas
                 </button>
             </div>
             
@@ -144,7 +150,7 @@
                 <div class="admin-stat">
                     <i class="bi bi-file-earmark-check"></i>
                     <span id="totalRespuestas">0</span>
-                    <label>Respuestas</label>
+                    <label>Pruebas Respondidas</label>
                 </div>
             </div>
         </div>
@@ -162,9 +168,15 @@
                 <span>Minisimulacros</span>
             </button>
             <button class="menu-tab" data-tab="plan-estudio" role="tab" aria-selected="false"
-                aria-controls="plan-estudio-content">
+                aria-controls="plan-estudio-content" id="tabPlanEstudio">
                 <i class="bi bi-calendar-check-fill" aria-hidden="true"></i>
                 <span>Plan de Estudio</span>
+            </button>
+            <!-- Tab solo para Admin: Ver Planes de Estudiantes -->
+            <button class="menu-tab admin-only-tab" data-tab="planes-admin" role="tab" aria-selected="false"
+                aria-controls="planes-admin-content" id="tabPlanesAdmin" style="display: none;">
+                <i class="bi bi-people-fill" aria-hidden="true"></i>
+                <span>Planes Estudiantes</span>
             </button>
         </nav>
 
@@ -238,14 +250,19 @@
             </div>
         </section>
 
-        <!-- Contenido de Plan de Estudio -->
+        <!-- Contenido de Plan de Estudio (Estudiantes) -->
         <section class="tab-content" id="plan-estudio-content" role="tabpanel" aria-labelledby="plan-estudio-tab">
-            <div class="results-grid">
-                <div class="empty-state" role="status">
-                    <i class="bi bi-calendar-check" aria-hidden="true"></i>
-                    <h3>Plan de Estudio</h3>
-                    <p>Funcionalidad en desarrollo</p>
-                </div>
+            <!-- Lista de pruebas para plan de estudio -->
+            <div class="plan-estudio-grid" id="planEstudioGrid" role="list" aria-label="Pruebas para plan de estudio">
+                <!-- Las pruebas se cargarán dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Contenido de Planes de Estudio - Solo Admin -->
+        <section class="tab-content" id="planes-admin-content" role="tabpanel" aria-labelledby="planes-admin-tab">
+            <!-- Lista de planes de estudio (usa los filtros de arriba) -->
+            <div class="planes-admin-grid" id="planesAdminGrid" role="list" aria-label="Planes de estudio de estudiantes">
+                <!-- Los planes se cargarán dinámicamente -->
             </div>
         </section>
     </main>

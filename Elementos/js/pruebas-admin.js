@@ -1311,19 +1311,56 @@ async function editTest(testId) {
     }
 }
 
-// Delete test function
+// Delete test function - AHORA TAMBIÉN ELIMINA LAS RESPUESTAS ASOCIADAS
 async function deleteTest(testId) {
     const confirmed = await showDeleteTestModal();
 
     if (confirmed) {
         try {
+            // Primero obtener y eliminar todas las respuestas asociadas a esta prueba
+            const respuestasSnapshot = await db.collection('respuestas')
+                .where('pruebaId', '==', testId)
+                .get();
+            
+            // Contar respuestas a eliminar
+            const cantidadRespuestas = respuestasSnapshot.size;
+            
+            if (cantidadRespuestas > 0) {
+                console.log(`Eliminando ${cantidadRespuestas} respuestas asociadas a la prueba ${testId}...`);
+                
+                // Eliminar respuestas en batches (máximo 500 por batch en Firebase)
+                const batchSize = 500;
+                const docs = respuestasSnapshot.docs;
+                
+                for (let i = 0; i < docs.length; i += batchSize) {
+                    const batch = db.batch();
+                    const chunk = docs.slice(i, i + batchSize);
+                    
+                    chunk.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    
+                    await batch.commit();
+                }
+                
+                console.log(`✅ ${cantidadRespuestas} respuestas eliminadas correctamente`);
+            }
+            
+            // Ahora eliminar la prueba
             await db.collection('pruebas').doc(testId).delete();
-            showNotification('Prueba eliminada exitosamente', 'success');
+            
+            // Mostrar mensaje con información de lo eliminado
+            if (cantidadRespuestas > 0) {
+                showNotification(`Prueba y ${cantidadRespuestas} respuesta(s) eliminadas exitosamente`, 'success');
+            } else {
+                showNotification('Prueba eliminada exitosamente', 'success');
+            }
+            
             await loadAllTests();
             renderTestsList();
         } catch (error) {
             console.error('Error deleting test:', error);
-            showNotification('Error al eliminar la prueba', 'error');
+            showNotification('Error al eliminar la prueba: ' + error.message, 'error');
         }
     }
 }
@@ -1337,14 +1374,17 @@ function showDeleteTestModal() {
                     <div class="panel-modal-body">
                         <i class="bi bi-exclamation-triangle panel-modal-icon"></i>
                         <p class="panel-modal-message">¿Estás seguro de que deseas eliminar esta prueba?</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: -15px; margin-bottom: 20px;">
+                            <i class="bi bi-info-circle"></i> También se eliminarán todas las respuestas de los estudiantes asociadas a esta prueba.
+                        </p>
                         <div class="panel-modal-footer">
                             <button class="panel-modal-btn panel-btn-cancel" id="deleteTestModalCancel">
                                 <i class="bi bi-x-lg"></i>
                                 Cancelar
                             </button>
                             <button class="panel-modal-btn panel-btn-confirm" id="deleteTestModalConfirm">
-                                <i class="bi bi-check-lg"></i>
-                                Eliminar
+                                <i class="bi bi-trash"></i>
+                                Eliminar Todo
                             </button>
                         </div>
                     </div>

@@ -1,0 +1,1798 @@
+/* Plan de Estudio - Estilos */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 50%, #0a0a0a 100%);
+    min-height: 100vh;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* ========== SIDEBAR LATERAL ========== */
+.sidebar-panel {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 300px;
+    height: 100vh;
+    background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
+    padding: 3rem 2rem;
+    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    will-change: transform;
+}
+
+.sidebar-profile {
+    text-align: center;
+    padding: 2rem 0 2.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: auto;
+}
+
+.sidebar-avatar {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.5);
+    border: 4px solid rgba(255, 0, 0, 0.2);
+}
+
+.sidebar-avatar-default {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    color: white;
+}
+
+.sidebar-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.sidebar-user-name {
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.sidebar-user-role {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    margin-bottom: 2rem;
+}
+
+.sidebar-profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.sidebar-actions {
+    padding-top: 2rem;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sidebar-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+}
+
+.btn-profile {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+
+.btn-profile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
+    background: linear-gradient(135deg, #ff1a1a, #d60000);
+}
+
+.btn-home {
+    background: linear-gradient(135deg, #ffa500, #ff8c00);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+}
+
+.btn-home:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 165, 0, 0.5);
+    background: linear-gradient(135deg, #ffb520, #ff9500);
+}
+
+.btn-back {
+    background: white;
+    color: #1a1a1a;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+}
+
+.btn-back:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.5);
+    background: #f0f0f0;
+}
+
+.btn-logout {
+    background: rgba(139, 0, 0, 0.3);
+    color: #ff9999;
+    border: 1px solid rgba(139, 0, 0, 0.5);
+}
+
+.btn-logout:hover {
+    background: rgba(139, 0, 0, 0.5);
+    border-color: rgba(139, 0, 0, 0.7);
+    color: #ffcccc;
+    transform: translateY(-2px);
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+    background: #000000;
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+    background: #1a1a1a;
+    transform: scale(1.05);
+}
+
+.mobile-menu-toggle.active {
+    left: auto;
+    right: 10px;
+}
+
+.mobile-menu-toggle i {
+    transition: transform 0.3s ease;
+}
+
+.mobile-menu-toggle.active i {
+    transform: rotate(180deg);
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    backdrop-filter: blur(5px);
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* ========== CONTENIDO PRINCIPAL ========== */
+.main-content {
+    margin-left: 300px;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+/* Header Superior */
+.page-header {
+    background: linear-gradient(135deg, #cc0000 0%, #8b0000 100%);
+    padding: 1rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 30px rgba(204, 0, 0, 0.4);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-title {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    margin: 0;
+}
+
+.page-title i {
+    font-size: 1.8rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.panel-time {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+}
+
+.time-display {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 1px;
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#timeIcon {
+    font-size: 1.3rem;
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.date-display {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+}
+
+/* Información de la Prueba */
+.info-prueba {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 2.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-item i {
+    color: #ff0000;
+    font-size: 1.1rem;
+}
+
+/* ========== TABS DE NAVEGACIÓN ========== */
+.plan-tabs {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 2.5rem 2rem;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.plan-tab {
+    flex: 1;
+    padding: 1.25rem 2rem;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.plan-tab i {
+    font-size: 1.3rem;
+}
+
+.plan-tab:hover {
+    background: rgba(255, 0, 0, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.plan-tab.active {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    color: white;
+    box-shadow: 0 4px 20px rgba(255, 0, 0, 0.4);
+}
+
+/* Contenido de Tabs */
+.tab-content {
+    display: none;
+    padding: 0 2.5rem 2rem;
+    animation: fadeIn 0.4s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading State */
+.loading-state {
+    text-align: center;
+    padding: 5rem 2rem;
+}
+
+.loading-spinner {
+    margin-bottom: 1.5rem;
+}
+
+.loading-spinner i {
+    font-size: 4rem;
+    color: #ff0000;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading-state p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.2rem;
+}
+
+/* ========== TAB: TEMAS A REFORZAR ========== */
+.resumen-analisis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.analisis-card {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.analisis-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.analisis-card.debilidades {
+    border-color: rgba(255, 77, 77, 0.3);
+    background: rgba(255, 77, 77, 0.1);
+}
+
+.analisis-card.fortalezas {
+    border-color: rgba(51, 255, 119, 0.3);
+    background: rgba(51, 255, 119, 0.1);
+}
+
+.analisis-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.8rem;
+}
+
+.analisis-card.debilidades .analisis-icon {
+    background: linear-gradient(135deg, #ff4d4d, #cc0000);
+    color: white;
+}
+
+.analisis-card.fortalezas .analisis-icon {
+    background: linear-gradient(135deg, #33ff77, #00cc44);
+    color: white;
+}
+
+.analisis-card h4 {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.5rem;
+}
+
+.analisis-card .valor {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+}
+
+/* Filtro de Materias */
+.materias-filter {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.materia-filter-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.materia-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: white;
+}
+
+.materia-filter-btn.active {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    border-color: #ff0000;
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+
+/* Temas por Materia */
+.temas-por-materia {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.materia-section {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.materia-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.materia-icono {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.materia-info h3 {
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 0.25rem;
+}
+
+.materia-info p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Lista de Temas */
+.temas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tema-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+}
+
+.tema-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
+}
+
+.tema-card.bajo {
+    border-left-color: #ff4d4d;
+}
+
+.tema-card.medio {
+    border-left-color: #ffa500;
+}
+
+.tema-card.alto {
+    border-left-color: #33ff77;
+}
+
+.tema-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.tema-nombre {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.tema-nivel {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.tema-card.bajo .tema-nivel {
+    background: rgba(255, 77, 77, 0.2);
+    color: #ff6b6b;
+}
+
+.tema-card.medio .tema-nivel {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+}
+
+.tema-card.alto .tema-nivel {
+    background: rgba(51, 255, 119, 0.2);
+    color: #33ff77;
+}
+
+.tema-detalles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.tema-detalle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.tema-detalle i {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.tema-acciones {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.btn-tema {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-tema.agregar {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    color: white;
+}
+
+.btn-tema.agregar:hover {
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+/* ========== TAB: CALENDARIO ========== */
+.calendario-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.calendario-nav-btn {
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendario-nav-btn:hover {
+    background: rgba(255, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.calendario-mes {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    min-width: 250px;
+    text-align: center;
+}
+
+.calendario-container {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
+}
+
+.calendario-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.calendario-header span {
+    text-align: center;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    padding: 0.5rem;
+}
+
+.calendario-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.calendario-dia {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    min-height: 60px;
+    min-height: 60px;
+}
+
+.calendario-dia:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.calendario-dia.hoy {
+    border: 2px solid #ff0000;
+    background: rgba(255, 0, 0, 0.15);
+}
+
+.calendario-dia.hoy .dia-numero {
+    color: #ff0000;
+    font-weight: 700;
+}
+
+.calendario-dia.seleccionado {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+    border-color: #ff0000;
+}
+
+.calendario-dia.seleccionado .dia-numero {
+    color: white;
+}
+
+.calendario-dia.otro-mes {
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.calendario-dia .dia-numero {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+}
+
+/* Indicador de sesiones en calendario */
+.calendario-dia .sesiones-indicator {
+    display: flex;
+    gap: 3px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 100%;
+}
+
+.calendario-dia .sesion-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ffa500;
+    box-shadow: 0 0 4px rgba(255, 165, 0, 0.5);
+}
+
+/* Día con sesiones */
+.calendario-dia:has(.sesiones-indicator) {
+    background: rgba(255, 165, 0, 0.1);
+    border-color: rgba(255, 165, 0, 0.3);
+}
+
+.calendario-dia:has(.sesiones-indicator):hover {
+    background: rgba(255, 165, 0, 0.2);
+}
+
+/* Sesiones del día */
+.sesiones-dia {
+    background: linear-gradient(145deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3));
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sesiones-dia h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sesiones-dia h3 i {
+    color: #ffa500;
+}
+
+.sesiones-dia h3 .fecha-seleccionada {
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-left: auto;
+}
+
+.no-sesiones {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 2rem;
+    font-size: 0.95rem;
+}
+
+#sesionesLista {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.sesion-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+}
+
+.sesion-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sesion-hora {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+}
+
+.sesion-hora .hora {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.sesion-hora .duracion {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.sesion-info {
+    flex: 1;
+}
+
+.sesion-materia {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.sesion-tema {
+    font-size: 1rem;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.sesion-notas {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+}
+
+.sesion-acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.btn-sesion {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-sesion:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-sesion.eliminar:hover {
+    background: rgba(255, 0, 0, 0.3);
+    color: #ff6b6b;
+}
+
+.btn-agregar-sesion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1rem;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-agregar-sesion:hover {
+    border-color: #ff0000;
+    color: #ff0000;
+    background: rgba(255, 0, 0, 0.1);
+}
+
+/* ========== TAB: HORARIO PERSONALIZADO ========== */
+.horario-config {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.horario-config h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.3rem;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.horario-config h3 i {
+    color: #ffa500;
+}
+
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.config-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.config-section label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+.config-section label i {
+    color: #ff0000;
+}
+
+/* Selector de Horas */
+.horas-selector {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.horas-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.horas-btn:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.horas-btn.active {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    border-color: #ff0000;
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+
+/* Selector de Días */
+.dias-selector {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.dia-btn {
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dia-btn:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dia-btn.active {
+    background: linear-gradient(135deg, #33ff77, #00cc44);
+    border-color: #33ff77;
+    color: white;
+    box-shadow: 0 4px 15px rgba(51, 255, 119, 0.3);
+}
+
+/* Selector de Momento */
+.momento-selector {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.momento-btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 1.5rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.momento-btn i {
+    font-size: 2rem;
+}
+
+.momento-btn span {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.momento-btn small {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.momento-btn:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-3px);
+}
+
+.momento-btn.active {
+    background: linear-gradient(135deg, #ffa500, #ff8c00);
+    border-color: #ffa500;
+    color: white;
+    box-shadow: 0 4px 20px rgba(255, 165, 0, 0.4);
+}
+
+/* Input de Fecha */
+.fecha-input {
+    width: 100%;
+    max-width: 280px;
+    padding: 1rem 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.95));
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.fecha-input:hover {
+    border-color: rgba(255, 0, 0, 0.4);
+    background: linear-gradient(145deg, rgba(40, 40, 40, 0.9), rgba(25, 25, 25, 0.95));
+}
+
+.fecha-input:focus {
+    outline: none;
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2);
+}
+
+/* Estilo del calendario nativo */
+.fecha-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.fecha-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Botón Generar Plan */
+.btn-generar-plan {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.25rem 2.5rem;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 25px rgba(255, 0, 0, 0.4);
+    margin-top: 1rem;
+    align-self: center;
+}
+
+.btn-generar-plan:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(255, 0, 0, 0.5);
+}
+
+.btn-generar-plan i {
+    font-size: 1.3rem;
+}
+
+/* Plan Generado */
+.plan-generado {
+    margin-top: 2rem;
+}
+
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.plan-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.3rem;
+    color: white;
+}
+
+.plan-header h3 i {
+    color: #33ff77;
+}
+
+.btn-editar-config {
+    padding: 0.75rem 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: transparent;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-editar-config:hover {
+    border-color: #ffa500;
+    color: #ffa500;
+}
+
+/* Resumen del Plan */
+.plan-resumen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.resumen-item {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.resumen-item i {
+    font-size: 2rem;
+    color: #ffa500;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.resumen-item .valor {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 0.25rem;
+}
+
+.resumen-item .label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Horario Semanal */
+.horario-semanal {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
+    overflow-x: auto;
+}
+
+.horario-grid {
+    display: grid;
+    grid-template-columns: 70px repeat(7, 1fr);
+    gap: 4px;
+    min-width: 700px;
+}
+
+.horario-header {
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    padding: 0.75rem 0.25rem;
+    background: rgba(255, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.horario-header .dia-nombre {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.horario-header .dia-fecha {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.horario-header.dia-hoy {
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+}
+
+.horario-header.dia-hoy .dia-fecha {
+    color: white;
+}
+
+.horario-header.dia-disponible:not(.dia-hoy) {
+    background: rgba(51, 255, 119, 0.15);
+    border-bottom: 2px solid #33ff77;
+    border-radius: 8px;
+}
+
+.horario-hora {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+}
+
+.horario-hora {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+}
+
+.horario-celda {
+    min-height: 45px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.horario-celda:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.horario-celda.ocupado {
+    background: rgba(255, 165, 0, 0.15);
+    border: none;
+}
+
+.horario-celda.ocupado .tema-mini {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-align: center;
+    padding: 0.25rem;
+    width: 100%;
+}
+
+.horario-celda.ocupado .tema-mini i {
+    font-size: 0.9rem;
+}
+
+.horario-celda.ocupado .tema-mini span {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Info extra del horario */
+.horario-info-extra {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    background: rgba(51, 153, 255, 0.1);
+    border: 1px solid rgba(51, 153, 255, 0.3);
+    border-radius: 10px;
+    color: #66b3ff;
+    font-size: 0.9rem;
+}
+
+.horario-info-extra i {
+    font-size: 1.2rem;
+}
+
+/* Recomendaciones */
+.recomendaciones {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.recomendaciones h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 1.5rem;
+}
+
+.recomendaciones h4 i {
+    color: #ffa500;
+}
+
+.recomendaciones-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.recomendacion-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border-left: 4px solid #ffa500;
+}
+
+.recomendacion-item i {
+    font-size: 1.5rem;
+    color: #ffa500;
+}
+
+.recomendacion-item p {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+}
+
+/* ========== MODAL ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-sesion {
+    background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.modal-header h3 i {
+    color: #ff0000;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    color: #ff0000;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.form-group label i {
+    color: #ffa500;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-select,
+.form-input,
+.form-textarea {
+    padding: 0.875rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus,
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2);
+}
+
+.form-select option {
+    background: #1a1a1a;
+    color: white;
+}
+
+.form-textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-cancelar {
+    padding: 0.875rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancelar:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-guardar {
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-guardar:hover {
+    box-shadow: 0 4px 20px rgba(255, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+    .sidebar-panel {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar-panel.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .mobile-menu-toggle {
+        display: flex;
+    }
+    
+    .plan-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .plan-tab {
+        flex: 1 1 calc(33.33% - 0.75rem);
+        min-width: 120px;
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .plan-tab span {
+        display: none;
+    }
+    
+    .momento-selector {
+        flex-direction: column;
+    }
+    
+    .momento-btn {
+        min-width: unset;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .page-title {
+        font-size: 1.3rem;
+    }
+    
+    .info-prueba {
+        padding: 1rem 1.5rem;
+        justify-content: center;
+    }
+    
+    .plan-tabs {
+        margin: 1rem 1.5rem 1.5rem;
+        padding: 0.75rem;
+    }
+    
+    .tab-content {
+        padding: 0 1.5rem 2rem;
+    }
+    
+    .resumen-analisis {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .calendario-mes {
+        font-size: 1.4rem;
+        min-width: 200px;
+    }
+    
+    .horario-config {
+        padding: 1.5rem;
+    }
+    
+    .horas-selector,
+    .dias-selector {
+        justify-content: center;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header {
+        padding: 1rem;
+    }
+    
+    .plan-tabs {
+        margin: 1rem;
+        gap: 0.5rem;
+    }
+    
+    .plan-tab {
+        flex: 1 1 100%;
+        padding: 0.75rem;
+    }
+    
+    .plan-tab span {
+        display: inline;
+        font-size: 0.85rem;
+    }
+    
+    .tab-content {
+        padding: 0 1rem 1.5rem;
+    }
+    
+    .resumen-analisis {
+        grid-template-columns: 1fr;
+    }
+    
+    .calendario-nav {
+        gap: 1rem;
+    }
+    
+    .calendario-nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .calendario-mes {
+        font-size: 1.2rem;
+        min-width: 150px;
+    }
+    
+    .calendario-dia {
+        min-height: 45px;
+    }
+    
+    .calendario-dia .dia-numero {
+        font-size: 0.85rem;
+    }
+    
+    .btn-generar-plan {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+    }
+    
+    .plan-resumen {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+

@@ -187,6 +187,16 @@ function inicializarMenuTabs() {
             if (targetContent) {
                 targetContent.classList.add('active');
             }
+            
+            // Si es el tab de plan de estudio (estudiante), cargar las pruebas
+            if (targetTab === 'plan-estudio' && !esAdmin) {
+                cargarPruebasParaPlanEstudio();
+            }
+            
+            // Si es el tab de planes admin, cargar los planes de estudiantes
+            if (targetTab === 'planes-admin' && esAdmin) {
+                cargarPlanesEstudiantesAdmin();
+            }
         });
     });
 }
@@ -495,6 +505,18 @@ function configurarInterfazAdmin() {
         adminFilter.style.display = 'block';
     }
     
+    // Mostrar tab de Planes de Estudiantes (solo admin)
+    const tabPlanesAdmin = document.getElementById('tabPlanesAdmin');
+    if (tabPlanesAdmin) {
+        tabPlanesAdmin.style.display = 'flex';
+    }
+    
+    // Ocultar tab de Plan de Estudio personal (no aplica a admin)
+    const tabPlanEstudio = document.getElementById('tabPlanEstudio');
+    if (tabPlanEstudio) {
+        tabPlanEstudio.style.display = 'none';
+    }
+    
     // Actualizar placeholder de los buscadores
     const searchPruebas = document.getElementById('searchPruebas');
     const searchMinisimulacros = document.getElementById('searchMinisimulacros');
@@ -559,6 +581,11 @@ function configurarInterfazAdmin() {
             
             // Actualizar selector de estudiantes
             actualizarSelectorEstudiantes();
+            
+            // Si el tab de planes está activo, actualizar los planes
+            if (planesEstudiantesCargados && todosLosPlanesEstudiantes.length > 0) {
+                renderizarPlanesAdmin(todosLosPlanesEstudiantes);
+            }
             
             // Recargar todos los resultados
             if (!window.firebaseDB) {
@@ -704,7 +731,7 @@ async function cargarInstitucionesAdmin(db) {
     }
 }
 
-// Cargar todos los resultados (para admin)
+// Cargar todos los resultados (para admin) - OPTIMIZADO
 async function cargarTodosLosResultados(db) {
     try {
         // Obtener todas las respuestas
@@ -719,28 +746,59 @@ async function cargarTodosLosResultados(db) {
             return;
         }
 
-        // Actualizar contador de respuestas
+        // OPTIMIZACIÓN: Primero recolectar todos los IDs de pruebas únicos y respuestas únicas
+        const pruebaIdsUnicos = new Set();
+        const respuestasUnicasAdmin = new Set(); // Para contar pruebas respondidas únicas
+        
+        respuestasSnapshot.forEach(doc => {
+            const respuesta = doc.data();
+            if (respuesta.pruebaId) {
+                pruebaIdsUnicos.add(respuesta.pruebaId);
+                // Clave única: pruebaId + estudianteId (agrupa bloques de la misma prueba)
+                const claveUnica = `${respuesta.pruebaId}_${respuesta.estudianteId || 'unknown'}`;
+                respuestasUnicasAdmin.add(claveUnica);
+            }
+        });
+        
+        // Actualizar contador de respuestas (pruebas respondidas únicas, no documentos)
         const totalRespuestasEl = document.getElementById('totalRespuestas');
         if (totalRespuestasEl) {
-            totalRespuestasEl.textContent = respuestasSnapshot.size;
+            totalRespuestasEl.textContent = respuestasUnicasAdmin.size;
         }
 
-        // Agrupar respuestas por prueba
+        // OPTIMIZACIÓN: Cargar todas las pruebas en paralelo (máximo 30 a la vez)
+        const pruebasCache = new Map();
+        const pruebaIdsArray = Array.from(pruebaIdsUnicos);
+        const batchSize = 30;
+        
+        for (let i = 0; i < pruebaIdsArray.length; i += batchSize) {
+            const batch = pruebaIdsArray.slice(i, i + batchSize);
+            const promesas = batch.map(id => db.collection('pruebas').doc(id).get());
+            const resultados = await Promise.all(promesas);
+            
+            resultados.forEach((pruebaDoc, index) => {
+                if (pruebaDoc.exists) {
+                    pruebasCache.set(batch[index], pruebaDoc.data());
+                }
+            });
+        }
+
+        // Agrupar respuestas por prueba (ahora usando el cache)
         const pruebasMap = new Map();
         const minisimulacrosMap = new Map();
 
-        for (const doc of respuestasSnapshot.docs) {
+        respuestasSnapshot.forEach(doc => {
             const respuesta = doc.data();
             const pruebaId = respuesta.pruebaId;
 
-            if (!pruebaId) continue;
+            if (!pruebaId) return;
 
-            // Obtener información de la prueba
-            const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
+            // Obtener información de la prueba del cache
+            const pruebaData = pruebasCache.get(pruebaId);
+            
+            // Si la prueba no existe en el cache, es una respuesta huérfana - saltarla
+            if (!pruebaData) return;
 
-            if (!pruebaDoc.exists) continue;
-
-            const pruebaData = pruebaDoc.data();
             const tipoPrueba = pruebaData.tipo || 'prueba';
 
             // Obtener bloques habilitados
@@ -781,7 +839,7 @@ async function cargarTodosLosResultados(db) {
                 }
                 pruebasMap.get(claveUnica).push(resultado);
             }
-        }
+        });
 
         // Mostrar pruebas con información del estudiante
         mostrarPruebasAdmin(pruebasMap);
@@ -1161,7 +1219,7 @@ function crearTarjetaPrueba(resultado) {
             </div>
         </div>
         <div class="result-card-footer">
-            <button class="btn-view-details" data-id="${resultado.id}" data-prueba-id="${resultado.pruebaId}" data-type="prueba">
+            <button class="btn-view-details" data-id="${resultado.id}" data-prueba-id="${resultado.pruebaId}" data-type="prueba" ${resultado.estudianteId ? `data-estudiante-id="${resultado.estudianteId}"` : ''}>
                 <i class="bi bi-eye-fill"></i>
                 Ver Resultados
             </button>
@@ -1171,7 +1229,7 @@ function crearTarjetaPrueba(resultado) {
     return card;
 }
 
-// Crear tarjeta de minisimulacro// Crear tarjeta de minisimulacro
+// Crear tarjeta de minisimulacro
 function crearTarjetaMinisimulacro(resultado) {
     const card = document.createElement('div');
     card.className = 'result-card';
@@ -1208,7 +1266,7 @@ function crearTarjetaMinisimulacro(resultado) {
             </div>
         </div>
         <div class="result-card-footer">
-            <button class="btn-view-details" data-id="${resultado.id}" data-prueba-id="${resultado.pruebaId}" data-type="minisimulacro">
+            <button class="btn-view-details" data-id="${resultado.id}" data-prueba-id="${resultado.pruebaId}" data-type="minisimulacro" ${resultado.estudianteId ? `data-estudiante-id="${resultado.estudianteId}"` : ''}>
                 <i class="bi bi-eye-fill"></i>
                 Ver Resultados
             </button>
@@ -1241,9 +1299,18 @@ document.addEventListener('click', function (e) {
         const id = button.getAttribute('data-id');
         const pruebaId = button.getAttribute('data-prueba-id');
         const type = button.getAttribute('data-type');
+        const estudianteIdAttr = button.getAttribute('data-estudiante-id');
+
+        // Construir URL con parámetros
+        let url = `Detalle-Resultados.html?id=${id}&pruebaId=${pruebaId}&tipo=${type}`;
+        
+        // Si es admin y hay un estudianteId, agregarlo a la URL
+        if (esAdmin && estudianteIdAttr) {
+            url += `&estudianteId=${encodeURIComponent(estudianteIdAttr)}`;
+        }
 
         // Redirigir a la página de detalle de resultados
-        window.location.href = `Detalle-Resultados.html?id=${id}&pruebaId=${pruebaId}&tipo=${type}`;
+        window.location.href = url;
     }
 });
 
@@ -1425,4 +1492,863 @@ function mostrarMinisimuFiltrados(minisimulacros) {
             crearTarjetaMinisimulacroAdmin(minisimu) : crearTarjetaMinisimulacro(minisimu);
         minisimuContainer.appendChild(minisimuCard);
     });
+}
+
+// ================ FUNCIONES PARA LIMPIAR RESPUESTAS HUÉRFANAS ================
+
+// Event listener para botón de limpiar respuestas huérfanas
+document.addEventListener('DOMContentLoaded', function() {
+    const btnLimpiarHuerfanas = document.getElementById('btnLimpiarHuerfanas');
+    if (btnLimpiarHuerfanas) {
+        btnLimpiarHuerfanas.addEventListener('click', limpiarRespuestasHuerfanas);
+    }
+});
+
+// Función principal para limpiar respuestas huérfanas
+async function limpiarRespuestasHuerfanas() {
+    // Confirmar con el usuario
+    const confirmacion = await Swal.fire({
+        title: '¿Limpiar respuestas huérfanas?',
+        html: `
+            <p>Esta acción buscará y eliminará todas las respuestas de pruebas que ya no existen en el sistema.</p>
+            <p><strong>⚠️ Esta acción no se puede deshacer.</strong></p>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="bi bi-trash3"></i> Sí, limpiar',
+        cancelButtonText: 'Cancelar',
+        background: '#1a1a1a',
+        color: '#fff'
+    });
+
+    if (!confirmacion.isConfirmed) {
+        return;
+    }
+
+    // Mostrar loading
+    Swal.fire({
+        title: 'Buscando respuestas huérfanas...',
+        html: '<p>Por favor espera mientras se analizan las respuestas...</p>',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        },
+        background: '#1a1a1a',
+        color: '#fff'
+    });
+
+    try {
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+        
+        const db = window.firebaseDB;
+        
+        // Obtener todas las respuestas
+        const respuestasSnapshot = await db.collection('respuestas').get();
+        
+        if (respuestasSnapshot.empty) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sin respuestas',
+                text: 'No hay respuestas en el sistema.',
+                background: '#1a1a1a',
+                color: '#fff'
+            });
+            return;
+        }
+
+        // Obtener IDs únicos de pruebas referenciadas
+        const pruebaIdsReferenciados = new Set();
+        // También contar respuestas únicas (por prueba+estudiante)
+        const respuestasUnicas = new Set();
+        
+        respuestasSnapshot.forEach(doc => {
+            const respuesta = doc.data();
+            if (respuesta.pruebaId) {
+                pruebaIdsReferenciados.add(respuesta.pruebaId);
+                // Clave única: pruebaId + estudianteId (esto agrupa bloques de la misma prueba)
+                const claveUnica = `${respuesta.pruebaId}_${respuesta.estudianteId || 'unknown'}`;
+                respuestasUnicas.add(claveUnica);
+            }
+        });
+
+        // Verificar cuáles pruebas existen
+        const pruebasExistentes = new Set();
+        const pruebasNoExistentes = new Set();
+        
+        for (const pruebaId of pruebaIdsReferenciados) {
+            const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
+            if (pruebaDoc.exists) {
+                pruebasExistentes.add(pruebaId);
+            } else {
+                pruebasNoExistentes.add(pruebaId);
+            }
+        }
+
+        // Identificar respuestas huérfanas
+        const respuestasHuerfanas = [];
+        const respuestasHuerfanasUnicas = new Set(); // Para contar pruebas únicas huérfanas
+        
+        respuestasSnapshot.forEach(doc => {
+            const respuesta = doc.data();
+            // Una respuesta es huérfana si:
+            // 1. No tiene pruebaId
+            // 2. Su pruebaId no existe en la colección de pruebas
+            if (!respuesta.pruebaId || pruebasNoExistentes.has(respuesta.pruebaId)) {
+                respuestasHuerfanas.push({
+                    id: doc.id,
+                    pruebaId: respuesta.pruebaId || 'Sin ID',
+                    estudianteId: respuesta.estudianteId || 'Desconocido',
+                    fecha: respuesta.fechaEnvio ? respuesta.fechaEnvio.toDate().toLocaleDateString() : 'Sin fecha'
+                });
+                // Contar respuestas únicas huérfanas
+                const claveUnica = `${respuesta.pruebaId || 'none'}_${respuesta.estudianteId || 'unknown'}`;
+                respuestasHuerfanasUnicas.add(claveUnica);
+            }
+        });
+
+        if (respuestasHuerfanas.length === 0) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Todo limpio!',
+                html: `
+                    <p>No se encontraron respuestas huérfanas.</p>
+                    <p><strong>Total de pruebas respondidas:</strong> ${respuestasUnicas.size}</p>
+                    <p><strong>Pruebas en el sistema:</strong> ${pruebaIdsReferenciados.size}</p>
+                `,
+                background: '#1a1a1a',
+                color: '#fff'
+            });
+            return;
+        }
+
+        // Mostrar confirmación con detalles
+        const confirmarEliminacion = await Swal.fire({
+            title: `Se encontraron ${respuestasHuerfanasUnicas.size} pruebas huérfanas`,
+            html: `
+                <div style="text-align: left; max-height: 300px; overflow-y: auto;">
+                    <p><strong>Pruebas eliminadas que tienen respuestas guardadas:</strong></p>
+                    <ul style="list-style: none; padding: 0;">
+                        ${Array.from(pruebasNoExistentes).slice(0, 10).map(id => 
+                            `<li style="padding: 5px; background: rgba(255,0,0,0.1); margin: 5px 0; border-radius: 5px;">
+                                <i class="bi bi-exclamation-triangle text-warning"></i> ${id}
+                            </li>`
+                        ).join('')}
+                        ${pruebasNoExistentes.size > 10 ? `<li>... y ${pruebasNoExistentes.size - 10} más</li>` : ''}
+                    </ul>
+                    <p><strong>${respuestasHuerfanasUnicas.size} prueba(s) respondida(s) de ${pruebasNoExistentes.size} prueba(s) eliminada(s)</strong></p>
+                    <p style="font-size: 0.9em; color: #aaa;">(${respuestasHuerfanas.length} documentos de respuesta serán eliminados)</p>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: `<i class="bi bi-trash3"></i> Eliminar ${respuestasHuerfanasUnicas.size} prueba(s) huérfana(s)`,
+            cancelButtonText: 'Cancelar',
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+
+        if (!confirmarEliminacion.isConfirmed) {
+            return;
+        }
+
+        // Eliminar respuestas huérfanas
+        Swal.fire({
+            title: 'Eliminando respuestas huérfanas...',
+            html: `<p>Eliminando 0 de ${respuestasHuerfanas.length}...</p>`,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+
+        let eliminadas = 0;
+        let errores = 0;
+        const batch = db.batch();
+        
+        // Firebase permite máximo 500 operaciones por batch
+        const batchSize = 500;
+        
+        for (let i = 0; i < respuestasHuerfanas.length; i += batchSize) {
+            const chunk = respuestasHuerfanas.slice(i, i + batchSize);
+            const batchActual = db.batch();
+            
+            for (const respuesta of chunk) {
+                try {
+                    const docRef = db.collection('respuestas').doc(respuesta.id);
+                    batchActual.delete(docRef);
+                } catch (err) {
+                    errores++;
+                    console.error('Error preparando eliminación:', err);
+                }
+            }
+            
+            try {
+                await batchActual.commit();
+                eliminadas += chunk.length;
+                
+                // Actualizar progreso
+                Swal.update({
+                    html: `<p>Eliminando ${eliminadas} de ${respuestasHuerfanas.length}...</p>`
+                });
+            } catch (err) {
+                errores += chunk.length;
+                console.error('Error en batch commit:', err);
+            }
+        }
+
+        // Mostrar resultado
+        Swal.fire({
+            icon: errores === 0 ? 'success' : 'warning',
+            title: 'Limpieza completada',
+            html: `
+                <p><strong>Respuestas eliminadas:</strong> ${eliminadas}</p>
+                ${errores > 0 ? `<p><strong>Errores:</strong> ${errores}</p>` : ''}
+                <p>La página se recargará para actualizar los datos.</p>
+            `,
+            background: '#1a1a1a',
+            color: '#fff'
+        }).then(() => {
+            // Recargar la página para actualizar los datos
+            window.location.reload();
+        });
+
+    } catch (error) {
+        console.error('Error al limpiar respuestas huérfanas:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al limpiar las respuestas: ' + error.message,
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+    }
+}
+
+// ========== PLAN DE ESTUDIO ==========
+
+// Variable para controlar si ya se cargaron las pruebas del plan
+let pruebasPlanEstudioCargadas = false;
+
+// Cargar pruebas para la sección de Plan de Estudio
+async function cargarPruebasParaPlanEstudio() {
+    // Evitar cargar múltiples veces
+    if (pruebasPlanEstudioCargadas) return;
+    
+    const grid = document.getElementById('planEstudioGrid');
+    if (!grid) return;
+    
+    // Mostrar loading con animación
+    grid.innerHTML = `
+        <div class="plan-loading-state" role="status" aria-live="polite">
+            <div class="plan-loading-spinner">
+                <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+            </div>
+            <h3>Analizando tus resultados...</h3>
+            <p>Preparando recomendaciones de estudio</p>
+        </div>
+    `;
+    
+    try {
+        const usuarioActual = sessionStorage.getItem('currentUser');
+        if (!usuarioActual) return;
+        
+        const usuario = JSON.parse(usuarioActual);
+        const estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;
+        
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+        
+        const db = window.firebaseDB;
+        
+        // Obtener todas las respuestas del estudiante
+        const respuestasSnapshot = await db.collection('respuestas')
+            .where('estudianteId', '==', estudianteId)
+            .get();
+        
+        if (respuestasSnapshot.empty) {
+            grid.innerHTML = `
+                <div class="plan-empty-state">
+                    <i class="bi bi-clipboard-x" aria-hidden="true"></i>
+                    <h3>No hay pruebas realizadas</h3>
+                    <p>Realiza algunas pruebas primero para poder crear tu plan de estudio personalizado.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Agrupar respuestas por prueba y calcular estadísticas
+        const pruebasConEstadisticas = new Map();
+        
+        for (const doc of respuestasSnapshot.docs) {
+            const respuesta = doc.data();
+            const pruebaId = respuesta.pruebaId;
+            
+            if (!pruebaId) continue;
+            
+            // Obtener información de la prueba
+            const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
+            if (!pruebaDoc.exists) continue;
+            
+            const pruebaData = pruebaDoc.data();
+            
+            // Solo procesar pruebas completas (no minisimulacros para plan de estudio)
+            if (pruebaData.tipo === 'minisimulacro') continue;
+            
+            // Acumular estadísticas
+            if (!pruebasConEstadisticas.has(pruebaId)) {
+                pruebasConEstadisticas.set(pruebaId, {
+                    pruebaId,
+                    nombre: pruebaData.nombre || 'Prueba sin nombre',
+                    fecha: respuesta.fechaEnvio,
+                    totalPreguntas: 0,
+                    correctas: 0,
+                    incorrectas: 0,
+                    temasConErrores: new Set()
+                });
+            }
+            
+            const stats = pruebasConEstadisticas.get(pruebaId);
+            
+            // Procesar estadísticas generales - verificar diferentes estructuras
+            if (respuesta.estadisticas) {
+                const estadisticas = respuesta.estadisticas;
+                const total = estadisticas.totalPreguntas || 0;
+                // Puede ser 'respuestasCorrectas' o 'correctas'
+                const correctas = estadisticas.respuestasCorrectas || estadisticas.correctas || 0;
+                const incorrectas = total - correctas;
+                
+                stats.totalPreguntas += total;
+                stats.correctas += correctas;
+                stats.incorrectas += incorrectas;
+            } else if (respuesta.respuestasEvaluadas) {
+                // Si no hay estadísticas, calcular desde respuestasEvaluadas
+                Object.keys(respuesta.respuestasEvaluadas).forEach(materia => {
+                    const respuestasMateria = respuesta.respuestasEvaluadas[materia];
+                    Object.values(respuestasMateria).forEach(pregunta => {
+                        stats.totalPreguntas++;
+                        if (pregunta.esCorrecta) {
+                            stats.correctas++;
+                        } else {
+                            stats.incorrectas++;
+                        }
+                    });
+                });
+            }
+            
+            // Procesar respuestas individuales para encontrar temas con errores
+            if (respuesta.respuestasEvaluadas) {
+                Object.keys(respuesta.respuestasEvaluadas).forEach(materia => {
+                    const respuestasMateria = respuesta.respuestasEvaluadas[materia];
+                    Object.values(respuestasMateria).forEach(pregunta => {
+                        if (!pregunta.esCorrecta) {
+                            // Agregar tema si existe
+                            if (pregunta.tema && pregunta.tema !== 'No especificado') {
+                                stats.temasConErrores.add(pregunta.tema);
+                            }
+                            // También agregar competencia y componente si existen
+                            if (pregunta.competencia && pregunta.competencia !== 'No especificado') {
+                                stats.temasConErrores.add(pregunta.competencia);
+                            }
+                        }
+                    });
+                });
+            }
+            
+            // Actualizar fecha más reciente
+            if (respuesta.fechaEnvio && (!stats.fecha || respuesta.fechaEnvio > stats.fecha)) {
+                stats.fecha = respuesta.fechaEnvio;
+            }
+        }
+        
+        if (pruebasConEstadisticas.size === 0) {
+            grid.innerHTML = `
+                <div class="plan-empty-state">
+                    <i class="bi bi-clipboard-check" aria-hidden="true"></i>
+                    <h3>No hay pruebas disponibles</h3>
+                    <p>Las pruebas que realices aparecerán aquí para crear tu plan de estudio.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Convertir a array y ordenar por fecha (más reciente primero)
+        const pruebasArray = Array.from(pruebasConEstadisticas.values()).sort((a, b) => {
+            if (!a.fecha) return 1;
+            if (!b.fecha) return -1;
+            return b.fecha.toDate() - a.fecha.toDate();
+        });
+        
+        // Renderizar tarjetas
+        grid.innerHTML = pruebasArray.map(prueba => crearTarjetaPlanEstudio(prueba)).join('');
+        
+        // Event listeners para botones
+        grid.querySelectorAll('.btn-crear-plan').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const pruebaId = this.dataset.pruebaId;
+                window.location.href = `Plan-Estudio.html?pruebaId=${pruebaId}`;
+            });
+        });
+        
+        pruebasPlanEstudioCargadas = true;
+        
+    } catch (error) {
+        console.error('Error al cargar pruebas para plan de estudio:', error);
+        grid.innerHTML = `
+            <div class="plan-empty-state plan-error-state">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <h3>Error al cargar pruebas</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Crear tarjeta de prueba para Plan de Estudio
+function crearTarjetaPlanEstudio(prueba) {
+    const porcentaje = prueba.totalPreguntas > 0 
+        ? Math.round((prueba.correctas / prueba.totalPreguntas) * 100) 
+        : 0;
+    
+    // Determinar nivel de urgencia
+    let urgencia = 'baja';
+    let urgenciaTexto = '¡Excelente!';
+    if (porcentaje < 50) {
+        urgencia = 'alta';
+        urgenciaTexto = 'Urgente';
+    } else if (porcentaje < 70) {
+        urgencia = 'media';
+        urgenciaTexto = 'Reforzar';
+    }
+    
+    const fechaFormateada = prueba.fecha 
+        ? prueba.fecha.toDate().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
+        : 'Sin fecha';
+    
+    return `
+        <article class="plan-prueba-card">
+            <div class="plan-prueba-header">
+                <div class="plan-prueba-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <div class="plan-prueba-info">
+                    <h4>${prueba.nombre}</h4>
+                    <p><i class="bi bi-calendar3"></i> ${fechaFormateada}</p>
+                </div>
+            </div>
+            
+            <div class="plan-prueba-stats">
+                <div class="plan-stat correctas">
+                    <span class="valor">${prueba.correctas}</span>
+                    <span class="label">Correctas</span>
+                </div>
+                <div class="plan-stat incorrectas">
+                    <span class="valor">${prueba.incorrectas}</span>
+                    <span class="label">Incorrectas</span>
+                </div>
+                <div class="plan-stat porcentaje">
+                    <span class="valor">${porcentaje}%</span>
+                    <span class="label">Rendimiento</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <span class="urgencia-badge ${urgencia}">
+                    <i class="bi bi-${urgencia === 'alta' ? 'exclamation-triangle' : urgencia === 'media' ? 'bookmark-star' : 'trophy'}"></i>
+                    ${urgenciaTexto}
+                </span>
+                <span style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">
+                    <i class="bi bi-book"></i> ${prueba.temasConErrores.size} tema(s) a reforzar
+                </span>
+            </div>
+            
+            <div class="plan-prueba-footer">
+                <button class="btn-crear-plan" data-prueba-id="${prueba.pruebaId}">
+                    <i class="bi bi-calendar-plus"></i>
+                    Crear Plan de Estudio
+                </button>
+            </div>
+        </article>
+    `;
+}
+
+// ========== PLANES DE ESTUDIO - VISTA ADMIN ==========
+
+let planesEstudiantesCargados = false;
+let todosLosPlanesEstudiantes = [];
+
+// Cargar planes de estudio de todos los estudiantes (solo admin)
+async function cargarPlanesEstudiantesAdmin() {
+    if (planesEstudiantesCargados) return;
+    
+    const grid = document.getElementById('planesAdminGrid');
+    if (!grid) return;
+    
+    // Mostrar loading
+    grid.innerHTML = `
+        <div class="plan-loading-state" role="status" aria-live="polite">
+            <div class="plan-loading-spinner">
+                <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+            </div>
+            <h3>Cargando planes de estudio...</h3>
+            <p>Obteniendo información de los estudiantes</p>
+        </div>
+    `;
+    
+    try {
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+        
+        const db = window.firebaseDB;
+        
+        // Obtener todos los planes de estudio
+        const planesSnapshot = await db.collection('planesEstudio')
+            .orderBy('fechaActualizacion', 'desc')
+            .get();
+        
+        if (planesSnapshot.empty) {
+            grid.innerHTML = `
+                <div class="plan-empty-state">
+                    <i class="bi bi-calendar-x" aria-hidden="true"></i>
+                    <h3>No hay planes de estudio</h3>
+                    <p>Los estudiantes aún no han creado planes de estudio.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Procesar planes
+        todosLosPlanesEstudiantes = [];
+        
+        for (const doc of planesSnapshot.docs) {
+            const plan = doc.data();
+            
+            // Obtener nombre de la prueba
+            let nombrePrueba = 'Prueba no encontrada';
+            try {
+                const pruebaDoc = await db.collection('pruebas').doc(plan.pruebaId).get();
+                if (pruebaDoc.exists) {
+                    nombrePrueba = pruebaDoc.data().nombre || 'Sin nombre';
+                }
+            } catch (e) {
+                console.error('Error al obtener prueba:', e);
+            }
+            
+            todosLosPlanesEstudiantes.push({
+                id: doc.id,
+                ...plan,
+                nombrePrueba
+            });
+        }
+        
+        // Configurar filtros (solo una vez)
+        if (!planesEstudiantesCargados) {
+            configurarFiltrosPlanesAdmin();
+        }
+        
+        planesEstudiantesCargados = true;
+        
+        // Aplicar filtros actuales y renderizar
+        filtrarPlanesAdmin();
+        
+    } catch (error) {
+        console.error('Error al cargar planes de estudiantes:', error);
+        grid.innerHTML = `
+            <div class="plan-empty-state plan-error-state">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <h3>Error al cargar planes</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Renderizar planes de admin
+function renderizarPlanesAdmin(planes) {
+    const grid = document.getElementById('planesAdminGrid');
+    if (!grid) return;
+    
+    if (planes.length === 0) {
+        grid.innerHTML = `
+            <div class="plan-empty-state">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <h3>No se encontraron planes</h3>
+                <p>No hay planes que coincidan con los filtros.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = planes.map(plan => crearTarjetaPlanAdmin(plan)).join('');
+    
+    // Event listeners para ver detalles
+    grid.querySelectorAll('.btn-ver-plan').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const planId = this.dataset.planId;
+            verDetallePlanAdmin(planId);
+        });
+    });
+}
+
+// Crear tarjeta de plan para admin
+function crearTarjetaPlanAdmin(plan) {
+    const iniciales = (plan.estudianteNombre || 'NN').split(' ')
+        .map(n => n.charAt(0).toUpperCase())
+        .slice(0, 2)
+        .join('');
+    
+    const totalSesiones = plan.sesiones ? plan.sesiones.length : 0;
+    const totalTemas = plan.temasAReforzar ? plan.temasAReforzar.length : 0;
+    
+    // Calcular días hasta la fecha límite
+    let diasRestantes = '--';
+    let estadoPlan = 'pendiente';
+    if (plan.configuracion && plan.configuracion.fechaLimite) {
+        const fechaLimite = new Date(plan.configuracion.fechaLimite);
+        const hoy = new Date();
+        const diff = Math.ceil((fechaLimite - hoy) / (1000 * 60 * 60 * 24));
+        diasRestantes = diff;
+        
+        if (diff < 0) {
+            estadoPlan = 'completado';
+        } else if (diff <= 7) {
+            estadoPlan = 'activo';
+        }
+    }
+    
+    const fechaActualizacion = plan.fechaActualizacion 
+        ? plan.fechaActualizacion.toDate().toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+        : 'Sin fecha';
+    
+    return `
+        <article class="plan-admin-card">
+            <div class="plan-admin-header">
+                <div class="plan-admin-avatar">${iniciales}</div>
+                <div class="plan-admin-info">
+                    <h4>${plan.estudianteNombre || 'Estudiante'}</h4>
+                    <p>${plan.institucion || 'Sin institución'}</p>
+                </div>
+                <span class="plan-progreso-badge ${estadoPlan}">
+                    <i class="bi bi-${estadoPlan === 'activo' ? 'lightning' : estadoPlan === 'completado' ? 'check-circle' : 'clock'}"></i>
+                    ${estadoPlan === 'activo' ? 'Activo' : estadoPlan === 'completado' ? 'Finalizado' : 'Pendiente'}
+                </span>
+            </div>
+            
+            <div class="plan-admin-body">
+                <div class="plan-admin-prueba">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>${plan.nombrePrueba}</span>
+                </div>
+                
+                <div class="plan-admin-stats">
+                    <div class="plan-admin-stat sesiones">
+                        <span class="valor">${totalSesiones}</span>
+                        <span class="label">Sesiones</span>
+                    </div>
+                    <div class="plan-admin-stat temas">
+                        <span class="valor">${totalTemas}</span>
+                        <span class="label">Temas</span>
+                    </div>
+                    <div class="plan-admin-stat dias">
+                        <span class="valor">${diasRestantes}</span>
+                        <span class="label">Días rest.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="plan-admin-footer">
+                <button class="btn-ver-plan" data-plan-id="${plan.id}">
+                    <i class="bi bi-eye"></i>
+                    Ver Detalle
+                </button>
+            </div>
+            
+            <div class="plan-fecha-actualizacion">
+                <i class="bi bi-clock-history"></i> Actualizado: ${fechaActualizacion}
+            </div>
+        </article>
+    `;
+}
+
+// Ver detalle de plan (modal)
+function verDetallePlanAdmin(planId) {
+    const plan = todosLosPlanesEstudiantes.find(p => p.id === planId);
+    if (!plan) return;
+    
+    const totalSesiones = plan.sesiones ? plan.sesiones.length : 0;
+    
+    // Colores por materia
+    const coloresMateria = {
+        'LC': '#FF4D4D', 'MT': '#33CCFF', 'SC': '#FF8C00', 'CN': '#33FF77', 'IN': '#B366FF',
+        'lectura': '#FF4D4D', 'matematicas': '#33CCFF', 'sociales': '#FF8C00', 'ciencias': '#33FF77', 'ingles': '#B366FF'
+    };
+    
+    const temasHtml = (plan.temasAReforzar || []).map(tema => {
+        const color = coloresMateria[tema.materia] || '#ffa500';
+        return `
+            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; border-left: 3px solid ${color};">
+                <span style="color: ${color}; font-weight: 600; min-width: 30px;">${tema.materia}</span>
+                <span style="color: rgba(255,255,255,0.9);">${tema.tema || tema.competencia || 'Sin especificar'}</span>
+            </div>
+        `;
+    }).join('') || '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 1rem;">No hay temas definidos</p>';
+    
+    // Agrupar sesiones por fecha
+    const sesionesPorFecha = {};
+    (plan.sesiones || []).forEach(sesion => {
+        const fecha = new Date(sesion.fecha);
+        const fechaKey = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+        if (!sesionesPorFecha[fechaKey]) {
+            sesionesPorFecha[fechaKey] = [];
+        }
+        sesionesPorFecha[fechaKey].push(sesion);
+    });
+    
+    const sesionesHtml = Object.keys(sesionesPorFecha).slice(0, 7).map(fecha => {
+        const sesiones = sesionesPorFecha[fecha];
+        return `
+            <div style="margin-bottom: 0.75rem;">
+                <div style="font-size: 0.85rem; color: #ffa500; font-weight: 600; margin-bottom: 0.5rem;">${fecha}</div>
+                ${sesiones.map(s => {
+                    const color = coloresMateria[s.materia] || '#ffa500';
+                    return `
+                        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; background: rgba(255,255,255,0.03); border-radius: 6px; margin-bottom: 0.25rem;">
+                            <span style="color: rgba(255,255,255,0.6); font-size: 0.8rem; min-width: 45px;">${s.horaInicio || '--:--'}</span>
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${color};"></span>
+                            <span style="color: white; font-size: 0.85rem;">${s.tema || s.materia}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }).join('') || '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 1rem;">No hay sesiones programadas</p>';
+    
+    const diasRestantes = Object.keys(sesionesPorFecha).length > 7 ? Object.keys(sesionesPorFecha).length - 7 : 0;
+    
+    Swal.fire({
+        title: `<i class="bi bi-calendar-check" style="color: #ffa500;"></i> Plan de Estudio`,
+        html: `
+            <div style="text-align: left; max-height: 65vh; overflow-y: auto; padding-right: 0.5rem;">
+                <!-- Info del estudiante -->
+                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,165,0,0.1); border-radius: 12px; margin-bottom: 1.5rem;">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #ffa500, #cc8400); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem;">
+                        ${(plan.estudianteNombre || 'NN').split(' ').map(n => n.charAt(0).toUpperCase()).slice(0, 2).join('')}
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 1.1rem;">${plan.estudianteNombre}</div>
+                        <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">${plan.institucion || 'Sin institución'}</div>
+                    </div>
+                </div>
+                
+                <!-- Prueba -->
+                <div style="margin-bottom: 1.25rem; padding: 0.75rem 1rem; background: rgba(255,0,0,0.1); border-radius: 10px; border-left: 3px solid #ff0000;">
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem;">Prueba</div>
+                    <div style="font-weight: 600;">${plan.nombrePrueba}</div>
+                </div>
+                
+                <!-- Estadísticas -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
+                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #ffa500;">${totalSesiones}</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Sesiones</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #ff5252;">${plan.temasAReforzar?.length || 0}</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Temas</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #33ff77;">${plan.configuracion?.horasPorDia || 2}h</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Hrs/día</div>
+                    </div>
+                </div>
+                
+                <!-- Temas a reforzar -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="color: #ff5252; margin-bottom: 0.75rem; font-size: 0.95rem;"><i class="bi bi-book"></i> Temas a Reforzar</h4>
+                    <div style="max-height: 150px; overflow-y: auto;">
+                        ${temasHtml}
+                    </div>
+                </div>
+                
+                <!-- Sesiones programadas -->
+                <div>
+                    <h4 style="color: #33ff77; margin-bottom: 0.75rem; font-size: 0.95rem;"><i class="bi bi-calendar-week"></i> Cronograma de Sesiones</h4>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        ${sesionesHtml}
+                        ${diasRestantes > 0 ? `<p style="color: rgba(255,255,255,0.4); text-align: center; font-size: 0.85rem; padding: 0.5rem;">... y ${diasRestantes} día(s) más con sesiones</p>` : ''}
+                    </div>
+                </div>
+            </div>
+        `,
+        background: '#1a1a1a',
+        color: '#fff',
+        width: '600px',
+        showCloseButton: true,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'plan-detail-modal'
+        }
+    });
+}
+
+// Configurar filtros de planes admin (usa los filtros existentes de admin)
+function configurarFiltrosPlanesAdmin() {
+    // Usar los filtros existentes de admin
+    const searchInput = document.getElementById('searchEstudianteAdmin');
+    const filterInstitucion = document.getElementById('filterInstitucionAdmin');
+    const filterEstudiante = document.getElementById('filterEstudiante');
+    
+    // Agregar listeners para filtrar planes cuando cambian
+    if (searchInput) {
+        searchInput.addEventListener('input', filtrarPlanesAdminSiActivo);
+    }
+    
+    if (filterInstitucion) {
+        filterInstitucion.addEventListener('change', filtrarPlanesAdminSiActivo);
+    }
+    
+    if (filterEstudiante) {
+        filterEstudiante.addEventListener('change', filtrarPlanesAdminSiActivo);
+    }
+}
+
+// Solo filtrar si el tab de planes está activo
+function filtrarPlanesAdminSiActivo() {
+    const tabPlanesActivo = document.getElementById('planes-admin-content')?.classList.contains('active');
+    if (tabPlanesActivo) {
+        filtrarPlanesAdmin();
+    }
+}
+
+// Filtrar planes admin usando los filtros existentes
+function filtrarPlanesAdmin() {
+    const searchTerm = (document.getElementById('searchEstudianteAdmin')?.value || '').toLowerCase();
+    const institucion = document.getElementById('filterInstitucionAdmin')?.value || '';
+    const estudianteSeleccionadoId = document.getElementById('filterEstudiante')?.value || '';
+    
+    const planesFiltrados = todosLosPlanesEstudiantes.filter(plan => {
+        // Filtrar por búsqueda de texto
+        const coincideBusqueda = !searchTerm || 
+            (plan.estudianteNombre || '').toLowerCase().includes(searchTerm) ||
+            (plan.nombrePrueba || '').toLowerCase().includes(searchTerm);
+        
+        // Filtrar por institución
+        const coincideInstitucion = !institucion || plan.institucion === institucion;
+        
+        // Filtrar por estudiante específico
+        const coincideEstudiante = !estudianteSeleccionadoId || plan.estudianteId === estudianteSeleccionadoId;
+        
+        return coincideBusqueda && coincideInstitucion && coincideEstudiante;
+    });
+    
+    renderizarPlanesAdmin(planesFiltrados);
 }

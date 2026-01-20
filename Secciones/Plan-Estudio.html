@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Plan de Estudio Personalizado - Seamos Genios">
+    <title>Plan de Estudio - Seamos Genios</title>
+
+    <!-- Security headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://www.gstatic.com">
+
+    <!-- Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../Elementos/css/plan-estudio.css">
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Abrir menú de navegación">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+    <!-- Sidebar Panel -->
+    <aside class="sidebar-panel" id="sidebarPanel" role="navigation" aria-label="Menú principal">
+        <!-- Perfil Usuario -->
+        <div class="sidebar-profile">
+            <div class="sidebar-avatar" id="sidebarAvatarContainer">
+                <div class="sidebar-avatar-default" id="sidebarAvatarDefault" aria-hidden="true">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <img class="sidebar-avatar-image" id="sidebarAvatarImage" style="display: none;" src=""
+                    alt="Foto de perfil del usuario">
+            </div>
+            <div class="sidebar-user-name" id="sidebarUserName" role="heading" aria-level="2">Usuario</div>
+            <div class="sidebar-user-role" id="sidebarUserRole">Estudiante</div>
+
+            <!-- Botones de Perfil y Web -->
+            <div class="sidebar-profile-actions">
+                <button class="sidebar-btn btn-profile" id="btnProfile" aria-label="Ir a mi perfil">
+                    <i class="bi bi-person-gear" aria-hidden="true"></i>
+                    <span>Mi Perfil</span>
+                </button>
+                <button class="sidebar-btn btn-home" id="btnHome" aria-label="Ir a la página principal">
+                    <i class="bi bi-house-door-fill" aria-hidden="true"></i>
+                    <span>Web Principal</span>
+                </button>
+                <button class="sidebar-btn btn-back" id="btnBack" aria-label="Volver a resultados">
+                    <i class="bi bi-arrow-left-circle-fill" aria-hidden="true"></i>
+                    <span>Volver a Resultados</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="sidebar-actions">
+            <button class="sidebar-btn btn-logout" id="btnLogout" aria-label="Cerrar sesión">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content" role="main">
+        <!-- Header Superior -->
+        <header class="page-header">
+            <div class="header-left">
+                <h1 class="page-title" id="pageTitle">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    <span>Plan de Estudio</span>
+                </h1>
+            </div>
+            <div class="header-right">
+                <div class="panel-time">
+                    <div class="time-display">
+                        <i class="bi bi-sun-fill" id="timeIcon" aria-hidden="true"></i>
+                        <time id="currentTime">--:--:-- --</time>
+                    </div>
+                    <div class="date-display" id="currentDate">--</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Información de la Prueba -->
+        <section class="info-prueba" id="infoPrueba">
+            <div class="info-item">
+                <i class="bi bi-file-earmark-text"></i>
+                <span id="nombrePrueba">Cargando prueba...</span>
+            </div>
+            <div class="info-item">
+                <i class="bi bi-calendar3"></i>
+                <span id="fechaPrueba">--</span>
+            </div>
+        </section>
+
+        <!-- Tabs de Navegación -->
+        <nav class="plan-tabs" role="tablist" aria-label="Navegación del plan de estudio">
+            <button class="plan-tab active" data-tab="temas" role="tab" aria-selected="true">
+                <i class="bi bi-book-fill"></i>
+                <span>Temas a Reforzar</span>
+            </button>
+            <button class="plan-tab" data-tab="calendario" role="tab" aria-selected="false">
+                <i class="bi bi-calendar-week-fill"></i>
+                <span>Mi Calendario</span>
+            </button>
+            <button class="plan-tab" data-tab="horario" role="tab" aria-selected="false">
+                <i class="bi bi-clock-fill"></i>
+                <span>Mi Horario</span>
+            </button>
+        </nav>
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState">
+            <div class="loading-spinner">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+            <p>Analizando tus resultados...</p>
+        </div>
+
+        <!-- Tab: Temas a Reforzar -->
+        <section class="tab-content active" id="temas-content" role="tabpanel">
+            <div id="temasContenido" style="display: none;">
+                <!-- Resumen General -->
+                <div class="resumen-analisis" id="resumenAnalisis">
+                    <!-- Se llena dinámicamente -->
+                </div>
+
+                <!-- Filtro por Materia -->
+                <div class="materias-filter" id="materiasFilter">
+                    <button class="materia-filter-btn active" data-materia="todas">
+                        <i class="bi bi-grid-fill"></i>
+                        Todas
+                    </button>
+                    <!-- Se llenan dinámicamente las materias -->
+                </div>
+
+                <!-- Lista de Temas por Materia -->
+                <div class="temas-por-materia" id="temasPorMateria">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: Calendario -->
+        <section class="tab-content" id="calendario-content" role="tabpanel">
+            <div id="calendarioContenido">
+                <!-- Navegación del Calendario -->
+                <div class="calendario-nav">
+                    <button class="calendario-nav-btn" id="mesAnterior">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <h2 class="calendario-mes" id="calendarioMes">Enero 2026</h2>
+                    <button class="calendario-nav-btn" id="mesSiguiente">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Calendario -->
+                <div class="calendario-container">
+                    <div class="calendario-header">
+                        <span>Dom</span>
+                        <span>Lun</span>
+                        <span>Mar</span>
+                        <span>Mié</span>
+                        <span>Jue</span>
+                        <span>Vie</span>
+                        <span>Sáb</span>
+                    </div>
+                    <div class="calendario-grid" id="calendarioGrid">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Sesiones del día seleccionado -->
+                <div class="sesiones-dia" id="sesionesDia">
+                    <h3><i class="bi bi-clock-history"></i> Sesiones de Estudio</h3>
+                    <div class="sesiones-lista" id="sesionesLista">
+                        <p class="no-sesiones">Selecciona un día para ver las sesiones de estudio</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: Horario Personalizado -->
+        <section class="tab-content" id="horario-content" role="tabpanel">
+            <div id="horarioContenido">
+                <!-- Configuración del Horario -->
+                <div class="horario-config">
+                    <h3><i class="bi bi-gear-fill"></i> Configura tu Horario de Estudio</h3>
+                    
+                    <div class="config-form">
+                        <!-- Horas disponibles por día -->
+                        <div class="config-section">
+                            <label><i class="bi bi-hourglass-split"></i> ¿Cuántas horas puedes estudiar por día?</label>
+                            <div class="horas-selector">
+                                <button class="horas-btn" data-horas="1">1h</button>
+                                <button class="horas-btn active" data-horas="2">2h</button>
+                                <button class="horas-btn" data-horas="3">3h</button>
+                                <button class="horas-btn" data-horas="4">4h</button>
+                                <button class="horas-btn" data-horas="5">5h+</button>
+                            </div>
+                        </div>
+
+                        <!-- Días disponibles -->
+                        <div class="config-section">
+                            <label><i class="bi bi-calendar-week"></i> ¿Qué días puedes estudiar?</label>
+                            <div class="dias-selector">
+                                <button class="dia-btn" data-dia="0">Dom</button>
+                                <button class="dia-btn active" data-dia="1">Lun</button>
+                                <button class="dia-btn active" data-dia="2">Mar</button>
+                                <button class="dia-btn active" data-dia="3">Mié</button>
+                                <button class="dia-btn active" data-dia="4">Jue</button>
+                                <button class="dia-btn active" data-dia="5">Vie</button>
+                                <button class="dia-btn" data-dia="6">Sáb</button>
+                            </div>
+                        </div>
+
+                        <!-- Horario preferido -->
+                        <div class="config-section">
+                            <label><i class="bi bi-sunrise"></i> ¿Cuál es tu mejor momento para estudiar?</label>
+                            <div class="momento-selector">
+                                <button class="momento-btn active" data-momento="manana">
+                                    <i class="bi bi-sunrise-fill"></i>
+                                    <span>Mañana</span>
+                                    <small>6:00 - 12:00</small>
+                                </button>
+                                <button class="momento-btn" data-momento="tarde">
+                                    <i class="bi bi-sun-fill"></i>
+                                    <span>Tarde</span>
+                                    <small>12:00 - 18:00</small>
+                                </button>
+                                <button class="momento-btn" data-momento="noche">
+                                    <i class="bi bi-moon-stars-fill"></i>
+                                    <span>Noche</span>
+                                    <small>18:00 - 23:00</small>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Fecha límite -->
+                        <div class="config-section">
+                            <label><i class="bi bi-flag-fill"></i> ¿Para cuándo necesitas estar preparado?</label>
+                            <input type="date" id="fechaLimite" class="fecha-input">
+                        </div>
+
+                        <!-- Botón generar plan -->
+                        <button class="btn-generar-plan" id="btnGenerarPlan">
+                            <i class="bi bi-magic"></i>
+                            Generar Mi Plan de Estudio
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plan Generado -->
+                <div class="plan-generado" id="planGenerado" style="display: none;">
+                    <div class="plan-header">
+                        <h3><i class="bi bi-clipboard-check-fill"></i> Tu Plan de Estudio Personalizado</h3>
+                        <button class="btn-editar-config" id="btnEditarConfig">
+                            <i class="bi bi-pencil-fill"></i>
+                            Editar Configuración
+                        </button>
+                    </div>
+                    
+                    <!-- Resumen del plan -->
+                    <div class="plan-resumen" id="planResumen">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+
+                    <!-- Horario semanal -->
+                    <div class="horario-semanal" id="horarioSemanal">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+
+                    <!-- Recomendaciones -->
+                    <div class="recomendaciones" id="recomendaciones">
+                        <h4><i class="bi bi-lightbulb-fill"></i> Recomendaciones para tu Estudio</h4>
+                        <div class="recomendaciones-lista" id="recomendacionesLista">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para agregar sesión de estudio -->
+    <div class="modal-overlay" id="modalSesion">
+        <div class="modal-sesion">
+            <div class="modal-header">
+                <h3><i class="bi bi-plus-circle-fill"></i> Agregar Sesión de Estudio</h3>
+                <button class="modal-close" id="cerrarModalSesion">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label><i class="bi bi-book"></i> Materia</label>
+                    <select id="sesionMateria" class="form-select">
+                        <!-- Se llena dinámicamente -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="bi bi-bookmark"></i> Tema</label>
+                    <select id="sesionTema" class="form-select">
+                        <!-- Se llena dinámicamente -->
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="bi bi-clock"></i> Hora Inicio</label>
+                        <input type="time" id="sesionHoraInicio" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="bi bi-clock-history"></i> Duración</label>
+                        <select id="sesionDuracion" class="form-select">
+                            <option value="30">30 minutos</option>
+                            <option value="45">45 minutos</option>
+                            <option value="60" selected>1 hora</option>
+                            <option value="90">1h 30min</option>
+                            <option value="120">2 horas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="bi bi-journal-text"></i> Notas (opcional)</label>
+                    <textarea id="sesionNotas" class="form-textarea" placeholder="Añade notas o recordatorios..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar" id="cancelarSesion">Cancelar</button>
+                <button class="btn-guardar" id="guardarSesion">
+                    <i class="bi bi-check-lg"></i> Guardar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/saber11-estructura.js"></script>
+    <script src="../Elementos/js/plan-estudio.js"></script>
+</body>
+
+</html>
+
+
