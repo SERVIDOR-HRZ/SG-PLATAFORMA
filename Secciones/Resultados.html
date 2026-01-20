@@ -106,7 +106,27 @@
 
         <!-- Contenido de Pruebas -->
         <div class="tab-content active" id="pruebas-content">
-            <div class="results-grid">
+            <!-- Filtros y Búsqueda -->
+            <div class="filters-container">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchPruebas" placeholder="Buscar por nombre de prueba...">
+                </div>
+                <div class="filter-group">
+                    <label><i class="bi bi-calendar-range"></i> Desde:</label>
+                    <input type="date" id="filterPruebasDesde">
+                </div>
+                <div class="filter-group">
+                    <label><i class="bi bi-calendar-range"></i> Hasta:</label>
+                    <input type="date" id="filterPruebasHasta">
+                </div>
+                <button class="btn-clear-filters" id="clearFiltersPruebas">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Limpiar Filtros
+                </button>
+            </div>
+            
+            <div class="results-grid" id="pruebasGrid">
                 <div class="empty-state">
                     <i class="bi bi-hourglass-split"></i>
                     <h3>Cargando pruebas...</h3>
@@ -117,7 +137,27 @@
 
         <!-- Contenido de Minisimulacros -->
         <div class="tab-content" id="minisimulacros-content">
-            <div class="results-grid">
+            <!-- Filtros y Búsqueda -->
+            <div class="filters-container">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchMinisimulacros" placeholder="Buscar por nombre de minisimulacro...">
+                </div>
+                <div class="filter-group">
+                    <label><i class="bi bi-calendar-range"></i> Desde:</label>
+                    <input type="date" id="filterMinisimuDesde">
+                </div>
+                <div class="filter-group">
+                    <label><i class="bi bi-calendar-range"></i> Hasta:</label>
+                    <input type="date" id="filterMinisimuHasta">
+                </div>
+                <button class="btn-clear-filters" id="clearFiltersMinisimu">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Limpiar Filtros
+                </button>
+            </div>
+            
+            <div class="results-grid" id="minisimuGrid">
                 <div class="empty-state">
                     <i class="bi bi-hourglass-split"></i>
                     <h3>Cargando minisimulacros...</h3>

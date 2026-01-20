@@ -1,5 +1,9 @@
 // Resultados.js - Funcionalidad para la sección de resultados
 
+// Variables globales para filtros
+let todasLasPruebas = [];
+let todosLosMinisimulacros = [];
+
 // Verificar autenticación al cargar la página
 document.addEventListener('DOMContentLoaded', function () {
     verificarAutenticacion();
@@ -8,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     inicializarSidebar();
     cargarDatosUsuario();
     cargarResultados();
+    inicializarFiltros();
 });
 
 // Verificar si el usuario está autenticado
@@ -535,10 +540,11 @@ async function cargarPruebasYMinisimulacros(db, estudianteId) {
 
 // Mostrar pruebas
 function mostrarPruebas(pruebasMap) {
-    const pruebasContainer = document.querySelector('#pruebas-content .results-grid');
+    const pruebasContainer = document.getElementById('pruebasGrid');
 
     if (pruebasMap.size === 0) {
         mostrarEstadoVacio('pruebas');
+        todasLasPruebas = [];
         return;
     }
 
@@ -563,6 +569,9 @@ function mostrarPruebas(pruebasMap) {
         return fechaB - fechaA;
     });
 
+    // Guardar en variable global
+    todasLasPruebas = pruebas;
+
     // Crear tarjetas
     pruebas.forEach(prueba => {
         const pruebaCard = crearTarjetaPrueba(prueba);
@@ -572,10 +581,11 @@ function mostrarPruebas(pruebasMap) {
 
 // Mostrar minisimulacros
 function mostrarMinisimulacros(minisimulacrosMap) {
-    const minisimuContainer = document.querySelector('#minisimulacros-content .results-grid');
+    const minisimuContainer = document.getElementById('minisimuGrid');
 
     if (minisimulacrosMap.size === 0) {
         mostrarEstadoVacio('minisimulacros');
+        todosLosMinisimulacros = [];
         return;
     }
 
@@ -599,6 +609,9 @@ function mostrarMinisimulacros(minisimulacrosMap) {
         const fechaB = b.fechaRealizacion ? b.fechaRealizacion.toDate() : new Date(0);
         return fechaB - fechaA;
     });
+
+    // Guardar en variable global
+    todosLosMinisimulacros = minisimulacros;
 
     // Crear tarjetas
     minisimulacros.forEach(minisimu => {
@@ -772,3 +785,179 @@ document.addEventListener('click', function (e) {
         // Funcionalidad pendiente
     }
 });
+
+
+// Inicializar filtros y búsqueda
+function inicializarFiltros() {
+    // Filtros de Pruebas
+    const searchPruebas = document.getElementById('searchPruebas');
+    const filterPruebasDesde = document.getElementById('filterPruebasDesde');
+    const filterPruebasHasta = document.getElementById('filterPruebasHasta');
+    const clearFiltersPruebas = document.getElementById('clearFiltersPruebas');
+
+    if (searchPruebas) {
+        searchPruebas.addEventListener('input', () => filtrarPruebas());
+    }
+    if (filterPruebasDesde) {
+        filterPruebasDesde.addEventListener('change', () => filtrarPruebas());
+    }
+    if (filterPruebasHasta) {
+        filterPruebasHasta.addEventListener('change', () => filtrarPruebas());
+    }
+    if (clearFiltersPruebas) {
+        clearFiltersPruebas.addEventListener('click', () => limpiarFiltrosPruebas());
+    }
+
+    // Filtros de Minisimulacros
+    const searchMinisimu = document.getElementById('searchMinisimulacros');
+    const filterMinisimuDesde = document.getElementById('filterMinisimuDesde');
+    const filterMinisimuHasta = document.getElementById('filterMinisimuHasta');
+    const clearFiltersMinisimu = document.getElementById('clearFiltersMinisimu');
+
+    if (searchMinisimu) {
+        searchMinisimu.addEventListener('input', () => filtrarMinisimulacros());
+    }
+    if (filterMinisimuDesde) {
+        filterMinisimuDesde.addEventListener('change', () => filtrarMinisimulacros());
+    }
+    if (filterMinisimuHasta) {
+        filterMinisimuHasta.addEventListener('change', () => filtrarMinisimulacros());
+    }
+    if (clearFiltersMinisimu) {
+        clearFiltersMinisimu.addEventListener('click', () => limpiarFiltrosMinisimu());
+    }
+}
+
+// Filtrar pruebas
+function filtrarPruebas() {
+    const searchTerm = document.getElementById('searchPruebas').value.toLowerCase();
+    const fechaDesde = document.getElementById('filterPruebasDesde').value;
+    const fechaHasta = document.getElementById('filterPruebasHasta').value;
+
+    let pruebasFiltradas = todasLasPruebas.filter(prueba => {
+        // Filtro por nombre
+        const nombreMatch = prueba.nombrePrueba.toLowerCase().includes(searchTerm);
+
+        // Filtro por fecha
+        let fechaMatch = true;
+        if (prueba.fechaRealizacion) {
+            const fechaPrueba = prueba.fechaRealizacion.toDate();
+            const fechaPruebaStr = fechaPrueba.toISOString().split('T')[0];
+
+            if (fechaDesde && fechaPruebaStr < fechaDesde) {
+                fechaMatch = false;
+            }
+            if (fechaHasta && fechaPruebaStr > fechaHasta) {
+                fechaMatch = false;
+            }
+        }
+
+        return nombreMatch && fechaMatch;
+    });
+
+    // Actualizar contador
+    const pruebasCount = document.getElementById('pruebasCount');
+    if (pruebasCount) {
+        pruebasCount.textContent = `${pruebasFiltradas.length} resultado${pruebasFiltradas.length !== 1 ? 's' : ''}`;
+    }
+
+    // Mostrar resultados filtrados
+    mostrarPruebasFiltradas(pruebasFiltradas);
+}
+
+// Filtrar minisimulacros
+function filtrarMinisimulacros() {
+    const searchTerm = document.getElementById('searchMinisimulacros').value.toLowerCase();
+    const fechaDesde = document.getElementById('filterMinisimuDesde').value;
+    const fechaHasta = document.getElementById('filterMinisimuHasta').value;
+
+    let minisimuFiltrados = todosLosMinisimulacros.filter(minisimu => {
+        // Filtro por nombre
+        const nombreMatch = minisimu.nombrePrueba.toLowerCase().includes(searchTerm);
+
+        // Filtro por fecha
+        let fechaMatch = true;
+        if (minisimu.fechaRealizacion) {
+            const fechaMinisimu = minisimu.fechaRealizacion.toDate();
+            const fechaMinisimuStr = fechaMinisimu.toISOString().split('T')[0];
+
+            if (fechaDesde && fechaMinisimuStr < fechaDesde) {
+                fechaMatch = false;
+            }
+            if (fechaHasta && fechaMinisimuStr > fechaHasta) {
+                fechaMatch = false;
+            }
+        }
+
+        return nombreMatch && fechaMatch;
+    });
+
+    // Actualizar contador
+    const minisimuCount = document.getElementById('minisimuCount');
+    if (minisimuCount) {
+        minisimuCount.textContent = `${minisimuFiltrados.length} resultado${minisimuFiltrados.length !== 1 ? 's' : ''}`;
+    }
+
+    // Mostrar resultados filtrados
+    mostrarMinisimuFiltrados(minisimuFiltrados);
+}
+
+// Limpiar filtros de pruebas
+function limpiarFiltrosPruebas() {
+    document.getElementById('searchPruebas').value = '';
+    document.getElementById('filterPruebasDesde').value = '';
+    document.getElementById('filterPruebasHasta').value = '';
+    filtrarPruebas();
+}
+
+// Limpiar filtros de minisimulacros
+function limpiarFiltrosMinisimu() {
+    document.getElementById('searchMinisimulacros').value = '';
+    document.getElementById('filterMinisimuDesde').value = '';
+    document.getElementById('filterMinisimuHasta').value = '';
+    filtrarMinisimulacros();
+}
+
+// Mostrar pruebas filtradas
+function mostrarPruebasFiltradas(pruebas) {
+    const pruebasContainer = document.getElementById('pruebasGrid');
+
+    if (pruebas.length === 0) {
+        pruebasContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <h3>No se encontraron resultados</h3>
+                <p>Intenta con otros criterios de búsqueda</p>
+            </div>
+        `;
+        return;
+    }
+
+    pruebasContainer.innerHTML = '';
+    pruebas.forEach(prueba => {
+        const pruebaCard = crearTarjetaPrueba(prueba);
+        pruebasContainer.appendChild(pruebaCard);
+    });
+}
+
+// Mostrar minisimulacros filtrados
+function mostrarMinisimuFiltrados(minisimulacros) {
+    const minisimuContainer = document.getElementById('minisimuGrid');
+
+    if (minisimulacros.length === 0) {
+        minisimuContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <h3>No se encontraron resultados</h3>
+                <p>Intenta con otros criterios de búsqueda</p>
+            </div>
+        `;
+        return;
+    }
+
+    minisimuContainer.innerHTML = '';
+    minisimulacros.forEach(minisimu => {
+        const minisimuCard = crearTarjetaMinisimulacro(minisimu);
+        minisimuContainer.appendChild(minisimuCard);
+    });
+}
