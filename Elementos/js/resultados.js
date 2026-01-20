@@ -4,6 +4,13 @@
 let todasLasPruebas = [];
 let todosLosMinisimulacros = [];
 
+// Variables para administrador
+let esAdmin = false;
+let todosLosEstudiantes = [];
+let estudianteSeleccionado = null;
+let todasLasInstituciones = [];
+let institucionSeleccionada = null;
+
 // Verificar autenticación al cargar la página
 document.addEventListener('DOMContentLoaded', function () {
     verificarAutenticacion();
@@ -451,15 +458,460 @@ async function cargarResultados() {
 
         const db = window.firebaseDB;
 
-        // Obtener el ID del estudiante (puede ser numeroDocumento, numeroIdentidad o id)
-        const estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;
+        // Verificar si es admin o coordinador
+        esAdmin = usuario.tipoUsuario === 'admin' || usuario.tipoUsuario === 'coordinador';
 
-        // Cargar pruebas y minisimulacros
-        await cargarPruebasYMinisimulacros(db, estudianteId);
+        if (esAdmin) {
+            // Mostrar interfaz de admin
+            configurarInterfazAdmin();
+            // Cargar todos los estudiantes
+            await cargarTodosLosEstudiantes(db);
+            // Cargar todos los resultados
+            await cargarTodosLosResultados(db);
+        } else {
+            // Obtener el ID del estudiante (puede ser numeroDocumento, numeroIdentidad o id)
+            const estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;
+            // Cargar pruebas y minisimulacros del estudiante
+            await cargarPruebasYMinisimulacros(db, estudianteId);
+        }
 
     } catch (error) {
         console.error('Error al cargar resultados:', error);
     }
+}
+
+// Configurar interfaz para administrador
+function configurarInterfazAdmin() {
+    // Cambiar título
+    const titulo = document.getElementById('panelTitle');
+    const subtitulo = document.getElementById('panelSubtitle');
+    
+    if (titulo) titulo.textContent = 'Todos los Resultados';
+    if (subtitulo) subtitulo.textContent = 'Consulta los resultados de todos los estudiantes';
+    
+    // Mostrar filtro de estudiante
+    const adminFilter = document.getElementById('adminFilterContainer');
+    if (adminFilter) {
+        adminFilter.style.display = 'block';
+    }
+    
+    // Actualizar placeholder de los buscadores
+    const searchPruebas = document.getElementById('searchPruebas');
+    const searchMinisimulacros = document.getElementById('searchMinisimulacros');
+    
+    if (searchPruebas) {
+        searchPruebas.placeholder = 'Buscar por nombre de prueba o estudiante...';
+    }
+    if (searchMinisimulacros) {
+        searchMinisimulacros.placeholder = 'Buscar por nombre de minisimulacro o estudiante...';
+    }
+    
+    // Configurar evento del filtro de institución
+    const filterInstitucion = document.getElementById('filterInstitucionAdmin');
+    if (filterInstitucion) {
+        filterInstitucion.addEventListener('change', function() {
+            institucionSeleccionada = this.value || null;
+            actualizarSelectorEstudiantes();
+        });
+    }
+    
+    // Configurar buscador de estudiante (input de texto)
+    const searchEstudiante = document.getElementById('searchEstudianteAdmin');
+    if (searchEstudiante) {
+        searchEstudiante.addEventListener('input', function() {
+            actualizarSelectorEstudiantes();
+        });
+    }
+    
+    // Configurar evento del selector de estudiante
+    const filterEstudiante = document.getElementById('filterEstudiante');
+    if (filterEstudiante) {
+        filterEstudiante.addEventListener('change', async function() {
+            estudianteSeleccionado = this.value || null;
+            
+            if (!window.firebaseDB) {
+                await esperarFirebase();
+            }
+            
+            if (estudianteSeleccionado) {
+                await cargarPruebasYMinisimulacros(window.firebaseDB, estudianteSeleccionado);
+            } else {
+                await cargarTodosLosResultados(window.firebaseDB);
+            }
+        });
+    }
+    
+    // Configurar botón limpiar filtros
+    const btnLimpiar = document.getElementById('btnLimpiarFiltrosAdmin');
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', async function() {
+            // Limpiar todos los filtros
+            const filterInstitucion = document.getElementById('filterInstitucionAdmin');
+            const searchEstudiante = document.getElementById('searchEstudianteAdmin');
+            const filterEstudiante = document.getElementById('filterEstudiante');
+            
+            if (filterInstitucion) filterInstitucion.value = '';
+            if (searchEstudiante) searchEstudiante.value = '';
+            if (filterEstudiante) filterEstudiante.value = '';
+            
+            institucionSeleccionada = null;
+            estudianteSeleccionado = null;
+            
+            // Actualizar selector de estudiantes
+            actualizarSelectorEstudiantes();
+            
+            // Recargar todos los resultados
+            if (!window.firebaseDB) {
+                await esperarFirebase();
+            }
+            await cargarTodosLosResultados(window.firebaseDB);
+        });
+    }
+}
+
+// Actualizar selector de estudiantes según filtros
+function actualizarSelectorEstudiantes() {
+    const select = document.getElementById('filterEstudiante');
+    const searchInput = document.getElementById('searchEstudianteAdmin');
+    
+    if (!select) return;
+    
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    
+    // Filtrar estudiantes
+    let estudiantesFiltrados = todosLosEstudiantes.filter(est => {
+        // Filtro por institución
+        const matchInstitucion = !institucionSeleccionada || est.institucion === institucionSeleccionada;
+        
+        // Filtro por búsqueda de texto
+        const matchBusqueda = !searchTerm || 
+            est.nombre.toLowerCase().includes(searchTerm) ||
+            (est.documento && est.documento.toLowerCase().includes(searchTerm));
+        
+        return matchInstitucion && matchBusqueda;
+    });
+    
+    // Limpiar y llenar el select
+    select.innerHTML = '<option value="">-- Todos los estudiantes --</option>';
+    
+    estudiantesFiltrados.forEach(est => {
+        const option = document.createElement('option');
+        option.value = est.idFiltro;
+        option.textContent = `${est.nombre} ${est.documento ? `(${est.documento})` : ''}`;
+        if (est.institucion) {
+            option.textContent += ` - ${est.institucion}`;
+        }
+        select.appendChild(option);
+    });
+    
+    // Actualizar contador de estudiantes filtrados
+    const totalEstudiantesEl = document.getElementById('totalEstudiantes');
+    if (totalEstudiantesEl) {
+        totalEstudiantesEl.textContent = estudiantesFiltrados.length;
+    }
+}
+
+// Cargar todos los estudiantes para el filtro
+async function cargarTodosLosEstudiantes(db) {
+    try {
+        // Primero cargar las instituciones
+        await cargarInstitucionesAdmin(db);
+        
+        const usuariosSnapshot = await db.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+        
+        todosLosEstudiantes = [];
+        const select = document.getElementById('filterEstudiante');
+        
+        if (!select) return;
+        
+        // Limpiar opciones existentes
+        select.innerHTML = '<option value="">-- Todos los estudiantes --</option>';
+        
+        usuariosSnapshot.forEach(doc => {
+            const estudiante = doc.data();
+            const estudianteId = estudiante.numeroDocumento || estudiante.numeroIdentidad || doc.id;
+            
+            todosLosEstudiantes.push({
+                id: doc.id,
+                idFiltro: estudianteId,
+                nombre: estudiante.nombre || 'Sin nombre',
+                documento: estudiante.numeroDocumento || estudiante.numeroIdentidad || '',
+                institucion: estudiante.institucion || ''
+            });
+        });
+        
+        // Ordenar por nombre
+        todosLosEstudiantes.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        
+        // Agregar opciones al select
+        todosLosEstudiantes.forEach(est => {
+            const option = document.createElement('option');
+            option.value = est.idFiltro;
+            option.textContent = `${est.nombre} ${est.documento ? `(${est.documento})` : ''}`;
+            if (est.institucion) {
+                option.textContent += ` - ${est.institucion}`;
+            }
+            select.appendChild(option);
+        });
+        
+        // Actualizar contador de estudiantes
+        const totalEstudiantesEl = document.getElementById('totalEstudiantes');
+        if (totalEstudiantesEl) {
+            totalEstudiantesEl.textContent = todosLosEstudiantes.length;
+        }
+        
+    } catch (error) {
+        console.error('Error al cargar estudiantes:', error);
+    }
+}
+
+// Cargar instituciones para el filtro de admin
+async function cargarInstitucionesAdmin(db) {
+    try {
+        // Obtener instituciones únicas de los estudiantes
+        const institucionesSet = new Set();
+        
+        const estudiantesSnapshot = await db.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+        
+        estudiantesSnapshot.forEach(doc => {
+            const estudiante = doc.data();
+            if (estudiante.institucion) {
+                institucionesSet.add(estudiante.institucion);
+            }
+        });
+        
+        todasLasInstituciones = Array.from(institucionesSet).sort();
+        
+        // Llenar el selector de instituciones
+        const selectInstitucion = document.getElementById('filterInstitucionAdmin');
+        if (selectInstitucion) {
+            selectInstitucion.innerHTML = '<option value="">-- Todas las instituciones --</option>';
+            
+            todasLasInstituciones.forEach(inst => {
+                const option = document.createElement('option');
+                option.value = inst;
+                option.textContent = inst;
+                selectInstitucion.appendChild(option);
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error al cargar instituciones:', error);
+    }
+}
+
+// Cargar todos los resultados (para admin)
+async function cargarTodosLosResultados(db) {
+    try {
+        // Obtener todas las respuestas
+        const respuestasSnapshot = await db.collection('respuestas').get();
+
+        if (respuestasSnapshot.empty) {
+            mostrarEstadoVacio('pruebas');
+            mostrarEstadoVacio('minisimulacros');
+            
+            const totalRespuestasEl = document.getElementById('totalRespuestas');
+            if (totalRespuestasEl) totalRespuestasEl.textContent = '0';
+            return;
+        }
+
+        // Actualizar contador de respuestas
+        const totalRespuestasEl = document.getElementById('totalRespuestas');
+        if (totalRespuestasEl) {
+            totalRespuestasEl.textContent = respuestasSnapshot.size;
+        }
+
+        // Agrupar respuestas por prueba
+        const pruebasMap = new Map();
+        const minisimulacrosMap = new Map();
+
+        for (const doc of respuestasSnapshot.docs) {
+            const respuesta = doc.data();
+            const pruebaId = respuesta.pruebaId;
+
+            if (!pruebaId) continue;
+
+            // Obtener información de la prueba
+            const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
+
+            if (!pruebaDoc.exists) continue;
+
+            const pruebaData = pruebaDoc.data();
+            const tipoPrueba = pruebaData.tipo || 'prueba';
+
+            // Obtener bloques habilitados
+            const bloquesHabilitados = [];
+            if (pruebaData.bloque1) bloquesHabilitados.push(1);
+            if (pruebaData.bloque2) bloquesHabilitados.push(2);
+
+            // Obtener nombre del estudiante
+            const estudianteInfo = todosLosEstudiantes.find(e => e.idFiltro === respuesta.estudianteId);
+            const nombreEstudiante = estudianteInfo ? estudianteInfo.nombre : respuesta.estudianteId;
+
+            // Crear objeto de resultado
+            const resultado = {
+                id: doc.id,
+                pruebaId: pruebaId,
+                nombrePrueba: pruebaData.nombre || 'Sin nombre',
+                bloques: bloquesHabilitados,
+                bloque: respuesta.bloque || 1,
+                fechaRealizacion: respuesta.fechaEnvio,
+                estadisticas: respuesta.estadisticas,
+                tipoPrueba: tipoPrueba,
+                estudianteId: respuesta.estudianteId,
+                nombreEstudiante: nombreEstudiante
+            };
+
+            // Crear clave única por prueba y estudiante
+            const claveUnica = `${pruebaId}_${respuesta.estudianteId}`;
+
+            // Separar por tipo
+            if (tipoPrueba === 'minisimulacro') {
+                if (!minisimulacrosMap.has(claveUnica)) {
+                    minisimulacrosMap.set(claveUnica, []);
+                }
+                minisimulacrosMap.get(claveUnica).push(resultado);
+            } else {
+                if (!pruebasMap.has(claveUnica)) {
+                    pruebasMap.set(claveUnica, []);
+                }
+                pruebasMap.get(claveUnica).push(resultado);
+            }
+        }
+
+        // Mostrar pruebas con información del estudiante
+        mostrarPruebasAdmin(pruebasMap);
+
+        // Mostrar minisimulacros con información del estudiante
+        mostrarMinisimulacrosAdmin(minisimulacrosMap);
+
+    } catch (error) {
+        console.error('Error al cargar todos los resultados:', error);
+        mostrarError('pruebas');
+        mostrarError('minisimulacros');
+    }
+}
+
+// Mostrar pruebas para admin (con nombre del estudiante)
+function mostrarPruebasAdmin(pruebasMap) {
+    const pruebasContainer = document.getElementById('pruebasGrid');
+
+    if (pruebasMap.size === 0) {
+        mostrarEstadoVacio('pruebas');
+        todasLasPruebas = [];
+        return;
+    }
+
+    pruebasContainer.innerHTML = '';
+
+    // Convertir a array y ordenar por fecha
+    const pruebas = Array.from(pruebasMap.entries()).map(([clave, resultados]) => {
+        // Obtener el resultado más reciente
+        const resultadoReciente = resultados.sort((a, b) => {
+            const fechaA = a.fechaRealizacion ? a.fechaRealizacion.toDate() : new Date(0);
+            const fechaB = b.fechaRealizacion ? b.fechaRealizacion.toDate() : new Date(0);
+            return fechaB - fechaA;
+        })[0];
+
+        return resultadoReciente;
+    });
+
+    // Ordenar por fecha
+    pruebas.sort((a, b) => {
+        const fechaA = a.fechaRealizacion ? a.fechaRealizacion.toDate() : new Date(0);
+        const fechaB = b.fechaRealizacion ? b.fechaRealizacion.toDate() : new Date(0);
+        return fechaB - fechaA;
+    });
+
+    // Guardar en variable global
+    todasLasPruebas = pruebas;
+
+    // Crear tarjetas
+    pruebas.forEach(prueba => {
+        const pruebaCard = crearTarjetaPruebaAdmin(prueba);
+        pruebasContainer.appendChild(pruebaCard);
+    });
+}
+
+// Mostrar minisimulacros para admin (con nombre del estudiante)
+function mostrarMinisimulacrosAdmin(minisimulacrosMap) {
+    const minisimuContainer = document.getElementById('minisimuGrid');
+
+    if (minisimulacrosMap.size === 0) {
+        mostrarEstadoVacio('minisimulacros');
+        todosLosMinisimulacros = [];
+        return;
+    }
+
+    minisimuContainer.innerHTML = '';
+
+    // Convertir a array y ordenar por fecha
+    const minisimulacros = Array.from(minisimulacrosMap.entries()).map(([clave, resultados]) => {
+        // Obtener el resultado más reciente
+        const resultadoReciente = resultados.sort((a, b) => {
+            const fechaA = a.fechaRealizacion ? a.fechaRealizacion.toDate() : new Date(0);
+            const fechaB = b.fechaRealizacion ? b.fechaRealizacion.toDate() : new Date(0);
+            return fechaB - fechaA;
+        })[0];
+
+        return resultadoReciente;
+    });
+
+    // Ordenar por fecha
+    minisimulacros.sort((a, b) => {
+        const fechaA = a.fechaRealizacion ? a.fechaRealizacion.toDate() : new Date(0);
+        const fechaB = b.fechaRealizacion ? b.fechaRealizacion.toDate() : new Date(0);
+        return fechaB - fechaA;
+    });
+
+    // Guardar en variable global
+    todosLosMinisimulacros = minisimulacros;
+
+    // Crear tarjetas
+    minisimulacros.forEach(minisimu => {
+        const minisimuCard = crearTarjetaMinisimulacroAdmin(minisimu);
+        minisimuContainer.appendChild(minisimuCard);
+    });
+}
+
+// Crear tarjeta de prueba para admin (incluye nombre del estudiante)
+function crearTarjetaPruebaAdmin(prueba) {
+    const card = crearTarjetaPrueba(prueba);
+    
+    // Agregar badge con nombre del estudiante
+    if (prueba.nombreEstudiante) {
+        const header = card.querySelector('.result-card-header');
+        if (header) {
+            const estudianteBadge = document.createElement('div');
+            estudianteBadge.className = 'estudiante-badge';
+            estudianteBadge.innerHTML = `<i class="bi bi-person-fill"></i> ${prueba.nombreEstudiante}`;
+            header.insertBefore(estudianteBadge, header.firstChild);
+        }
+    }
+    
+    return card;
+}
+
+// Crear tarjeta de minisimulacro para admin (incluye nombre del estudiante)
+function crearTarjetaMinisimulacroAdmin(minisimu) {
+    const card = crearTarjetaMinisimulacro(minisimu);
+    
+    // Agregar badge con nombre del estudiante
+    if (minisimu.nombreEstudiante) {
+        const header = card.querySelector('.result-card-header');
+        if (header) {
+            const estudianteBadge = document.createElement('div');
+            estudianteBadge.className = 'estudiante-badge';
+            estudianteBadge.innerHTML = `<i class="bi bi-person-fill"></i> ${minisimu.nombreEstudiante}`;
+            header.insertBefore(estudianteBadge, header.firstChild);
+        }
+    }
+    
+    return card;
 }
 
 // Cargar pruebas y minisimulacros del usuario
@@ -622,7 +1074,11 @@ function mostrarMinisimulacros(minisimulacrosMap) {
 
 // Mostrar estado vacío
 function mostrarEstadoVacio(tipo) {
-    const container = document.querySelector(`#${tipo}-content .results-grid`);
+    const containerId = tipo === 'pruebas' ? 'pruebasGrid' : 'minisimuGrid';
+    const container = document.getElementById(containerId);
+    
+    if (!container) return;
+    
     const mensajes = {
         'pruebas': {
             icono: 'bi-file-earmark-text',
@@ -649,7 +1105,11 @@ function mostrarEstadoVacio(tipo) {
 
 // Mostrar error
 function mostrarError(tipo) {
-    const container = document.querySelector(`#${tipo}-content .results-grid`);
+    const containerId = tipo === 'pruebas' ? 'pruebasGrid' : 'minisimuGrid';
+    const container = document.getElementById(containerId);
+    
+    if (!container) return;
+    
     const mensajes = {
         'pruebas': 'pruebas',
         'minisimulacros': 'minisimulacros'
@@ -770,7 +1230,7 @@ function formatearFecha(fecha) {
     return fecha.toLocaleDateString('es-ES', opciones);
 }
 
-// Funcionalidad de botones "Ver Resultados" (placeholder)
+// Funcionalidad de botones "Ver Resultados" - Redirige a página de detalle
 document.addEventListener('click', function (e) {
     if (e.target.classList.contains('btn-view-details') ||
         e.target.closest('.btn-view-details')) {
@@ -779,10 +1239,11 @@ document.addEventListener('click', function (e) {
             e.target.closest('.btn-view-details');
 
         const id = button.getAttribute('data-id');
+        const pruebaId = button.getAttribute('data-prueba-id');
         const type = button.getAttribute('data-type');
 
-        console.log(`Ver resultados de ${type} con ID: ${id}`);
-        // Funcionalidad pendiente
+        // Redirigir a la página de detalle de resultados
+        window.location.href = `Detalle-Resultados.html?id=${id}&pruebaId=${pruebaId}&tipo=${type}`;
     }
 });
 
@@ -835,8 +1296,14 @@ function filtrarPruebas() {
     const fechaHasta = document.getElementById('filterPruebasHasta').value;
 
     let pruebasFiltradas = todasLasPruebas.filter(prueba => {
-        // Filtro por nombre
-        const nombreMatch = prueba.nombrePrueba.toLowerCase().includes(searchTerm);
+        // Filtro por nombre de prueba
+        const nombrePruebaMatch = prueba.nombrePrueba.toLowerCase().includes(searchTerm);
+        
+        // Filtro por nombre de estudiante (solo admin)
+        const nombreEstudianteMatch = esAdmin && prueba.nombreEstudiante ? 
+            prueba.nombreEstudiante.toLowerCase().includes(searchTerm) : false;
+        
+        const nombreMatch = nombrePruebaMatch || nombreEstudianteMatch;
 
         // Filtro por fecha
         let fechaMatch = true;
@@ -855,12 +1322,6 @@ function filtrarPruebas() {
         return nombreMatch && fechaMatch;
     });
 
-    // Actualizar contador
-    const pruebasCount = document.getElementById('pruebasCount');
-    if (pruebasCount) {
-        pruebasCount.textContent = `${pruebasFiltradas.length} resultado${pruebasFiltradas.length !== 1 ? 's' : ''}`;
-    }
-
     // Mostrar resultados filtrados
     mostrarPruebasFiltradas(pruebasFiltradas);
 }
@@ -872,8 +1333,14 @@ function filtrarMinisimulacros() {
     const fechaHasta = document.getElementById('filterMinisimuHasta').value;
 
     let minisimuFiltrados = todosLosMinisimulacros.filter(minisimu => {
-        // Filtro por nombre
-        const nombreMatch = minisimu.nombrePrueba.toLowerCase().includes(searchTerm);
+        // Filtro por nombre de minisimulacro
+        const nombreMinisimuMatch = minisimu.nombrePrueba.toLowerCase().includes(searchTerm);
+        
+        // Filtro por nombre de estudiante (solo admin)
+        const nombreEstudianteMatch = esAdmin && minisimu.nombreEstudiante ? 
+            minisimu.nombreEstudiante.toLowerCase().includes(searchTerm) : false;
+        
+        const nombreMatch = nombreMinisimuMatch || nombreEstudianteMatch;
 
         // Filtro por fecha
         let fechaMatch = true;
@@ -891,12 +1358,6 @@ function filtrarMinisimulacros() {
 
         return nombreMatch && fechaMatch;
     });
-
-    // Actualizar contador
-    const minisimuCount = document.getElementById('minisimuCount');
-    if (minisimuCount) {
-        minisimuCount.textContent = `${minisimuFiltrados.length} resultado${minisimuFiltrados.length !== 1 ? 's' : ''}`;
-    }
 
     // Mostrar resultados filtrados
     mostrarMinisimuFiltrados(minisimuFiltrados);
@@ -935,7 +1396,9 @@ function mostrarPruebasFiltradas(pruebas) {
 
     pruebasContainer.innerHTML = '';
     pruebas.forEach(prueba => {
-        const pruebaCard = crearTarjetaPrueba(prueba);
+        // Usar función de admin si es admin y tiene nombre de estudiante
+        const pruebaCard = (esAdmin && prueba.nombreEstudiante) ? 
+            crearTarjetaPruebaAdmin(prueba) : crearTarjetaPrueba(prueba);
         pruebasContainer.appendChild(pruebaCard);
     });
 }
@@ -957,7 +1420,9 @@ function mostrarMinisimuFiltrados(minisimulacros) {
 
     minisimuContainer.innerHTML = '';
     minisimulacros.forEach(minisimu => {
-        const minisimuCard = crearTarjetaMinisimulacro(minisimu);
+        // Usar función de admin si es admin y tiene nombre de estudiante
+        const minisimuCard = (esAdmin && minisimu.nombreEstudiante) ? 
+            crearTarjetaMinisimulacroAdmin(minisimu) : crearTarjetaMinisimulacro(minisimu);
         minisimuContainer.appendChild(minisimuCard);
     });
 }

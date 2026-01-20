@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Consulta tus resultados y progreso académico en Seamos Genios">
     <title>Mis Resultados - Seamos Genios</title>
 
     <!-- Security headers -->
@@ -13,50 +14,58 @@
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://www.gstatic.com">
+
+    <!-- Fonts and Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="../Elementos/css/resultados.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
 </head>
 
 <body>
     <!-- Mobile Menu Toggle -->
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;">
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;"
+        aria-label="Abrir menú de navegación">
         <i class="bi bi-chevron-right"></i>
     </button>
 
     <!-- Sidebar Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
     <!-- Sidebar Panel -->
-    <aside class="sidebar-panel" id="sidebarPanel">
+    <aside class="sidebar-panel" id="sidebarPanel" role="navigation" aria-label="Menú principal">
         <!-- Perfil Usuario -->
         <div class="sidebar-profile">
             <div class="sidebar-avatar" id="userAvatarContainer">
-                <div class="sidebar-avatar-default" id="userAvatarDefault">
+                <div class="sidebar-avatar-default" id="userAvatarDefault" aria-hidden="true">
                     <i class="bi bi-person-fill"></i>
                 </div>
                 <img class="sidebar-avatar-image" id="userAvatarImage" style="display: none;" src=""
-                    alt="Foto de perfil">
+                    alt="Foto de perfil del usuario">
             </div>
-            <div class="sidebar-user-name" id="userName">Usuario</div>
+            <div class="sidebar-user-name" id="userName" role="heading" aria-level="2">Usuario</div>
             <div class="sidebar-user-role" id="userRole">Panel de Resultados</div>
 
             <!-- Botones de Perfil y Web -->
             <div class="sidebar-profile-actions">
-                <button class="sidebar-btn btn-profile" id="btnProfile">
-                    <i class="bi bi-person-gear"></i>
+                <button class="sidebar-btn btn-profile" id="btnProfile" aria-label="Ir a mi perfil">
+                    <i class="bi bi-person-gear" aria-hidden="true"></i>
                     <span>Mi Perfil</span>
                 </button>
-                <button class="sidebar-btn btn-home" id="btnHome">
-                    <i class="bi bi-house-door-fill"></i>
+                <button class="sidebar-btn btn-home" id="btnHome" aria-label="Ir a la página principal">
+                    <i class="bi bi-house-door-fill" aria-hidden="true"></i>
                     <span>Web Principal</span>
                 </button>
-                <button class="sidebar-btn btn-back" id="btnBack">
-                    <i class="bi bi-arrow-left-circle-fill"></i>
+                <button class="sidebar-btn btn-back" id="btnBack" aria-label="Volver al panel anterior">
+                    <i class="bi bi-arrow-left-circle-fill" aria-hidden="true"></i>
                     <span>Volver al Panel</span>
                 </button>
             </div>
@@ -64,123 +73,187 @@
 
         <!-- Botones de Acción -->
         <div class="sidebar-actions">
-            <button class="sidebar-btn btn-logout" id="btnLogout">
-                <i class="bi bi-box-arrow-right"></i>
+            <button class="sidebar-btn btn-logout" id="btnLogout" aria-label="Cerrar sesión">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
                 <span>Cerrar Sesión</span>
             </button>
         </div>
     </aside>
 
     <!-- Contenido Principal -->
-    <main class="main-panel-content">
+    <main class="main-panel-content" role="main">
         <!-- Header -->
         <header class="panel-header">
             <div>
-                <h1 class="panel-title">Mis Resultados</h1>
-                <p class="panel-subtitle">Consulta tus resultados y progreso académico</p>
+                <h1 class="panel-title" id="panelTitle">Mis Resultados</h1>
+                <p class="panel-subtitle" id="panelSubtitle">Consulta tus resultados y progreso académico</p>
             </div>
             <div class="panel-time">
                 <div class="time-display">
-                    <i class="bi bi-sun-fill" id="timeIcon"></i>
-                    <span id="currentTime">3:02:47 PM</span>
+                    <i class="bi bi-sun-fill" id="timeIcon" aria-hidden="true"></i>
+                    <time id="currentTime">3:02:47 PM</time>
                 </div>
                 <div class="date-display" id="currentDate">sábado, 17 de enero de 2026</div>
             </div>
         </header>
 
-        <!-- Menú de Navegación -->
-        <div class="results-menu">
-            <button class="menu-tab active" data-tab="pruebas">
-                <i class="bi bi-file-earmark-text-fill"></i>
-                <span>Pruebas</span>
-            </button>
-            <button class="menu-tab" data-tab="minisimulacros">
-                <i class="bi bi-clipboard-check-fill"></i>
-                <span>Minisimulacros</span>
-            </button>
-            <button class="menu-tab" data-tab="plan-estudio">
-                <i class="bi bi-calendar-check-fill"></i>
-                <span>Plan de Estudio</span>
-            </button>
-        </div>
-
-        <!-- Contenido de Pruebas -->
-        <div class="tab-content active" id="pruebas-content">
-            <!-- Filtros y Búsqueda -->
-            <div class="filters-container">
-                <div class="search-box">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="searchPruebas" placeholder="Buscar por nombre de prueba...">
+        <!-- Filtro de Estudiante (Solo Admin/Coordinador) -->
+        <div class="admin-filter-container" id="adminFilterContainer" style="display: none;">
+            <div class="admin-filter-header">
+                <i class="bi bi-people-fill"></i>
+                <span>Filtrar Resultados</span>
+            </div>
+            <div class="admin-filter-content">
+                <!-- Filtro por Institución -->
+                <div class="filter-group-admin">
+                    <label for="filterInstitucionAdmin"><i class="bi bi-building"></i> Institución:</label>
+                    <select id="filterInstitucionAdmin" class="filter-admin-select">
+                        <option value="">-- Todas las instituciones --</option>
+                    </select>
                 </div>
-                <div class="filter-group">
-                    <label><i class="bi bi-calendar-range"></i> Desde:</label>
-                    <input type="date" id="filterPruebasDesde">
+                
+                <!-- Buscador de Estudiante -->
+                <div class="filter-group-admin search-estudiante-group">
+                    <label for="searchEstudianteAdmin"><i class="bi bi-search"></i> Buscar estudiante:</label>
+                    <input type="text" id="searchEstudianteAdmin" class="search-estudiante-input" 
+                           placeholder="Escribir nombre o documento...">
                 </div>
-                <div class="filter-group">
-                    <label><i class="bi bi-calendar-range"></i> Hasta:</label>
-                    <input type="date" id="filterPruebasHasta">
+                
+                <!-- Selector de Estudiante -->
+                <div class="filter-group-admin">
+                    <label for="filterEstudiante"><i class="bi bi-person"></i> Estudiante:</label>
+                    <select id="filterEstudiante" class="filter-admin-select">
+                        <option value="">-- Todos los estudiantes --</option>
+                    </select>
                 </div>
-                <button class="btn-clear-filters" id="clearFiltersPruebas">
+                
+                <!-- Botón Limpiar -->
+                <button class="btn-limpiar-filtros-admin" id="btnLimpiarFiltrosAdmin">
                     <i class="bi bi-arrow-clockwise"></i>
-                    Limpiar Filtros
+                    Limpiar
                 </button>
             </div>
             
-            <div class="results-grid" id="pruebasGrid">
-                <div class="empty-state">
-                    <i class="bi bi-hourglass-split"></i>
+            <!-- Estadísticas -->
+            <div class="admin-stats" id="adminStats">
+                <div class="admin-stat">
+                    <i class="bi bi-people"></i>
+                    <span id="totalEstudiantes">0</span>
+                    <label>Estudiantes</label>
+                </div>
+                <div class="admin-stat">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <span id="totalRespuestas">0</span>
+                    <label>Respuestas</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de Navegación -->
+        <nav class="results-menu" role="tablist" aria-label="Navegación de resultados">
+            <button class="menu-tab active" data-tab="pruebas" role="tab" aria-selected="true"
+                aria-controls="pruebas-content">
+                <i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>
+                <span>Pruebas</span>
+            </button>
+            <button class="menu-tab" data-tab="minisimulacros" role="tab" aria-selected="false"
+                aria-controls="minisimulacros-content">
+                <i class="bi bi-clipboard-check-fill" aria-hidden="true"></i>
+                <span>Minisimulacros</span>
+            </button>
+            <button class="menu-tab" data-tab="plan-estudio" role="tab" aria-selected="false"
+                aria-controls="plan-estudio-content">
+                <i class="bi bi-calendar-check-fill" aria-hidden="true"></i>
+                <span>Plan de Estudio</span>
+            </button>
+        </nav>
+
+        <!-- Contenido de Pruebas -->
+        <section class="tab-content active" id="pruebas-content" role="tabpanel" aria-labelledby="pruebas-tab">
+            <!-- Filtros y Búsqueda -->
+            <div class="filters-container" role="search">
+                <div class="search-box">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <label for="searchPruebas" class="sr-only">Buscar pruebas</label>
+                    <input type="text" id="searchPruebas" placeholder="Buscar por nombre de prueba..."
+                        aria-label="Buscar por nombre de prueba">
+                </div>
+                <div class="filter-group">
+                    <label for="filterPruebasDesde"><i class="bi bi-calendar-range" aria-hidden="true"></i>
+                        Desde:</label>
+                    <input type="date" id="filterPruebasDesde" aria-label="Filtrar desde fecha">
+                </div>
+                <div class="filter-group">
+                    <label for="filterPruebasHasta"><i class="bi bi-calendar-range" aria-hidden="true"></i>
+                        Hasta:</label>
+                    <input type="date" id="filterPruebasHasta" aria-label="Filtrar hasta fecha">
+                </div>
+                <button class="btn-clear-filters" id="clearFiltersPruebas" aria-label="Limpiar todos los filtros">
+                    <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                    Limpiar Filtros
+                </button>
+            </div>
+
+            <div class="results-grid" id="pruebasGrid" role="list" aria-label="Lista de pruebas realizadas">
+                <div class="empty-state" role="status" aria-live="polite">
+                    <i class="bi bi-hourglass-split" aria-hidden="true"></i>
                     <h3>Cargando pruebas...</h3>
                     <p>Por favor espera un momento</p>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Contenido de Minisimulacros -->
-        <div class="tab-content" id="minisimulacros-content">
+        <section class="tab-content" id="minisimulacros-content" role="tabpanel" aria-labelledby="minisimulacros-tab">
             <!-- Filtros y Búsqueda -->
-            <div class="filters-container">
+            <div class="filters-container" role="search">
                 <div class="search-box">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="searchMinisimulacros" placeholder="Buscar por nombre de minisimulacro...">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <label for="searchMinisimulacros" class="sr-only">Buscar minisimulacros</label>
+                    <input type="text" id="searchMinisimulacros" placeholder="Buscar por nombre de minisimulacro..."
+                        aria-label="Buscar por nombre de minisimulacro">
                 </div>
                 <div class="filter-group">
-                    <label><i class="bi bi-calendar-range"></i> Desde:</label>
-                    <input type="date" id="filterMinisimuDesde">
+                    <label for="filterMinisimuDesde"><i class="bi bi-calendar-range" aria-hidden="true"></i>
+                        Desde:</label>
+                    <input type="date" id="filterMinisimuDesde" aria-label="Filtrar desde fecha">
                 </div>
                 <div class="filter-group">
-                    <label><i class="bi bi-calendar-range"></i> Hasta:</label>
-                    <input type="date" id="filterMinisimuHasta">
+                    <label for="filterMinisimuHasta"><i class="bi bi-calendar-range" aria-hidden="true"></i>
+                        Hasta:</label>
+                    <input type="date" id="filterMinisimuHasta" aria-label="Filtrar hasta fecha">
                 </div>
-                <button class="btn-clear-filters" id="clearFiltersMinisimu">
-                    <i class="bi bi-arrow-clockwise"></i>
+                <button class="btn-clear-filters" id="clearFiltersMinisimu" aria-label="Limpiar todos los filtros">
+                    <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
                     Limpiar Filtros
                 </button>
             </div>
-            
-            <div class="results-grid" id="minisimuGrid">
-                <div class="empty-state">
-                    <i class="bi bi-hourglass-split"></i>
+
+            <div class="results-grid" id="minisimuGrid" role="list" aria-label="Lista de minisimulacros realizados">
+                <div class="empty-state" role="status" aria-live="polite">
+                    <i class="bi bi-hourglass-split" aria-hidden="true"></i>
                     <h3>Cargando minisimulacros...</h3>
                     <p>Por favor espera un momento</p>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Contenido de Plan de Estudio -->
-        <div class="tab-content" id="plan-estudio-content">
+        <section class="tab-content" id="plan-estudio-content" role="tabpanel" aria-labelledby="plan-estudio-tab">
             <div class="results-grid">
-                <div class="empty-state">
-                    <i class="bi bi-calendar-check"></i>
+                <div class="empty-state" role="status">
+                    <i class="bi bi-calendar-check" aria-hidden="true"></i>
                     <h3>Plan de Estudio</h3>
                     <p>Funcionalidad en desarrollo</p>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
     <!-- Firebase CDN -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/resultados.js"></script>

@@ -722,7 +722,7 @@ function showCurrentQuestion() {
     const config = subjectConfig[currentSubject];
 
     // Contar solo preguntas reales para el selector
-    const realQuestions = subjectQuestions.filter(q => 
+    const realQuestions = subjectQuestions.filter(q =>
         q.type === 'multiple' || q.type === 'short' || q.type === 'open'
     );
     const realQuestionNumber = getRealQuestionNumber(currentQuestionIndex);
@@ -780,7 +780,7 @@ function showCurrentQuestion() {
 // Clean LaTeX document code (remove document structure, keep only math)
 function cleanLatexCode(text) {
     if (!text) return text;
-    
+
     // Si contiene comandos de documento LaTeX, extraer solo el contenido matemático
     if (text.includes('\\documentclass') || text.includes('\\begin{document}')) {
         // Extraer contenido entre \begin{document} y \end{document}
@@ -788,17 +788,17 @@ function cleanLatexCode(text) {
         if (docMatch) {
             text = docMatch[1];
         }
-        
+
         // Remover comandos de paquetes y configuración
         text = text.replace(/\\documentclass\{[^}]*\}/g, '');
         text = text.replace(/\\usepackage(\[[^\]]*\])?\{[^}]*\}/g, '');
         text = text.replace(/\\begin\{document\}/g, '');
         text = text.replace(/\\end\{document\}/g, '');
-        
+
         // Limpiar espacios extra
         text = text.trim();
     }
-    
+
     return text;
 }
 
@@ -813,7 +813,7 @@ function renderMathInContainer(container) {
                     node.nodeValue = cleanLatexCode(node.nodeValue);
                 }
             });
-            
+
             // Typeset the container with MathJax
             window.MathJax.typesetPromise([container]).catch((err) => {
                 console.log('MathJax typeset error:', err);
@@ -836,12 +836,12 @@ function getTextNodes(element) {
         null,
         false
     );
-    
+
     let node;
     while (node = walker.nextNode()) {
         textNodes.push(node);
     }
-    
+
     return textNodes;
 }
 
@@ -909,14 +909,14 @@ function createQuestionVideosHTML(videos) {
 function getRealQuestionNumber(itemIndex) {
     const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
     let questionNumber = 0;
-    
+
     for (let i = 0; i <= itemIndex; i++) {
         const item = subjectQuestions[i];
         if (item.type === 'multiple' || item.type === 'short' || item.type === 'open') {
             questionNumber++;
         }
     }
-    
+
     return questionNumber;
 }
 
@@ -924,11 +924,11 @@ function getRealQuestionNumber(itemIndex) {
 function getContextElements(currentIndex) {
     const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
     const contextElements = [];
-    
+
     // Buscar hacia atrás para encontrar textos de lectura que incluyan esta pregunta
     for (let i = currentIndex - 1; i >= 0; i--) {
         const item = subjectQuestions[i];
-        
+
         // Si encontramos un texto de lectura
         if (item.type === 'reading') {
             // Verificar si esta pregunta está en la lista de showInQuestions
@@ -939,14 +939,14 @@ function getContextElements(currentIndex) {
             break;
         }
     }
-    
+
     return contextElements;
 }
 
 // Render current item (question, paragraph, or title)
 function renderCurrentItem(item, contextElements, questionNumber, config) {
     let html = '';
-    
+
     // Solo mostrar contexto si estamos en una PREGUNTA (no si estamos en el texto de lectura mismo)
     if (item.type !== 'reading' && contextElements.length > 0) {
         contextElements.forEach((element, idx) => {
@@ -973,7 +973,7 @@ function renderCurrentItem(item, contextElements, questionNumber, config) {
             }
         });
     }
-    
+
     // Renderizar el elemento actual
     if (item.type === 'reading') {
         // Texto de lectura completo (título + párrafo)
@@ -1019,7 +1019,7 @@ function renderCurrentItem(item, contextElements, questionNumber, config) {
             ${item.type === 'multiple' ? createMultipleChoiceHTML(item) : createOpenAnswerHTML(item)}
         `;
     }
-    
+
     return html;
 }
 
@@ -1027,11 +1027,11 @@ function renderCurrentItem(item, contextElements, questionNumber, config) {
 function createQuestionsSelector(allItems) {
     let html = '';
     let questionNumber = 0;
-    
+
     for (let i = 0; i < allItems.length; i++) {
         const item = allItems[i];
         const isActive = i === currentQuestionIndex;
-        
+
         if (item.type === 'reading') {
             // Botón para texto de lectura
             html += `
@@ -1044,10 +1044,10 @@ function createQuestionsSelector(allItems) {
         } else if (item.type === 'multiple' || item.type === 'short' || item.type === 'open') {
             // Botón para pregunta
             questionNumber++;
-            const isAnswered = userAnswers[currentSubject] && 
-                              userAnswers[currentSubject][i] !== null && 
-                              userAnswers[currentSubject][i] !== undefined && 
-                              userAnswers[currentSubject][i] !== '';
+            const isAnswered = userAnswers[currentSubject] &&
+                userAnswers[currentSubject][i] !== null &&
+                userAnswers[currentSubject][i] !== undefined &&
+                userAnswers[currentSubject][i] !== '';
 
             html += `
                 <button class="question-btn ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" 
@@ -1072,7 +1072,7 @@ function toggleContext(contextIndex) {
     const content = document.getElementById(`contextContent_${contextIndex}`);
     const icon = document.getElementById(`contextIcon_${contextIndex}`);
     const toggle = document.getElementById(`contextToggle_${contextIndex}`);
-    
+
     if (content.style.display === 'none') {
         content.style.display = 'block';
         icon.classList.remove('bi-chevron-down');
@@ -1256,7 +1256,7 @@ function updateProgress() {
             items.forEach((item, index) => {
                 if (item.type === 'multiple' || item.type === 'short' || item.type === 'open') {
                     totalQuestions++;
-                    if (userAnswers[subject] && userAnswers[subject][index] !== null && 
+                    if (userAnswers[subject] && userAnswers[subject][index] !== null &&
                         userAnswers[subject][index] !== undefined && userAnswers[subject][index] !== '') {
                         answeredQuestions++;
                     }
@@ -1268,7 +1268,7 @@ function updateProgress() {
     // Calcular progreso
     const progressPercent = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
     document.getElementById('progressFill').style.width = progressPercent + '%';
-    document.getElementById('progressText').textContent = 
+    document.getElementById('progressText').textContent =
         `${answeredQuestions} de ${totalQuestions} preguntas completadas`;
 
     // Show submit button if all questions are answered
@@ -1537,19 +1537,19 @@ function showSubmitModal() {
         const config = subjectConfig[subject];
         const subjectAnswers = userAnswers[subject];
         const subjectQuestions = testQuestions.find(q => q[subject])?.[subject] || [];
-        
+
         // Count only real questions (not reading texts, paragraphs, titles)
         let totalQuestions = 0;
         let answeredCount = 0;
 
         Object.keys(subjectAnswers).forEach(questionIndex => {
             const question = subjectQuestions[parseInt(questionIndex)];
-            
+
             // Skip non-question items
             if (!question || question.type === 'reading' || question.type === 'paragraph' || question.type === 'title') {
                 return;
             }
-            
+
             totalQuestions++;
             const answer = subjectAnswers[questionIndex];
             if (answer !== null && answer !== undefined && answer !== '') {
@@ -1653,6 +1653,62 @@ async function submitTest() {
     }
 }
 
+// Función auxiliar para buscar afirmación por ID en la estructura SABER11
+function buscarAfirmacionPorId(materia, afirmacionId) {
+    // Mapear nombres de materias a claves de SABER11_ESTRUCTURA
+    // Las claves son: ciencias, sociales, matematicas, lectura, ingles
+    const mapeoMaterias = {
+        'matematicas': 'matematicas',
+        'lectura': 'lectura',
+        'sociales': 'sociales',
+        'ciencias': 'ciencias',
+        'ingles': 'ingles',
+        'naturales': 'ciencias'
+    };
+
+    const materiaKey = mapeoMaterias[materia] || materia.toLowerCase();
+
+    if (!window.SABER11_ESTRUCTURA || !window.SABER11_ESTRUCTURA[materiaKey]) {
+        return null;
+    }
+
+    const competencias = window.SABER11_ESTRUCTURA[materiaKey].competencias;
+
+    for (const competencia of competencias) {
+        if (competencia.afirmaciones) {
+            const afirmacion = competencia.afirmaciones.find(a => a.id === afirmacionId);
+            if (afirmacion) {
+                return afirmacion;
+            }
+        }
+    }
+
+    return null;
+}
+
+// Función auxiliar para buscar competencia por ID en la estructura SABER11
+function buscarCompetenciaPorId(materia, competenciaId) {
+    // Mapear nombres de materias a claves de SABER11_ESTRUCTURA
+    // Las claves son: ciencias, sociales, matematicas, lectura, ingles
+    const mapeoMaterias = {
+        'matematicas': 'matematicas',
+        'lectura': 'lectura',
+        'sociales': 'sociales',
+        'ciencias': 'ciencias',
+        'ingles': 'ingles',
+        'naturales': 'ciencias'
+    };
+
+    const materiaKey = mapeoMaterias[materia] || materia.toLowerCase();
+
+    if (!window.SABER11_ESTRUCTURA || !window.SABER11_ESTRUCTURA[materiaKey]) {
+        return null;
+    }
+
+    const competencias = window.SABER11_ESTRUCTURA[materiaKey].competencias;
+    return competencias.find(c => c.id === competenciaId);
+}
+
 // Evaluate answers automatically
 function evaluateAnswers() {
     const evaluatedAnswers = {};
@@ -1687,12 +1743,80 @@ function evaluateAnswers() {
                 correctAnswer = 'Respuesta abierta - Requiere revisión manual';
             }
 
+            // Extraer información de saber11 si existe
+            const saber11 = question.saber11 || {};
+            const componentesTexto = saber11.componentes ? saber11.componentes.join(', ') : 'No especificado';
+            
+            // Procesar competencias (ahora son IDs, necesitamos buscar los nombres)
+            // IMPORTANTE: usar 'subject' en lugar de 'currentSubject' para la materia correcta
+            let competenciasTexto = 'No especificada';
+            if (saber11.competencias && Array.isArray(saber11.competencias) && saber11.competencias.length > 0) {
+                const competenciasArray = [];
+                saber11.competencias.forEach(competenciaId => {
+                    const competencia = buscarCompetenciaPorId(subject, competenciaId);
+                    if (competencia) {
+                        competenciasArray.push(competencia.nombre);
+                    }
+                });
+                if (competenciasArray.length > 0) {
+                    competenciasTexto = competenciasArray.join(', ');
+                }
+            }
+
+            // Procesar afirmaciones (estructura: { competenciaId: [afirmacionId1, afirmacionId2] })
+            // IMPORTANTE: usar 'subject' en lugar de 'currentSubject' para la materia correcta
+            let afirmacionesTexto = 'No especificada';
+            if (saber11.afirmaciones && typeof saber11.afirmaciones === 'object') {
+                const afirmacionesArray = [];
+                Object.keys(saber11.afirmaciones).forEach(competenciaId => {
+                    const afirmacionIds = saber11.afirmaciones[competenciaId];
+                    if (Array.isArray(afirmacionIds)) {
+                        afirmacionIds.forEach(afirmacionId => {
+                            // Buscar la descripción de la afirmación en la estructura SABER11
+                            // IMPORTANTE: usar 'subject' en lugar de 'currentSubject'
+                            const afirmacion = buscarAfirmacionPorId(subject, afirmacionId);
+                            if (afirmacion) {
+                                afirmacionesArray.push(afirmacion.descripcion || afirmacion.id);
+                            }
+                        });
+                    }
+                });
+                if (afirmacionesArray.length > 0) {
+                    afirmacionesTexto = afirmacionesArray.join(', ');
+                }
+            }
+
+            // Procesar temas (ahora son strings "categoria|nombre", necesitamos extraer solo el nombre)
+            let temasTexto = 'No especificado';
+            if (saber11.temas && Array.isArray(saber11.temas) && saber11.temas.length > 0) {
+                const temasArray = saber11.temas.map(t => {
+                    // Si es un string con formato "categoria|nombre", extraer solo el nombre
+                    if (typeof t === 'string' && t.includes('|')) {
+                        return t.split('|')[1];
+                    }
+                    // Si es un objeto, usar t.nombre
+                    return t.nombre || t;
+                });
+                temasTexto = temasArray.join(', ');
+            }
+
+            // Guardar respuesta evaluada con TODA la información
             evaluatedAnswers[subject][questionIndex] = {
                 respuestaUsuario: userAnswer,
                 respuestaCorrecta: correctAnswer,
                 esCorrecta: isCorrect,
                 tipoRespuesta: question.type,
-                textoPregunta: question.text
+                textoPregunta: question.text,
+                // Agregar opciones si es pregunta de selección múltiple
+                opcionA: question.options && question.options[0] ? question.options[0].text : '',
+                opcionB: question.options && question.options[1] ? question.options[1].text : '',
+                opcionC: question.options && question.options[2] ? question.options[2].text : '',
+                opcionD: question.options && question.options[3] ? question.options[3].text : '',
+                // Información de Saber 11
+                componente: componentesTexto,
+                competencia: competenciasTexto,
+                afirmacion: afirmacionesTexto,
+                tema: temasTexto
             };
         });
     });

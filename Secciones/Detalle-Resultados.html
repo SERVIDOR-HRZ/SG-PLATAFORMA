@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Detalle de resultados de tu prueba en Seamos Genios">
+    <title>Detalle de Resultados - Seamos Genios</title>
+
+    <!-- Security headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://www.gstatic.com">
+
+    <!-- Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../Elementos/css/detalle-resultados-page.css">
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Abrir menú de navegación">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+    <!-- Sidebar Panel -->
+    <aside class="sidebar-panel" id="sidebarPanel" role="navigation" aria-label="Menú principal">
+        <!-- Perfil Usuario -->
+        <div class="sidebar-profile">
+            <div class="sidebar-avatar" id="sidebarAvatarContainer">
+                <div class="sidebar-avatar-default" id="sidebarAvatarDefault" aria-hidden="true">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <img class="sidebar-avatar-image" id="sidebarAvatarImage" style="display: none;" src=""
+                    alt="Foto de perfil del usuario">
+            </div>
+            <div class="sidebar-user-name" id="sidebarUserName" role="heading" aria-level="2">Usuario</div>
+            <div class="sidebar-user-role" id="sidebarUserRole">Estudiante</div>
+
+            <!-- Botones de Perfil y Web -->
+            <div class="sidebar-profile-actions">
+                <button class="sidebar-btn btn-profile" id="btnProfile" aria-label="Ir a mi perfil">
+                    <i class="bi bi-person-gear" aria-hidden="true"></i>
+                    <span>Mi Perfil</span>
+                </button>
+                <button class="sidebar-btn btn-home" id="btnHome" aria-label="Ir a la página principal">
+                    <i class="bi bi-house-door-fill" aria-hidden="true"></i>
+                    <span>Web Principal</span>
+                </button>
+                <button class="sidebar-btn btn-back" id="btnBack" aria-label="Volver al panel anterior">
+                    <i class="bi bi-arrow-left-circle-fill" aria-hidden="true"></i>
+                    <span>Volver al Panel</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="sidebar-actions">
+            <button class="sidebar-btn btn-logout" id="btnLogout" aria-label="Cerrar sesión">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content" role="main">
+        <!-- Header Superior -->
+        <header class="page-header">
+            <div class="header-left">
+                <h1 class="page-title" id="pageTitle">
+                    <i class="bi bi-clipboard-data-fill"></i>
+                    <span>Cargando...</span>
+                </h1>
+            </div>
+            <div class="header-right">
+                <div class="panel-time">
+                    <div class="time-display">
+                        <i class="bi bi-sun-fill" id="timeIcon" aria-hidden="true"></i>
+                        <time id="currentTime">--:--:-- --</time>
+                    </div>
+                    <div class="date-display" id="currentDate">--</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Información de la Prueba -->
+        <section class="info-prueba" id="infoPrueba">
+            <div class="info-item">
+                <i class="bi bi-calendar3"></i>
+                <span id="fechaPrueba">--</span>
+            </div>
+            <div class="info-item">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+                <span id="bloquesPrueba">--</span>
+            </div>
+            <div class="info-item tipo-prueba" id="tipoPruebaContainer">
+                <i class="bi bi-clipboard-check-fill"></i>
+                <span id="tipoPrueba">Prueba</span>
+            </div>
+        </section>
+
+        <!-- Tabs de Navegación -->
+        <nav class="detalle-tabs" role="tablist" aria-label="Navegación de detalle">
+            <button class="detalle-tab active" data-tab="resumen" role="tab" aria-selected="true">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Resumen</span>
+            </button>
+            <button class="detalle-tab" data-tab="materias" role="tab" aria-selected="false">
+                <i class="bi bi-book-fill"></i>
+                <span>Por Materia</span>
+            </button>
+        </nav>
+
+        <!-- Contenido de Resumen -->
+        <section class="tab-content active" id="resumen-content" role="tabpanel">
+            <!-- Loading State -->
+            <div class="loading-state" id="loadingState">
+                <div class="loading-spinner">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <p>Cargando resultados...</p>
+            </div>
+
+            <!-- Contenido del Resumen -->
+            <div id="resumenContenido" style="display: none;">
+                <!-- Tarjetas de Resumen -->
+                <div class="resumen-grid" id="resumenGrid">
+                    <!-- Se llena dinámicamente -->
+                </div>
+
+                <!-- Gráfico de Materias -->
+                <div class="grafico-section" id="graficoSection">
+                    <h3><i class="bi bi-pie-chart-fill"></i> Rendimiento por Materia</h3>
+                    <div class="grafico-container" id="graficoContainer">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Lista de Materias -->
+                <div class="materias-resumen" id="materiasResumen">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Contenido de Materias -->
+        <section class="tab-content" id="materias-content" role="tabpanel">
+            <div id="materiasContenido">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Vista de Detalle de Materia Específica -->
+        <section class="detalle-materia-view" id="detalleMateriaView" style="display: none;">
+            <div class="detalle-materia-header">
+                <button class="btn-volver-materias" id="btnVolverMaterias">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver a Materias
+                </button>
+                <h2 id="nombreMateriaDetalle">Materia</h2>
+            </div>
+            <div class="detalle-materia-stats" id="detalleMateriaStats">
+                <!-- Se llena dinámicamente -->
+            </div>
+            <div class="preguntas-lista" id="preguntasLista">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    
+    <!-- MathJax para fórmulas matemáticas -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]'], ['\\begin{equation}', '\\end{equation}']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady();
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/saber11-estructura.js"></script>
+    <script src="../Elementos/js/detalle-resultados-page.js"></script>
+</body>
+
+</html>

@@ -4661,10 +4661,11 @@ function renderAulas() {
 
     const materiasConfig = {
         'anuncios': { nombre: 'Anuncios', icon: 'bi-megaphone' },
-        'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator' },
-        'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book' },
-        'sociales': { nombre: 'C. Sociales', icon: 'bi-globe' },
-        'naturales': { nombre: 'C. Naturales', icon: 'bi-tree' },
+        'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator-fill' },
+        'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book-fill' },
+        'sociales': { nombre: 'C. Sociales', icon: 'bi-globe-americas' },
+        'naturales': { nombre: 'C. Naturales', icon: 'bi-tree-fill' },
+        'ciencias': { nombre: 'C. Naturales', icon: 'bi-tree-fill' },
         'ingles': { nombre: 'Inglés', icon: 'bi-translate' }
     };
 
@@ -5369,11 +5370,11 @@ function quitarTodosInstitucion() {
 // Configuración de materias
 const materiasConfigProfesor = {
     'anuncios': { nombre: 'Anuncios', icon: 'bi-megaphone', color: '#1a1a1a' },
-    'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator', color: '#667eea' },
-    'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book', color: '#dc3545' },
-    'sociales': { nombre: 'C. Sociales', icon: 'bi-globe', color: '#ffc107' },
-    'naturales': { nombre: 'C. Naturales', icon: 'bi-tree', color: '#28a745' },
-    'ciencias': { nombre: 'C. Naturales', icon: 'bi-tree', color: '#28a745' },
+    'matematicas': { nombre: 'Matemáticas', icon: 'bi-calculator-fill', color: '#667eea' },
+    'lectura': { nombre: 'Lectura Crítica', icon: 'bi-book-fill', color: '#dc3545' },
+    'sociales': { nombre: 'C. Sociales', icon: 'bi-globe-americas', color: '#ffc107' },
+    'naturales': { nombre: 'C. Naturales', icon: 'bi-tree-fill', color: '#28a745' },
+    'ciencias': { nombre: 'C. Naturales', icon: 'bi-tree-fill', color: '#28a745' },
     'ingles': { nombre: 'Inglés', icon: 'bi-translate', color: '#9c27b0' }
 };
 
@@ -5679,10 +5680,10 @@ async function mostrarAulasUsuario(userId, userName) {
     // Configuración de colores y nombres de materias
     const materiasColores = {
         'anuncios': { nombre: 'Anuncios', color: '#1a1a1a', icon: 'bi-megaphone' },
-        'matematicas': { nombre: 'Matemáticas', color: '#667eea', icon: 'bi-calculator' },
-        'lectura': { nombre: 'Lectura Crítica', color: '#dc3545', icon: 'bi-book' },
-        'sociales': { nombre: 'C. Sociales', color: '#ffc107', icon: 'bi-globe' },
-        'naturales': { nombre: 'C. Naturales', color: '#28a745', icon: 'bi-tree' },
+        'matematicas': { nombre: 'Matemáticas', color: '#667eea', icon: 'bi-calculator-fill' },
+        'lectura': { nombre: 'Lectura Crítica', color: '#dc3545', icon: 'bi-book-fill' },
+        'sociales': { nombre: 'C. Sociales', color: '#ffc107', icon: 'bi-globe-americas' },
+        'naturales': { nombre: 'C. Naturales', color: '#28a745', icon: 'bi-tree-fill' },
         'ingles': { nombre: 'Inglés', color: '#9c27b0', icon: 'bi-translate' }
     };
 
