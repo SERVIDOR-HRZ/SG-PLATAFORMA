@@ -511,19 +511,22 @@ body {
     grid-column: 1 / -1;
     text-align: center;
     padding: 4rem 2rem;
-    color: rgba(255, 255, 255, 0.6);
 }
 
 .empty-state i {
     font-size: 5rem;
     margin-bottom: 1.5rem;
-    color: rgba(255, 255, 255, 0.3);
+    color: #333;
 }
 
 .empty-state h3 {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: #1a1a1a;
+}
+
+.empty-state p {
+    color: #666;
 }
 
 /* Plan de Estudio */

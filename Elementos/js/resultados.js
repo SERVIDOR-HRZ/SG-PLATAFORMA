@@ -1,18 +1,19 @@
 // Resultados.js - Funcionalidad para la sección de resultados
 
 // Verificar autenticación al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     verificarAutenticacion();
     inicializarReloj();
     inicializarMenuTabs();
     inicializarSidebar();
     cargarDatosUsuario();
+    cargarResultados();
 });
 
 // Verificar si el usuario está autenticado
 function verificarAutenticacion() {
     const usuarioActual = sessionStorage.getItem('currentUser');
-    
+
     if (!usuarioActual) {
         window.location.href = '../index.html';
         return;
@@ -22,17 +23,17 @@ function verificarAutenticacion() {
 // Cargar datos del usuario
 async function cargarDatosUsuario() {
     const usuarioActual = sessionStorage.getItem('currentUser');
-    
+
     if (usuarioActual) {
         try {
             const usuario = JSON.parse(usuarioActual);
-            
+
             // Actualizar nombre de usuario
             const userNameElement = document.getElementById('userName');
             if (userNameElement && usuario.nombre) {
                 userNameElement.textContent = usuario.nombre.toUpperCase();
             }
-            
+
             // Actualizar rol
             const userRoleElement = document.getElementById('userRole');
             if (userRoleElement && usuario.tipoUsuario) {
@@ -44,7 +45,7 @@ async function cargarDatosUsuario() {
                 };
                 userRoleElement.textContent = roles[usuario.tipoUsuario] || 'Usuario';
             }
-            
+
             // Cargar foto de perfil desde Firebase
             await cargarFotoPerfil(usuario.id);
         } catch (error) {
@@ -66,7 +67,7 @@ async function cargarFotoPerfil(usuarioId) {
 
         if (usuarioDoc.exists) {
             const datosUsuario = usuarioDoc.data();
-            
+
             if (datosUsuario.fotoPerfil) {
                 mostrarFotoPerfil(datosUsuario.fotoPerfil);
             }
@@ -107,19 +108,19 @@ function esperarFirebase() {
 function inicializarReloj() {
     function actualizarReloj() {
         const ahora = new Date();
-        
+
         // Actualizar hora
         const horas = ahora.getHours();
         const minutos = ahora.getMinutes().toString().padStart(2, '0');
         const segundos = ahora.getSeconds().toString().padStart(2, '0');
         const ampm = horas >= 12 ? 'PM' : 'AM';
         const horas12 = horas % 12 || 12;
-        
+
         const timeElement = document.getElementById('currentTime');
         if (timeElement) {
             timeElement.textContent = `${horas12}:${minutos}:${segundos} ${ampm}`;
         }
-        
+
         // Actualizar icono según la hora
         const timeIcon = document.getElementById('timeIcon');
         if (timeIcon) {
@@ -133,22 +134,22 @@ function inicializarReloj() {
                 timeIcon.className = 'bi bi-moon-stars-fill';
             }
         }
-        
+
         // Actualizar fecha
-        const opciones = { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        const opciones = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         };
         const fechaFormateada = ahora.toLocaleDateString('es-ES', opciones);
-        
+
         const dateElement = document.getElementById('currentDate');
         if (dateElement) {
             dateElement.textContent = fechaFormateada;
         }
     }
-    
+
     actualizarReloj();
     setInterval(actualizarReloj, 1000);
 }
@@ -157,18 +158,18 @@ function inicializarReloj() {
 function inicializarMenuTabs() {
     const menuTabs = document.querySelectorAll('.menu-tab');
     const tabContents = document.querySelectorAll('.tab-content');
-    
+
     menuTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
+        tab.addEventListener('click', function () {
             const targetTab = this.getAttribute('data-tab');
-            
+
             // Remover clase active de todos los tabs
             menuTabs.forEach(t => t.classList.remove('active'));
             tabContents.forEach(content => content.classList.remove('active'));
-            
+
             // Agregar clase active al tab seleccionado
             this.classList.add('active');
-            
+
             // Mostrar contenido correspondiente
             const targetContent = document.getElementById(`${targetTab}-content`);
             if (targetContent) {
@@ -183,7 +184,7 @@ function inicializarSidebar() {
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const sidebarPanel = document.getElementById('sidebarPanel');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
-    
+
     // Mostrar botón móvil en pantallas pequeñas
     function checkMobileView() {
         if (window.innerWidth <= 768) {
@@ -205,17 +206,17 @@ function inicializarSidebar() {
             }
         }
     }
-    
+
     checkMobileView();
     window.addEventListener('resize', checkMobileView);
-    
+
     // Toggle sidebar móvil
     if (mobileMenuToggle) {
-        mobileMenuToggle.addEventListener('click', function() {
+        mobileMenuToggle.addEventListener('click', function () {
             const isActive = sidebarPanel.classList.toggle('active');
             sidebarOverlay.classList.toggle('active');
             this.classList.toggle('active');
-            
+
             // Cambiar icono
             const icon = this.querySelector('i');
             if (isActive) {
@@ -225,10 +226,10 @@ function inicializarSidebar() {
             }
         });
     }
-    
+
     // Cerrar sidebar al hacer clic en overlay
     if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', function() {
+        sidebarOverlay.addEventListener('click', function () {
             if (sidebarPanel) {
                 sidebarPanel.classList.remove('active');
             }
@@ -245,7 +246,7 @@ function inicializarSidebar() {
 // Botón de perfil
 const btnProfile = document.getElementById('btnProfile');
 if (btnProfile) {
-    btnProfile.addEventListener('click', function() {
+    btnProfile.addEventListener('click', function () {
         window.location.href = 'panelUsuario.html';
     });
 }
@@ -253,7 +254,7 @@ if (btnProfile) {
 // Botón de inicio
 const btnHome = document.getElementById('btnHome');
 if (btnHome) {
-    btnHome.addEventListener('click', function() {
+    btnHome.addEventListener('click', function () {
         window.location.href = '../index.html';
     });
 }
@@ -261,15 +262,15 @@ if (btnHome) {
 // Botón de volver al panel
 const btnBack = document.getElementById('btnBack');
 if (btnBack) {
-    btnBack.addEventListener('click', function() {
+    btnBack.addEventListener('click', function () {
         const usuarioActual = sessionStorage.getItem('currentUser');
-        
+
         if (usuarioActual) {
             try {
                 const usuario = JSON.parse(usuarioActual);
-                
+
                 // Redirigir según el rol
-                switch(usuario.tipoUsuario) {
+                switch (usuario.tipoUsuario) {
                     case 'admin':
                         window.location.href = 'Panel_Admin.html';
                         break;
@@ -296,7 +297,7 @@ if (btnBack) {
 // Botón de cerrar sesión
 const btnLogout = document.getElementById('btnLogout');
 if (btnLogout) {
-    btnLogout.addEventListener('click', async function() {
+    btnLogout.addEventListener('click', async function () {
         const confirmed = await showLogoutModal();
         if (confirmed) {
             sessionStorage.removeItem('currentUser');
@@ -374,11 +375,11 @@ function showLogoutModal() {
         `;
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         const overlay = document.getElementById('panelModalOverlay');
         const confirmBtn = document.getElementById('panelModalConfirm');
         const cancelBtn = document.getElementById('panelModalCancel');
-        
+
         // Show modal with animation
         setTimeout(() => {
             overlay.style.opacity = '1';
@@ -429,10 +430,345 @@ function closeModal(overlay) {
     }, 300);
 }
 
-// Funcionalidad de botones "Ver Detalles" (placeholder)
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('btn-view-details') || 
+// Cargar resultados del usuario
+async function cargarResultados() {
+    const usuarioActual = sessionStorage.getItem('currentUser');
+
+    if (!usuarioActual) return;
+
+    try {
+        const usuario = JSON.parse(usuarioActual);
+
+        // Esperar a que Firebase esté listo
+        if (!window.firebaseDB) {
+            await esperarFirebase();
+        }
+
+        const db = window.firebaseDB;
+
+        // Obtener el ID del estudiante (puede ser numeroDocumento, numeroIdentidad o id)
+        const estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;
+
+        // Cargar pruebas y minisimulacros
+        await cargarPruebasYMinisimulacros(db, estudianteId);
+
+    } catch (error) {
+        console.error('Error al cargar resultados:', error);
+    }
+}
+
+// Cargar pruebas y minisimulacros del usuario
+async function cargarPruebasYMinisimulacros(db, estudianteId) {
+    try {
+        // Obtener todas las respuestas del estudiante
+        const respuestasSnapshot = await db.collection('respuestas')
+            .where('estudianteId', '==', estudianteId)
+            .get();
+
+        if (respuestasSnapshot.empty) {
+            mostrarEstadoVacio('pruebas');
+            mostrarEstadoVacio('minisimulacros');
+            return;
+        }
+
+        // Agrupar respuestas por prueba
+        const pruebasMap = new Map();
+        const minisimulacrosMap = new Map();
+
+        for (const doc of respuestasSnapshot.docs) {
+            const respuesta = doc.data();
+            const pruebaId = respuesta.pruebaId;
+
+            if (!pruebaId) continue;
+
+            // Obtener información de la prueba
+            const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
+
+            if (!pruebaDoc.exists) continue;
+
+            const pruebaData = pruebaDoc.data();
+            const tipoPrueba = pruebaData.tipo || 'prueba';
+
+            // Obtener bloques habilitados
+            const bloquesHabilitados = [];
+            if (pruebaData.bloque1) bloquesHabilitados.push(1);
+            if (pruebaData.bloque2) bloquesHabilitados.push(2);
+
+            // Crear objeto de resultado
+            const resultado = {
+                id: doc.id,
+                pruebaId: pruebaId,
+                nombrePrueba: pruebaData.nombre || 'Sin nombre',
+                bloques: bloquesHabilitados,
+                bloque: respuesta.bloque || 1,
+                fechaRealizacion: respuesta.fechaEnvio,
+                estadisticas: respuesta.estadisticas,
+                tipoPrueba: tipoPrueba
+            };
+
+            // Separar por tipo
+            if (tipoPrueba === 'minisimulacro') {
+                if (!minisimulacrosMap.has(pruebaId)) {
+                    minisimulacrosMap.set(pruebaId, []);
+                }
+                minisimulacrosMap.get(pruebaId).push(resultado);
+            } else {
+                if (!pruebasMap.has(pruebaId)) {
+                    pruebasMap.set(pruebaId, []);
+                }
+                pruebasMap.get(pruebaId).push(resultado);
+            }
+        }
+
+        // Mostrar pruebas
+        mostrarPruebas(pruebasMap);
+
+        // Mostrar minisimulacros
+        mostrarMinisimulacros(minisimulacrosMap);
+
+    } catch (error) {
+        console.error('Error al cargar pruebas y minisimulacros:', error);
+        mostrarError('pruebas');
+        mostrarError('minisimulacros');
+    }
+}
+
+// Mostrar pruebas
+function mostrarPruebas(pruebasMap) {
+    const pruebasContainer = document.querySelector('#pruebas-content .results-grid');
+
+    if (pruebasMap.size === 0) {
+        mostrarEstadoVacio('pruebas');
+        return;
+    }
+
+    pruebasContainer.innerHTML = '';
+
+    // Convertir a array y ordenar por fecha
+    const pruebas = Array.from(pruebasMap.entries()).map(([pruebaId, resultados]) => {
+        // Obtener el resultado más reciente
+        const resultadoReciente = resultados.sort((a, b) => {
+            const fechaA = a.fechaRealizacion ? a.fechaRealizacion.toDate() : new Date(0);
+            const fechaB = b.fechaRealizacion ? b.fechaRealizacion.toDate() : new Date(0);
+            return fechaB - fechaA;
+        })[0];
+
+        return resultadoReciente;
+    });
+
+    // Ordenar por fecha
+    pruebas.sort((a, b) => {
+        const fechaA = a.fechaRealizacion ? a.fechaRealizacion.toDate() : new Date(0);
+        const fechaB = b.fechaRealizacion ? b.fechaRealizacion.toDate() : new Date(0);
+        return fechaB - fechaA;
+    });
+
+    // Crear tarjetas
+    pruebas.forEach(prueba => {
+        const pruebaCard = crearTarjetaPrueba(prueba);
+        pruebasContainer.appendChild(pruebaCard);
+    });
+}
+
+// Mostrar minisimulacros
+function mostrarMinisimulacros(minisimulacrosMap) {
+    const minisimuContainer = document.querySelector('#minisimulacros-content .results-grid');
+
+    if (minisimulacrosMap.size === 0) {
+        mostrarEstadoVacio('minisimulacros');
+        return;
+    }
+
+    minisimuContainer.innerHTML = '';
+
+    // Convertir a array y ordenar por fecha
+    const minisimulacros = Array.from(minisimulacrosMap.entries()).map(([pruebaId, resultados]) => {
+        // Obtener el resultado más reciente
+        const resultadoReciente = resultados.sort((a, b) => {
+            const fechaA = a.fechaRealizacion ? a.fechaRealizacion.toDate() : new Date(0);
+            const fechaB = b.fechaRealizacion ? b.fechaRealizacion.toDate() : new Date(0);
+            return fechaB - fechaA;
+        })[0];
+
+        return resultadoReciente;
+    });
+
+    // Ordenar por fecha
+    minisimulacros.sort((a, b) => {
+        const fechaA = a.fechaRealizacion ? a.fechaRealizacion.toDate() : new Date(0);
+        const fechaB = b.fechaRealizacion ? b.fechaRealizacion.toDate() : new Date(0);
+        return fechaB - fechaA;
+    });
+
+    // Crear tarjetas
+    minisimulacros.forEach(minisimu => {
+        const minisimuCard = crearTarjetaMinisimulacro(minisimu);
+        minisimuContainer.appendChild(minisimuCard);
+    });
+}
+
+// Mostrar estado vacío
+function mostrarEstadoVacio(tipo) {
+    const container = document.querySelector(`#${tipo}-content .results-grid`);
+    const mensajes = {
+        'pruebas': {
+            icono: 'bi-file-earmark-text',
+            titulo: 'No hay pruebas realizadas',
+            descripcion: 'Aún no has realizado ninguna prueba'
+        },
+        'minisimulacros': {
+            icono: 'bi-clipboard-check',
+            titulo: 'No hay minisimulacros realizados',
+            descripcion: 'Aún no has realizado ningún minisimulacro'
+        }
+    };
+
+    const mensaje = mensajes[tipo];
+
+    container.innerHTML = `
+        <div class="empty-state">
+            <i class="bi ${mensaje.icono}"></i>
+            <h3>${mensaje.titulo}</h3>
+            <p>${mensaje.descripcion}</p>
+        </div>
+    `;
+}
+
+// Mostrar error
+function mostrarError(tipo) {
+    const container = document.querySelector(`#${tipo}-content .results-grid`);
+    const mensajes = {
+        'pruebas': 'pruebas',
+        'minisimulacros': 'minisimulacros'
+    };
+
+    container.innerHTML = `
+        <div class="empty-state">
+            <i class="bi bi-exclamation-triangle"></i>
+            <h3>Error al cargar ${mensajes[tipo]}</h3>
+            <p>No se pudieron cargar los ${mensajes[tipo]}. Intenta nuevamente.</p>
+        </div>
+    `;
+}
+
+// Crear tarjeta de prueba
+function crearTarjetaPrueba(resultado) {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+
+    // Formatear fecha
+    const fecha = resultado.fechaRealizacion ?
+        formatearFecha(resultado.fechaRealizacion.toDate()) :
+        'Fecha no disponible';
+
+    // Obtener bloques
+    const bloques = resultado.bloques || [];
+    const bloquesTexto = bloques.length > 0 ?
+        bloques.map(b => `Bloque ${b}`).join(' - ') :
+        'Sin bloques especificados';
+
+    card.innerHTML = `
+        <div class="result-card-header">
+            <div class="result-icon">
+                <i class="bi bi-file-earmark-text-fill"></i>
+            </div>
+            <div class="result-info">
+                <h3>${resultado.nombrePrueba || 'Prueba sin nombre'}</h3>
+                <div class="result-date">
+                    <i class="bi bi-calendar3"></i> ${fecha}
+                </div>
+            </div>
+        </div>
+        <div class="result-card-body">
+            <div class="result-subjects">
+                <div class="subject-item">
+                    <span><i class="bi bi-grid-3x3-gap-fill"></i> Bloques:</span>
+                    <span class="subject-score">${bloquesTexto}</span>
+                </div>
+            </div>
+        </div>
+        <div class="result-card-footer">
+            <button class="btn-view-details" data-id="${resultado.id}" data-prueba-id="${resultado.pruebaId}" data-type="prueba">
+                <i class="bi bi-eye-fill"></i>
+                Ver Resultados
+            </button>
+        </div>
+    `;
+
+    return card;
+}
+
+// Crear tarjeta de minisimulacro// Crear tarjeta de minisimulacro
+function crearTarjetaMinisimulacro(resultado) {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+
+    // Formatear fecha
+    const fecha = resultado.fechaRealizacion ?
+        formatearFecha(resultado.fechaRealizacion.toDate()) :
+        'Fecha no disponible';
+
+    // Obtener bloques
+    const bloques = resultado.bloques || [];
+    const bloquesTexto = bloques.length > 0 ?
+        bloques.map(b => `Bloque ${b}`).join(' - ') :
+        'Sin bloques especificados';
+
+    card.innerHTML = `
+        <div class="result-card-header">
+            <div class="result-icon mini">
+                <i class="bi bi-clipboard-check-fill"></i>
+            </div>
+            <div class="result-info">
+                <h3>${resultado.nombrePrueba || 'Minisimulacro sin nombre'}</h3>
+                <div class="result-date">
+                    <i class="bi bi-calendar3"></i> ${fecha}
+                </div>
+            </div>
+        </div>
+        <div class="result-card-body">
+            <div class="result-subjects">
+                <div class="subject-item">
+                    <span><i class="bi bi-grid-3x3-gap-fill"></i> Bloques:</span>
+                    <span class="subject-score">${bloquesTexto}</span>
+                </div>
+            </div>
+        </div>
+        <div class="result-card-footer">
+            <button class="btn-view-details" data-id="${resultado.id}" data-prueba-id="${resultado.pruebaId}" data-type="minisimulacro">
+                <i class="bi bi-eye-fill"></i>
+                Ver Resultados
+            </button>
+        </div>
+    `;
+
+    return card;
+}
+
+// Formatear fecha
+function formatearFecha(fecha) {
+    const opciones = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return fecha.toLocaleDateString('es-ES', opciones);
+}
+
+// Funcionalidad de botones "Ver Resultados" (placeholder)
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('btn-view-details') ||
         e.target.closest('.btn-view-details')) {
-        alert('Funcionalidad de detalles en desarrollo');
+        const button = e.target.classList.contains('btn-view-details') ?
+            e.target :
+            e.target.closest('.btn-view-details');
+
+        const id = button.getAttribute('data-id');
+        const type = button.getAttribute('data-type');
+
+        console.log(`Ver resultados de ${type} con ID: ${id}`);
+        // Funcionalidad pendiente
     }
 });
