@@ -1082,7 +1082,11 @@ function generarPlanEstudio() {
     
     // Calcular días hasta la fecha límite
     const hoy = new Date();
-    const fechaLimite = configuracionHorario.fechaLimite || new Date(hoy.getTime() + 14 * 24 * 60 * 60 * 1000);
+    let fechaLimite = obtenerFechaLimiteComoDate(configuracionHorario.fechaLimite);
+    if (!fechaLimite) {
+        fechaLimite = new Date(hoy.getTime() + 14 * 24 * 60 * 60 * 1000);
+        configuracionHorario.fechaLimite = fechaLimite;
+    }
     const diasHastaLimite = Math.ceil((fechaLimite - hoy) / (1000 * 60 * 60 * 24));
     
     // Calcular sesiones necesarias
@@ -1249,9 +1253,31 @@ function restaurarSeleccionesVisuales() {
     // Restaurar fecha límite
     const fechaInput = document.getElementById('fechaLimite');
     if (fechaInput && configuracionHorario.fechaLimite) {
-        const fecha = new Date(configuracionHorario.fechaLimite);
-        fechaInput.value = fecha.toISOString().split('T')[0];
+        const fecha = obtenerFechaLimiteComoDate(configuracionHorario.fechaLimite);
+        if (fecha) {
+            fechaInput.value = fecha.toISOString().split('T')[0];
+        }
     }
+}
+
+// Normalizar fecha límite (maneja Date, string o Timestamp de Firebase)
+function obtenerFechaLimiteComoDate(valor) {
+    if (!valor) return null;
+
+    // Ya es Date
+    if (valor instanceof Date) {
+        return isNaN(valor.getTime()) ? null : valor;
+    }
+
+    // Timestamp de Firebase (tiene toDate)
+    if (typeof valor.toDate === 'function') {
+        const f = valor.toDate();
+        return isNaN(f.getTime()) ? null : f;
+    }
+
+    // String u otro tipo compatible con Date
+    const fecha = new Date(valor);
+    return isNaN(fecha.getTime()) ? null : fecha;
 }
 
 // Renderizar plan generado
@@ -1626,9 +1652,10 @@ function mostrarPlanGeneradoExistente() {
         
         // Calcular estadísticas para mostrar
         const hoy = new Date();
-        const fechaLimite = configuracionHorario.fechaLimite 
-            ? new Date(configuracionHorario.fechaLimite) 
-            : new Date(hoy.getTime() + 14 * 24 * 60 * 60 * 1000);
+        let fechaLimite = obtenerFechaLimiteComoDate(configuracionHorario.fechaLimite);
+        if (!fechaLimite) {
+            fechaLimite = new Date(hoy.getTime() + 14 * 24 * 60 * 60 * 1000);
+        }
         
         const diasHastaLimite = Math.max(0, Math.ceil((fechaLimite - hoy) / (1000 * 60 * 60 * 24)));
         const horasTotales = sesionesEstudio.length * 1; // 1 hora por sesión
