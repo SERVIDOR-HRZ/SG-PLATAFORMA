@@ -567,11 +567,17 @@ function deshabilitarEdicionAdmin() {
     
     // Deshabilitar todos los inputs de configuración
     document.querySelectorAll('input, select, textarea, button').forEach(element => {
-        // No deshabilitar los botones de navegación de tabs y calendario
+        // No deshabilitar los botones de navegación y sidebar
         if (!element.classList.contains('plan-tab') && 
             !element.classList.contains('calendario-nav-btn') &&
             !element.classList.contains('materia-filter-btn') &&
-            element.id !== 'btnExportarPDF') {
+            !element.classList.contains('sidebar-btn') &&
+            element.id !== 'btnExportarPDF' &&
+            element.id !== 'btnBack' &&
+            element.id !== 'btnHome' &&
+            element.id !== 'btnProfile' &&
+            element.id !== 'btnLogout' &&
+            element.id !== 'mobileMenuToggle') {
             element.disabled = true;
         }
     });
