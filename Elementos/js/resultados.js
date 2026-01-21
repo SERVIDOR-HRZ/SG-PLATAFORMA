@@ -660,13 +660,25 @@ async function cargarTodosLosEstudiantes(db) {
             const estudiante = doc.data();
             const estudianteId = estudiante.numeroDocumento || estudiante.numeroIdentidad || doc.id;
             
+            // Buscar institución en diferentes campos posibles
+            const institucion = estudiante.institucion || 
+                               estudiante.Institucion || 
+                               estudiante.nombreInstitucion || 
+                               estudiante.nombreInstitucion || 
+                               '';
+            
             todosLosEstudiantes.push({
                 id: doc.id,
                 idFiltro: estudianteId,
                 nombre: estudiante.nombre || 'Sin nombre',
                 documento: estudiante.numeroDocumento || estudiante.numeroIdentidad || '',
-                institucion: estudiante.institucion || ''
+                institucion: institucion
             });
+            
+            // Debug: mostrar en consola si no tiene institución
+            if (!institucion) {
+                console.log('Estudiante sin institución:', estudiante.nombre, 'ID:', estudianteId);
+            }
         });
         
         // Ordenar por nombre
@@ -806,9 +818,10 @@ async function cargarTodosLosResultados(db) {
             if (pruebaData.bloque1) bloquesHabilitados.push(1);
             if (pruebaData.bloque2) bloquesHabilitados.push(2);
 
-            // Obtener nombre del estudiante
+            // Obtener nombre del estudiante e institución
             const estudianteInfo = todosLosEstudiantes.find(e => e.idFiltro === respuesta.estudianteId);
             const nombreEstudiante = estudianteInfo ? estudianteInfo.nombre : respuesta.estudianteId;
+            const institucionEstudiante = estudianteInfo ? estudianteInfo.institucion : '';
 
             // Crear objeto de resultado
             const resultado = {
@@ -821,7 +834,8 @@ async function cargarTodosLosResultados(db) {
                 estadisticas: respuesta.estadisticas,
                 tipoPrueba: tipoPrueba,
                 estudianteId: respuesta.estudianteId,
-                nombreEstudiante: nombreEstudiante
+                nombreEstudiante: nombreEstudiante,
+                institucionEstudiante: institucionEstudiante
             };
 
             // Crear clave única por prueba y estudiante
@@ -946,13 +960,16 @@ function mostrarMinisimulacrosAdmin(minisimulacrosMap) {
 function crearTarjetaPruebaAdmin(prueba) {
     const card = crearTarjetaPrueba(prueba);
     
-    // Agregar badge con nombre del estudiante
+    // Agregar badge con nombre del estudiante e institución
     if (prueba.nombreEstudiante) {
         const header = card.querySelector('.result-card-header');
         if (header) {
             const estudianteBadge = document.createElement('div');
             estudianteBadge.className = 'estudiante-badge';
-            estudianteBadge.innerHTML = `<i class="bi bi-person-fill"></i> ${prueba.nombreEstudiante}`;
+            const institucionTexto = prueba.institucionEstudiante && prueba.institucionEstudiante.trim() !== '' ? 
+                `<br><small style="font-size: 0.85em; opacity: 0.8;">${prueba.institucionEstudiante}</small>` : 
+                '<br><small style="font-size: 0.85em; opacity: 0.6;">Sin institución</small>';
+            estudianteBadge.innerHTML = `<i class="bi bi-person-fill"></i> ${prueba.nombreEstudiante}${institucionTexto}`;
             header.insertBefore(estudianteBadge, header.firstChild);
         }
     }
@@ -964,13 +981,16 @@ function crearTarjetaPruebaAdmin(prueba) {
 function crearTarjetaMinisimulacroAdmin(minisimu) {
     const card = crearTarjetaMinisimulacro(minisimu);
     
-    // Agregar badge con nombre del estudiante
+    // Agregar badge con nombre del estudiante e institución
     if (minisimu.nombreEstudiante) {
         const header = card.querySelector('.result-card-header');
         if (header) {
             const estudianteBadge = document.createElement('div');
             estudianteBadge.className = 'estudiante-badge';
-            estudianteBadge.innerHTML = `<i class="bi bi-person-fill"></i> ${minisimu.nombreEstudiante}`;
+            const institucionTexto = minisimu.institucionEstudiante && minisimu.institucionEstudiante.trim() !== '' ? 
+                `<br><small style="font-size: 0.85em; opacity: 0.8;">${minisimu.institucionEstudiante}</small>` : 
+                '<br><small style="font-size: 0.85em; opacity: 0.6;">Sin institución</small>';
+            estudianteBadge.innerHTML = `<i class="bi bi-person-fill"></i> ${minisimu.nombreEstudiante}${institucionTexto}`;
             header.insertBefore(estudianteBadge, header.firstChild);
         }
     }
@@ -1825,10 +1845,24 @@ async function cargarPlanesEstudiantesAdmin() {
                 console.error('Error al obtener prueba:', e);
             }
             
+            // Obtener información del estudiante (nombre e institución)
+            let estudianteNombre = plan.estudianteNombre || 'Estudiante';
+            let institucionEstudiante = '';
+            
+            if (plan.estudianteId) {
+                const estudianteInfo = todosLosEstudiantes.find(e => e.idFiltro === plan.estudianteId);
+                if (estudianteInfo) {
+                    estudianteNombre = estudianteInfo.nombre;
+                    institucionEstudiante = estudianteInfo.institucion || '';
+                }
+            }
+            
             todosLosPlanesEstudiantes.push({
                 id: doc.id,
                 ...plan,
-                nombrePrueba
+                nombrePrueba,
+                estudianteNombre,
+                institucion: institucionEstudiante
             });
         }
         
@@ -1895,8 +1929,13 @@ function crearTarjetaPlanAdmin(plan) {
     let diasRestantes = '--';
     let estadoPlan = 'pendiente';
     if (plan.configuracion && plan.configuracion.fechaLimite) {
-        const fechaLimite = new Date(plan.configuracion.fechaLimite);
+        const fechaLimite = plan.configuracion.fechaLimite.toDate ? 
+            plan.configuracion.fechaLimite.toDate() : 
+            new Date(plan.configuracion.fechaLimite);
         const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0); // Normalizar a medianoche
+        fechaLimite.setHours(0, 0, 0, 0); // Normalizar a medianoche
+        
         const diff = Math.ceil((fechaLimite - hoy) / (1000 * 60 * 60 * 24));
         diasRestantes = diff;
         
@@ -1961,125 +2000,15 @@ function crearTarjetaPlanAdmin(plan) {
     `;
 }
 
-// Ver detalle de plan (modal)
+// Ver detalle de plan - Redirigir a página de plan de estudio
 function verDetallePlanAdmin(planId) {
     const plan = todosLosPlanesEstudiantes.find(p => p.id === planId);
     if (!plan) return;
     
-    const totalSesiones = plan.sesiones ? plan.sesiones.length : 0;
-    
-    // Colores por materia
-    const coloresMateria = {
-        'LC': '#FF4D4D', 'MT': '#33CCFF', 'SC': '#FF8C00', 'CN': '#33FF77', 'IN': '#B366FF',
-        'lectura': '#FF4D4D', 'matematicas': '#33CCFF', 'sociales': '#FF8C00', 'ciencias': '#33FF77', 'ingles': '#B366FF'
-    };
-    
-    const temasHtml = (plan.temasAReforzar || []).map(tema => {
-        const color = coloresMateria[tema.materia] || '#ffa500';
-        return `
-            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; border-left: 3px solid ${color};">
-                <span style="color: ${color}; font-weight: 600; min-width: 30px;">${tema.materia}</span>
-                <span style="color: rgba(255,255,255,0.9);">${tema.tema || tema.competencia || 'Sin especificar'}</span>
-            </div>
-        `;
-    }).join('') || '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 1rem;">No hay temas definidos</p>';
-    
-    // Agrupar sesiones por fecha
-    const sesionesPorFecha = {};
-    (plan.sesiones || []).forEach(sesion => {
-        const fecha = new Date(sesion.fecha);
-        const fechaKey = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
-        if (!sesionesPorFecha[fechaKey]) {
-            sesionesPorFecha[fechaKey] = [];
-        }
-        sesionesPorFecha[fechaKey].push(sesion);
-    });
-    
-    const sesionesHtml = Object.keys(sesionesPorFecha).slice(0, 7).map(fecha => {
-        const sesiones = sesionesPorFecha[fecha];
-        return `
-            <div style="margin-bottom: 0.75rem;">
-                <div style="font-size: 0.85rem; color: #ffa500; font-weight: 600; margin-bottom: 0.5rem;">${fecha}</div>
-                ${sesiones.map(s => {
-                    const color = coloresMateria[s.materia] || '#ffa500';
-                    return `
-                        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; background: rgba(255,255,255,0.03); border-radius: 6px; margin-bottom: 0.25rem;">
-                            <span style="color: rgba(255,255,255,0.6); font-size: 0.8rem; min-width: 45px;">${s.horaInicio || '--:--'}</span>
-                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${color};"></span>
-                            <span style="color: white; font-size: 0.85rem;">${s.tema || s.materia}</span>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-    }).join('') || '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 1rem;">No hay sesiones programadas</p>';
-    
-    const diasRestantes = Object.keys(sesionesPorFecha).length > 7 ? Object.keys(sesionesPorFecha).length - 7 : 0;
-    
-    Swal.fire({
-        title: `<i class="bi bi-calendar-check" style="color: #ffa500;"></i> Plan de Estudio`,
-        html: `
-            <div style="text-align: left; max-height: 65vh; overflow-y: auto; padding-right: 0.5rem;">
-                <!-- Info del estudiante -->
-                <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,165,0,0.1); border-radius: 12px; margin-bottom: 1.5rem;">
-                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #ffa500, #cc8400); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem;">
-                        ${(plan.estudianteNombre || 'NN').split(' ').map(n => n.charAt(0).toUpperCase()).slice(0, 2).join('')}
-                    </div>
-                    <div>
-                        <div style="font-weight: 700; font-size: 1.1rem;">${plan.estudianteNombre}</div>
-                        <div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">${plan.institucion || 'Sin institución'}</div>
-                    </div>
-                </div>
-                
-                <!-- Prueba -->
-                <div style="margin-bottom: 1.25rem; padding: 0.75rem 1rem; background: rgba(255,0,0,0.1); border-radius: 10px; border-left: 3px solid #ff0000;">
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem;">Prueba</div>
-                    <div style="font-weight: 600;">${plan.nombrePrueba}</div>
-                </div>
-                
-                <!-- Estadísticas -->
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
-                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
-                        <div style="font-size: 1.5rem; font-weight: 800; color: #ffa500;">${totalSesiones}</div>
-                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Sesiones</div>
-                    </div>
-                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
-                        <div style="font-size: 1.5rem; font-weight: 800; color: #ff5252;">${plan.temasAReforzar?.length || 0}</div>
-                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Temas</div>
-                    </div>
-                    <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
-                        <div style="font-size: 1.5rem; font-weight: 800; color: #33ff77;">${plan.configuracion?.horasPorDia || 2}h</div>
-                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase;">Hrs/día</div>
-                    </div>
-                </div>
-                
-                <!-- Temas a reforzar -->
-                <div style="margin-bottom: 1.5rem;">
-                    <h4 style="color: #ff5252; margin-bottom: 0.75rem; font-size: 0.95rem;"><i class="bi bi-book"></i> Temas a Reforzar</h4>
-                    <div style="max-height: 150px; overflow-y: auto;">
-                        ${temasHtml}
-                    </div>
-                </div>
-                
-                <!-- Sesiones programadas -->
-                <div>
-                    <h4 style="color: #33ff77; margin-bottom: 0.75rem; font-size: 0.95rem;"><i class="bi bi-calendar-week"></i> Cronograma de Sesiones</h4>
-                    <div style="max-height: 200px; overflow-y: auto;">
-                        ${sesionesHtml}
-                        ${diasRestantes > 0 ? `<p style="color: rgba(255,255,255,0.4); text-align: center; font-size: 0.85rem; padding: 0.5rem;">... y ${diasRestantes} día(s) más con sesiones</p>` : ''}
-                    </div>
-                </div>
-            </div>
-        `,
-        background: '#1a1a1a',
-        color: '#fff',
-        width: '600px',
-        showCloseButton: true,
-        showConfirmButton: false,
-        customClass: {
-            popup: 'plan-detail-modal'
-        }
-    });
+    // Redirigir a la página de plan de estudio con los parámetros necesarios
+    // Agregamos adminView=true para indicar que es vista de admin
+    const url = `Plan-Estudio.html?pruebaId=${plan.pruebaId}&estudianteId=${encodeURIComponent(plan.estudianteId)}&planId=${planId}&adminView=true`;
+    window.location.href = url;
 }
 
 // Configurar filtros de planes admin (usa los filtros existentes de admin)

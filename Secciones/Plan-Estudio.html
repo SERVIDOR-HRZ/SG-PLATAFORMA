@@ -162,39 +162,45 @@
 
         <!-- Tab: Calendario -->
         <section class="tab-content" id="calendario-content" role="tabpanel">
-            <div id="calendarioContenido">
-                <!-- Navegación del Calendario -->
-                <div class="calendario-nav">
-                    <button class="calendario-nav-btn" id="mesAnterior">
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-                    <h2 class="calendario-mes" id="calendarioMes">Enero 2026</h2>
-                    <button class="calendario-nav-btn" id="mesSiguiente">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
+            <div id="calendarioContenido" class="calendario-layout-grid">
+                <!-- Columna Izquierda: Calendario -->
+                <div class="calendario-column">
+                    <!-- Navegación del Calendario -->
+                    <div class="calendario-nav">
+                        <button class="calendario-nav-btn" id="mesAnterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <h2 class="calendario-mes" id="calendarioMes">Enero 2026</h2>
+                        <button class="calendario-nav-btn" id="mesSiguiente">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <!-- Calendario -->
+                    <div class="calendario-container">
+                        <div class="calendario-header">
+                            <span>Dom</span>
+                            <span>Lun</span>
+                            <span>Mar</span>
+                            <span>Mié</span>
+                            <span>Jue</span>
+                            <span>Vie</span>
+                            <span>Sáb</span>
+                        </div>
+                        <div class="calendario-grid" id="calendarioGrid">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Calendario -->
-                <div class="calendario-container">
-                    <div class="calendario-header">
-                        <span>Dom</span>
-                        <span>Lun</span>
-                        <span>Mar</span>
-                        <span>Mié</span>
-                        <span>Jue</span>
-                        <span>Vie</span>
-                        <span>Sáb</span>
-                    </div>
-                    <div class="calendario-grid" id="calendarioGrid">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Sesiones del día seleccionado -->
-                <div class="sesiones-dia" id="sesionesDia">
-                    <h3><i class="bi bi-clock-history"></i> Sesiones de Estudio</h3>
-                    <div class="sesiones-lista" id="sesionesLista">
-                        <p class="no-sesiones">Selecciona un día para ver las sesiones de estudio</p>
+                <!-- Columna Derecha: Resumen de Sesiones -->
+                <div class="sesiones-column">
+                    <!-- Sesiones del día seleccionado -->
+                    <div class="sesiones-dia" id="sesionesDia">
+                        <h3><i class="bi bi-clock-history"></i> Sesiones de Estudio</h3>
+                        <div class="sesiones-lista" id="sesionesLista">
+                            <p class="no-sesiones">Selecciona un día para ver las sesiones de estudio</p>
+                        </div>
                     </div>
                 </div>
             </div>

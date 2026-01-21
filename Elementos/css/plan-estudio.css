@@ -720,12 +720,46 @@ body {
     text-align: center;
 }
 
+/* Layout de dos columnas para calendario */
+.calendario-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.calendario-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sesiones-column {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+}
+
+/* Responsive: en móviles, una columna */
+@media (max-width: 1024px) {
+    .calendario-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .sesiones-column {
+        position: static;
+        max-height: none;
+    }
+}
+
 .calendario-container {
     background: rgba(0, 0, 0, 0.4);
     border-radius: 20px;
     padding: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 2rem;
+    margin-bottom: 0;
 }
 
 .calendario-header {
@@ -774,13 +808,42 @@ body {
 }
 
 .calendario-dia.hoy {
-    border: 2px solid #ff0000;
-    background: rgba(255, 0, 0, 0.15);
+    border: 3px solid #ff0000;
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.25), rgba(255, 0, 0, 0.15));
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4), inset 0 0 15px rgba(255, 0, 0, 0.1);
+    position: relative;
+    animation: pulseToday 2s ease-in-out infinite;
+}
+
+.calendario-dia.hoy::before {
+    content: 'HOY';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: #ff0000;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+@keyframes pulseToday {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.4), inset 0 0 15px rgba(255, 0, 0, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 0, 0, 0.6), inset 0 0 20px rgba(255, 0, 0, 0.2);
+    }
 }
 
 .calendario-dia.hoy .dia-numero {
     color: #ff0000;
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 1.2rem;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
 }
 
 .calendario-dia.seleccionado {
@@ -838,6 +901,9 @@ body {
     border-radius: 16px;
     padding: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .sesiones-dia h3 {
@@ -849,6 +915,7 @@ body {
     margin-bottom: 1.25rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
 }
 
 .sesiones-dia h3 i {
@@ -860,6 +927,31 @@ body {
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.9rem;
     margin-left: auto;
+}
+
+.sesiones-lista {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+/* Scrollbar personalizado para lista de sesiones */
+.sesiones-lista::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sesiones-lista::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.sesiones-lista::-webkit-scrollbar-thumb {
+    background: rgba(255, 165, 0, 0.3);
+    border-radius: 10px;
+}
+
+.sesiones-lista::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 165, 0, 0.5);
 }
 
 .no-sesiones {

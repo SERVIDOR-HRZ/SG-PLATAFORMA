@@ -378,6 +378,9 @@ function inicializarConfiguracion() {
 async function cargarDatosDesdeURL() {
     const params = new URLSearchParams(window.location.search);
     const pruebaId = params.get('pruebaId');
+    const adminView = params.get('adminView') === 'true';
+    const estudianteIdParam = params.get('estudianteId');
+    const planIdParam = params.get('planId');
     
     if (!pruebaId) {
         mostrarError('No se especificó una prueba. Vuelve a la sección de resultados.');
@@ -391,6 +394,12 @@ async function cargarDatosDesdeURL() {
         
         const db = window.firebaseDB;
         
+        // Si es vista de admin y hay un planId, cargar el plan directamente
+        if (adminView && planIdParam) {
+            await cargarPlanExistenteAdmin(db, planIdParam);
+            return;
+        }
+        
         // Obtener datos de la prueba
         const pruebaDoc = await db.collection('pruebas').doc(pruebaId).get();
         if (!pruebaDoc.exists) {
@@ -402,9 +411,16 @@ async function cargarDatosDesdeURL() {
         // Actualizar información de la prueba
         document.getElementById('nombrePrueba').textContent = pruebaData.nombre || 'Prueba';
         
-        // Obtener respuestas del estudiante
-        const usuario = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-        const estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;
+        // Determinar el estudianteId a usar
+        let estudianteId;
+        if (adminView && estudianteIdParam) {
+            // Admin viendo plan de otro estudiante
+            estudianteId = estudianteIdParam;
+        } else {
+            // Usuario viendo su propio plan
+            const usuario = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;
+        }
         
         const respuestasSnapshot = await db.collection('respuestas')
             .where('pruebaId', '==', pruebaId)
@@ -412,7 +428,7 @@ async function cargarDatosDesdeURL() {
             .get();
         
         if (respuestasSnapshot.empty) {
-            throw new Error('No se encontraron tus respuestas para esta prueba');
+            throw new Error('No se encontraron respuestas para esta prueba');
         }
         
         // Obtener la fecha de la última respuesta
@@ -455,6 +471,118 @@ async function cargarDatosDesdeURL() {
     } catch (error) {
         console.error('Error al cargar datos:', error);
         mostrarError('No se pudieron cargar los datos: ' + error.message);
+    }
+}
+
+// Cargar plan existente para vista de admin
+async function cargarPlanExistenteAdmin(db, planId) {
+    try {
+        // Obtener el plan desde Firebase
+        const planDoc = await db.collection('planesEstudio').doc(planId).get();
+        
+        if (!planDoc.exists) {
+            throw new Error('No se encontró el plan de estudio');
+        }
+        
+        const planData = planDoc.data();
+        
+        // Actualizar información de la prueba
+        document.getElementById('nombrePrueba').textContent = planData.nombrePrueba || 'Plan de Estudio';
+        
+        // Mostrar información del estudiante en el header
+        const headerTitle = document.querySelector('.page-title span');
+        if (headerTitle) {
+            headerTitle.textContent = `Plan de ${planData.estudianteNombre || 'Estudiante'}`;
+        }
+        
+        // Cargar fecha de actualización
+        if (planData.fechaActualizacion) {
+            const fecha = planData.fechaActualizacion.toDate ? 
+                planData.fechaActualizacion.toDate() : 
+                new Date(planData.fechaActualizacion);
+            document.getElementById('fechaPrueba').textContent = formatearFecha(fecha);
+        }
+        
+        // Cargar temas a reforzar
+        temasAReforzar = planData.temasAReforzar || [];
+        
+        // Mostrar temas en la interfaz
+        renderizarTemasAReforzar(temasAReforzar);
+        
+        // Cargar sesiones
+        if (planData.sesiones && planData.sesiones.length > 0) {
+            // Cargar sesiones en la variable global
+            sesionesEstudio = planData.sesiones.map(s => ({
+                ...s,
+                fecha: s.fecha.toDate ? s.fecha.toDate() : new Date(s.fecha)
+            }));
+            
+            // Renderizar calendario con las sesiones
+            renderizarCalendario();
+        }
+        
+        // Ocultar loading
+        const loadingState = document.getElementById('loadingState');
+        const temasContenido = document.getElementById('temasContenido');
+        
+        if (loadingState) loadingState.style.display = 'none';
+        if (temasContenido) temasContenido.style.display = 'block';
+        
+        // Deshabilitar edición para admin (solo lectura)
+        deshabilitarEdicionAdmin();
+        
+    } catch (error) {
+        console.error('Error al cargar plan:', error);
+        mostrarError('No se pudo cargar el plan de estudio: ' + error.message);
+    }
+}
+
+// Deshabilitar edición para vista de admin (solo lectura)
+function deshabilitarEdicionAdmin() {
+    // Ocultar el tab "Mi Horario" (solo para estudiantes)
+    const tabHorario = document.querySelector('.plan-tab[data-tab="horario"]');
+    if (tabHorario) {
+        tabHorario.style.display = 'none';
+    }
+    
+    // Ocultar botones de acción
+    const btnGenerar = document.getElementById('btnGenerarPlan');
+    const btnGuardar = document.getElementById('btnGuardarSesiones');
+    const btnExportar = document.getElementById('btnExportarPDF');
+    
+    if (btnGenerar) btnGenerar.style.display = 'none';
+    if (btnGuardar) btnGuardar.style.display = 'none';
+    
+    // Mantener solo el botón de exportar (si existe)
+    if (btnExportar) {
+        btnExportar.style.display = 'inline-flex';
+    }
+    
+    // Deshabilitar checkboxes de temas (no se pueden seleccionar/deseleccionar)
+    document.querySelectorAll('.tema-checkbox').forEach(checkbox => {
+        checkbox.disabled = true;
+        checkbox.style.cursor = 'not-allowed';
+        checkbox.style.opacity = '0.6';
+    });
+    
+    // Deshabilitar todos los inputs de configuración
+    document.querySelectorAll('input, select, textarea, button').forEach(element => {
+        // No deshabilitar los botones de navegación de tabs y calendario
+        if (!element.classList.contains('plan-tab') && 
+            !element.classList.contains('calendario-nav-btn') &&
+            !element.classList.contains('materia-filter-btn') &&
+            element.id !== 'btnExportarPDF') {
+            element.disabled = true;
+        }
+    });
+    
+    // Agregar mensaje de solo lectura en el header
+    const pageTitle = document.querySelector('.page-title');
+    if (pageTitle) {
+        const readOnlyBadge = document.createElement('span');
+        readOnlyBadge.style.cssText = 'background: rgba(255,165,0,0.2); color: #ffa500; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-left: 1rem;';
+        readOnlyBadge.innerHTML = '<i class="bi bi-eye"></i> Solo lectura';
+        pageTitle.appendChild(readOnlyBadge);
     }
 }
 
@@ -785,6 +913,13 @@ function renderizarCalendario() {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
     
+    // Si no hay día seleccionado y estamos en el mes actual, seleccionar hoy automáticamente
+    if (!diaSeleccionado && 
+        mesActual.getMonth() === hoy.getMonth() && 
+        mesActual.getFullYear() === hoy.getFullYear()) {
+        diaSeleccionado = new Date(hoy);
+    }
+    
     let html = '';
     
     // Días del mes anterior
@@ -834,6 +969,11 @@ function renderizarCalendario() {
     }
     
     grid.innerHTML = html;
+    
+    // Si hay un día seleccionado, renderizar sus sesiones automáticamente
+    if (diaSeleccionado) {
+        renderizarSesionesDia();
+    }
 }
 
 // Seleccionar día
