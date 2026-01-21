@@ -507,9 +507,11 @@ function procesarDatosConsolidado(respuestasConsolidadas, pruebaData, todasLasRe
                 materias[materia].incorrectas++;
             }
             
-            const estadisticasPregunta = estadisticasPorPregunta[preguntaIdOriginal] || {
+            // IMPORTANTE: Buscar estadísticas usando materia + preguntaId
+            const claveEstadisticas = `${materia}|||${preguntaIdOriginal}`;
+            const estadisticasPregunta = estadisticasPorPregunta[claveEstadisticas] || {
                 totalRespuestas: 0,
-                porOpcion: { 'A': 0, 'B': 0, 'C': 0, 'D': 0 }
+                porOpcion: { 'A': { cantidad: 0, porcentaje: 0 }, 'B': { cantidad: 0, porcentaje: 0 }, 'C': { cantidad: 0, porcentaje: 0 }, 'D': { cantidad: 0, porcentaje: 0 } }
             };
             
             // ========== OBTENER DATOS DE SABER11 DIRECTAMENTE DE LA PREGUNTA ORIGINAL ==========
@@ -657,6 +659,8 @@ function calcularEstadisticasOpciones(todasLasRespuestas) {
     
     todasLasRespuestas.forEach(respuesta => {
         const respuestasEvaluadas = respuesta.respuestasEvaluadas || {};
+        const bloqueRespuesta = respuesta.bloque || 1;
+        const estudianteId = respuesta.estudianteId;
         
         Object.keys(respuestasEvaluadas).forEach(materia => {
             const respuestasMateria = respuestasEvaluadas[materia];
@@ -664,21 +668,29 @@ function calcularEstadisticasOpciones(todasLasRespuestas) {
             Object.keys(respuestasMateria).forEach(preguntaId => {
                 const respuestaPregunta = respuestasMateria[preguntaId];
                 
-                if (!estadisticas[preguntaId]) {
-                    estadisticas[preguntaId] = {
+                // Crear clave única que incluya materia, pregunta Y bloque
+                const claveUnica = `${materia}|||${preguntaId}|||bloque${bloqueRespuesta}`;
+                
+                if (!estadisticas[claveUnica]) {
+                    estadisticas[claveUnica] = {
                         totalRespuestas: 0,
                         estudiantesUnicos: new Set(),
-                        porOpcion: { 'A': 0, 'B': 0, 'C': 0, 'D': 0, '0': 0, '1': 0, '2': 0, '3': 0 }
+                        porOpcion: { 'A': 0, 'B': 0, 'C': 0, 'D': 0, '0': 0, '1': 0, '2': 0, '3': 0 },
+                        preguntaIdOriginal: preguntaId,
+                        materia: materia,
+                        bloque: bloqueRespuesta
                     };
                 }
                 
                 const respuestaUsuario = respuestaPregunta.respuestaUsuario;
-                const estudianteId = respuesta.estudianteId;
                 
                 if (respuestaUsuario !== null && respuestaUsuario !== undefined && respuestaUsuario !== '') {
-                    if (!estadisticas[preguntaId].estudiantesUnicos.has(estudianteId)) {
-                        estadisticas[preguntaId].estudiantesUnicos.add(estudianteId);
-                        estadisticas[preguntaId].totalRespuestas++;
+                    // Crear clave única de estudiante + pregunta + bloque para evitar duplicados
+                    const claveEstudiante = `${estudianteId}|||${claveUnica}`;
+                    
+                    if (!estadisticas[claveUnica].estudiantesUnicos.has(claveEstudiante)) {
+                        estadisticas[claveUnica].estudiantesUnicos.add(claveEstudiante);
+                        estadisticas[claveUnica].totalRespuestas++;
                         
                         let opcionSeleccionada = respuestaUsuario;
                         if (typeof respuestaUsuario === 'number') {
@@ -686,8 +698,8 @@ function calcularEstadisticasOpciones(todasLasRespuestas) {
                             opcionSeleccionada = letras[respuestaUsuario] || respuestaUsuario;
                         }
                         
-                        if (estadisticas[preguntaId].porOpcion[opcionSeleccionada] !== undefined) {
-                            estadisticas[preguntaId].porOpcion[opcionSeleccionada]++;
+                        if (estadisticas[claveUnica].porOpcion[opcionSeleccionada] !== undefined) {
+                            estadisticas[claveUnica].porOpcion[opcionSeleccionada]++;
                         }
                     }
                 }
@@ -695,23 +707,38 @@ function calcularEstadisticasOpciones(todasLasRespuestas) {
         });
     });
     
-    // Calcular porcentajes
-    Object.keys(estadisticas).forEach(preguntaId => {
-        const stats = estadisticas[preguntaId];
+    // Calcular porcentajes y crear índice simplificado
+    const estadisticasSimplificadas = {};
+    
+    Object.keys(estadisticas).forEach(claveUnica => {
+        const stats = estadisticas[claveUnica];
         const total = stats.totalRespuestas;
+        const preguntaIdOriginal = stats.preguntaIdOriginal;
+        const materia = stats.materia;
         
         if (total > 0) {
+            const porOpcionCalculado = {};
             Object.keys(stats.porOpcion).forEach(opcion => {
                 const cantidad = stats.porOpcion[opcion];
                 const porcentaje = Math.round((cantidad / total) * 100);
-                stats.porOpcion[opcion] = { cantidad, porcentaje };
+                porOpcionCalculado[opcion] = { cantidad, porcentaje };
             });
+            
+            // IMPORTANTE: Incluir materia en la clave para evitar sobrescrituras
+            // Diferentes materias pueden tener preguntas con el mismo ID
+            const claveConMateria = `${materia}|||${preguntaIdOriginal}`;
+            estadisticasSimplificadas[claveConMateria] = {
+                totalRespuestas: total,
+                porOpcion: porOpcionCalculado,
+                materia: materia,
+                preguntaId: preguntaIdOriginal
+            };
         }
-        
-        delete stats.estudiantesUnicos;
     });
     
-    return estadisticas;
+    console.log('=== ESTADÍSTICAS CALCULADAS ===', estadisticasSimplificadas);
+    
+    return estadisticasSimplificadas;
 }
 
 // Mapear nombre de materia a clave
