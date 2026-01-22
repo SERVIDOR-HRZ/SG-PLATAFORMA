@@ -511,7 +511,7 @@ function procesarDatosConsolidado(respuestasConsolidadas, pruebaData, todasLasRe
             const claveEstadisticas = `${materia}|||${preguntaIdOriginal}`;
             const estadisticasPregunta = estadisticasPorPregunta[claveEstadisticas] || {
                 totalRespuestas: 0,
-                porOpcion: { 'A': { cantidad: 0, porcentaje: 0 }, 'B': { cantidad: 0, porcentaje: 0 }, 'C': { cantidad: 0, porcentaje: 0 }, 'D': { cantidad: 0, porcentaje: 0 } }
+                porOpcion: {} // Objeto vacío por defecto
             };
             
             // ========== OBTENER DATOS DE SABER11 DIRECTAMENTE DE LA PREGUNTA ORIGINAL ==========
@@ -621,6 +621,9 @@ function procesarDatosConsolidado(respuestasConsolidadas, pruebaData, todasLasRe
                 esCorrecta: esCorrecta,
                 tipoRespuesta: respuestaPregunta.tipoRespuesta || 'multiple',
                 bloque: bloqueNum,
+                // IMPORTANTE: Incluir el array completo de opciones
+                opciones: respuestaPregunta.opciones || [],
+                // Mantener compatibilidad con código antiguo (primeras 4 opciones)
                 opcionA: respuestaPregunta.opcionA || '',
                 opcionB: respuestaPregunta.opcionB || '',
                 opcionC: respuestaPregunta.opcionC || '',
@@ -675,7 +678,7 @@ function calcularEstadisticasOpciones(todasLasRespuestas) {
                     estadisticas[claveUnica] = {
                         totalRespuestas: 0,
                         estudiantesUnicos: new Set(),
-                        porOpcion: { 'A': 0, 'B': 0, 'C': 0, 'D': 0, '0': 0, '1': 0, '2': 0, '3': 0 },
+                        porOpcion: {}, // Objeto vacío, se llenará dinámicamente
                         preguntaIdOriginal: preguntaId,
                         materia: materia,
                         bloque: bloqueRespuesta
@@ -694,13 +697,15 @@ function calcularEstadisticasOpciones(todasLasRespuestas) {
                         
                         let opcionSeleccionada = respuestaUsuario;
                         if (typeof respuestaUsuario === 'number') {
-                            const letras = ['A', 'B', 'C', 'D'];
-                            opcionSeleccionada = letras[respuestaUsuario] || respuestaUsuario;
+                            // Generar letra dinámicamente (A, B, C, D, E, F...)
+                            opcionSeleccionada = String.fromCharCode(65 + respuestaUsuario);
                         }
                         
-                        if (estadisticas[claveUnica].porOpcion[opcionSeleccionada] !== undefined) {
-                            estadisticas[claveUnica].porOpcion[opcionSeleccionada]++;
+                        // Inicializar contador si no existe
+                        if (estadisticas[claveUnica].porOpcion[opcionSeleccionada] === undefined) {
+                            estadisticas[claveUnica].porOpcion[opcionSeleccionada] = 0;
                         }
+                        estadisticas[claveUnica].porOpcion[opcionSeleccionada]++;
                     }
                 }
             });
@@ -1333,7 +1338,30 @@ function verDetalleMateria(materia) {
 
 // Renderizar tarjeta de pregunta
 function renderizarPreguntaCard(pregunta, numero, materia) {
-    const opciones = ['A', 'B', 'C', 'D'];
+    // IMPORTANTE: Usar el array de opciones directamente si existe
+    let opcionesArray = pregunta.opciones;
+    
+    // Si no existe el array de opciones, intentar reconstruir desde opcionA, opcionB, etc.
+    if (!opcionesArray || !Array.isArray(opcionesArray) || opcionesArray.length === 0) {
+        opcionesArray = [];
+        const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (let i = 0; i < letras.length; i++) {
+            const letra = letras[i];
+            const textoOpcion = pregunta[`opcion${letra}`];
+            if (textoOpcion && textoOpcion.trim() !== '') {
+                opcionesArray.push(textoOpcion);
+            } else {
+                break; // Detenerse cuando no hay más opciones
+            }
+        }
+    }
+    
+    console.log(`=== PREGUNTA ${numero} - OPCIONES ===`);
+    console.log('Array de opciones:', opcionesArray);
+    console.log('Cantidad de opciones:', opcionesArray.length);
+    
+    const cantidadOpciones = opcionesArray.length;
+    const opciones = Array.from({ length: cantidadOpciones }, (_, i) => String.fromCharCode(65 + i)); // A, B, C, D, E, F...
     const respuestaCorrecta = pregunta.respuestaCorrecta;
     
     // Extraer ID original de la pregunta (sin sufijo _bloqueX)
@@ -1422,18 +1450,20 @@ function renderizarPreguntaCard(pregunta, numero, materia) {
     
     if (respuestaCorrecta !== null && respuestaCorrecta !== undefined && respuestaCorrecta !== '') {
         if (typeof respuestaCorrecta === 'number') {
-            if (respuestaCorrecta >= 0 && respuestaCorrecta <= 3) {
+            // Soportar cualquier índice válido (no solo 0-3)
+            if (respuestaCorrecta >= 0 && respuestaCorrecta < cantidadOpciones) {
                 respuestaCorrectaLetra = opciones[respuestaCorrecta];
             }
         } else if (typeof respuestaCorrecta === 'string') {
             const correctaTrim = respuestaCorrecta.trim();
             
             // Verificar si es un dígito numérico como string
-            if (['0', '1', '2', '3'].includes(correctaTrim)) {
-                respuestaCorrectaLetra = opciones[parseInt(correctaTrim)];
+            const numeroRespuesta = parseInt(correctaTrim);
+            if (!isNaN(numeroRespuesta) && numeroRespuesta >= 0 && numeroRespuesta < cantidadOpciones) {
+                respuestaCorrectaLetra = opciones[numeroRespuesta];
             }
-            // Verificar si es una letra válida
-            else if (['A', 'B', 'C', 'D', 'a', 'b', 'c', 'd'].includes(correctaTrim)) {
+            // Verificar si es una letra válida (cualquier letra A-Z)
+            else if (/^[A-Z]$/i.test(correctaTrim)) {
                 respuestaCorrectaLetra = correctaTrim.toUpperCase();
             }
         }
@@ -1444,19 +1474,20 @@ function renderizarPreguntaCard(pregunta, numero, materia) {
     
     if (respuestaEstudiante !== null && respuestaEstudiante !== undefined && respuestaEstudiante !== '') {
         if (typeof respuestaEstudiante === 'number') {
-            // Es un número directo (0, 1, 2, 3)
-            if (respuestaEstudiante >= 0 && respuestaEstudiante <= 3) {
+            // Soportar cualquier índice válido (no solo 0-3)
+            if (respuestaEstudiante >= 0 && respuestaEstudiante < cantidadOpciones) {
                 respuestaEstudianteLetra = opciones[respuestaEstudiante];
             }
         } else if (typeof respuestaEstudiante === 'string') {
             const respuestaTrim = respuestaEstudiante.trim();
             
-            // PRIMERO: verificar si es un dígito numérico como string ("0", "1", "2", "3")
-            if (['0', '1', '2', '3'].includes(respuestaTrim)) {
-                respuestaEstudianteLetra = opciones[parseInt(respuestaTrim)];
+            // PRIMERO: verificar si es un dígito numérico como string
+            const numeroRespuesta = parseInt(respuestaTrim);
+            if (!isNaN(numeroRespuesta) && numeroRespuesta >= 0 && numeroRespuesta < cantidadOpciones) {
+                respuestaEstudianteLetra = opciones[numeroRespuesta];
             }
-            // SEGUNDO: verificar si es una letra válida (A, B, C, D)
-            else if (['A', 'B', 'C', 'D', 'a', 'b', 'c', 'd'].includes(respuestaTrim)) {
+            // SEGUNDO: verificar si es una letra válida (cualquier letra A-Z)
+            else if (/^[A-Z]$/i.test(respuestaTrim)) {
                 respuestaEstudianteLetra = respuestaTrim.toUpperCase();
             }
             // TERCERO: si es cualquier otro string, intentar usarlo como está
@@ -1533,7 +1564,7 @@ function renderizarPreguntaCard(pregunta, numero, materia) {
             </div>
             
             <div class="pregunta-opciones">
-                ${opciones.map(opcion => {
+                ${opciones.map((opcion, index) => {
                     const esRespuestaCorrecta = opcion === respuestaCorrectaLetra;
                     const esRespuestaEstudiante = tieneRespuesta && opcion === respuestaEstudianteLetra;
                     
@@ -1550,7 +1581,14 @@ function renderizarPreguntaCard(pregunta, numero, materia) {
                         clasesPrincipales.push('es-tu-acierto');
                     }
                     
-                    const textoOpcion = procesarTextoMatematico(pregunta[`opcion${opcion}`] || `Opción ${opcion}`);
+                    // Obtener texto de opción desde el array dinámico o campo legacy
+                    let textoOpcion;
+                    if (opcionesArray && opcionesArray[index]) {
+                        textoOpcion = opcionesArray[index];
+                    } else {
+                        textoOpcion = pregunta[`opcion${opcion}`] || `Opción ${opcion}`;
+                    }
+                    textoOpcion = procesarTextoMatematico(textoOpcion);
                     
                     let porcentajeReal = 0;
                     let cantidadReal = 0;
@@ -1774,8 +1812,8 @@ async function mostrarUsuariosPorOpcion(materia, preguntaId, opcion) {
                 respuestaCorrecta = pregunta.respuestaCorrecta;
                 // Convertir a letra si es número
                 if (typeof respuestaCorrecta === 'number') {
-                    const letras = ['A', 'B', 'C', 'D'];
-                    respuestaCorrecta = letras[respuestaCorrecta];
+                    // Generar letra dinámicamente (A, B, C, D, E, F...)
+                    respuestaCorrecta = String.fromCharCode(65 + respuestaCorrecta);
                 }
             }
         }
@@ -1854,8 +1892,8 @@ async function mostrarUsuariosPorOpcion(materia, preguntaId, opcion) {
 
                         // Convertir número a letra si es necesario
                         if (typeof respuestaUsuario === 'number') {
-                            const letras = ['A', 'B', 'C', 'D'];
-                            respuestaUsuario = letras[respuestaUsuario];
+                            // Generar letra dinámicamente (A, B, C, D, E, F...)
+                            respuestaUsuario = String.fromCharCode(65 + respuestaUsuario);
                         }
 
                         // Si seleccionó esta opción y no lo hemos agregado ya

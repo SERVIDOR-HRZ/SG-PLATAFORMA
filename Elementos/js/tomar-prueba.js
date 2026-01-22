@@ -1807,7 +1807,9 @@ function evaluateAnswers() {
                 esCorrecta: isCorrect,
                 tipoRespuesta: question.type,
                 textoPregunta: question.text,
-                // Agregar opciones si es pregunta de selección múltiple
+                // Agregar TODAS las opciones dinámicamente (no solo A, B, C, D)
+                opciones: question.options ? question.options.map(opt => opt.text) : [],
+                // Mantener compatibilidad con código antiguo (primeras 4 opciones)
                 opcionA: question.options && question.options[0] ? question.options[0].text : '',
                 opcionB: question.options && question.options[1] ? question.options[1].text : '',
                 opcionC: question.options && question.options[2] ? question.options[2].text : '',
