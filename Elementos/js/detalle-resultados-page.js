@@ -1321,7 +1321,7 @@ function verDetalleMateria(materia) {
     // Renderizar preguntas
     const preguntasContainer = document.getElementById('preguntasLista');
     preguntasContainer.innerHTML = data.preguntas.map((pregunta, index) => 
-        renderizarPreguntaCard(pregunta, index + 1)
+        renderizarPreguntaCard(pregunta, index + 1, materia)
     ).join('');
     
     // Renderizar fórmulas matemáticas
@@ -1332,9 +1332,12 @@ function verDetalleMateria(materia) {
 }
 
 // Renderizar tarjeta de pregunta
-function renderizarPreguntaCard(pregunta, numero) {
+function renderizarPreguntaCard(pregunta, numero, materia) {
     const opciones = ['A', 'B', 'C', 'D'];
     const respuestaCorrecta = pregunta.respuestaCorrecta;
+    
+    // Extraer ID original de la pregunta (sin sufijo _bloqueX)
+    const preguntaIdOriginal = pregunta.id ? pregunta.id.split('_bloque')[0] : numero;
     
     // Intentar obtener la respuesta del estudiante de múltiples campos posibles
     // IMPORTANTE: 0 es un valor válido, así que verificamos explícitamente
@@ -1480,7 +1483,7 @@ function renderizarPreguntaCard(pregunta, numero) {
     const respondioCorrectamente = tieneRespuesta && respuestaEstudianteLetra === respuestaCorrectaLetra;
     
     return `
-        <div class="pregunta-card">
+        <div class="pregunta-card" data-pregunta-id="${preguntaIdOriginal}" data-materia="${materia || ''}">
             <div class="pregunta-header">
                 <div class="pregunta-numero">
                     <i class="bi bi-question-circle-fill"></i>
@@ -1580,7 +1583,7 @@ function renderizarPreguntaCard(pregunta, numero) {
                                 </div>
                             </div>
                             <div class="opcion-stats">
-                                <span class="porcentaje-badge" title="${cantidadReal} estudiante(s) seleccionaron esta opción">
+                                <span class="opcion-porcentaje porcentaje-badge" data-opcion="${opcion}" data-pregunta-id="${preguntaIdOriginal}" data-materia="${materia || ''}" title="${cantidadReal} estudiante(s) seleccionaron esta opción - Clic para ver lista">
                                     ${porcentajeReal}%
                                 </span>
                             </div>
@@ -1730,3 +1733,396 @@ function mostrarError(mensaje) {
     `;
 }
 
+
+
+// ========================================
+// MODAL DE USUARIOS POR OPCIÓN
+// ========================================
+
+// Variables globales para el modal de usuarios
+let modalUsuariosActivo = false;
+let usuariosActuales = [];
+let usuariosFiltrados = [];
+
+// Función principal para mostrar usuarios que seleccionaron una opción
+async function mostrarUsuariosPorOpcion(materia, preguntaId, opcion) {
+    try {
+        console.log('=== MOSTRANDO USUARIOS POR OPCIÓN ===');
+        console.log('Materia:', materia);
+        console.log('Pregunta ID:', preguntaId);
+        console.log('Opción:', opcion);
+
+        // Obtener la prueba actual desde los parámetros de URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pruebaId = urlParams.get('pruebaId');
+        
+        if (!pruebaId) {
+            console.error('No se encontró el ID de la prueba');
+            return;
+        }
+
+        // Buscar la respuesta correcta en los datos actuales
+        let respuestaCorrecta = null;
+        if (datosDetalleActual && datosDetalleActual.materias[materia]) {
+            const preguntas = datosDetalleActual.materias[materia].preguntas;
+            const pregunta = preguntas.find(p => {
+                const idOriginal = p.id ? p.id.split('_bloque')[0] : null;
+                return idOriginal === preguntaId;
+            });
+            
+            if (pregunta) {
+                respuestaCorrecta = pregunta.respuestaCorrecta;
+                // Convertir a letra si es número
+                if (typeof respuestaCorrecta === 'number') {
+                    const letras = ['A', 'B', 'C', 'D'];
+                    respuestaCorrecta = letras[respuestaCorrecta];
+                }
+            }
+        }
+
+        const esOpcionCorrecta = opcion === respuestaCorrecta;
+
+        // Mostrar modal con loading
+        crearModalUsuarios();
+        const modal = document.getElementById('modalUsuarios');
+        modal.classList.add('active');
+        modalUsuariosActivo = true;
+
+        // Mostrar loading
+        const modalBody = modal.querySelector('.modal-usuarios-body');
+        modalBody.innerHTML = `
+            <div class="usuarios-loading">
+                <i class="bi bi-hourglass-split"></i>
+                <p>Cargando usuarios...</p>
+            </div>
+        `;
+
+        // Actualizar título del modal con indicador de correcta/incorrecta
+        const modalTitle = modal.querySelector('.modal-usuarios-title');
+        const modalHeader = modal.querySelector('.modal-usuarios-header');
+        
+        // Cambiar color del header según si es correcta o incorrecta
+        if (esOpcionCorrecta) {
+            modalHeader.style.background = 'linear-gradient(135deg, #00c853, #00a843)';
+        } else {
+            modalHeader.style.background = 'linear-gradient(135deg, #ff5252, #d32f2f)';
+        }
+        
+        modalTitle.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <i class="bi bi-people-fill"></i>
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    <span style="font-size: 0.9rem; opacity: 0.9;">Estudiantes que seleccionaron</span>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 2rem; font-weight: 900; letter-spacing: 2px;">OPCIÓN ${opcion}</span>
+                        <span class="badge-estado-opcion ${esOpcionCorrecta ? 'badge-correcta' : 'badge-incorrecta'}">
+                            <i class="bi bi-${esOpcionCorrecta ? 'check-circle-fill' : 'x-circle-fill'}"></i>
+                            ${esOpcionCorrecta ? 'CORRECTA' : 'INCORRECTA'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Obtener todas las respuestas de la prueba
+        const db = window.firebaseDB;
+        const respuestasSnapshot = await db.collection('respuestas')
+            .where('pruebaId', '==', pruebaId)
+            .get();
+
+        // Filtrar usuarios que seleccionaron esta opción
+        const usuarios = [];
+        const estudiantesIds = new Set();
+
+        respuestasSnapshot.forEach(doc => {
+            const respuesta = doc.data();
+            const estudianteId = respuesta.estudianteId;
+            const respuestasEvaluadas = respuesta.respuestasEvaluadas || {};
+
+            // Buscar en la materia específica
+            if (respuestasEvaluadas[materia]) {
+                const respuestasMateria = respuestasEvaluadas[materia];
+
+                // Buscar la pregunta específica (puede tener sufijo _bloqueX)
+                Object.keys(respuestasMateria).forEach(key => {
+                    // Extraer el ID original de la pregunta
+                    const preguntaIdOriginal = key.split('_bloque')[0];
+
+                    if (preguntaIdOriginal === preguntaId) {
+                        const respuestaPregunta = respuestasMateria[key];
+                        let respuestaUsuario = respuestaPregunta.respuestaUsuario;
+
+                        // Convertir número a letra si es necesario
+                        if (typeof respuestaUsuario === 'number') {
+                            const letras = ['A', 'B', 'C', 'D'];
+                            respuestaUsuario = letras[respuestaUsuario];
+                        }
+
+                        // Si seleccionó esta opción y no lo hemos agregado ya
+                        if (respuestaUsuario === opcion && !estudiantesIds.has(estudianteId)) {
+                            estudiantesIds.add(estudianteId);
+                            usuarios.push({
+                                id: estudianteId,
+                                nombre: null, // Se llenará después
+                                opcionSeleccionada: opcion,
+                                esCorrecta: esOpcionCorrecta
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        console.log(`Encontrados ${usuarios.length} usuarios que seleccionaron la opción ${opcion}`);
+
+        // Ahora obtener los nombres de los usuarios desde la colección 'usuarios'
+        for (let usuario of usuarios) {
+            try {
+                // Buscar por numeroDocumento o numeroIdentidad en lugar de por ID del documento
+                const usuarioQuery = await db.collection('usuarios')
+                    .where('numeroDocumento', '==', usuario.id)
+                    .limit(1)
+                    .get();
+                
+                if (!usuarioQuery.empty) {
+                    const usuarioDoc = usuarioQuery.docs[0];
+                    const datosUsuario = usuarioDoc.data();
+                    
+                    // DEBUG: Ver todos los campos disponibles
+                    console.log('=== DATOS DEL USUARIO ===');
+                    console.log('ID:', usuario.id);
+                    console.log('Campos disponibles:', Object.keys(datosUsuario));
+                    console.log('Datos completos:', datosUsuario);
+                    
+                    // Intentar obtener el nombre de diferentes campos
+                    usuario.nombre = datosUsuario.nombre || 
+                                    datosUsuario.nombreCompleto || 
+                                    datosUsuario.nombres ||
+                                    datosUsuario.displayName ||
+                                    datosUsuario.fullName ||
+                                    `${datosUsuario.primerNombre || ''} ${datosUsuario.segundoNombre || ''} ${datosUsuario.primerApellido || ''} ${datosUsuario.segundoApellido || ''}`.trim() ||
+                                    `${datosUsuario.primerNombre || ''} ${datosUsuario.primerApellido || ''}`.trim() ||
+                                    datosUsuario.usuario ||
+                                    datosUsuario.email ||
+                                    'Estudiante';
+                    
+                    console.log('Nombre asignado:', usuario.nombre);
+                } else {
+                    console.warn(`Usuario con numeroDocumento ${usuario.id} no existe en la colección usuarios`);
+                    usuario.nombre = `ID: ${usuario.id}`;
+                }
+            } catch (error) {
+                console.error(`Error obteniendo nombre del usuario ${usuario.id}:`, error);
+                usuario.nombre = `ID: ${usuario.id}`;
+            }
+        }
+
+        // Guardar usuarios actuales
+        usuariosActuales = usuarios;
+        usuariosFiltrados = usuarios;
+
+        // Renderizar lista de usuarios
+        renderizarListaUsuarios(usuarios, opcion, esOpcionCorrecta);
+
+    } catch (error) {
+        console.error('Error mostrando usuarios por opción:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo cargar la lista de usuarios'
+        });
+        cerrarModalUsuarios();
+    }
+}
+
+// Crear estructura del modal de usuarios
+function crearModalUsuarios() {
+    // Si ya existe, no crear de nuevo
+    if (document.getElementById('modalUsuarios')) {
+        return;
+    }
+
+    const modalHTML = `
+        <div class="modal-usuarios-overlay" id="modalUsuarios">
+            <div class="modal-usuarios-container">
+                <div class="modal-usuarios-header">
+                    <h3 class="modal-usuarios-title">
+                        <i class="bi bi-people-fill"></i>
+                        Estudiantes
+                    </h3>
+                    <button class="modal-usuarios-close-btn" onclick="cerrarModalUsuarios()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-usuarios-search">
+                    <div class="usuarios-search-wrapper">
+                        <i class="bi bi-search usuarios-search-icon"></i>
+                        <input 
+                            type="text" 
+                            class="usuarios-search-input" 
+                            id="usuariosSearchInput"
+                            placeholder="Buscar por nombre o ID..."
+                            autocomplete="off"
+                        >
+                    </div>
+                </div>
+
+                <div class="modal-usuarios-count" id="usuariosCount">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Total: <strong>0</strong> estudiante(s)</span>
+                </div>
+                
+                <div class="modal-usuarios-body" id="modalUsuariosBody">
+                    <!-- Contenido dinámico -->
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Event listener para el buscador
+    const searchInput = document.getElementById('usuariosSearchInput');
+    searchInput.addEventListener('input', function(e) {
+        filtrarUsuarios(e.target.value);
+    });
+
+    // Cerrar con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modalUsuariosActivo) {
+            cerrarModalUsuarios();
+        }
+    });
+
+    // Cerrar al hacer clic fuera
+    document.getElementById('modalUsuarios').addEventListener('click', function(e) {
+        if (e.target === this) {
+            cerrarModalUsuarios();
+        }
+    });
+}
+
+// Renderizar lista de usuarios
+function renderizarListaUsuarios(usuarios, opcion, esOpcionCorrecta) {
+    const modalBody = document.getElementById('modalUsuariosBody');
+    const countContainer = document.getElementById('usuariosCount');
+
+    // Actualizar contador con indicador de correcta/incorrecta
+    countContainer.innerHTML = `
+        <i class="bi bi-people-fill"></i>
+        <span>Total: <strong>${usuarios.length}</strong> estudiante(s) - 
+        <span class="${esOpcionCorrecta ? 'texto-correcta' : 'texto-incorrecta'}">
+            ${esOpcionCorrecta ? 'Respuesta CORRECTA ✓' : 'Respuesta INCORRECTA ✗'}
+        </span>
+        </span>
+    `;
+
+    // Si no hay usuarios
+    if (usuarios.length === 0) {
+        modalBody.innerHTML = `
+            <div class="usuarios-no-resultados">
+                <i class="bi bi-inbox"></i>
+                <p>No se encontraron estudiantes</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Ordenar usuarios alfabéticamente
+    usuarios.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+    // Renderizar lista
+    const html = `
+        <div class="usuarios-lista">
+            ${usuarios.map(usuario => `
+                <div class="usuario-item ${usuario.esCorrecta ? 'usuario-correcto' : 'usuario-incorrecto'}">
+                    <div class="usuario-avatar ${usuario.esCorrecta ? 'avatar-correcto' : 'avatar-incorrecto'}">
+                        ${obtenerIniciales(usuario.nombre)}
+                    </div>
+                    <div class="usuario-info">
+                        <div class="usuario-nombre">${usuario.nombre}</div>
+                        <div class="usuario-id">ID: ${usuario.id}</div>
+                    </div>
+                    <div class="usuario-estado">
+                        <i class="bi bi-${usuario.esCorrecta ? 'check-circle-fill' : 'x-circle-fill'}"></i>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    modalBody.innerHTML = html;
+}
+
+// Filtrar usuarios por búsqueda
+function filtrarUsuarios(termino) {
+    const terminoLower = termino.toLowerCase().trim();
+
+    if (!terminoLower) {
+        // Si no hay término de búsqueda, mostrar todos
+        usuariosFiltrados = usuariosActuales;
+    } else {
+        // Filtrar por nombre o ID
+        usuariosFiltrados = usuariosActuales.filter(usuario => {
+            const nombreMatch = usuario.nombre.toLowerCase().includes(terminoLower);
+            const idMatch = usuario.id.toString().toLowerCase().includes(terminoLower);
+            return nombreMatch || idMatch;
+        });
+    }
+
+    // Renderizar lista filtrada
+    const esOpcionCorrecta = usuariosActuales.length > 0 ? usuariosActuales[0].esCorrecta : false;
+    renderizarListaUsuarios(usuariosFiltrados, usuariosActuales[0]?.opcionSeleccionada || 'A', esOpcionCorrecta);
+}
+
+// Obtener iniciales del nombre
+function obtenerIniciales(nombre) {
+    if (!nombre) return '?';
+    
+    const palabras = nombre.trim().split(' ');
+    if (palabras.length === 1) {
+        return palabras[0].substring(0, 2).toUpperCase();
+    }
+    
+    return (palabras[0][0] + palabras[palabras.length - 1][0]).toUpperCase();
+}
+
+// Cerrar modal de usuarios
+function cerrarModalUsuarios() {
+    const modal = document.getElementById('modalUsuarios');
+    if (modal) {
+        modal.classList.remove('active');
+        modalUsuariosActivo = false;
+        usuariosActuales = [];
+        usuariosFiltrados = [];
+
+        // Limpiar buscador
+        const searchInput = document.getElementById('usuariosSearchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+    }
+}
+
+// Event listener para clics en porcentajes
+document.addEventListener('click', function(e) {
+    const porcentaje = e.target.closest('.opcion-porcentaje');
+    if (porcentaje) {
+        // Obtener datos directamente de los atributos
+        const opcion = porcentaje.getAttribute('data-opcion');
+        const preguntaId = porcentaje.getAttribute('data-pregunta-id');
+        const materia = porcentaje.getAttribute('data-materia');
+        
+        console.log('=== CLIC EN PORCENTAJE ===');
+        console.log('Opción:', opcion);
+        console.log('Pregunta ID:', preguntaId);
+        console.log('Materia:', materia);
+        
+        if (opcion && preguntaId && materia) {
+            mostrarUsuariosPorOpcion(materia, preguntaId, opcion);
+        } else {
+            console.warn('Faltan datos en el porcentaje:', { opcion, preguntaId, materia });
+        }
+    }
+});
