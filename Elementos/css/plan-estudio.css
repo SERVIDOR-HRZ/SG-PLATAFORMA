@@ -785,6 +785,34 @@ body {
     gap: 6px;
 }
 
+/* Leyenda de estados del calendario */
+.calendario-leyenda {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.leyenda-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.leyenda-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
 .calendario-dia {
     aspect-ratio: 1;
     display: flex;
@@ -793,18 +821,17 @@ body {
     justify-content: center;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.08);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     position: relative;
-    min-height: 60px;
     min-height: 60px;
 }
 
 .calendario-dia:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
 }
 
 .calendario-dia.hoy {
@@ -827,6 +854,7 @@ body {
     padding: 2px 6px;
     border-radius: 4px;
     letter-spacing: 0.5px;
+    z-index: 2;
 }
 
 @keyframes pulseToday {
@@ -844,16 +872,68 @@ body {
     font-size: 1.2rem;
     text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
 }
-}
 
+/* Día seleccionado - MEJORADO */
 .calendario-dia.seleccionado {
-    background: linear-gradient(135deg, #ff0000, #cc0000);
-    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
-    border-color: #ff0000;
+    background: linear-gradient(135deg, #ff0000, #cc0000) !important;
+    border: 3px solid #ff0000 !important;
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.6), 0 4px 20px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+    transform: scale(1.1) !important;
+    z-index: 10;
+    animation: pulseSelected 1.5s ease-in-out infinite;
 }
 
 .calendario-dia.seleccionado .dia-numero {
-    color: white;
+    color: white !important;
+    font-weight: 900 !important;
+    font-size: 1.3rem !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Animación para el día seleccionado */
+@keyframes pulseSelected {
+    0%, 100% {
+        box-shadow: 0 0 25px rgba(255, 0, 0, 0.6), 0 4px 20px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 35px rgba(255, 0, 0, 0.8), 0 6px 25px rgba(255, 0, 0, 0.6), inset 0 0 25px rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* Animación de entrada cuando se selecciona */
+@keyframes selectDay {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+.calendario-dia.seleccionado {
+    animation: selectDay 0.4s ease-out, pulseSelected 1.5s ease-in-out 0.4s infinite;
+}
+
+/* Cuando un día es HOY y está SELECCIONADO */
+.calendario-dia.hoy.seleccionado {
+    border: 3px solid #ffffff !important;
+    background: linear-gradient(135deg, #ff0000, #cc0000) !important;
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.5), inset 0 0 25px rgba(255, 255, 255, 0.2) !important;
+}
+
+.calendario-dia.hoy.seleccionado::before {
+    background: white;
+    color: #ff0000;
+}
+
+.calendario-dia.hoy.seleccionado .dia-numero {
+    color: white !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.4) !important;
 }
 
 .calendario-dia.otro-mes {
@@ -878,11 +958,26 @@ body {
 }
 
 .calendario-dia .sesion-dot {
-    width: 7px;
-    height: 7px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 6px currentColor;
+}
+
+.calendario-dia .sesion-dot.completada {
+    background: #33ff77;
+    box-shadow: 0 0 8px rgba(51, 255, 119, 0.6);
+}
+
+.calendario-dia .sesion-dot.pendiente {
     background: #ffa500;
-    box-shadow: 0 0 4px rgba(255, 165, 0, 0.5);
+    box-shadow: 0 0 8px rgba(255, 165, 0, 0.6);
+}
+
+.calendario-dia .sesion-dot.no-realizada {
+    background: #ff4d4d;
+    box-shadow: 0 0 8px rgba(255, 77, 77, 0.6);
 }
 
 /* Día con sesiones */
@@ -893,6 +988,30 @@ body {
 
 .calendario-dia:has(.sesiones-indicator):hover {
     background: rgba(255, 165, 0, 0.2);
+}
+
+/* Día con todas las sesiones completadas */
+.calendario-dia:has(.sesion-dot.completada):not(:has(.sesion-dot.pendiente)):not(:has(.sesion-dot.no-realizada)) {
+    background: rgba(51, 255, 119, 0.15);
+    border-color: rgba(51, 255, 119, 0.4);
+}
+
+/* Día con sesiones no realizadas */
+.calendario-dia:has(.sesion-dot.no-realizada) {
+    background: rgba(255, 77, 77, 0.1);
+    border-color: rgba(255, 77, 77, 0.3);
+}
+
+/* Cuando un día con sesiones está seleccionado */
+.calendario-dia.seleccionado .sesion-dot {
+    transform: scale(1.3);
+    box-shadow: 0 0 12px currentColor;
+}
+
+/* Efecto de clic en el día */
+.calendario-dia:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
 }
 
 /* Sesiones del día */
@@ -927,6 +1046,11 @@ body {
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.9rem;
     margin-left: auto;
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(204, 0, 0, 0.2));
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    text-transform: capitalize;
 }
 
 .sesiones-lista {
@@ -975,10 +1099,52 @@ body {
     margin-bottom: 1rem;
     border-left: 4px solid;
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .sesion-item:hover {
     background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
+}
+
+/* Estados de sesión */
+.sesion-item.completada {
+    background: rgba(51, 255, 119, 0.1);
+    border-left-color: #33ff77;
+}
+
+.sesion-item.completada::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(51, 255, 119, 0.15), transparent);
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+.sesion-item.pendiente {
+    background: rgba(255, 165, 0, 0.08);
+    border-left-color: #ffa500;
+}
+
+.sesion-item.no-realizada {
+    background: rgba(255, 77, 77, 0.1);
+    border-left-color: #ff4d4d;
+}
+
+.sesion-item.no-realizada::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(255, 77, 77, 0.15), transparent);
+    border-radius: 12px;
+    pointer-events: none;
 }
 
 .sesion-hora {
@@ -1025,6 +1191,117 @@ body {
     font-style: italic;
 }
 
+.sesion-estado {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.sesion-estado i {
+    font-size: 1rem;
+}
+
+/* Barra de progreso */
+.progreso-container {
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.progreso-barra {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progreso-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #33ff77, #00cc44);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.progreso-texto {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+}
+
+/* Temporizador activo */
+.temporizador-activo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, rgba(51, 204, 255, 0.2), rgba(51, 204, 255, 0.1));
+    border: 2px solid rgba(51, 204, 255, 0.4);
+    border-radius: 10px;
+    margin-top: 0.75rem;
+    animation: pulseTemporizador 2s ease-in-out infinite;
+}
+
+@keyframes pulseTemporizador {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(51, 204, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(51, 204, 255, 0.6);
+    }
+}
+
+.temporizador-activo i {
+    font-size: 1.5rem;
+    color: #33ccff;
+    animation: rotateTemporizador 2s linear infinite;
+}
+
+@keyframes rotateTemporizador {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.temporizador-activo .tiempo-actual {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #33ccff;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+/* Estado en curso */
+.sesion-item.en-curso {
+    background: rgba(51, 204, 255, 0.1);
+    border-left-color: #33ccff;
+}
+
+.sesion-item.en-curso::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(51, 204, 255, 0.15), transparent);
+    border-radius: 12px;
+    pointer-events: none;
+}
+
 .sesion-acciones {
     display: flex;
     flex-direction: column;
@@ -1039,10 +1316,46 @@ body {
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
 }
 
 .btn-sesion:hover {
     background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.btn-sesion.completar {
+    background: rgba(51, 255, 119, 0.2);
+    color: #33ff77;
+}
+
+.btn-sesion.completar:hover {
+    background: rgba(51, 255, 119, 0.3);
+    box-shadow: 0 0 15px rgba(51, 255, 119, 0.4);
+}
+
+.btn-sesion.iniciar {
+    background: rgba(51, 204, 255, 0.2);
+    color: #33ccff;
+}
+
+.btn-sesion.iniciar:hover {
+    background: rgba(51, 204, 255, 0.3);
+    box-shadow: 0 0 15px rgba(51, 204, 255, 0.4);
+}
+
+.btn-sesion.pausar {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+}
+
+.btn-sesion.pausar:hover {
+    background: rgba(255, 165, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 165, 0, 0.4);
 }
 
 .btn-sesion.eliminar:hover {
@@ -1325,6 +1638,12 @@ body {
     color: #33ff77;
 }
 
+.plan-header-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
 .btn-editar-config {
     padding: 0.75rem 1.25rem;
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -1342,6 +1661,27 @@ body {
 .btn-editar-config:hover {
     border-color: #ffa500;
     color: #ffa500;
+}
+
+.btn-eliminar-plan {
+    padding: 0.75rem 1.25rem;
+    border: 2px solid rgba(220, 53, 69, 0.3);
+    border-radius: 10px;
+    background: rgba(220, 53, 69, 0.1);
+    color: #ff6b6b;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-eliminar-plan:hover {
+    border-color: #dc3545;
+    background: rgba(220, 53, 69, 0.2);
+    color: #ff4d4d;
+    transform: translateY(-2px);
 }
 
 /* Resumen del Plan */
@@ -1379,101 +1719,225 @@ body {
     color: rgba(255, 255, 255, 0.6);
 }
 
-/* Horario Semanal */
+/* Horario Semanal - MEJORADO */
 .horario-semanal {
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(145deg, rgba(0, 0, 0, 0.6), rgba(20, 20, 20, 0.4));
     border-radius: 20px;
-    padding: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     margin-bottom: 2rem;
     overflow-x: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Navegación de semanas */
+.horario-navegacion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.horario-semana-titulo {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    flex: 1;
+    min-width: 200px;
+}
+
+.horario-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(204, 0, 0, 0.1));
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.horario-nav-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(204, 0, 0, 0.2));
+    border-color: rgba(255, 0, 0, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+
+.horario-nav-btn:active {
+    transform: translateY(0);
+}
+
+.horario-nav-btn i {
+    font-size: 1.2rem;
 }
 
 .horario-grid {
     display: grid;
-    grid-template-columns: 70px repeat(7, 1fr);
-    gap: 4px;
-    min-width: 700px;
+    grid-template-columns: 90px repeat(7, 1fr);
+    gap: 8px;
+    min-width: 800px;
 }
 
 .horario-header {
     font-weight: 700;
     color: white;
     text-align: center;
-    padding: 0.75rem 0.25rem;
-    background: rgba(255, 0, 0, 0.2);
+    padding: 1rem 0.5rem;
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.25), rgba(204, 0, 0, 0.15));
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.horario-header:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
 }
 
 .horario-header .dia-nombre {
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .horario-header .dia-fecha {
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.7);
-    font-weight: 500;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
 }
 
 .horario-header.dia-hoy {
     background: linear-gradient(135deg, #ff0000, #cc0000);
+    border-color: #ff0000;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    animation: pulseHeader 2s ease-in-out infinite;
+}
+
+@keyframes pulseHeader {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
+    }
 }
 
 .horario-header.dia-hoy .dia-fecha {
     color: white;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .horario-header.dia-disponible:not(.dia-hoy) {
-    background: rgba(51, 255, 119, 0.15);
-    border-bottom: 2px solid #33ff77;
-    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(51, 255, 119, 0.2), rgba(0, 204, 68, 0.15));
+    border-color: rgba(51, 255, 119, 0.4);
+}
+
+.horario-header.dia-disponible:not(.dia-hoy):hover {
+    box-shadow: 0 4px 15px rgba(51, 255, 119, 0.3);
 }
 
 .horario-hora {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
-    font-weight: 600;
-}
-
-.horario-hora {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 6px;
+    font-size: 0.9rem;
+    color: white;
+    font-weight: 700;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border-radius: 10px;
+    padding: 0.75rem 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    min-height: 60px;
+    letter-spacing: 0.5px;
 }
 
 .horario-celda {
-    min-height: 45px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    min-height: 60px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem;
-    font-size: 0.75rem;
+    padding: 0.75rem;
+    font-size: 0.8rem;
     color: white;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.horario-celda::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.05));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.horario-celda:hover::before {
+    opacity: 1;
 }
 
 .horario-celda:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .horario-celda.ocupado {
-    background: rgba(255, 165, 0, 0.15);
-    border: none;
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.25), rgba(255, 140, 0, 0.15));
+    border: 2px solid rgba(255, 165, 0, 0.4);
+    box-shadow: 0 2px 10px rgba(255, 165, 0, 0.2);
+}
+
+.horario-celda.ocupado:hover {
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.35), rgba(255, 140, 0, 0.25));
+    border-color: rgba(255, 165, 0, 0.6);
+    box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+}
+
+/* Estados de sesiones en el horario */
+.horario-celda.ocupado.completada {
+    background: linear-gradient(135deg, rgba(51, 255, 119, 0.3), rgba(0, 204, 68, 0.2));
+    border-color: rgba(51, 255, 119, 0.5);
+    box-shadow: 0 2px 10px rgba(51, 255, 119, 0.3);
+}
+
+.horario-celda.ocupado.completada:hover {
+    background: linear-gradient(135deg, rgba(51, 255, 119, 0.4), rgba(0, 204, 68, 0.3));
+    box-shadow: 0 4px 15px rgba(51, 255, 119, 0.5);
+}
+
+.horario-celda.ocupado.no-realizada {
+    background: linear-gradient(135deg, rgba(255, 77, 77, 0.3), rgba(204, 0, 0, 0.2));
+    border-color: rgba(255, 77, 77, 0.5);
+    box-shadow: 0 2px 10px rgba(255, 77, 77, 0.3);
+}
+
+.horario-celda.ocupado.no-realizada:hover {
+    background: linear-gradient(135deg, rgba(255, 77, 77, 0.4), rgba(204, 0, 0, 0.3));
+    box-shadow: 0 4px 15px rgba(255, 77, 77, 0.5);
 }
 
 .horario-celda.ocupado .tema-mini {
@@ -1481,24 +1945,48 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 6px;
     text-align: center;
-    padding: 0.25rem;
+    padding: 0.5rem;
     width: 100%;
+    z-index: 1;
 }
 
 .horario-celda.ocupado .tema-mini i {
-    font-size: 0.9rem;
+    font-size: 1.3rem;
+    margin-bottom: 2px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .horario-celda.ocupado .tema-mini span {
-    font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.2;
+    font-size: 0.75rem;
+    color: white;
+    font-weight: 600;
+    line-height: 1.3;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Efecto especial para celdas con sesiones - REMOVIDO EL BORDE AMARILLO */
+.horario-celda.ocupado::after {
+    content: none; /* Desactivado para evitar el borde amarillo */
+}
+
+/* Quitar outline amarillo del focus */
+.horario-celda:focus,
+.horario-celda:focus-visible {
+    outline: none;
+}
+
+.horario-celda.ocupado:focus,
+.horario-celda.ocupado:focus-visible {
+    outline: none;
+    border-color: rgba(255, 165, 0, 0.8);
 }
 
 /* Info extra del horario */
@@ -1506,17 +1994,19 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem;
-    margin-top: 1rem;
-    background: rgba(51, 153, 255, 0.1);
-    border: 1px solid rgba(51, 153, 255, 0.3);
-    border-radius: 10px;
+    padding: 1.25rem;
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, rgba(51, 153, 255, 0.15), rgba(51, 153, 255, 0.08));
+    border: 2px solid rgba(51, 153, 255, 0.3);
+    border-radius: 12px;
     color: #66b3ff;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 .horario-info-extra i {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    color: #3399ff;
 }
 
 /* Recomendaciones */
@@ -1823,6 +2313,39 @@ body {
     .form-row {
         grid-template-columns: 1fr;
     }
+    
+    /* Botones del plan en tablets */
+    .plan-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .plan-header-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+    
+    .btn-editar-config,
+    .btn-eliminar-plan {
+        flex: 1;
+    }
+    
+    /* Leyenda responsive */
+    .calendario-leyenda {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    /* Navegación de horario responsive */
+    .horario-navegacion {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .horario-nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1861,6 +2384,18 @@ body {
         width: 40px;
         height: 40px;
         font-size: 1.2rem;
+    }
+    
+    /* Botones del plan en móviles */
+    .plan-header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-editar-config,
+    .btn-eliminar-plan {
+        width: 100%;
+        justify-content: center;
     }
     
     .calendario-mes {

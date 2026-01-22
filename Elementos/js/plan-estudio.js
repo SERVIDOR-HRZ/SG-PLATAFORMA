@@ -7,6 +7,9 @@ let temasAReforzar = [];
 let sesionesEstudio = [];
 let mesActual = new Date();
 let diaSeleccionado = null;
+let semanaActualOffset = 0; // Para navegar entre semanas en el horario
+let temporizadorActivo = null; // Para el temporizador de sesión
+let sesionEnCurso = null; // ID de la sesión que está en curso
 let configuracionHorario = {
     horasPorDia: 2,
     diasDisponibles: [1, 2, 3, 4, 5], // Lun-Vie
@@ -277,7 +280,7 @@ function inicializarConfiguracion() {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.horas-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            configuracionHorario.horasPorDia = parseInt(this.dataset.horas);
+            configuracionHorario.horasPorDia = parseFloat(this.dataset.horas);
         });
     });
 
@@ -351,6 +354,34 @@ function inicializarConfiguracion() {
         }
     });
 
+    // Botón eliminar plan completo
+    document.getElementById('btnEliminarPlan')?.addEventListener('click', async () => {
+        const result = await Swal.fire({
+            title: '¿Eliminar plan completo?',
+            html: `
+                <p>Esta acción eliminará:</p>
+                <ul style="text-align: left; margin: 1rem auto; max-width: 300px;">
+                    <li>Todas las sesiones programadas</li>
+                    <li>La configuración del horario</li>
+                    <li>El plan generado</li>
+                </ul>
+                <p style="color: #ff6b6b; font-weight: 600;">Esta acción no se puede deshacer.</p>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#666',
+            confirmButtonText: 'Sí, eliminar todo',
+            cancelButtonText: 'Cancelar',
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+        
+        if (result.isConfirmed) {
+            await eliminarPlanCompleto();
+        }
+    });
+
     // Navegación del calendario
     document.getElementById('mesAnterior')?.addEventListener('click', () => {
         mesActual.setMonth(mesActual.getMonth() - 1);
@@ -360,6 +391,23 @@ function inicializarConfiguracion() {
     document.getElementById('mesSiguiente')?.addEventListener('click', () => {
         mesActual.setMonth(mesActual.getMonth() + 1);
         renderizarCalendario();
+    });
+
+    // Navegación de semanas en el horario
+    document.getElementById('semanaAnterior')?.addEventListener('click', () => {
+        semanaActualOffset--;
+        const gridContainer = document.getElementById('horarioGrid');
+        if (gridContainer) {
+            renderizarHorarioSemanal(gridContainer);
+        }
+    });
+
+    document.getElementById('semanaSiguiente')?.addEventListener('click', () => {
+        semanaActualOffset++;
+        const gridContainer = document.getElementById('horarioGrid');
+        if (gridContainer) {
+            renderizarHorarioSemanal(gridContainer);
+        }
     });
 
     // Modal de sesión
@@ -949,6 +997,17 @@ function renderizarCalendario() {
                    fechaSesion.getFullYear() === mesActual.getFullYear();
         });
         
+        // Contar sesiones por estado
+        const sesionesCompletadas = sesionesDelDia.filter(s => s.completada).length;
+        const sesionesPendientes = sesionesDelDia.filter(s => {
+            if (s.completada) return false;
+            const fechaSesion = new Date(s.fecha);
+            const [hora, minuto] = s.horaInicio.split(':');
+            fechaSesion.setHours(parseInt(hora), parseInt(minuto), 0, 0);
+            return fechaSesion >= new Date();
+        }).length;
+        const sesionesNoRealizadas = sesionesDelDia.length - sesionesCompletadas - sesionesPendientes;
+        
         let clases = ['calendario-dia'];
         if (esHoy) clases.push('hoy');
         if (esSeleccionado) clases.push('seleccionado');
@@ -958,10 +1017,9 @@ function renderizarCalendario() {
                 <span class="dia-numero">${dia}</span>
                 ${sesionesDelDia.length > 0 ? `
                     <div class="sesiones-indicator">
-                        ${sesionesDelDia.slice(0, 3).map(s => {
-                            const color = coloresMaterias[s.materia] || '#ffa500';
-                            return `<span class="sesion-dot" style="background: ${color};"></span>`;
-                        }).join('')}
+                        ${sesionesCompletadas > 0 ? `<span class="sesion-dot completada" style="background: #33ff77;" title="${sesionesCompletadas} completada(s)"></span>` : ''}
+                        ${sesionesPendientes > 0 ? `<span class="sesion-dot pendiente" style="background: #ffa500;" title="${sesionesPendientes} pendiente(s)"></span>` : ''}
+                        ${sesionesNoRealizadas > 0 ? `<span class="sesion-dot no-realizada" style="background: #ff4d4d;" title="${sesionesNoRealizadas} no realizada(s)"></span>` : ''}
                     </div>
                 ` : ''}
             </div>
@@ -985,6 +1043,25 @@ function renderizarCalendario() {
 // Seleccionar día
 window.seleccionarDia = function(fechaISO) {
     diaSeleccionado = new Date(fechaISO);
+    
+    // Agregar efecto visual inmediato al día clickeado
+    const diaElement = document.querySelector(`[data-fecha="${fechaISO}"]`);
+    if (diaElement) {
+        // Remover clase de todos los días
+        document.querySelectorAll('.calendario-dia').forEach(dia => {
+            dia.classList.remove('seleccionado');
+        });
+        
+        // Agregar clase al día seleccionado
+        diaElement.classList.add('seleccionado');
+        
+        // Efecto de pulso adicional
+        diaElement.style.animation = 'none';
+        setTimeout(() => {
+            diaElement.style.animation = '';
+        }, 10);
+    }
+    
     renderizarCalendario();
     renderizarSesionesDia();
 };
@@ -1018,11 +1095,29 @@ function renderizarSesionesDia() {
     
     if (sesionesDelDia.length === 0) {
         container.innerHTML = `
-            <p class="no-sesiones">No hay sesiones programadas para ${fechaFormateada}</p>
-            <button class="btn-agregar-sesion" onclick="abrirModalSesion()">
-                <i class="bi bi-plus-circle"></i>
-                Agregar Sesión de Estudio
-            </button>
+            <div style="text-align: center; padding: 2rem;">
+                <div style="
+                    width: 80px;
+                    height: 80px;
+                    margin: 0 auto 1rem;
+                    background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(204, 0, 0, 0.1));
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 2px solid rgba(255, 0, 0, 0.3);
+                ">
+                    <i class="bi bi-calendar-x" style="font-size: 2.5rem; color: rgba(255, 255, 255, 0.5);"></i>
+                </div>
+                <p class="no-sesiones" style="margin-bottom: 1.5rem;">
+                    No hay sesiones programadas para<br>
+                    <strong style="color: #ff0000;">${fechaFormateada}</strong>
+                </p>
+                <button class="btn-agregar-sesion" onclick="abrirModalSesion()">
+                    <i class="bi bi-plus-circle"></i>
+                    Agregar Sesión de Estudio
+                </button>
+            </div>
         `;
         return;
     }
@@ -1034,8 +1129,64 @@ function renderizarSesionesDia() {
         const color = coloresMaterias[sesion.materia] || '#ffa500';
         const nombreMateria = nombresMaterias[sesion.materia] || sesion.materia;
         
+        // Inicializar propiedades si no existen
+        if (!sesion.tiempoEstudiado) sesion.tiempoEstudiado = 0;
+        if (!sesion.enCurso) sesion.enCurso = false;
+        if (!sesion.inicioTemporizador) sesion.inicioTemporizador = null;
+        
+        // Calcular tiempo total (duración esperada en segundos)
+        const duracionTotal = sesion.duracion * 60;
+        const tiempoRestante = duracionTotal - sesion.tiempoEstudiado;
+        const porcentajeCompletado = Math.min((sesion.tiempoEstudiado / duracionTotal) * 100, 100);
+        
+        // Determinar estado de la sesión
+        let estadoClass = '';
+        let estadoColor = '';
+        let estadoTexto = '';
+        let estadoIcono = '';
+        
+        if (sesion.completada) {
+            estadoClass = 'completada';
+            estadoColor = '#33ff77';
+            estadoTexto = 'Completada';
+            estadoIcono = 'bi-check-circle-fill';
+        } else if (sesion.enCurso) {
+            estadoClass = 'en-curso';
+            estadoColor = '#33ccff';
+            estadoTexto = 'En curso';
+            estadoIcono = 'bi-play-circle-fill';
+        } else {
+            // Verificar si la sesión ya pasó
+            const fechaSesion = new Date(sesion.fecha);
+            const [hora, minuto] = sesion.horaInicio.split(':');
+            fechaSesion.setHours(parseInt(hora), parseInt(minuto), 0, 0);
+            const ahora = new Date();
+            
+            if (fechaSesion < ahora) {
+                estadoClass = 'no-realizada';
+                estadoColor = '#ff4d4d';
+                estadoTexto = 'No realizada';
+                estadoIcono = 'bi-x-circle-fill';
+            } else {
+                estadoClass = 'pendiente';
+                estadoColor = '#ffa500';
+                estadoTexto = 'Pendiente';
+                estadoIcono = 'bi-clock-fill';
+            }
+        }
+        
+        // Formatear tiempo estudiado
+        const horasEstudiadas = Math.floor(sesion.tiempoEstudiado / 3600);
+        const minutosEstudiados = Math.floor((sesion.tiempoEstudiado % 3600) / 60);
+        const segundosEstudiados = sesion.tiempoEstudiado % 60;
+        const tiempoFormateado = horasEstudiadas > 0 
+            ? `${horasEstudiadas}h ${minutosEstudiados}m ${segundosEstudiados}s`
+            : minutosEstudiados > 0 
+                ? `${minutosEstudiados}m ${segundosEstudiados}s`
+                : `${segundosEstudiados}s`;
+        
         return `
-            <div class="sesion-item" style="border-left-color: ${color};">
+            <div class="sesion-item ${estadoClass}" style="border-left-color: ${color};">
                 <div class="sesion-hora">
                     <span class="hora">${sesion.horaInicio}</span>
                     <span class="duracion">${sesion.duracion} min</span>
@@ -1044,8 +1195,52 @@ function renderizarSesionesDia() {
                     <div class="sesion-materia" style="color: ${color};">${nombreMateria}</div>
                     <div class="sesion-tema">${sesion.tema}</div>
                     ${sesion.notas ? `<div class="sesion-notas">${sesion.notas}</div>` : ''}
+                    
+                    <!-- Barra de progreso -->
+                    ${!sesion.completada && sesion.tiempoEstudiado > 0 ? `
+                        <div class="progreso-container">
+                            <div class="progreso-barra">
+                                <div class="progreso-fill" style="width: ${porcentajeCompletado}%; background: ${color};"></div>
+                            </div>
+                            <div class="progreso-texto">
+                                <span>${tiempoFormateado} / ${sesion.duracion} min</span>
+                                <span>${Math.round(porcentajeCompletado)}%</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Temporizador en curso -->
+                    ${sesion.enCurso ? `
+                        <div class="temporizador-activo" id="temporizador-${sesion.id}">
+                            <i class="bi bi-stopwatch"></i>
+                            <span class="tiempo-actual">00:00</span>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="sesion-estado" style="color: ${estadoColor};">
+                        <i class="bi ${estadoIcono}"></i>
+                        <span>${estadoTexto}</span>
+                    </div>
                 </div>
                 <div class="sesion-acciones">
+                    ${!sesion.completada ? `
+                        ${sesion.enCurso ? `
+                            <button class="btn-sesion pausar" onclick="pausarSesion('${sesion.id}')" title="Pausar">
+                                <i class="bi bi-pause-fill"></i>
+                            </button>
+                        ` : `
+                            <button class="btn-sesion iniciar" onclick="iniciarSesion('${sesion.id}')" title="Iniciar sesión">
+                                <i class="bi bi-play-fill"></i>
+                            </button>
+                        `}
+                        <button class="btn-sesion completar" onclick="toggleCompletarSesion('${sesion.id}')" title="Marcar como completada">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                    ` : `
+                        <button class="btn-sesion completar" onclick="toggleCompletarSesion('${sesion.id}')" title="Marcar como pendiente">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                    `}
                     <button class="btn-sesion eliminar" onclick="eliminarSesion('${sesion.id}')" title="Eliminar">
                         <i class="bi bi-trash"></i>
                     </button>
@@ -1200,6 +1395,167 @@ window.eliminarSesion = async function(sesionId) {
     }
 };
 
+// Marcar/desmarcar sesión como completada
+window.toggleCompletarSesion = async function(sesionId) {
+    const sesion = sesionesEstudio.find(s => s.id === sesionId);
+    
+    if (!sesion) return;
+    
+    // Si está en curso, pausar primero
+    if (sesion.enCurso) {
+        pausarSesion(sesionId);
+    }
+    
+    // Cambiar estado
+    sesion.completada = !sesion.completada;
+    
+    // Si se marca como completada, registrar el tiempo total
+    if (sesion.completada && sesion.tiempoEstudiado < sesion.duracion * 60) {
+        sesion.tiempoEstudiado = sesion.duracion * 60;
+    }
+    
+    // Guardar cambios
+    guardarSesionesLocalmente();
+    
+    // Actualizar vista
+    renderizarCalendario();
+    renderizarSesionesDia();
+    
+    // Mostrar mensaje
+    if (sesion.completada) {
+        Swal.fire({
+            icon: 'success',
+            title: '¡Excelente!',
+            text: 'Sesión marcada como completada',
+            timer: 1500,
+            showConfirmButton: false,
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+    }
+};
+
+// Iniciar sesión de estudio
+window.iniciarSesion = function(sesionId) {
+    const sesion = sesionesEstudio.find(s => s.id === sesionId);
+    
+    if (!sesion) return;
+    
+    // Pausar cualquier otra sesión en curso
+    if (sesionEnCurso && sesionEnCurso !== sesionId) {
+        pausarSesion(sesionEnCurso);
+    }
+    
+    // Marcar sesión como en curso
+    sesion.enCurso = true;
+    sesion.inicioTemporizador = Date.now();
+    sesionEnCurso = sesionId;
+    
+    // Iniciar temporizador
+    iniciarTemporizador(sesionId);
+    
+    // Guardar y actualizar
+    guardarSesionesLocalmente();
+    renderizarSesionesDia();
+    
+    // Mostrar notificación
+    Swal.fire({
+        icon: 'info',
+        title: '¡Sesión iniciada!',
+        text: 'El temporizador está corriendo. ¡Enfócate en tu estudio!',
+        timer: 2000,
+        showConfirmButton: false,
+        background: '#1a1a1a',
+        color: '#fff'
+    });
+};
+
+// Pausar sesión de estudio
+window.pausarSesion = function(sesionId) {
+    const sesion = sesionesEstudio.find(s => s.id === sesionId);
+    
+    if (!sesion || !sesion.enCurso) return;
+    
+    // Calcular tiempo transcurrido
+    const tiempoTranscurrido = Math.floor((Date.now() - sesion.inicioTemporizador) / 1000);
+    sesion.tiempoEstudiado += tiempoTranscurrido;
+    
+    // Marcar como pausada
+    sesion.enCurso = false;
+    sesion.inicioTemporizador = null;
+    sesionEnCurso = null;
+    
+    // Detener temporizador
+    if (temporizadorActivo) {
+        clearInterval(temporizadorActivo);
+        temporizadorActivo = null;
+    }
+    
+    // Verificar si completó el tiempo
+    const duracionTotal = sesion.duracion * 60;
+    if (sesion.tiempoEstudiado >= duracionTotal) {
+        sesion.completada = true;
+        Swal.fire({
+            icon: 'success',
+            title: '¡Felicitaciones!',
+            text: 'Has completado el tiempo de estudio para esta sesión.',
+            confirmButtonColor: '#33ff77',
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+    }
+    
+    // Guardar y actualizar
+    guardarSesionesLocalmente();
+    renderizarCalendario();
+    renderizarSesionesDia();
+};
+
+// Iniciar temporizador visual
+function iniciarTemporizador(sesionId) {
+    const sesion = sesionesEstudio.find(s => s.id === sesionId);
+    if (!sesion) return;
+    
+    // Limpiar temporizador anterior si existe
+    if (temporizadorActivo) {
+        clearInterval(temporizadorActivo);
+    }
+    
+    // Actualizar cada segundo
+    temporizadorActivo = setInterval(() => {
+        const elementoTemporizador = document.getElementById(`temporizador-${sesionId}`);
+        if (!elementoTemporizador) {
+            clearInterval(temporizadorActivo);
+            return;
+        }
+        
+        // Calcular tiempo transcurrido en esta sesión
+        const tiempoActual = Math.floor((Date.now() - sesion.inicioTemporizador) / 1000);
+        const tiempoTotal = sesion.tiempoEstudiado + tiempoActual;
+        
+        // Formatear tiempo
+        const horas = Math.floor(tiempoTotal / 3600);
+        const minutos = Math.floor((tiempoTotal % 3600) / 60);
+        const segundos = tiempoTotal % 60;
+        
+        const tiempoFormateado = horas > 0 
+            ? `${horas}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`
+            : `${minutos}:${segundos.toString().padStart(2, '0')}`;
+        
+        // Actualizar display
+        const spanTiempo = elementoTemporizador.querySelector('.tiempo-actual');
+        if (spanTiempo) {
+            spanTiempo.textContent = tiempoFormateado;
+        }
+        
+        // Verificar si completó el tiempo
+        const duracionTotal = sesion.duracion * 60;
+        if (tiempoTotal >= duracionTotal) {
+            pausarSesion(sesionId);
+        }
+    }, 1000);
+}
+
 // ========== GENERACIÓN DE PLAN ==========
 
 // Generar plan de estudio
@@ -1298,11 +1654,11 @@ function generarSesionesAutomaticas(diasDisponiblesCount, fechaLimite) {
     
     let temaIndex = 0;
     
-    // Hora según momento preferido
+    // Hora según momento preferido - MEJORADO con más opciones
     const horasPorMomento = {
-        'manana': ['07:00', '08:00', '09:00', '10:00', '11:00'],
-        'tarde': ['14:00', '15:00', '16:00', '17:00', '18:00'],
-        'noche': ['19:00', '20:00', '21:00', '22:00']
+        'manana': ['07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30'],
+        'tarde': ['14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'],
+        'noche': ['19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00']
     };
     
     const horasDisponibles = horasPorMomento[configuracionHorario.momentoPreferido] || horasPorMomento['manana'];
@@ -1319,9 +1675,8 @@ function generarSesionesAutomaticas(diasDisponiblesCount, fechaLimite) {
         }
     }
     
-    // Contador de sesiones creadas por día
-    let sesionesDelDia = 0;
-    let horaIndexDia = 0;
+    // Calcular duración de cada sesión basado en horas disponibles
+    const duracionSesion = configuracionHorario.horasPorDia >= 1 ? 60 : 30; // 60 min o 30 min
     
     // Iterar hasta completar todos los temas o llegar a la fecha límite
     while (temaIndex < temasExpandidos.length && diaActual <= fechaLimite) {
@@ -1329,14 +1684,16 @@ function generarSesionesAutomaticas(diasDisponiblesCount, fechaLimite) {
         
         // Verificar si este día de la semana está disponible
         if (configuracionHorario.diasDisponibles.includes(diaSemana)) {
-            // Cuántas sesiones podemos poner hoy
-            const sesionesPosiblesHoy = Math.min(
-                configuracionHorario.horasPorDia, 
+            // Calcular cuántas sesiones caben en las horas disponibles
+            const minutosDisponibles = configuracionHorario.horasPorDia * 60;
+            const sesionesPosiblesHoy = Math.floor(minutosDisponibles / duracionSesion);
+            const sesionesReales = Math.min(
+                sesionesPosiblesHoy,
                 horasDisponibles.length,
                 temasExpandidos.length - temaIndex
             );
             
-            for (let i = 0; i < sesionesPosiblesHoy; i++) {
+            for (let i = 0; i < sesionesReales; i++) {
                 const tema = temasExpandidos[temaIndex];
                 
                 if (tema) {
@@ -1347,8 +1704,8 @@ function generarSesionesAutomaticas(diasDisponiblesCount, fechaLimite) {
                         materia: tema.materia,
                         tema: tema.tema || tema.competencia || 'Tema general',
                         competencia: tema.competencia,
-                        horaInicio: horasDisponibles[i],
-                        duracion: 60,
+                        horaInicio: horasDisponibles[i % horasDisponibles.length],
+                        duracion: duracionSesion,
                         notas: tema.competencia ? `Competencia: ${tema.competencia}` : '',
                         completada: false,
                         generadoAutomaticamente: true
@@ -1367,32 +1724,32 @@ function generarSesionesAutomaticas(diasDisponiblesCount, fechaLimite) {
     // Actualizar calendario
     renderizarCalendario();
     
-    console.log(`Plan generado: ${sesionesEstudio.length} sesiones creadas`);
+    console.log(`Plan generado: ${sesionesEstudio.length} sesiones creadas (${duracionSesion} min cada una)`);
 }
 
 // Restaurar selecciones visuales de la configuración guardada
 function restaurarSeleccionesVisuales() {
     // Restaurar horas por día
-    document.querySelectorAll('.hora-btn').forEach(btn => {
-        btn.classList.remove('selected');
-        if (parseInt(btn.dataset.horas) === configuracionHorario.horasPorDia) {
-            btn.classList.add('selected');
+    document.querySelectorAll('.horas-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseFloat(btn.dataset.horas) === configuracionHorario.horasPorDia) {
+            btn.classList.add('active');
         }
     });
     
     // Restaurar días de la semana
     document.querySelectorAll('.dia-btn').forEach(btn => {
-        btn.classList.remove('selected');
+        btn.classList.remove('active');
         if (configuracionHorario.diasDisponibles.includes(parseInt(btn.dataset.dia))) {
-            btn.classList.add('selected');
+            btn.classList.add('active');
         }
     });
     
     // Restaurar momento preferido
     document.querySelectorAll('.momento-btn').forEach(btn => {
-        btn.classList.remove('selected');
+        btn.classList.remove('active');
         if (btn.dataset.momento === configuracionHorario.momentoPreferido) {
-            btn.classList.add('selected');
+            btn.classList.add('active');
         }
     });
     
@@ -1429,7 +1786,7 @@ function obtenerFechaLimiteComoDate(valor) {
 // Renderizar plan generado
 function renderizarPlanGenerado(sesionesNecesarias, diasDisponibles, horasTotales, diasHastaLimite) {
     const resumenContainer = document.getElementById('planResumen');
-    const horarioContainer = document.getElementById('horarioSemanal');
+    const horarioGridContainer = document.getElementById('horarioGrid');
     const recomendacionesContainer = document.getElementById('recomendacionesLista');
     
     // Resumen
@@ -1456,8 +1813,10 @@ function renderizarPlanGenerado(sesionesNecesarias, diasDisponibles, horasTotale
         </div>
     `;
     
-    // Horario semanal
-    renderizarHorarioSemanal(horarioContainer);
+    // Horario semanal - usar el grid container, no el contenedor completo
+    if (horarioGridContainer) {
+        renderizarHorarioSemanal(horarioGridContainer);
+    }
     
     // Recomendaciones
     const recomendaciones = generarRecomendaciones();
@@ -1469,12 +1828,12 @@ function renderizarPlanGenerado(sesionesNecesarias, diasDisponibles, horasTotale
     `).join('');
 }
 
-// Renderizar horario semanal con fechas reales
+// Renderizar horario semanal con fechas reales - MEJORADO CON NAVEGACIÓN Y ESTADOS
 function renderizarHorarioSemanal(container) {
     const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
     const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     
-    // Horas según el momento preferido
+    // Horas según el momento preferido - MEJORADO
     const horasPorMomento = {
         'manana': ['07:00', '08:00', '09:00', '10:00', '11:00'],
         'tarde': ['14:00', '15:00', '16:00', '17:00', '18:00'],
@@ -1485,17 +1844,22 @@ function renderizarHorarioSemanal(container) {
     
     // Encontrar el rango de fechas de las sesiones
     if (sesionesEstudio.length === 0) {
-        container.innerHTML = '<p class="no-sesiones" style="text-align: center; padding: 2rem;">No hay sesiones programadas</p>';
+        container.innerHTML = `
+            <div style="text-align: center; padding: 3rem;">
+                <i class="bi bi-calendar-x" style="font-size: 4rem; color: rgba(255, 255, 255, 0.3); margin-bottom: 1rem;"></i>
+                <p class="no-sesiones" style="font-size: 1.1rem;">No hay sesiones programadas</p>
+            </div>
+        `;
         return;
     }
     
-    // Obtener la semana actual (desde hoy hasta 6 días después)
+    // Obtener la semana según el offset
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
     
-    // Encontrar el inicio de la semana actual (domingo)
+    // Calcular inicio de la semana con offset
     const inicioSemana = new Date(hoy);
-    inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+    inicioSemana.setDate(hoy.getDate() - hoy.getDay() + (semanaActualOffset * 7));
     
     // Crear array de los 7 días de la semana
     const diasDeLaSemana = [];
@@ -1505,24 +1869,76 @@ function renderizarHorarioSemanal(container) {
         diasDeLaSemana.push(dia);
     }
     
+    // Actualizar título de la semana
+    const tituloSemana = document.getElementById('horarioSemanaTitulo');
+    if (tituloSemana) {
+        if (semanaActualOffset === 0) {
+            tituloSemana.textContent = 'Semana Actual';
+        } else if (semanaActualOffset === 1) {
+            tituloSemana.textContent = 'Próxima Semana';
+        } else if (semanaActualOffset === -1) {
+            tituloSemana.textContent = 'Semana Anterior';
+        } else if (semanaActualOffset > 1) {
+            tituloSemana.textContent = `${semanaActualOffset} Semanas Adelante`;
+        } else {
+            tituloSemana.textContent = `${Math.abs(semanaActualOffset)} Semanas Atrás`;
+        }
+        
+        // Agregar rango de fechas
+        const fechaInicio = diasDeLaSemana[0];
+        const fechaFin = diasDeLaSemana[6];
+        tituloSemana.innerHTML += `<br><small style="font-size: 0.8rem; color: rgba(255,255,255,0.6); font-weight: 500;">${fechaInicio.getDate()} ${meses[fechaInicio.getMonth()]} - ${fechaFin.getDate()} ${meses[fechaFin.getMonth()]} ${fechaFin.getFullYear()}</small>`;
+    }
+    
     let html = '<div class="horario-grid">';
     
-    // Header con fechas reales
-    html += '<div class="horario-header">Hora</div>';
+    // Header con fechas reales - MEJORADO
+    html += `
+        <div class="horario-header" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)); border: 2px solid rgba(255, 255, 255, 0.2);">
+            <span class="dia-nombre" style="font-size: 0.9rem;">HORA</span>
+        </div>
+    `;
     diasDeLaSemana.forEach((fecha, index) => {
         const esHoy = fecha.toDateString() === hoy.toDateString();
         const esDiaDisponible = configuracionHorario.diasDisponibles.includes(index);
+        
+        // Contar sesiones para este día
+        const sesionesDelDia = sesionesEstudio.filter(s => {
+            const fechaSesion = new Date(s.fecha);
+            return fechaSesion.getDate() === fecha.getDate() && 
+                   fechaSesion.getMonth() === fecha.getMonth() && 
+                   fechaSesion.getFullYear() === fecha.getFullYear();
+        });
+        
+        // Contar por estado
+        const completadas = sesionesDelDia.filter(s => s.completada).length;
+        const pendientes = sesionesDelDia.filter(s => {
+            if (s.completada) return false;
+            const fechaSesion = new Date(s.fecha);
+            const [hora, minuto] = s.horaInicio.split(':');
+            fechaSesion.setHours(parseInt(hora), parseInt(minuto), 0, 0);
+            return fechaSesion >= new Date();
+        }).length;
+        const noRealizadas = sesionesDelDia.length - completadas - pendientes;
+        
         html += `
             <div class="horario-header ${esHoy ? 'dia-hoy' : ''} ${esDiaDisponible ? 'dia-disponible' : ''}">
                 <span class="dia-nombre">${diasSemana[index]}</span>
                 <span class="dia-fecha">${fecha.getDate()} ${meses[fecha.getMonth()]}</span>
+                ${sesionesDelDia.length > 0 ? `
+                    <div style="display: flex; gap: 4px; margin-top: 4px; justify-content: center;">
+                        ${completadas > 0 ? `<span style="font-size: 0.65rem; background: rgba(51, 255, 119, 0.3); color: #33ff77; padding: 2px 5px; border-radius: 4px; font-weight: 700;">${completadas}✓</span>` : ''}
+                        ${pendientes > 0 ? `<span style="font-size: 0.65rem; background: rgba(255, 165, 0, 0.3); color: #ffa500; padding: 2px 5px; border-radius: 4px; font-weight: 700;">${pendientes}⏱</span>` : ''}
+                        ${noRealizadas > 0 ? `<span style="font-size: 0.65rem; background: rgba(255, 77, 77, 0.3); color: #ff4d4d; padding: 2px 5px; border-radius: 4px; font-weight: 700;">${noRealizadas}✗</span>` : ''}
+                    </div>
+                ` : ''}
             </div>
         `;
     });
     
-    // Celdas con sesiones
+    // Celdas con sesiones - MEJORADO CON COLORES DE ESTADO
     horas.forEach(hora => {
-        html += `<div class="horario-hora">${hora}</div>`;
+        html += `<div class="horario-hora"><i class="bi bi-clock" style="margin-right: 4px; font-size: 0.8rem;"></i>${hora}</div>`;
         
         diasDeLaSemana.forEach((fechaDia) => {
             // Buscar si hay sesión para esta fecha y hora específica
@@ -1537,14 +1953,45 @@ function renderizarHorarioSemanal(container) {
             if (sesion) {
                 const color = coloresMaterias[sesion.materia] || '#ffa500';
                 const icono = iconosMaterias[sesion.materia] || 'bi-book';
-                const temaCorto = (sesion.tema || 'Estudio').length > 12 
-                    ? (sesion.tema || 'Estudio').substring(0, 12) + '...' 
+                const temaCorto = (sesion.tema || 'Estudio').length > 15 
+                    ? (sesion.tema || 'Estudio').substring(0, 15) + '...' 
                     : (sesion.tema || 'Estudio');
+                
+                // Determinar color de fondo según estado
+                let bgColor = color;
+                let estadoIcono = '';
+                let estadoClass = '';
+                
+                if (sesion.completada) {
+                    bgColor = '#33ff77';
+                    estadoIcono = '<i class="bi bi-check-circle-fill" style="position: absolute; top: 4px; right: 4px; font-size: 0.9rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i>';
+                    estadoClass = 'completada';
+                } else {
+                    const fechaSesion = new Date(sesion.fecha);
+                    const [h, m] = sesion.horaInicio.split(':');
+                    fechaSesion.setHours(parseInt(h), parseInt(m), 0, 0);
+                    
+                    if (fechaSesion < new Date()) {
+                        bgColor = '#ff4d4d';
+                        estadoIcono = '<i class="bi bi-x-circle-fill" style="position: absolute; top: 4px; right: 4px; font-size: 0.9rem; color: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i>';
+                        estadoClass = 'no-realizada';
+                    } else {
+                        estadoClass = 'pendiente';
+                    }
+                }
+                
                 html += `
-                    <div class="horario-celda ocupado" style="background: ${color}20; border-left: 3px solid ${color};">
+                    <div class="horario-celda ocupado ${estadoClass}" style="
+                        background: linear-gradient(135deg, ${bgColor}40, ${bgColor}20);
+                        border-color: ${bgColor}80;
+                    " title="${sesion.tema} - ${sesion.duracion} min - ${sesion.completada ? 'Completada' : (estadoClass === 'no-realizada' ? 'No realizada' : 'Pendiente')}">
+                        ${estadoIcono}
                         <div class="tema-mini">
-                            <i class="bi ${icono}" style="color: ${color};"></i>
+                            <i class="bi ${icono}" style="color: ${bgColor};"></i>
                             <span>${temaCorto}</span>
+                            <small style="font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 2px;">
+                                ${sesion.duracion} min
+                            </small>
                         </div>
                     </div>
                 `;
@@ -1556,18 +2003,51 @@ function renderizarHorarioSemanal(container) {
     
     html += '</div>';
     
-    // Agregar navegación de semanas si hay sesiones en otras semanas
-    const sesionesPosteriores = sesionesEstudio.filter(s => {
+    // Agregar estadísticas de la semana
+    const sesionesEstaSemana = sesionesEstudio.filter(s => {
         const fechaSesion = new Date(s.fecha);
-        return fechaSesion > diasDeLaSemana[6];
+        return fechaSesion >= diasDeLaSemana[0] && fechaSesion <= diasDeLaSemana[6];
     });
     
-    if (sesionesPosteriores.length > 0) {
+    if (sesionesEstaSemana.length > 0) {
+        const completadas = sesionesEstaSemana.filter(s => s.completada).length;
+        const pendientes = sesionesEstaSemana.filter(s => {
+            if (s.completada) return false;
+            const fechaSesion = new Date(s.fecha);
+            const [hora, minuto] = s.horaInicio.split(':');
+            fechaSesion.setHours(parseInt(hora), parseInt(minuto), 0, 0);
+            return fechaSesion >= new Date();
+        }).length;
+        const noRealizadas = sesionesEstaSemana.length - completadas - pendientes;
+        const horasTotales = sesionesEstaSemana.reduce((total, s) => total + (s.duracion / 60), 0);
+        
         html += `
-            <div class="horario-info-extra">
-                <i class="bi bi-info-circle"></i>
-                <span>Hay ${sesionesPosteriores.length} sesión(es) más programadas para las próximas semanas. 
-                Revisa el tab "Mi Calendario" para ver todas.</span>
+            <div style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+                margin-top: 1.5rem;
+                padding: 1.5rem;
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            ">
+                <div style="text-align: center;">
+                    <div style="font-size: 1.8rem; font-weight: 800; color: #33ff77;">${completadas}</div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Completadas</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.8rem; font-weight: 800; color: #ffa500;">${pendientes}</div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Pendientes</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.8rem; font-weight: 800; color: #ff4d4d;">${noRealizadas}</div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">No realizadas</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.8rem; font-weight: 800; color: white;">${horasTotales.toFixed(1)}h</div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Horas totales</div>
+                </div>
             </div>
         `;
     }
@@ -1818,6 +2298,117 @@ function mostrarPlanGeneradoExistente() {
             horasTotales,
             diasHastaLimite
         );
+    }
+}
+
+// Eliminar plan completo
+async function eliminarPlanCompleto() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const pruebaId = params.get('pruebaId');
+        
+        // Limpiar todas las sesiones
+        sesionesEstudio = [];
+        
+        // Resetear configuración a valores por defecto
+        configuracionHorario = {
+            horasPorDia: 2,
+            diasDisponibles: [1, 2, 3, 4, 5], // Lun-Vie
+            momentoPreferido: 'manana',
+            fechaLimite: null
+        };
+        
+        // Resetear estado del plan
+        planYaGenerado = false;
+        
+        // Eliminar de localStorage
+        localStorage.removeItem(`plan_estudio_${pruebaId}`);
+        
+        // Eliminar de Firebase
+        try {
+            const usuarioActual = sessionStorage.getItem('currentUser');
+            if (usuarioActual && window.firebaseDB) {
+                const usuario = JSON.parse(usuarioActual);
+                const estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;
+                const planId = `plan_${estudianteId}_${pruebaId}`;
+                
+                const db = window.firebaseDB;
+                await db.collection('planesEstudio').doc(planId).delete();
+                console.log('Plan eliminado de Firebase');
+            }
+        } catch (error) {
+            console.error('Error al eliminar de Firebase:', error);
+            // Continuar aunque falle Firebase
+        }
+        
+        // Ocultar plan generado y mostrar configuración
+        document.getElementById('planGenerado').style.display = 'none';
+        document.querySelector('.horario-config').style.display = 'block';
+        
+        // Restaurar valores por defecto en la interfaz
+        restaurarConfiguracionPorDefecto();
+        
+        // Actualizar calendario
+        renderizarCalendario();
+        renderizarSesionesDia();
+        
+        // Mostrar mensaje de éxito
+        await Swal.fire({
+            icon: 'success',
+            title: '¡Plan eliminado!',
+            text: 'Puedes crear un nuevo plan de estudio cuando quieras.',
+            timer: 2500,
+            showConfirmButton: false,
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+        
+    } catch (error) {
+        console.error('Error al eliminar plan:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un problema al eliminar el plan. Intenta de nuevo.',
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+    }
+}
+
+// Restaurar configuración por defecto en la interfaz
+function restaurarConfiguracionPorDefecto() {
+    // Restaurar horas por día (2h por defecto)
+    document.querySelectorAll('.horas-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseFloat(btn.dataset.horas) === 2) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Restaurar días de la semana (Lun-Vie por defecto)
+    document.querySelectorAll('.dia-btn').forEach(btn => {
+        btn.classList.remove('active');
+        const dia = parseInt(btn.dataset.dia);
+        if ([1, 2, 3, 4, 5].includes(dia)) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Restaurar momento preferido (mañana por defecto)
+    document.querySelectorAll('.momento-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.momento === 'manana') {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Restaurar fecha límite (2 semanas por defecto)
+    const fechaInput = document.getElementById('fechaLimite');
+    if (fechaInput) {
+        const dosSemanasDate = new Date();
+        dosSemanasDate.setDate(dosSemanasDate.getDate() + 14);
+        fechaInput.value = dosSemanasDate.toISOString().split('T')[0];
+        configuracionHorario.fechaLimite = dosSemanasDate;
     }
 }
 

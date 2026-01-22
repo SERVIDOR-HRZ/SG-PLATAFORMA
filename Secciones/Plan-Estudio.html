@@ -190,6 +190,22 @@
                         <div class="calendario-grid" id="calendarioGrid">
                             <!-- Se llena dinámicamente -->
                         </div>
+                        
+                        <!-- Leyenda de estados -->
+                        <div class="calendario-leyenda">
+                            <div class="leyenda-item">
+                                <span class="leyenda-dot" style="background: #33ff77; box-shadow: 0 0 6px rgba(51, 255, 119, 0.6);"></span>
+                                <span>Completada</span>
+                            </div>
+                            <div class="leyenda-item">
+                                <span class="leyenda-dot" style="background: #ffa500; box-shadow: 0 0 6px rgba(255, 165, 0, 0.6);"></span>
+                                <span>Pendiente</span>
+                            </div>
+                            <div class="leyenda-item">
+                                <span class="leyenda-dot" style="background: #ff4d4d; box-shadow: 0 0 6px rgba(255, 77, 77, 0.6);"></span>
+                                <span>No realizada</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -218,6 +234,7 @@
                         <div class="config-section">
                             <label><i class="bi bi-hourglass-split"></i> ¿Cuántas horas puedes estudiar por día?</label>
                             <div class="horas-selector">
+                                <button class="horas-btn" data-horas="0.5">30min</button>
                                 <button class="horas-btn" data-horas="1">1h</button>
                                 <button class="horas-btn active" data-horas="2">2h</button>
                                 <button class="horas-btn" data-horas="3">3h</button>
@@ -280,10 +297,16 @@
                 <div class="plan-generado" id="planGenerado" style="display: none;">
                     <div class="plan-header">
                         <h3><i class="bi bi-clipboard-check-fill"></i> Tu Plan de Estudio Personalizado</h3>
-                        <button class="btn-editar-config" id="btnEditarConfig">
-                            <i class="bi bi-pencil-fill"></i>
-                            Editar Configuración
-                        </button>
+                        <div class="plan-header-actions">
+                            <button class="btn-editar-config" id="btnEditarConfig">
+                                <i class="bi bi-pencil-fill"></i>
+                                Editar Configuración
+                            </button>
+                            <button class="btn-eliminar-plan" id="btnEliminarPlan">
+                                <i class="bi bi-trash-fill"></i>
+                                Eliminar Plan
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- Resumen del plan -->
@@ -293,7 +316,23 @@
 
                     <!-- Horario semanal -->
                     <div class="horario-semanal" id="horarioSemanal">
-                        <!-- Se llena dinámicamente -->
+                        <!-- Navegación de semanas -->
+                        <div class="horario-navegacion">
+                            <button class="horario-nav-btn" id="semanaAnterior">
+                                <i class="bi bi-chevron-left"></i>
+                                Semana Anterior
+                            </button>
+                            <h4 class="horario-semana-titulo" id="horarioSemanaTitulo">Semana Actual</h4>
+                            <button class="horario-nav-btn" id="semanaSiguiente">
+                                Semana Siguiente
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Grid del horario -->
+                        <div id="horarioGrid">
+                            <!-- Se llena dinámicamente -->
+                        </div>
                     </div>
 
                     <!-- Recomendaciones -->
