@@ -117,11 +117,20 @@ async function loadAulaData() {
         // Obtener las materias visibles según el tipo de usuario
         let materiasVisibles = currentAulaData.materias || [];
 
+        // Cargar datos del usuario desde Firebase
+        const db = window.firebaseDB;
+        const usuarioDoc = await db.collection('usuarios').doc(currentUser.id).get();
+        
+        if (!usuarioDoc.exists) {
+            console.error('Usuario no encontrado en Firebase');
+            window.location.href = 'Clases.html';
+            return;
+        }
+        
+        const userData = usuarioDoc.data();
+
         // Si es profesor (no superusuario), filtrar por las materias que tiene asignadas en esta aula
         if (currentUser.tipoUsuario === 'admin') {
-            const db = window.firebaseDB;
-            const usuarioDoc = await db.collection('usuarios').doc(currentUser.id).get();
-            const userData = usuarioDoc.data();
             const rol = userData.rol || currentUser.rol;
 
             if (rol !== 'superusuario') {
@@ -138,6 +147,30 @@ async function loadAulaData() {
                     // Filtrar solo las materias que el profesor tiene asignadas en esta aula
                     materiasVisibles = currentAulaData.materias.filter(m => aulaAsignada.materias.includes(m));
                 }
+            }
+        }
+
+        // Si es estudiante, filtrar adicionalmente por materias permitidas específicas
+        if (currentUser.tipoUsuario === 'estudiante') {
+            const aulasAsignadas = userData.aulasAsignadas || [];
+            const aulaAsignada = aulasAsignadas.find(a => {
+                if (typeof a === 'object' && a.aulaId) {
+                    return a.aulaId === currentAulaId;
+                }
+                return a === currentAulaId;
+            });
+
+            console.log('🔍 Estudiante entrando al aula:', currentAulaId);
+            console.log('📚 Aulas asignadas del estudiante:', aulasAsignadas);
+            console.log('🎯 Aula encontrada:', aulaAsignada);
+
+            // Si el estudiante tiene materias específicas permitidas, filtrar
+            if (aulaAsignada && typeof aulaAsignada === 'object' && aulaAsignada.materiasPermitidas && aulaAsignada.materiasPermitidas.length > 0) {
+                console.log('✂️ Filtrando materias. Permitidas:', aulaAsignada.materiasPermitidas);
+                materiasVisibles = materiasVisibles.filter(m => aulaAsignada.materiasPermitidas.includes(m));
+                console.log('✅ Materias visibles después del filtro:', materiasVisibles);
+            } else {
+                console.log('ℹ️ Sin restricciones de materias, mostrando todas las del aula');
             }
         }
 

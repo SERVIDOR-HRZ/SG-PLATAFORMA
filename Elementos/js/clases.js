@@ -166,8 +166,24 @@ async function renderAulasSelector(aulas, userData, currentUser) {
         // Usar aulasAsignadas para filtrar (nuevo sistema)
         const aulasAsignadas = userData.aulasAsignadas || [];
         
+        console.log('=== DEBUG ESTUDIANTE ===');
+        console.log('Aulas asignadas del estudiante:', aulasAsignadas);
+        console.log('Aulas disponibles:', aulas.map(a => ({ id: a.id, nombre: a.nombre })));
+        
         // Filtrar solo las aulas que el estudiante tiene asignadas
-        aulasPermitidas = aulas.filter(aula => aulasAsignadas.includes(aula.id));
+        // Soportar tanto el formato antiguo (string) como el nuevo (objeto con aulaId)
+        aulasPermitidas = aulas.filter(aula => {
+            return aulasAsignadas.some(asignacion => {
+                if (typeof asignacion === 'string') {
+                    return asignacion === aula.id;
+                } else if (typeof asignacion === 'object' && asignacion.aulaId) {
+                    return asignacion.aulaId === aula.id;
+                }
+                return false;
+            });
+        });
+        
+        console.log('Aulas permitidas después del filtro:', aulasPermitidas.map(a => ({ id: a.id, nombre: a.nombre })));
         
         if (aulasPermitidas.length === 0) {
             clasesGrid.innerHTML = `
@@ -231,11 +247,36 @@ function createAulaCard(aula, userData, currentUser, materiasProfesorPorAula = {
     const color = aula.color || '#667eea';
     const materias = aula.materias || [];
     
-    // Para estudiantes: mostrar todas las materias del aula (ya tienen acceso completo al aula)
+    // Para estudiantes: verificar si tiene materias personalizadas para esta aula
     // Para profesores: mostrar solo las materias que tienen asignadas en esta aula
     let materiasVisibles = materias;
-    if (currentUser.tipoUsuario === 'admin' && userData.rol !== 'superusuario') {
-        // Usar el nuevo sistema de materias por aula
+    
+    if (currentUser.tipoUsuario === 'estudiante') {
+        // Buscar si el estudiante tiene materias personalizadas para esta aula
+        const aulasAsignadas = userData.aulasAsignadas || [];
+        const aulaAsignada = aulasAsignadas.find(asignacion => {
+            if (typeof asignacion === 'string') {
+                return asignacion === aula.id;
+            } else if (typeof asignacion === 'object' && asignacion.aulaId) {
+                return asignacion.aulaId === aula.id;
+            }
+            return false;
+        });
+        
+        console.log(`=== AULA: ${aula.nombre} ===`);
+        console.log('Asignación encontrada:', aulaAsignada);
+        
+        // Si tiene materias personalizadas, filtrar
+        if (aulaAsignada && typeof aulaAsignada === 'object' && aulaAsignada.materiasPermitidas && aulaAsignada.materiasPermitidas.length > 0) {
+            materiasVisibles = materias.filter(m => aulaAsignada.materiasPermitidas.includes(m));
+            console.log('Materias personalizadas:', aulaAsignada.materiasPermitidas);
+            console.log('Materias visibles después del filtro:', materiasVisibles);
+        } else {
+            console.log('Sin personalización, mostrando todas las materias del aula');
+        }
+        // Si no tiene personalizadas, mostrar todas las materias del aula
+    } else if (currentUser.tipoUsuario === 'admin' && userData.rol !== 'superusuario') {
+        // Usar el nuevo sistema de materias por aula para profesores
         const materiasAsignadas = materiasProfesorPorAula[aula.id] || [];
         if (materiasAsignadas.length > 0) {
             // Filtrar solo las materias que el profesor tiene asignadas en esta aula

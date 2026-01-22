@@ -7,6 +7,7 @@
     <title>Gestión de Usuarios - Seamos Genios</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../Elementos/css/usuarios.css">
+    <link rel="stylesheet" href="../Elementos/css/materias-estudiante-config.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
 
 </head>
@@ -1007,6 +1008,18 @@
                         </div>
                     </div>
 
+                    <!-- Configuración de Materias por Aula (NUEVO) -->
+                    <div class="form-section student-edit-fields" id="materiasAulaEditSection" style="display: none;">
+                        <h4><i class="bi bi-sliders"></i> Personalizar Materias por Aula</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                            <i class="bi bi-info-circle"></i> Selecciona qué materias puede ver el estudiante en cada aula. 
+                            Si no personalizas, verá todas las materias del aula.
+                        </p>
+                        <div id="aulasMateriasEditContainer">
+                            <!-- Se cargarán las aulas con sus materias -->
+                        </div>
+                    </div>
+
                 </form>
             </div>
             <div class="modal-actions">
@@ -1684,6 +1697,31 @@
                         </div>
                     </div>
 
+                    <!-- Configuración de Materias por Estudiante -->
+                    <div class="form-section" id="materiasEstudianteSection" style="display: none;">
+                        <h4><i class="bi bi-sliders"></i> Configuración de Materias por Estudiante</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona un estudiante para personalizar las materias que puede ver en esta aula</p>
+                        
+                        <div class="estudiante-materias-selector">
+                            <select id="estudianteMateriasSelect" class="filter-select">
+                                <option value="">Seleccionar estudiante...</option>
+                            </select>
+                        </div>
+
+                        <div class="materias-estudiante-config" id="materiasEstudianteConfig" style="display: none;">
+                            <div class="config-header">
+                                <i class="bi bi-person-fill"></i>
+                                <span>Materias para: <strong id="estudianteSeleccionadoNombre"></strong></span>
+                            </div>
+                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 1rem;">
+                                <i class="bi bi-info-circle"></i> Si no seleccionas ninguna materia, el estudiante verá todas las materias del aula
+                            </p>
+                            <div class="materias-estudiante-grid" id="materiasEstudianteGrid">
+                                <!-- Materias checkboxes will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
                     <input type="hidden" id="aulaId" value="">
                 </form>
             </div>
@@ -1924,6 +1962,7 @@
     <script src="../Elementos/js/config.js"></script>
     <script src="../Elementos/js/perfil-compartido.js"></script>
     <script src="../Elementos/js/invitaciones-aula.js"></script>
+    <script src="../Elementos/js/materias-estudiante-config.js"></script>
     <script src="../Elementos/js/usuarios.js"></script>
 
 </body>

@@ -1,0 +1,250 @@
+/* Configuración de Materias por Estudiante */
+.estudiante-materias-selector {
+    margin-bottom: 1.5rem;
+}
+
+.materias-estudiante-config {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.materias-estudiante-config .config-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.materias-estudiante-config .config-header i {
+    font-size: 1.5rem;
+    color: #667eea;
+}
+
+.materias-estudiante-config .config-header strong {
+    color: #667eea;
+}
+
+.materias-estudiante-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.materia-estudiante-checkbox {
+    display: flex;
+    cursor: pointer;
+    position: relative;
+}
+
+.materia-estudiante-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.materia-estudiante-checkbox .checkbox-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.materia-estudiante-checkbox input[type="checkbox"]:checked + .checkbox-content {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea15, #764ba215);
+}
+
+.materia-estudiante-checkbox .checkbox-content i {
+    font-size: 1.5rem;
+}
+
+.materia-estudiante-checkbox .checkbox-content.matematicas i {
+    color: #2196F3;
+}
+
+.materia-estudiante-checkbox .checkbox-content.lectura i {
+    color: #F44336;
+}
+
+.materia-estudiante-checkbox .checkbox-content.sociales i {
+    color: #FF9800;
+}
+
+.materia-estudiante-checkbox .checkbox-content.naturales i {
+    color: #4CAF50;
+}
+
+.materia-estudiante-checkbox .checkbox-content.ingles i {
+    color: #9C27B0;
+}
+
+.materia-estudiante-checkbox .checkbox-content.anuncios i {
+    color: #1a1a1a;
+}
+
+.materia-estudiante-checkbox .checkbox-content span {
+    font-weight: 500;
+    color: #333;
+}
+
+.materia-estudiante-checkbox:hover .checkbox-content {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Configuración de Materias por Aula en Editar Usuario */
+#aulasMateriasEditContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.aula-materias-config-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.aula-materias-config-card.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea05, #764ba205);
+}
+
+.aula-materias-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.aula-materias-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.aula-materias-title i {
+    font-size: 1.5rem;
+    color: #667eea;
+}
+
+.aula-materias-title h5 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.aula-materias-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.aula-materia-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.aula-materia-badge.matematicas {
+    background: #2196F320;
+    color: #2196F3;
+}
+
+.aula-materia-badge.lectura {
+    background: #F4433620;
+    color: #F44336;
+}
+
+.aula-materia-badge.sociales {
+    background: #FF980020;
+    color: #FF9800;
+}
+
+.aula-materia-badge.naturales {
+    background: #4CAF5020;
+    color: #4CAF50;
+}
+
+.aula-materia-badge.ingles {
+    background: #9C27B020;
+    color: #9C27B0;
+}
+
+.aula-materia-badge.anuncios {
+    background: #1a1a1a20;
+    color: #1a1a1a;
+}
+
+.aula-materias-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.aula-materias-toggle input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.aula-materias-toggle label {
+    cursor: pointer;
+    font-weight: 500;
+    color: #666;
+}
+
+.aula-materias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.aula-materias-grid.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.aula-materias-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.aula-materias-info i {
+    color: #667eea;
+}
+
+.aula-materias-info.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.aula-materias-info.warning i {
+    color: #ffc107;
+}

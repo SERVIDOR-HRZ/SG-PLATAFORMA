@@ -1583,6 +1583,11 @@ function openEditUserModal(userId) {
 function closeEditUserModal() {
     elements.editUserModal.classList.remove('show');
     currentUserForEdit = null;
+    
+    // Limpiar configuración de materias
+    if (typeof limpiarConfigEdit === 'function') {
+        limpiarConfigEdit();
+    }
 }
 
 // Open reset password modal
@@ -1920,12 +1925,26 @@ async function handleEditUser(e) {
             updateData.puntos = puntos;
             updateData.insignias = insignias;
 
-            // Get selected aulas
-            const aulasAsignadas = [];
-            const aulasCheckboxes = document.querySelectorAll('input[name="aulaPermisoEdit"]:checked');
-            aulasCheckboxes.forEach(checkbox => {
-                aulasAsignadas.push(checkbox.value);
-            });
+            // Get selected aulas con configuración de materias
+            let aulasAsignadas = [];
+            
+            console.log('=== GUARDANDO ESTUDIANTE ===');
+            
+            // Usar la función del módulo de materias si está disponible
+            if (typeof obtenerAulasConMaterias === 'function') {
+                aulasAsignadas = obtenerAulasConMaterias();
+                console.log('Aulas obtenidas de obtenerAulasConMaterias():', aulasAsignadas);
+            } else {
+                console.log('Función obtenerAulasConMaterias no disponible, usando fallback');
+                // Fallback: solo IDs de aulas sin personalización
+                const aulasCheckboxes = document.querySelectorAll('input[name="aulaPermisoEdit"]:checked');
+                aulasCheckboxes.forEach(checkbox => {
+                    aulasAsignadas.push(checkbox.value);
+                });
+                console.log('Aulas del fallback:', aulasAsignadas);
+            }
+            
+            console.log('Aulas que se guardarán en Firebase:', aulasAsignadas);
             updateData.aulasAsignadas = aulasAsignadas;
         }
 
@@ -5069,7 +5088,30 @@ async function loadAulasForEditForm(selectedAulas = []) {
             return;
         }
 
-        renderAulasCheckboxes(grid, aulas, 'aulaPermisoEdit', selectedAulas);
+        // Extraer solo los IDs de las aulas (soportar formato mixto)
+        const selectedAulaIds = selectedAulas.map(aula => {
+            if (typeof aula === 'object' && aula.aulaId) {
+                return aula.aulaId;
+            }
+            return aula;
+        });
+
+        renderAulasCheckboxes(grid, aulas, 'aulaPermisoEdit', selectedAulaIds);
+
+        // Cargar configuración de materias por aula
+        if (typeof cargarAulasMateriasEdit === 'function' && currentUserForEdit) {
+            await cargarAulasMateriasEdit(currentUserForEdit.id, currentUserForEdit.aulasAsignadas || []);
+        }
+
+        // Agregar event listeners para actualizar la UI cuando cambien las aulas
+        const checkboxes = grid.querySelectorAll('input[name="aulaPermisoEdit"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                if (typeof actualizarMateriasEditUI === 'function') {
+                    actualizarMateriasEditUI();
+                }
+            });
+        });
 
     } catch (error) {
         console.error('Error loading aulas for edit form:', error);
