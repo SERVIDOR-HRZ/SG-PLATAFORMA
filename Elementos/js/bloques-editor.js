@@ -714,6 +714,22 @@ async function editSubject(subject, block) {
     iconElement.className = `subject-icon-large ${subject}`;
     iconElement.innerHTML = `<i class="${config.icon}"></i>`;
 
+    // Add LaTeX guide button for mathematics
+    const panelHeaderActions = document.querySelector('.panel-right .panel-header-actions');
+    const existingLatexBtn = document.getElementById('latexGuideBtn');
+    if (existingLatexBtn) {
+        existingLatexBtn.remove();
+    }
+    
+    if (subject === 'matematicas') {
+        const latexBtn = document.createElement('button');
+        latexBtn.id = 'latexGuideBtn';
+        latexBtn.className = 'btn btn-sm btn-latex-guide';
+        latexBtn.innerHTML = '<i class="bi bi-book"></i> Guía LaTeX';
+        latexBtn.onclick = showLatexGuide;
+        panelHeaderActions.insertBefore(latexBtn, panelHeaderActions.firstChild);
+    }
+
     // Load questions
     loadQuestionsInModal();
 
@@ -918,8 +934,22 @@ function createQuestionElement(question, index, questionNumber) {
                         <i class="bi bi-question-circle"></i>
                         Pregunta:
                     </label>
-                    <textarea class="question-text" placeholder="Escribe tu pregunta aquí..." 
+                    <textarea class="question-text" id="questionText_${index}" placeholder="Escribe tu pregunta aquí... Usa $formula$ para matemáticas" 
+                              oninput="updateLatexPreviewRealtime(${index}, 'question', this.value)"
                               onchange="updateQuestionText(${index}, this.value)">${question.text || ''}</textarea>
+                    <div class="latex-controls">
+                        <button class="btn btn-sm btn-latex-preview" onclick="toggleLatexPreview(${index}, 'question')">
+                            <i class="bi bi-eye"></i>
+                            Vista Previa Fórmula
+                        </button>
+                    </div>
+                    <div class="latex-preview-container" id="latexPreview_question_${index}" style="display: none;">
+                        <div class="latex-preview-header">
+                            <i class="bi bi-calculator"></i>
+                            <span>Vista Previa:</span>
+                        </div>
+                        <div class="latex-preview-content" id="latexPreviewContent_question_${index}"></div>
+                    </div>
                     <div class="media-controls">
                         <button class="btn btn-sm btn-info" onclick="addImageToQuestion(${index})">
                             <i class="bi bi-image"></i>
@@ -988,10 +1018,17 @@ function createOptionsHTML(options, questionIndex) {
                 </div>
                 <div class="option-content-modern">
                     ${hasImage ? createOptionImagesHTML(option.images || [], questionIndex, optionIndex) : ''}
-                    <textarea class="option-textarea-modern" 
-                              placeholder="Escribe la opción ${letter} aquí..."
+                    <textarea class="option-textarea-modern" id="optionText_${questionIndex}_${optionIndex}"
+                              placeholder="Escribe la opción ${letter} aquí... Usa $formula$ para matemáticas"
+                              oninput="updateLatexPreviewRealtime(${questionIndex}, 'option', this.value, ${optionIndex})"
                               onchange="updateOptionText(${questionIndex}, ${optionIndex}, this.value)"
                               rows="2">${option.text || ''}</textarea>
+                    <button class="btn-latex-preview-small" onclick="toggleLatexPreview(${questionIndex}, 'option', ${optionIndex})" title="Vista previa fórmula">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <div class="latex-preview-container-small" id="latexPreview_option_${questionIndex}_${optionIndex}" style="display: none;">
+                        <div class="latex-preview-content" id="latexPreviewContent_option_${questionIndex}_${optionIndex}"></div>
+                    </div>
                 </div>
             </div>
         `;
@@ -3114,7 +3151,97 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-window.editSubject = editSubject;
-window.showDeleteQuestionModal = showDeleteQuestionModal;
-window.showDeleteVideoModal = showDeleteVideoModal;
-window.toggleBankQuestionSelection = toggleBankQuestionSelection;
+// Toggle LaTeX preview
+function toggleLatexPreview(questionIndex, type, optionIndex = null) {
+    let textareaId, previewId, contentId;
+    
+    if (type === 'question') {
+        textareaId = `questionText_${questionIndex}`;
+        previewId = `latexPreview_question_${questionIndex}`;
+        contentId = `latexPreviewContent_question_${questionIndex}`;
+    } else if (type === 'option') {
+        textareaId = `optionText_${questionIndex}_${optionIndex}`;
+        previewId = `latexPreview_option_${questionIndex}_${optionIndex}`;
+        contentId = `latexPreviewContent_option_${questionIndex}_${optionIndex}`;
+    }
+    
+    const textarea = document.getElementById(textareaId);
+    const preview = document.getElementById(previewId);
+    const content = document.getElementById(contentId);
+    
+    if (!textarea || !preview || !content) return;
+    
+    if (preview.style.display === 'none') {
+        // Mostrar vista previa
+        const text = textarea.value;
+        
+        // Insertar el texto directamente (IGUAL QUE EN LA GUÍA)
+        content.innerHTML = text;
+        preview.style.display = 'block';
+        
+        // Renderizar LaTeX (EXACTAMENTE IGUAL QUE EN LA GUÍA)
+        setTimeout(() => {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                // Clear any previous MathJax processing
+                window.MathJax.typesetClear([content]);
+                
+                // Render LaTeX content
+                window.MathJax.typesetPromise([content]).then(() => {
+                    console.log('LaTeX preview rendered successfully');
+                }).catch((err) => {
+                    console.error('MathJax error:', err);
+                });
+            }
+        }, 100);
+    } else {
+        // Ocultar vista previa
+        preview.style.display = 'none';
+    }
+}
+
+// Debounce timer for realtime preview
+let latexPreviewTimers = {};
+
+// Update LaTeX preview in realtime
+function updateLatexPreviewRealtime(questionIndex, type, text, optionIndex = null) {
+    let previewId, contentId, timerId;
+    
+    if (type === 'question') {
+        previewId = `latexPreview_question_${questionIndex}`;
+        contentId = `latexPreviewContent_question_${questionIndex}`;
+        timerId = `question_${questionIndex}`;
+    } else if (type === 'option') {
+        previewId = `latexPreview_option_${questionIndex}_${optionIndex}`;
+        contentId = `latexPreviewContent_option_${questionIndex}_${optionIndex}`;
+        timerId = `option_${questionIndex}_${optionIndex}`;
+    }
+    
+    const preview = document.getElementById(previewId);
+    const content = document.getElementById(contentId);
+    
+    if (!preview || !content || preview.style.display === 'none') return;
+    
+    // Clear previous timer
+    if (latexPreviewTimers[timerId]) {
+        clearTimeout(latexPreviewTimers[timerId]);
+    }
+    
+    // Set new timer for debounced update
+    latexPreviewTimers[timerId] = setTimeout(() => {
+        // Insertar el texto directamente (IGUAL QUE EN LA GUÍA)
+        content.innerHTML = text;
+        
+        // Renderizar LaTeX (EXACTAMENTE IGUAL QUE EN LA GUÍA)
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            // Clear any previous MathJax processing
+            window.MathJax.typesetClear([content]);
+            
+            // Render LaTeX content
+            window.MathJax.typesetPromise([content]).then(() => {
+                console.log('LaTeX preview updated successfully');
+            }).catch((err) => {
+                console.error('MathJax error:', err);
+            });
+        }
+    }, 500); // Update after 500ms of no typing
+}
