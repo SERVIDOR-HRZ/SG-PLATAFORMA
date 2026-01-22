@@ -90,12 +90,6 @@ function setupEventListeners() {
     document.getElementById('saveSubject').addEventListener('click', saveSubjectData);
     document.getElementById('addQuestionBtn').addEventListener('click', addNewQuestion);
 
-    // LaTeX help button
-    document.getElementById('latexHelpBtn').addEventListener('click', showLatexHelp);
-
-    // Question bank button
-    document.getElementById('questionBankBtn').addEventListener('click', showQuestionBank);
-
     // Save blocks button
     document.getElementById('saveBlocksBtn').addEventListener('click', saveAllBlocks);
 
@@ -700,7 +694,7 @@ function updateQuestionsCount() {
 }
 
 // Edit subject
-function editSubject(subject, block) {
+async function editSubject(subject, block) {
     currentEditingSubject = subject;
     currentEditingBlock = block;
 
@@ -708,7 +702,6 @@ function editSubject(subject, block) {
     const blockKey = `bloque${block}`;
 
     // Update modal header
-    document.getElementById('modalTitle').textContent = `Editar ${config.name}`;
     document.getElementById('modalSubjectName').textContent = config.name;
     document.getElementById('modalBlockInfo').textContent = `Bloque ${block}`;
 
@@ -723,6 +716,12 @@ function editSubject(subject, block) {
 
     // Load questions
     loadQuestionsInModal();
+
+    // Load question bank
+    await loadQuestionBank();
+
+    // Setup bank search events
+    setupBankSearchEvents();
 
     // Show modal
     document.getElementById('subjectModal').classList.add('active');
@@ -742,6 +741,8 @@ function loadQuestionsInModal() {
                 <p>Agrega preguntas o bloques de lectura para esta materia</p>
             </div>
         `;
+        // Refresh bank when questions list is empty
+        refreshBankQuestions();
         return;
     }
 
@@ -758,6 +759,9 @@ function loadQuestionsInModal() {
 
     // Renderizar fórmulas LaTeX después de cargar las preguntas
     setTimeout(() => renderMathInElement(container), 100);
+    
+    // Refresh bank questions to update "already added" status
+    refreshBankQuestions();
 }
 
 // Clean LaTeX document code (remove document structure, keep only math)
@@ -935,48 +939,68 @@ function createQuestionElement(question, index, questionNumber) {
     return div;
 }
 
-// Create options HTML
+// Create options HTML - Professional Design with Textarea
 function createOptionsHTML(options, questionIndex) {
-    let html = '<div class="options-container">';
+    const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    let html = '<div class="options-container-modern">';
 
     options.forEach((option, optionIndex) => {
+        const letter = optionLetters[optionIndex] || (optionIndex + 1);
+        const hasImage = option.images && option.images.length > 0;
+        
         html += `
-            <div class="option-item">
-                <div class="option-controls">
-                    <input type="radio" name="correct_${questionIndex}" 
-                           ${option.isCorrect ? 'checked' : ''} 
-                           onchange="setCorrectOption(${questionIndex}, ${optionIndex})">
-                    <div class="option-content-editor">
-                        <input type="text" value="${(option.text || '').replace(/"/g, '&quot;')}" 
-                               placeholder="Opción ${optionIndex + 1}"
-                               onchange="updateOptionText(${questionIndex}, ${optionIndex}, this.value)">
-                        ${createOptionImagesHTML(option.images || [], questionIndex, optionIndex)}
+            <div class="option-card-modern ${option.isCorrect ? 'correct-option-modern' : ''}" data-option-index="${optionIndex}">
+                <div class="option-header-modern">
+                    <div class="option-selector-modern">
+                        <input type="radio" 
+                               name="correct_${questionIndex}" 
+                               id="radio_${questionIndex}_${optionIndex}"
+                               ${option.isCorrect ? 'checked' : ''} 
+                               onchange="setCorrectOption(${questionIndex}, ${optionIndex})"
+                               class="option-radio-modern">
+                        <label for="radio_${questionIndex}_${optionIndex}" class="option-radio-label">
+                            <span class="radio-custom"></span>
+                            <span class="option-letter-modern">${letter}</span>
+                        </label>
                     </div>
-                    <div class="option-buttons">
-                        ${(option.images && option.images.length > 0) ? `
-                            <button class="btn btn-sm btn-danger" onclick="removeImageFromOption(${questionIndex}, ${optionIndex}, 0)">
+                    <div class="option-actions-modern">
+                        ${hasImage ? `
+                            <button class="btn-icon-modern btn-danger-modern" 
+                                    onclick="removeImageFromOption(${questionIndex}, ${optionIndex}, 0)" 
+                                    title="Eliminar imagen">
                                 <i class="bi bi-trash"></i>
                             </button>
                         ` : `
-                            <button class="btn btn-sm btn-info" onclick="addImageToOption(${questionIndex}, ${optionIndex})">
+                            <button class="btn-icon-modern btn-info-modern" 
+                                    onclick="addImageToOption(${questionIndex}, ${optionIndex})" 
+                                    title="Agregar imagen">
                                 <i class="bi bi-image"></i>
                             </button>
                         `}
                         ${options.length > 2 ? `
-                            <button class="btn btn-sm btn-danger" onclick="deleteOption(${questionIndex}, ${optionIndex})">
-                                <i class="bi bi-x"></i>
+                            <button class="btn-icon-modern btn-delete-modern" 
+                                    onclick="deleteOption(${questionIndex}, ${optionIndex})" 
+                                    title="Eliminar opción">
+                                <i class="bi bi-x-lg"></i>
                             </button>
                         ` : ''}
                     </div>
+                </div>
+                <div class="option-content-modern">
+                    ${hasImage ? createOptionImagesHTML(option.images || [], questionIndex, optionIndex) : ''}
+                    <textarea class="option-textarea-modern" 
+                              placeholder="Escribe la opción ${letter} aquí..."
+                              onchange="updateOptionText(${questionIndex}, ${optionIndex}, this.value)"
+                              rows="2">${option.text || ''}</textarea>
                 </div>
             </div>
         `;
     });
 
     html += `
-        <button class="btn btn-sm btn-primary add-option-btn" onclick="addOption(${questionIndex})">
-            <i class="bi bi-plus"></i>
-            Agregar Opción
+        <button class="btn-add-option-modern" onclick="addOption(${questionIndex})">
+            <i class="bi bi-plus-circle"></i>
+            <span>Agregar Opción</span>
         </button>
     </div>`;
 
@@ -985,7 +1009,11 @@ function createOptionsHTML(options, questionIndex) {
 
 // ========== SABER 11 STRUCTURE FUNCTIONS ==========
 
-// Create Saber 11 selectors HTML with multiple selection support
+// Variables globales para el modal Saber 11
+let currentSaber11QuestionIndex = null;
+let tempSaber11Data = null;
+
+// Create Saber 11 selectors HTML with button to open modal
 function createSaber11SelectorsHTML(question, index) {
     const saber11 = question.saber11 || {};
     const estructura = window.SABER11_ESTRUCTURA ? window.SABER11_ESTRUCTURA[currentEditingSubject] : null;
@@ -994,15 +1022,80 @@ function createSaber11SelectorsHTML(question, index) {
         return '<div class="saber11-warning"><i class="bi bi-exclamation-triangle"></i> Estructura Saber 11 no disponible para esta materia</div>';
     }
 
+    // Contar elementos seleccionados
+    const componentesCount = (saber11.componentes || []).length;
+    const competenciasCount = (saber11.competencias || []).length;
+    const temasCount = (saber11.temas || []).length;
+    
+    let afirmacionesCount = 0;
+    if (saber11.afirmaciones) {
+        Object.values(saber11.afirmaciones).forEach(arr => {
+            afirmacionesCount += arr.length;
+        });
+    }
+
+    const hasClassification = componentesCount > 0 || competenciasCount > 0 || afirmacionesCount > 0 || temasCount > 0;
+
+    return `
+        <div class="saber11-compact-selector">
+            <button class="btn-saber11-open ${hasClassification ? 'has-data' : ''}" onclick="openSaber11Modal(${index})">
+                <div class="saber11-btn-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div class="saber11-btn-content">
+                    <span class="saber11-btn-title">Clasificación Saber 11</span>
+                    ${hasClassification ? `
+                        <span class="saber11-btn-summary">
+                            ${componentesCount > 0 ? `${componentesCount} componente${componentesCount !== 1 ? 's' : ''}` : ''}
+                            ${competenciasCount > 0 ? `${componentesCount > 0 ? ' • ' : ''}${competenciasCount} competencia${competenciasCount !== 1 ? 's' : ''}` : ''}
+                            ${afirmacionesCount > 0 ? `${(componentesCount > 0 || competenciasCount > 0) ? ' • ' : ''}${afirmacionesCount} afirmación${afirmacionesCount !== 1 ? 'es' : ''}` : ''}
+                            ${temasCount > 0 ? `${(componentesCount > 0 || competenciasCount > 0 || afirmacionesCount > 0) ? ' • ' : ''}${temasCount} tema${temasCount !== 1 ? 's' : ''}` : ''}
+                        </span>
+                    ` : '<span class="saber11-btn-empty">Sin clasificación</span>'}
+                </div>
+                <i class="bi bi-chevron-right saber11-btn-arrow"></i>
+            </button>
+        </div>
+    `;
+}
+
+// Open Saber 11 Modal
+function openSaber11Modal(index) {
+    currentSaber11QuestionIndex = index;
+    const blockKey = `bloque${currentEditingBlock}`;
+    const question = testBlocks[blockKey][currentEditingSubject].questions[index];
+    
+    // Clonar datos actuales
+    tempSaber11Data = JSON.parse(JSON.stringify(question.saber11 || {}));
+    
+    // Cargar contenido del modal
+    loadSaber11ModalContent();
+    
+    // Mostrar modal
+    document.getElementById('saber11Modal').classList.add('active');
+}
+
+// Load Saber 11 Modal Content
+function loadSaber11ModalContent() {
+    const estructura = window.SABER11_ESTRUCTURA ? window.SABER11_ESTRUCTURA[currentEditingSubject] : null;
+    
+    if (!estructura) {
+        document.getElementById('saber11ModalContent').innerHTML = `
+            <div class="saber11-error">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>Estructura Saber 11 no disponible para esta materia</p>
+            </div>
+        `;
+        return;
+    }
+
+    const config = subjectConfig[currentEditingSubject];
+    document.getElementById('saber11ModalSubject').textContent = `Pregunta ${currentSaber11QuestionIndex + 1} - ${config.name}`;
+
     const componentes = estructura.componentes || [];
     const competencias = estructura.competencias || [];
 
-    // Obtener componentes seleccionados (array)
-    const selectedComponentes = saber11.componentes || [];
-    // Obtener competencias seleccionadas (array)
-    const selectedCompetencias = saber11.competencias || [];
-
-    // Obtener todos los temas disponibles de todas las competencias
+    // Obtener todos los temas disponibles
     let allTemas = [];
     competencias.forEach(comp => {
         if (comp.afirmaciones) {
@@ -1018,7 +1111,7 @@ function createSaber11SelectorsHTML(question, index) {
         }
     });
 
-    // Agrupar temas por categoría para mostrarlos organizados
+    // Agrupar temas por categoría
     const temasPorCategoria = {};
     allTemas.forEach(t => {
         if (!temasPorCategoria[t.categoria]) {
@@ -1027,139 +1120,142 @@ function createSaber11SelectorsHTML(question, index) {
         temasPorCategoria[t.categoria].push(t);
     });
 
-    // Obtener temas seleccionados (array)
-    const selectedTemas = saber11.temas || [];
+    const selectedComponentes = tempSaber11Data.componentes || [];
+    const selectedCompetencias = tempSaber11Data.competencias || [];
+    const selectedTemas = tempSaber11Data.temas || [];
+    const afirmacionesSeleccionadas = tempSaber11Data.afirmaciones || {};
 
-    return `
-        <div class="saber11-selectors" data-question-index="${index}">
-            <div class="saber11-header">
-                <i class="bi bi-mortarboard-fill"></i>
-                <span>Clasificación Saber 11</span>
-                <button class="btn btn-sm btn-outline-info saber11-toggle" onclick="toggleSaber11Panel(${index})">
-                    <i class="bi bi-chevron-down"></i>
-                </button>
+    const html = `
+        <div class="saber11-modal-section">
+            <div class="saber11-section-header">
+                <i class="bi bi-layers"></i>
+                <h4>Componentes</h4>
+                <span class="required-badge">Obligatorio</span>
             </div>
-            <div class="saber11-content" id="saber11Content_${index}">
-                <!-- Componentes -->
-                <div class="saber11-row">
-                    <div class="saber11-field saber11-field-full">
-                        <label><i class="bi bi-layers"></i> Componentes:</label>
-                        <div class="componentes-checkboxes" id="componentesCheckboxes_${index}">
-                            ${componentes.map(c => `
-                                <label class="componente-checkbox-item ${selectedComponentes.includes(c) ? 'selected' : ''}">
-                                    <input type="checkbox" 
-                                           value="${c}" 
-                                           ${selectedComponentes.includes(c) ? 'checked' : ''}
-                                           onchange="toggleComponente(${index}, '${c}', this.checked)">
-                                    <span>${c}</span>
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Competencias -->
-                <div class="saber11-row">
-                    <div class="saber11-field saber11-field-full">
-                        <label><i class="bi bi-lightbulb"></i> Competencias:</label>
-                        <div class="competencias-checkboxes" id="competenciasCheckboxes_${index}">
-                            ${competencias.map(c => `
-                                <label class="competencia-checkbox-item ${selectedCompetencias.includes(c.id) ? 'selected' : ''}">
-                                    <input type="checkbox" 
-                                           value="${c.id}" 
-                                           ${selectedCompetencias.includes(c.id) ? 'checked' : ''}
-                                           onchange="toggleCompetencia(${index}, '${c.id}', this.checked)">
-                                    <span>${c.nombre}</span>
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Afirmaciones dinámicas por cada competencia seleccionada -->
-                <div class="saber11-afirmaciones-container" id="afirmacionesContainer_${index}">
-                    ${createAfirmacionesSelectorsHTML(index, selectedCompetencias, competencias, saber11)}
-                </div>
-                
-                <!-- Temas Asociados - Selección múltiple por categoría -->
-                <div class="saber11-row">
-                    <div class="saber11-field saber11-field-full">
-                        <label><i class="bi bi-book"></i> Temas Asociados:</label>
-                        <div class="temas-por-categoria">
-                            ${Object.keys(temasPorCategoria).map(categoria => `
-                                <div class="categoria-section ${currentEditingSubject}">
-                                    <div class="categoria-header">
-                                        <i class="bi bi-folder2-open"></i>
-                                        <span>${categoria}</span>
-                                    </div>
-                                    <div class="temas-checkboxes">
-                                        ${temasPorCategoria[categoria].map(t => {
-                                            const temaValue = `${t.categoria}|${t.nombre}`;
-                                            const isSelected = selectedTemas.includes(temaValue);
-                                            return `
-                                                <label class="tema-checkbox-item ${isSelected ? 'selected' : ''}">
-                                                    <input type="checkbox" 
-                                                           value="${temaValue}" 
-                                                           ${isSelected ? 'checked' : ''}
-                                                           onchange="toggleTema(${index}, '${temaValue}', this.checked)">
-                                                    <div class="tema-content">
-                                                        <span class="tema-nombre">${t.nombre}</span>
-                                                        ${t.tip ? `<div class="tema-tip"><i class="bi bi-lightbulb-fill"></i> ${t.tip}</div>` : ''}
-                                                    </div>
-                                                </label>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
+            <div class="saber11-checkboxes-grid">
+                ${componentes.map(c => `
+                    <label class="saber11-checkbox-card ${selectedComponentes.includes(c) ? 'selected' : ''}">
+                        <input type="checkbox" 
+                               value="${c}" 
+                               ${selectedComponentes.includes(c) ? 'checked' : ''}
+                               onchange="toggleModalComponente('${c}', this.checked)">
+                        <span>${c}</span>
+                    </label>
+                `).join('')}
             </div>
         </div>
+
+        <div class="saber11-modal-section">
+            <div class="saber11-section-header">
+                <i class="bi bi-lightbulb"></i>
+                <h4>Competencias</h4>
+                <span class="required-badge">Obligatorio</span>
+            </div>
+            <div class="saber11-checkboxes-grid">
+                ${competencias.map(c => `
+                    <label class="saber11-checkbox-card ${selectedCompetencias.includes(c.id) ? 'selected' : ''}">
+                        <input type="checkbox" 
+                               value="${c.id}" 
+                               ${selectedCompetencias.includes(c.id) ? 'checked' : ''}
+                               onchange="toggleModalCompetencia('${c.id}', this.checked)">
+                        <div class="competencia-card-content">
+                            <span class="competencia-nombre">${c.nombre}</span>
+                            <span class="competencia-descripcion">${c.descripcion}</span>
+                        </div>
+                    </label>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="saber11-modal-section" id="afirmacionesModalSection">
+            ${createModalAfirmacionesHTML(selectedCompetencias, competencias, afirmacionesSeleccionadas)}
+        </div>
+
+        <div class="saber11-modal-section">
+            <div class="saber11-section-header">
+                <i class="bi bi-book"></i>
+                <h4>Temas Asociados</h4>
+                <span class="required-badge">Obligatorio</span>
+            </div>
+            ${Object.keys(temasPorCategoria).map(categoria => `
+                <div class="saber11-categoria-section">
+                    <div class="saber11-categoria-header">
+                        <i class="bi bi-folder2-open"></i>
+                        <span>${categoria}</span>
+                    </div>
+                    <div class="saber11-temas-grid">
+                        ${temasPorCategoria[categoria].map(t => {
+                            const temaValue = `${t.categoria}|${t.nombre}`;
+                            const isSelected = selectedTemas.includes(temaValue);
+                            return `
+                                <label class="saber11-tema-card ${isSelected ? 'selected' : ''}">
+                                    <input type="checkbox" 
+                                           value="${temaValue}" 
+                                           ${isSelected ? 'checked' : ''}
+                                           onchange="toggleModalTema('${temaValue}', this.checked)">
+                                    <div class="tema-card-content">
+                                        <span class="tema-nombre">${t.nombre}</span>
+                                        ${t.tip ? `<span class="tema-tip"><i class="bi bi-lightbulb-fill"></i> ${t.tip}</span>` : ''}
+                                    </div>
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
     `;
+
+    document.getElementById('saber11ModalContent').innerHTML = html;
 }
 
-// Create afirmaciones selectors for each selected competencia - con selección múltiple
-function createAfirmacionesSelectorsHTML(index, selectedCompetencias, competencias, saber11) {
+// Create modal afirmaciones HTML
+function createModalAfirmacionesHTML(selectedCompetencias, competencias, afirmacionesSeleccionadas) {
     if (!selectedCompetencias || selectedCompetencias.length === 0) {
-        return '<p class="no-competencias-message"><i class="bi bi-info-circle"></i> Selecciona al menos una competencia para ver las afirmaciones disponibles.</p>';
+        return `
+            <div class="saber11-section-header">
+                <i class="bi bi-check2-square"></i>
+                <h4>Afirmaciones</h4>
+                <span class="required-badge">Obligatorio</span>
+            </div>
+            <div class="saber11-empty-message">
+                <i class="bi bi-info-circle"></i>
+                <p>Selecciona al menos una competencia para ver las afirmaciones disponibles</p>
+            </div>
+        `;
     }
 
-    // afirmaciones ahora es un objeto: { competenciaId: [array de afirmacionIds] }
-    const afirmacionesSeleccionadas = saber11.afirmaciones || {};
-
-    let html = '';
+    let html = `
+        <div class="saber11-section-header">
+            <i class="bi bi-check2-square"></i>
+            <h4>Afirmaciones</h4>
+            <span class="required-badge">Obligatorio</span>
+        </div>
+    `;
 
     selectedCompetencias.forEach(compId => {
         const competencia = competencias.find(c => c.id === compId);
         if (!competencia) return;
 
         const afirmaciones = competencia.afirmaciones || [];
-        // Ahora es un array de IDs seleccionados
         const selectedAfirmaciones = afirmacionesSeleccionadas[compId] || [];
 
         html += `
-            <div class="saber11-competencia-section" data-competencia="${compId}">
-                <div class="competencia-section-header">
+            <div class="saber11-competencia-afirmaciones">
+                <div class="competencia-afirmaciones-header">
                     <i class="bi bi-lightbulb-fill"></i>
                     <span>${competencia.nombre}</span>
                 </div>
-                <div class="saber11-afirmaciones-content">
-                    <div class="saber11-field saber11-field-full">
-                        <label><i class="bi bi-check2-square"></i> Afirmaciones (opcional):</label>
-                        <div class="afirmaciones-checkboxes">
-                            ${afirmaciones.map(a => `
-                                <label class="afirmacion-checkbox-item ${selectedAfirmaciones.includes(a.id) ? 'selected' : ''}">
-                                    <input type="checkbox" 
-                                           value="${a.id}" 
-                                           ${selectedAfirmaciones.includes(a.id) ? 'checked' : ''}
-                                           onchange="toggleAfirmacion(${index}, '${compId}', '${a.id}', this.checked)">
-                                    <span>${a.descripcion}</span>
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
+                <div class="saber11-afirmaciones-list">
+                    ${afirmaciones.map(a => `
+                        <label class="saber11-afirmacion-card ${selectedAfirmaciones.includes(a.id) ? 'selected' : ''}">
+                            <input type="checkbox" 
+                                   value="${a.id}" 
+                                   ${selectedAfirmaciones.includes(a.id) ? 'checked' : ''}
+                                   onchange="toggleModalAfirmacion('${compId}', '${a.id}', this.checked)">
+                            <span>${a.descripcion}</span>
+                        </label>
+                    `).join('')}
                 </div>
             </div>
         `;
@@ -1167,6 +1263,240 @@ function createAfirmacionesSelectorsHTML(index, selectedCompetencias, competenci
 
     return html;
 }
+
+// Toggle functions for modal
+function toggleModalComponente(componenteId, isChecked) {
+    if (!tempSaber11Data.componentes) {
+        tempSaber11Data.componentes = [];
+    }
+
+    if (isChecked) {
+        if (!tempSaber11Data.componentes.includes(componenteId)) {
+            tempSaber11Data.componentes.push(componenteId);
+        }
+    } else {
+        const idx = tempSaber11Data.componentes.indexOf(componenteId);
+        if (idx > -1) {
+            tempSaber11Data.componentes.splice(idx, 1);
+        }
+    }
+}
+
+function toggleModalCompetencia(competenciaId, isChecked) {
+    if (!tempSaber11Data.competencias) {
+        tempSaber11Data.competencias = [];
+    }
+
+    if (isChecked) {
+        if (!tempSaber11Data.competencias.includes(competenciaId)) {
+            tempSaber11Data.competencias.push(competenciaId);
+        }
+    } else {
+        const idx = tempSaber11Data.competencias.indexOf(competenciaId);
+        if (idx > -1) {
+            tempSaber11Data.competencias.splice(idx, 1);
+        }
+        // Limpiar afirmaciones de esta competencia
+        if (tempSaber11Data.afirmaciones) {
+            delete tempSaber11Data.afirmaciones[competenciaId];
+        }
+    }
+
+    // Recargar sección de afirmaciones
+    const estructura = window.SABER11_ESTRUCTURA[currentEditingSubject];
+    const competencias = estructura.competencias || [];
+    const afirmacionesSection = document.getElementById('afirmacionesModalSection');
+    afirmacionesSection.innerHTML = createModalAfirmacionesHTML(
+        tempSaber11Data.competencias || [],
+        competencias,
+        tempSaber11Data.afirmaciones || {}
+    );
+}
+
+function toggleModalAfirmacion(competenciaId, afirmacionId, isChecked) {
+    if (!tempSaber11Data.afirmaciones) {
+        tempSaber11Data.afirmaciones = {};
+    }
+
+    if (!tempSaber11Data.afirmaciones[competenciaId]) {
+        tempSaber11Data.afirmaciones[competenciaId] = [];
+    }
+
+    if (isChecked) {
+        if (!tempSaber11Data.afirmaciones[competenciaId].includes(afirmacionId)) {
+            tempSaber11Data.afirmaciones[competenciaId].push(afirmacionId);
+        }
+    } else {
+        const idx = tempSaber11Data.afirmaciones[competenciaId].indexOf(afirmacionId);
+        if (idx > -1) {
+            tempSaber11Data.afirmaciones[competenciaId].splice(idx, 1);
+        }
+    }
+}
+
+function toggleModalTema(temaValue, isChecked) {
+    if (!tempSaber11Data.temas) {
+        tempSaber11Data.temas = [];
+    }
+
+    if (isChecked) {
+        if (!tempSaber11Data.temas.includes(temaValue)) {
+            tempSaber11Data.temas.push(temaValue);
+        }
+    } else {
+        const idx = tempSaber11Data.temas.indexOf(temaValue);
+        if (idx > -1) {
+            tempSaber11Data.temas.splice(idx, 1);
+        }
+    }
+}
+
+// Save Saber 11 classification
+function saveSaber11Classification() {
+    if (currentSaber11QuestionIndex === null) return;
+
+    // Validar que se haya seleccionado al menos un elemento de cada categoría
+    const componentes = tempSaber11Data.componentes || [];
+    const competencias = tempSaber11Data.competencias || [];
+    const temas = tempSaber11Data.temas || [];
+    
+    // Contar afirmaciones totales
+    let totalAfirmaciones = 0;
+    if (tempSaber11Data.afirmaciones) {
+        Object.values(tempSaber11Data.afirmaciones).forEach(arr => {
+            totalAfirmaciones += arr.length;
+        });
+    }
+
+    // Validaciones
+    const errores = [];
+    
+    if (componentes.length === 0) {
+        errores.push('Debes seleccionar al menos un <strong>Componente</strong>');
+    }
+    
+    if (competencias.length === 0) {
+        errores.push('Debes seleccionar al menos una <strong>Competencia</strong>');
+    }
+    
+    if (totalAfirmaciones === 0) {
+        errores.push('Debes seleccionar al menos una <strong>Afirmación</strong>');
+    }
+    
+    if (temas.length === 0) {
+        errores.push('Debes seleccionar al menos un <strong>Tema Asociado</strong>');
+    }
+
+    // Si hay errores, mostrar notificación y no guardar
+    if (errores.length > 0) {
+        showValidationModal(errores);
+        return;
+    }
+
+    // Si todo está bien, guardar
+    const blockKey = `bloque${currentEditingBlock}`;
+    const question = testBlocks[blockKey][currentEditingSubject].questions[currentSaber11QuestionIndex];
+    
+    question.saber11 = JSON.parse(JSON.stringify(tempSaber11Data));
+    
+    closeSaber11Modal();
+    loadQuestionsInModal();
+    
+    showNotification('Clasificación Saber 11 guardada correctamente', 'success');
+}
+
+// Show validation modal
+function showValidationModal(errores) {
+    const modalHTML = `
+        <div class="modal-overlay validation-modal-overlay" id="validationModalOverlay">
+            <div class="modal validation-modal">
+                <div class="modal-header validation-modal-header">
+                    <div class="validation-icon-container">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <h3>Clasificación Incompleta</h3>
+                    <button class="close-btn" onclick="closeValidationModal()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body validation-modal-body">
+                    <p class="validation-message">Para guardar la clasificación Saber 11, debes completar todos los campos obligatorios:</p>
+                    <ul class="validation-errors-list">
+                        ${errores.map(error => `<li><i class="bi bi-x-circle-fill"></i> ${error}</li>`).join('')}
+                    </ul>
+                    <div class="validation-help">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>Selecciona al menos un elemento de cada categoría para continuar.</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="closeValidationModal()">
+                        <i class="bi bi-check-lg"></i>
+                        Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = document.getElementById('validationModalOverlay');
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Close validation modal
+function closeValidationModal() {
+    const modal = document.getElementById('validationModalOverlay');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+// Make function global
+window.closeValidationModal = closeValidationModal;
+
+// Close Saber 11 Modal
+function closeSaber11Modal() {
+    document.getElementById('saber11Modal').classList.remove('active');
+    currentSaber11QuestionIndex = null;
+    tempSaber11Data = null;
+}
+
+// Setup Saber 11 Modal event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const closeSaber11Btn = document.getElementById('closeSaber11Modal');
+    const cancelSaber11Btn = document.getElementById('cancelSaber11');
+    const saveSaber11Btn = document.getElementById('saveSaber11');
+    const saber11Modal = document.getElementById('saber11Modal');
+
+    if (closeSaber11Btn) {
+        closeSaber11Btn.addEventListener('click', closeSaber11Modal);
+    }
+
+    if (cancelSaber11Btn) {
+        cancelSaber11Btn.addEventListener('click', closeSaber11Modal);
+    }
+
+    if (saveSaber11Btn) {
+        saveSaber11Btn.addEventListener('click', saveSaber11Classification);
+    }
+
+    if (saber11Modal) {
+        saber11Modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSaber11Modal();
+            }
+        });
+    }
+});
+
+// Make functions global
+window.openSaber11Modal = openSaber11Modal;
+window.toggleModalComponente = toggleModalComponente;
+window.toggleModalCompetencia = toggleModalCompetencia;
+window.toggleModalAfirmacion = toggleModalAfirmacion;
+window.toggleModalTema = toggleModalTema;
 
 // Get tip for tema
 function getTipForTema(temaValue, allTemas) {
@@ -1176,168 +1506,6 @@ function getTipForTema(temaValue, allTemas) {
     return tema ? tema.tip : '';
 }
 
-// Toggle competencia selection
-function toggleCompetencia(index, competenciaId, isChecked) {
-    const blockKey = `bloque${currentEditingBlock}`;
-    const question = testBlocks[blockKey][currentEditingSubject].questions[index];
-
-    if (!question.saber11) {
-        question.saber11 = {};
-    }
-
-    if (!question.saber11.competencias) {
-        question.saber11.competencias = [];
-    }
-
-    if (isChecked) {
-        if (!question.saber11.competencias.includes(competenciaId)) {
-            question.saber11.competencias.push(competenciaId);
-        }
-    } else {
-        const idx = question.saber11.competencias.indexOf(competenciaId);
-        if (idx > -1) {
-            question.saber11.competencias.splice(idx, 1);
-        }
-        // Limpiar afirmaciones de esta competencia
-        if (question.saber11.afirmaciones) {
-            delete question.saber11.afirmaciones[competenciaId];
-        }
-    }
-
-    // Reload to update UI
-    loadQuestionsInModal();
-}
-
-// Toggle componente selection
-function toggleComponente(index, componenteId, isChecked) {
-    const blockKey = `bloque${currentEditingBlock}`;
-    const question = testBlocks[blockKey][currentEditingSubject].questions[index];
-
-    if (!question.saber11) {
-        question.saber11 = {};
-    }
-
-    if (!question.saber11.componentes) {
-        question.saber11.componentes = [];
-    }
-
-    if (isChecked) {
-        if (!question.saber11.componentes.includes(componenteId)) {
-            question.saber11.componentes.push(componenteId);
-        }
-    } else {
-        const idx = question.saber11.componentes.indexOf(componenteId);
-        if (idx > -1) {
-            question.saber11.componentes.splice(idx, 1);
-        }
-    }
-}
-
-// Toggle afirmacion selection (multiple selection per competencia)
-function toggleAfirmacion(index, competenciaId, afirmacionId, isChecked) {
-    const blockKey = `bloque${currentEditingBlock}`;
-    const question = testBlocks[blockKey][currentEditingSubject].questions[index];
-
-    if (!question.saber11) {
-        question.saber11 = {};
-    }
-
-    if (!question.saber11.afirmaciones) {
-        question.saber11.afirmaciones = {};
-    }
-
-    if (!question.saber11.afirmaciones[competenciaId]) {
-        question.saber11.afirmaciones[competenciaId] = [];
-    }
-
-    if (isChecked) {
-        if (!question.saber11.afirmaciones[competenciaId].includes(afirmacionId)) {
-            question.saber11.afirmaciones[competenciaId].push(afirmacionId);
-        }
-    } else {
-        const idx = question.saber11.afirmaciones[competenciaId].indexOf(afirmacionId);
-        if (idx > -1) {
-            question.saber11.afirmaciones[competenciaId].splice(idx, 1);
-        }
-    }
-}
-
-// Toggle tema selection (multiple selection)
-function toggleTema(index, temaValue, isChecked) {
-    const blockKey = `bloque${currentEditingBlock}`;
-    const question = testBlocks[blockKey][currentEditingSubject].questions[index];
-
-    if (!question.saber11) {
-        question.saber11 = {};
-    }
-
-    if (!question.saber11.temas) {
-        question.saber11.temas = [];
-    }
-
-    if (isChecked) {
-        if (!question.saber11.temas.includes(temaValue)) {
-            question.saber11.temas.push(temaValue);
-        }
-    } else {
-        const idx = question.saber11.temas.indexOf(temaValue);
-        if (idx > -1) {
-            question.saber11.temas.splice(idx, 1);
-        }
-    }
-}
-
-// Make new functions globally accessible
-window.toggleCompetencia = toggleCompetencia;
-window.toggleComponente = toggleComponente;
-window.toggleAfirmacion = toggleAfirmacion;
-window.toggleTema = toggleTema;
-
-// Toggle Saber 11 panel visibility
-function toggleSaber11Panel(index) {
-    const content = document.getElementById(`saber11Content_${index}`);
-    const toggle = content.previousElementSibling.querySelector('.saber11-toggle i');
-
-    if (content.classList.contains('collapsed')) {
-        content.classList.remove('collapsed');
-        toggle.className = 'bi bi-chevron-down';
-    } else {
-        content.classList.add('collapsed');
-        toggle.className = 'bi bi-chevron-up';
-    }
-}
-
-// Update Saber 11 componente
-function updateSaber11Componente(index, value) {
-    const blockKey = `bloque${currentEditingBlock}`;
-    const question = testBlocks[blockKey][currentEditingSubject].questions[index];
-
-    if (!question.saber11) {
-        question.saber11 = {};
-    }
-
-    question.saber11.componente = value;
-}
-
-// Update Saber 11 tema
-function updateSaber11Tema(index, value) {
-    const blockKey = `bloque${currentEditingBlock}`;
-    const question = testBlocks[blockKey][currentEditingSubject].questions[index];
-
-    if (!question.saber11) {
-        question.saber11 = {};
-    }
-
-    question.saber11.tema = value;
-
-    // Reload to show tip
-    loadQuestionsInModal();
-}
-
-// Make Saber 11 functions globally accessible
-window.toggleSaber11Panel = toggleSaber11Panel;
-window.updateSaber11Componente = updateSaber11Componente;
-window.updateSaber11Tema = updateSaber11Tema;
 // Add new question
 function addNewQuestion() {
     showQuestionTypeModal();
@@ -1559,6 +1727,10 @@ async function deleteQuestion(index) {
         const blockKey = `bloque${currentEditingBlock}`;
         testBlocks[blockKey][currentEditingSubject].questions.splice(index, 1);
         loadQuestionsInModal();
+        
+        // Refresh bank questions to update "already added" status
+        refreshBankQuestions();
+        
         showNotification('Pregunta eliminada correctamente', 'success');
     }
 }
@@ -1577,6 +1749,9 @@ function setCorrectOption(questionIndex, optionIndex) {
     options.forEach((option, index) => {
         option.isCorrect = index === optionIndex;
     });
+    
+    // Recargar la vista para actualizar los estilos visuales
+    loadQuestionsInModal();
 }
 
 // Add option
@@ -1656,6 +1831,25 @@ async function saveSubjectData() {
                 return;
             }
 
+            // Validar clasificación Saber 11
+            const saber11 = question.saber11 || {};
+            const componentes = saber11.componentes || [];
+            const competencias = saber11.competencias || [];
+            const temas = saber11.temas || [];
+            
+            let totalAfirmaciones = 0;
+            if (saber11.afirmaciones) {
+                Object.values(saber11.afirmaciones).forEach(arr => {
+                    totalAfirmaciones += arr.length;
+                });
+            }
+            
+            if (componentes.length === 0 || competencias.length === 0 || 
+                totalAfirmaciones === 0 || temas.length === 0) {
+                showNotification(`La pregunta ${questionNumber} no tiene clasificación Saber 11 completa. Debes completar: Componente, Competencia, Afirmación y Tema.`, 'error');
+                return;
+            }
+
             questionNumber++;
         }
     }
@@ -1678,6 +1872,55 @@ async function saveSubjectData() {
 // Save all blocks
 async function saveAllBlocks() {
     try {
+        // Validar que todas las preguntas tengan clasificación Saber 11
+        const preguntasSinClasificacion = [];
+        
+        Object.keys(testBlocks).forEach(bloqueKey => {
+            const bloque = testBlocks[bloqueKey];
+            Object.keys(bloque).forEach(materia => {
+                const questions = bloque[materia].questions || [];
+                questions.forEach((question, index) => {
+                    // Solo validar preguntas normales, no bloques de lectura
+                    if (question.type !== 'reading') {
+                        const saber11 = question.saber11 || {};
+                        const componentes = saber11.componentes || [];
+                        const competencias = saber11.competencias || [];
+                        const temas = saber11.temas || [];
+                        
+                        let totalAfirmaciones = 0;
+                        if (saber11.afirmaciones) {
+                            Object.values(saber11.afirmaciones).forEach(arr => {
+                                totalAfirmaciones += arr.length;
+                            });
+                        }
+                        
+                        if (componentes.length === 0 || competencias.length === 0 || 
+                            totalAfirmaciones === 0 || temas.length === 0) {
+                            preguntasSinClasificacion.push({
+                                bloque: bloqueKey,
+                                materia: materia,
+                                numero: index + 1
+                            });
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Si hay preguntas sin clasificación, mostrar error
+        if (preguntasSinClasificacion.length > 0) {
+            const errores = preguntasSinClasificacion.map(p => 
+                `<strong>${p.bloque}</strong> - ${p.materia} - Pregunta ${p.numero}`
+            );
+            
+            showValidationModal([
+                'Las siguientes preguntas no tienen clasificación Saber 11 completa:',
+                ...errores.slice(0, 10), // Mostrar máximo 10
+                ...(errores.length > 10 ? [`... y ${errores.length - 10} más`] : [])
+            ]);
+            return;
+        }
+        
         showLoadingOverlay();
 
         const db = window.firebaseDB;
@@ -2355,52 +2598,29 @@ function hideImageModal() {
 // ========== QUESTION BANK FUNCTIONS ==========
 
 let selectedBankQuestions = [];
+let currentBankQuestions = []; // Store current bank questions
 
-// Show question bank modal
-async function showQuestionBank() {
+// Load question bank (now integrated in main modal)
+async function loadQuestionBankIntegrated() {
     try {
-        showLoadingOverlay();
-
-        // Update modal title
-        const config = subjectConfig[currentEditingSubject];
-        document.getElementById('bankSubjectName').textContent = config.name;
-
         // Load questions from bank
         await loadQuestionBank();
 
-        // Setup bank modal events
-        setupBankModalEvents();
-
-        // Show modal
-        document.getElementById('questionBankModal').classList.add('active');
-
-        hideLoadingOverlay();
+        // Setup search events
+        setupBankSearchEvents();
     } catch (error) {
-        console.error('Error showing question bank:', error);
+        console.error('Error loading question bank:', error);
         showNotification('Error al cargar el banco de preguntas: ' + error.message, 'error');
-        hideLoadingOverlay();
     }
 }
 
-// Setup bank modal events
-function setupBankModalEvents() {
-    // Close button
-    document.getElementById('closeBankModal').addEventListener('click', hideQuestionBank);
-    document.getElementById('cancelBank').addEventListener('click', hideQuestionBank);
-
-    // Add selected questions button
-    document.getElementById('addSelectedQuestions').addEventListener('click', addSelectedQuestionsToTest);
-
+// Setup bank search events
+function setupBankSearchEvents() {
     // Search input
     const searchInput = document.getElementById('bankSearchInput');
-    searchInput.addEventListener('input', filterBankQuestions);
-
-    // Close on overlay click
-    document.getElementById('questionBankModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            hideQuestionBank();
-        }
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', filterBankQuestions);
+    }
 }
 
 // Load question bank from Firebase
@@ -2417,12 +2637,22 @@ async function loadQuestionBank() {
             bankQuestions = bankDoc.data().questions || [];
         }
 
+        // Store questions globally
+        currentBankQuestions = bankQuestions;
+
         // Display questions
         displayBankQuestions(bankQuestions);
 
     } catch (error) {
         console.error('Error loading question bank:', error);
         throw error;
+    }
+}
+
+// Refresh bank questions display (updates "already added" status)
+function refreshBankQuestions() {
+    if (currentBankQuestions && currentBankQuestions.length > 0) {
+        displayBankQuestions(currentBankQuestions);
     }
 }
 
@@ -2459,19 +2689,29 @@ function createBankQuestionElement(question, index) {
     div.className = 'bank-question-item';
     div.dataset.questionIndex = index;
 
+    // Check if question is already added to current test
+    const blockKey = `bloque${currentEditingBlock}`;
+    const currentQuestions = testBlocks[blockKey][currentEditingSubject].questions;
+    const isAlreadyAdded = isQuestionAlreadyInTest(question, currentQuestions);
+
     // Get Saber 11 info if available
     const saber11Info = createBankSaber11Info(question);
 
     if (question.type === 'reading') {
         div.innerHTML = `
-            <div class="bank-question-checkbox">
-                <input type="checkbox" onchange="toggleBankQuestionSelection(${index})">
-            </div>
             <div class="bank-question-header">
                 <span class="bank-question-type-badge reading">
                     <i class="bi bi-book-half"></i>
-                    Texto de Lectura
+                    Bloque de Lectura
                 </span>
+                <div class="bank-question-actions">
+                    <button class="bank-delete-btn" onclick="event.stopPropagation(); deleteBankQuestion(${index})" title="Eliminar del banco">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <span class="bank-add-icon">
+                        <i class="${isAlreadyAdded ? 'bi bi-check-circle-fill' : 'bi bi-plus-circle'}"></i>
+                    </span>
+                </div>
             </div>
             <div class="bank-reading-title">
                 <i class="bi bi-type-h1"></i>
@@ -2481,63 +2721,172 @@ function createBankQuestionElement(question, index) {
                 ${question.text ? escapeHtml(question.text.substring(0, 200) + (question.text.length > 200 ? '...' : '')) : 'Sin texto'}
             </div>
             ${createBankQuestionMediaPreview(question)}
+            ${isAlreadyAdded ? '<div class="bank-already-added-badge"><i class="bi bi-check-circle-fill"></i> Ya agregada</div>' : ''}
         `;
     } else {
         div.innerHTML = `
-            <div class="bank-question-checkbox">
-                <input type="checkbox" onchange="toggleBankQuestionSelection(${index})">
-            </div>
             <div class="bank-question-header">
-                <span class="bank-question-type-badge multiple">
-                    <i class="bi bi-ui-checks"></i>
-                    Selección Múltiple
-                </span>
-                ${saber11Info}
+                <div class="bank-question-header-left">
+                    <span class="bank-question-type-badge multiple">
+                        <i class="bi bi-ui-checks"></i>
+                        Selección Múltiple
+                    </span>
+                    ${saber11Info}
+                </div>
+                <div class="bank-question-actions">
+                    <button class="bank-delete-btn" onclick="event.stopPropagation(); deleteBankQuestion(${index})" title="Eliminar del banco">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <span class="bank-add-icon">
+                        <i class="${isAlreadyAdded ? 'bi bi-check-circle-fill' : 'bi bi-plus-circle'}"></i>
+                    </span>
+                </div>
             </div>
             <div class="bank-question-text">
                 ${escapeHtml(question.text || 'Sin pregunta')}
             </div>
             ${createBankQuestionMediaPreview(question)}
             ${createBankOptionsPreview(question.options || [])}
+            ${isAlreadyAdded ? '<div class="bank-already-added-badge"><i class="bi bi-check-circle-fill"></i> Ya agregada</div>' : ''}
         `;
     }
 
-    // Click on card to toggle selection
-    div.addEventListener('click', function (e) {
-        if (e.target.type !== 'checkbox') {
-            const checkbox = div.querySelector('input[type="checkbox"]');
-            checkbox.checked = !checkbox.checked;
-            toggleBankQuestionSelection(index);
+    // Mark as already added if it is
+    if (isAlreadyAdded) {
+        div.classList.add('already-added');
+    }
+
+    // Click on card to add question directly
+    div.addEventListener('click', async function (e) {
+        // Prevent if already added
+        if (div.classList.contains('already-added')) {
+            showNotification('Esta pregunta ya está agregada a la prueba', 'warning');
+            return;
+        }
+
+        // Prevent double-click issues
+        if (div.classList.contains('adding')) return;
+        
+        div.classList.add('adding');
+        
+        try {
+            // Get the question data
+            const questionData = currentBankQuestions[index];
+            if (!questionData) {
+                throw new Error('Pregunta no encontrada');
+            }
+
+            // Create a deep copy of the question
+            const questionCopy = JSON.parse(JSON.stringify(questionData));
+
+            // Add to current test
+            await addBankQuestionToTest(questionCopy);
+
+            // Visual feedback - mark as permanently added
+            div.classList.remove('adding');
+            div.classList.add('already-added');
+            
+            // Update icon
+            const addIcon = div.querySelector('.bank-add-icon i');
+            if (addIcon) {
+                addIcon.className = 'bi bi-check-circle-fill';
+            }
+
+            // Add badge
+            const badge = document.createElement('div');
+            badge.className = 'bank-already-added-badge';
+            badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Ya agregada';
+            div.appendChild(badge);
+
+            showNotification('Pregunta agregada exitosamente', 'success');
+
+        } catch (error) {
+            console.error('Error adding question:', error);
+            showNotification('Error al agregar la pregunta: ' + error.message, 'error');
+            div.classList.remove('adding');
         }
     });
 
     return div;
 }
 
+// Check if question is already in test
+function isQuestionAlreadyInTest(bankQuestion, testQuestions) {
+    return testQuestions.some(testQ => {
+        // Compare by text and type
+        if (testQ.type !== bankQuestion.type) return false;
+        
+        if (bankQuestion.type === 'reading') {
+            return testQ.title === bankQuestion.title && testQ.text === bankQuestion.text;
+        } else {
+            return testQ.text === bankQuestion.text;
+        }
+    });
+}
+
 // Create Saber 11 info for bank question
 function createBankSaber11Info(question) {
-    if (!question.saber11 || !question.saber11.competencia) {
+    if (!question.saber11) {
         return '';
     }
 
-    const estructura = window.SABER11_ESTRUCTURA ? window.SABER11_ESTRUCTURA[currentEditingSubject] : null;
-    if (!estructura) return '';
-
-    const competencia = estructura.competencias.find(c => c.id === question.saber11.competencia);
-    if (!competencia) return '';
-
-    let infoText = competencia.nombre;
-
-    if (question.saber11.componente) {
-        infoText = `[${question.saber11.componente}] ${infoText}`;
+    const saber11 = question.saber11;
+    const componentes = saber11.componentes || [];
+    const competencias = saber11.competencias || [];
+    const temas = saber11.temas || [];
+    
+    // Contar afirmaciones
+    let totalAfirmaciones = 0;
+    if (saber11.afirmaciones) {
+        Object.values(saber11.afirmaciones).forEach(arr => {
+            totalAfirmaciones += arr.length;
+        });
     }
 
-    return `
-        <span class="bank-saber11-badge" title="${infoText}">
-            <i class="bi bi-mortarboard-fill"></i>
-            ${question.saber11.componente || 'Saber 11'}
-        </span>
-    `;
+    if (componentes.length === 0 && competencias.length === 0 && totalAfirmaciones === 0 && temas.length === 0) {
+        return '';
+    }
+
+    // Crear badges para cada categoría
+    let badges = '';
+    
+    if (componentes.length > 0) {
+        badges += `
+            <span class="bank-saber11-badge componente" title="Componentes: ${componentes.join(', ')}">
+                <i class="bi bi-layers-fill"></i>
+                ${componentes.length} Comp.
+            </span>
+        `;
+    }
+    
+    if (competencias.length > 0) {
+        badges += `
+            <span class="bank-saber11-badge competencia" title="Competencias: ${competencias.join(', ')}">
+                <i class="bi bi-star-fill"></i>
+                ${competencias.length} Compet.
+            </span>
+        `;
+    }
+    
+    if (totalAfirmaciones > 0) {
+        badges += `
+            <span class="bank-saber11-badge afirmacion" title="${totalAfirmaciones} Afirmaciones">
+                <i class="bi bi-check2-circle"></i>
+                ${totalAfirmaciones} Afirm.
+            </span>
+        `;
+    }
+    
+    if (temas.length > 0) {
+        badges += `
+            <span class="bank-saber11-badge tema" title="Temas: ${temas.join(', ')}">
+                <i class="bi bi-bookmark-fill"></i>
+                ${temas.length} Temas
+            </span>
+        `;
+    }
+
+    return `<div class="bank-saber11-info">${badges}</div>`;
 }
 
 // Create bank question media preview
@@ -2609,19 +2958,6 @@ function toggleBankQuestionSelection(index) {
 }
 
 // Update add button text
-function updateAddButtonText() {
-    const button = document.getElementById('addSelectedQuestions');
-    const count = selectedBankQuestions.length;
-
-    if (count === 0) {
-        button.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Seleccionadas';
-        button.disabled = true;
-    } else {
-        button.innerHTML = `<i class="bi bi-plus-circle"></i> Agregar ${count} Pregunta${count > 1 ? 's' : ''}`;
-        button.disabled = false;
-    }
-}
-
 // Filter bank questions
 function filterBankQuestions() {
     const searchTerm = document.getElementById('bankSearchInput').value.toLowerCase();
@@ -2637,58 +2973,69 @@ function filterBankQuestions() {
     });
 }
 
-// Add selected questions to test
-async function addSelectedQuestionsToTest() {
+// Add selected questions to test (now with direct click on bank questions)
+async function addBankQuestionToTest(questionData) {
     try {
-        if (selectedBankQuestions.length === 0) {
-            showNotification('Selecciona al menos una pregunta', 'warning');
-            return;
-        }
-
-        showLoadingOverlay();
-
-        const db = window.firebaseDB;
-        const bankRef = db.collection('bancoPreguntas').doc(currentEditingSubject);
-        const bankDoc = await bankRef.get();
-
-        if (!bankDoc.exists) {
-            throw new Error('No se encontró el banco de preguntas');
-        }
-
-        const bankQuestions = bankDoc.data().questions || [];
+        // Add the question to the current test
         const blockKey = `bloque${currentEditingBlock}`;
-
-        // Add selected questions to current test
-        selectedBankQuestions.forEach(index => {
-            if (bankQuestions[index]) {
-                // Create a deep copy of the question
-                const questionCopy = JSON.parse(JSON.stringify(bankQuestions[index]));
-                testBlocks[blockKey][currentEditingSubject].questions.push(questionCopy);
-            }
-        });
+        testBlocks[blockKey][currentEditingSubject].questions.push(questionData);
 
         // Reload questions in modal
         loadQuestionsInModal();
 
-        // Hide bank modal
-        hideQuestionBank();
+        // Update counter
+        updateQuestionsCounter();
 
-        showNotification(`${selectedBankQuestions.length} pregunta(s) agregada(s) correctamente`, 'success');
-        hideLoadingOverlay();
-
+        showNotification('Pregunta agregada correctamente', 'success');
     } catch (error) {
-        console.error('Error adding questions:', error);
-        showNotification('Error al agregar preguntas: ' + error.message, 'error');
+        console.error('Error adding question:', error);
+        showNotification('Error al agregar la pregunta: ' + error.message, 'error');
+    }
+}
+
+// Delete question from bank
+async function deleteBankQuestion(index) {
+    if (!confirm('¿Estás seguro de eliminar esta pregunta del banco? Esta acción no se puede deshacer.')) {
+        return;
+    }
+
+    try {
+        showLoadingOverlay();
+
+        const db = window.firebaseDB;
+        const bankRef = db.collection('bancoPreguntas').doc(currentEditingSubject);
+
+        // Remove question from array
+        currentBankQuestions.splice(index, 1);
+
+        // Update Firebase
+        await bankRef.set({
+            questions: currentBankQuestions
+        }, { merge: true });
+
+        // Reload bank display
+        displayBankQuestions(currentBankQuestions);
+
+        showNotification('Pregunta eliminada del banco', 'success');
+        hideLoadingOverlay();
+    } catch (error) {
+        console.error('Error deleting question:', error);
+        showNotification('Error al eliminar la pregunta: ' + error.message, 'error');
         hideLoadingOverlay();
     }
 }
 
-// Hide question bank modal
-function hideQuestionBank() {
-    document.getElementById('questionBankModal').classList.remove('active');
-    selectedBankQuestions = [];
-    document.getElementById('bankSearchInput').value = '';
+// Update questions counter
+function updateQuestionsCounter() {
+    const blockKey = `bloque${currentEditingBlock}`;
+    const count = testBlocks[blockKey][currentEditingSubject].questions.length;
+    const counterElement = document.getElementById('questionsCountDisplay');
+    if (counterElement) {
+        counterElement.textContent = `${count} pregunta${count !== 1 ? 's' : ''}`;
+    }
 }
+
+// Question bank functions removed - now integrated in main modal
 
 // Save questions to bank (called when saving subject)
 async function saveQuestionsToBank() {
@@ -2767,7 +3114,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+window.editSubject = editSubject;
 window.showDeleteQuestionModal = showDeleteQuestionModal;
 window.showDeleteVideoModal = showDeleteVideoModal;
-window.showQuestionBank = showQuestionBank;
 window.toggleBankQuestionSelection = toggleBankQuestionSelection;

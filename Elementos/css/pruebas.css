@@ -1058,30 +1058,40 @@
 }
 
 /* ========================================
-   EMPTY STATE
+   EMPTY STATE & NO RESULTS
    ======================================== */
-.empty-state {
+.empty-state,
+.no-results-message {
     text-align: center;
-    padding: 3rem 2rem;
-    color: #666;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    margin: 2rem 0;
 }
 
-.empty-state i {
-    font-size: 4rem;
-    color: rgba(0, 0, 0, 0.15);
-    margin-bottom: 1rem;
+.empty-state i,
+.no-results-message i {
+    font-size: 4.5rem;
+    color: rgba(255, 0, 0, 0.3);
+    margin-bottom: 1.5rem;
+    display: block;
 }
 
-.empty-state h3 {
-    margin-bottom: 0.5rem;
+.empty-state h3,
+.no-results-message h3 {
+    margin-bottom: 0.75rem;
     color: #333;
-    font-size: 1.3rem;
-    font-weight: 600;
+    font-size: 1.4rem;
+    font-weight: 700;
 }
 
-.empty-state p {
+.empty-state p,
+.no-results-message p {
     margin-bottom: 0;
-    font-size: 0.9rem;
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.6;
 }
 
 /* ========================================

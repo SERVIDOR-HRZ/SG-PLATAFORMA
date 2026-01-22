@@ -81,8 +81,18 @@
     <main class="main-content">
         <!-- Test Info -->
         <div class="test-info-card">
-            <h2 id="testName">Cargando...</h2>
-            <p id="testDate">Fecha: Cargando...</p>
+            <div class="test-info-content">
+                <div class="test-info-text">
+                    <h2 id="testName">Cargando...</h2>
+                    <p id="testDate">Fecha: Cargando...</p>
+                </div>
+                <div class="test-info-actions">
+                    <button class="btn btn-success btn-lg" id="saveBlocksBtn">
+                        <i class="bi bi-check-circle"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Blocks Container -->
@@ -205,53 +215,65 @@
                 </div>
             </div>
         </div>
-
-        <!-- Save Button -->
-        <div class="save-container">
-            <button class="btn btn-success btn-lg" id="saveBlocksBtn">
-                <i class="bi bi-check-circle"></i>
-                Guardar Cambios
-            </button>
-        </div>
     </main>
 
     <!-- Subject Editor Modal -->
     <div class="modal-overlay" id="subjectModal">
-        <div class="modal modal-lg">
+        <div class="modal modal-editor">
             <div class="modal-header">
-                <h3 id="modalTitle">Editar Materia</h3>
+                <div class="modal-header-content">
+                    <div class="subject-info-header">
+                        <div class="subject-icon-large" id="modalSubjectIcon">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <div>
+                            <h3 id="modalSubjectName">Materia</h3>
+                            <p id="modalBlockInfo">Bloque 1</p>
+                        </div>
+                    </div>
+                </div>
                 <button class="close-btn" id="closeModal">
                     <i class="bi bi-x"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <div class="subject-editor">
-                    <div class="editor-header">
-                        <div class="subject-info">
-                            <div class="subject-icon-large" id="modalSubjectIcon">
-                                <i class="bi bi-book"></i>
-                            </div>
-                            <div>
-                                <h4 id="modalSubjectName">Materia</h4>
-                                <p id="modalBlockInfo">Bloque 1</p>
-                            </div>
+            <div class="modal-body-split">
+                <!-- Left Panel: Question Bank -->
+                <div class="panel-left">
+                    <div class="panel-header">
+                        <h4>
+                            <i class="bi bi-database"></i>
+                            Banco de Preguntas
+                        </h4>
+                    </div>
+                    <div class="bank-search-container">
+                        <div class="bank-search-box">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="bankSearchInput" placeholder="Buscar preguntas...">
                         </div>
-                        <div class="editor-actions">
-                            <button class="btn btn-success" id="questionBankBtn">
-                                <i class="bi bi-database"></i>
-                                Banco de Preguntas
-                            </button>
-                            <button class="btn btn-primary" id="addQuestionBtn">
+                    </div>
+                    <div class="bank-questions-list" id="bankQuestionsContainer">
+                        <!-- Bank questions will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Right Panel: Questions Editor -->
+                <div class="panel-right">
+                    <div class="panel-header">
+                        <h4>
+                            <i class="bi bi-pencil-square"></i>
+                            Preguntas de la Prueba
+                        </h4>
+                        <div class="panel-header-actions">
+                            <button class="btn btn-add-element" id="addQuestionBtn">
                                 <i class="bi bi-plus-circle"></i>
                                 Agregar Elemento
                             </button>
-                            <button class="latex-help-btn" id="latexHelpBtn">
-                                <i class="bi bi-calculator"></i>
-                                Ayuda LaTeX
-                            </button>
+                            <div class="questions-counter">
+                                <i class="bi bi-list-ol"></i>
+                                <span id="questionsCountDisplay">0 preguntas</span>
+                            </div>
                         </div>
                     </div>
-
                     <div class="questions-container" id="questionsContainer">
                         <!-- Questions will be loaded here -->
                     </div>
@@ -259,41 +281,41 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="cancelEdit">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="saveSubject">Guardar Materia</button>
+                <button type="button" class="btn btn-primary" id="saveSubject">
+                    <i class="bi bi-check-lg"></i>
+                    Guardar Materia
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Question Bank Modal -->
-    <div class="modal-overlay" id="questionBankModal">
-        <div class="modal modal-xl">
-            <div class="modal-header">
-                <h3>
-                    <i class="bi bi-database"></i>
-                    Banco de Preguntas - <span id="bankSubjectName">Materia</span>
-                </h3>
-                <button class="close-btn" id="closeBankModal">
+    <!-- Saber 11 Classification Modal -->
+    <div class="modal-overlay" id="saber11Modal">
+        <div class="modal modal-saber11">
+            <div class="modal-header saber11-modal-header">
+                <div class="modal-header-content">
+                    <div class="saber11-modal-icon">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <div>
+                        <h3>Clasificación Saber 11</h3>
+                        <p id="saber11ModalSubject">Materia</p>
+                    </div>
+                </div>
+                <button class="close-btn" id="closeSaber11Modal">
                     <i class="bi bi-x"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <div class="bank-header">
-                    <div class="bank-info">
-                        <p>Selecciona las preguntas que deseas agregar a esta prueba</p>
-                    </div>
-                    <div class="bank-search">
-                        <input type="text" id="bankSearchInput" placeholder="Buscar preguntas..." class="form-control">
-                    </div>
-                </div>
-                <div class="bank-questions-container" id="bankQuestionsContainer">
-                    <!-- Bank questions will be loaded here -->
+            <div class="modal-body saber11-modal-body">
+                <div id="saber11ModalContent">
+                    <!-- Content will be loaded dynamically -->
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancelBank">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="addSelectedQuestions">
-                    <i class="bi bi-plus-circle"></i>
-                    Agregar Seleccionadas
+                <button type="button" class="btn btn-secondary" id="cancelSaber11">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveSaber11">
+                    <i class="bi bi-check-lg"></i>
+                    Guardar Clasificación
                 </button>
             </div>
         </div>
