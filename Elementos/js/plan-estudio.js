@@ -430,6 +430,9 @@ async function cargarDatosDesdeURL() {
     const estudianteIdParam = params.get('estudianteId');
     const planIdParam = params.get('planId');
     
+    // Guardar si es vista de admin en variable global
+    window.esVistaAdmin = adminView;
+    
     if (!pruebaId) {
         mostrarError('No se especificó una prueba. Vuelve a la sección de resultados.');
         return;
@@ -1113,10 +1116,12 @@ function renderizarSesionesDia() {
                     No hay sesiones programadas para<br>
                     <strong style="color: #ff0000;">${fechaFormateada}</strong>
                 </p>
-                <button class="btn-agregar-sesion" onclick="abrirModalSesion()">
-                    <i class="bi bi-plus-circle"></i>
-                    Agregar Sesión de Estudio
-                </button>
+                ${!window.esVistaAdmin ? `
+                    <button class="btn-agregar-sesion" onclick="abrirModalSesion()">
+                        <i class="bi bi-plus-circle"></i>
+                        Agregar Sesión de Estudio
+                    </button>
+                ` : ''}
             </div>
         `;
         return;
@@ -1223,37 +1228,47 @@ function renderizarSesionesDia() {
                     </div>
                 </div>
                 <div class="sesion-acciones">
-                    ${!sesion.completada ? `
-                        ${sesion.enCurso ? `
-                            <button class="btn-sesion pausar" onclick="pausarSesion('${sesion.id}')" title="Pausar">
-                                <i class="bi bi-pause-fill"></i>
+                    ${!window.esVistaAdmin ? `
+                        ${!sesion.completada ? `
+                            ${sesion.enCurso ? `
+                                <button class="btn-sesion pausar" onclick="pausarSesion('${sesion.id}')" title="Pausar">
+                                    <i class="bi bi-pause-fill"></i>
+                                </button>
+                            ` : `
+                                <button class="btn-sesion iniciar" onclick="iniciarSesion('${sesion.id}')" title="Iniciar sesión">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                            `}
+                            <button class="btn-sesion completar" onclick="toggleCompletarSesion('${sesion.id}')" title="Marcar como completada">
+                                <i class="bi bi-check-lg"></i>
                             </button>
                         ` : `
-                            <button class="btn-sesion iniciar" onclick="iniciarSesion('${sesion.id}')" title="Iniciar sesión">
-                                <i class="bi bi-play-fill"></i>
+                            <button class="btn-sesion completar" onclick="toggleCompletarSesion('${sesion.id}')" title="Marcar como pendiente">
+                                <i class="bi bi-arrow-counterclockwise"></i>
                             </button>
                         `}
-                        <button class="btn-sesion completar" onclick="toggleCompletarSesion('${sesion.id}')" title="Marcar como completada">
-                            <i class="bi bi-check-lg"></i>
+                        <button class="btn-sesion eliminar" onclick="eliminarSesion('${sesion.id}')" title="Eliminar">
+                            <i class="bi bi-trash"></i>
                         </button>
                     ` : `
-                        <button class="btn-sesion completar" onclick="toggleCompletarSesion('${sesion.id}')" title="Marcar como pendiente">
-                            <i class="bi bi-arrow-counterclockwise"></i>
-                        </button>
+                        <!-- Vista de solo lectura para admin -->
+                        <div class="badge-solo-lectura">
+                            <i class="bi bi-eye"></i>
+                            <span>Solo lectura</span>
+                        </div>
                     `}
-                    <button class="btn-sesion eliminar" onclick="eliminarSesion('${sesion.id}')" title="Eliminar">
-                        <i class="bi bi-trash"></i>
-                    </button>
                 </div>
             </div>
         `;
     }).join('');
     
     html += `
-        <button class="btn-agregar-sesion" onclick="abrirModalSesion()">
-            <i class="bi bi-plus-circle"></i>
-            Agregar Otra Sesión
-        </button>
+        ${!window.esVistaAdmin ? `
+            <button class="btn-agregar-sesion" onclick="abrirModalSesion()">
+                <i class="bi bi-plus-circle"></i>
+                Agregar Otra Sesión
+            </button>
+        ` : ''}
     `;
     
     container.innerHTML = html;
@@ -1374,6 +1389,18 @@ async function guardarSesion() {
 
 // Eliminar sesión
 window.eliminarSesion = async function(sesionId) {
+    // Prevenir en vista de admin
+    if (window.esVistaAdmin) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Solo lectura',
+            text: 'No puedes eliminar sesiones en modo de visualización.',
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+        return;
+    }
+    
     const result = await Swal.fire({
         title: '¿Eliminar sesión?',
         text: 'Esta acción no se puede deshacer.',
@@ -1397,6 +1424,18 @@ window.eliminarSesion = async function(sesionId) {
 
 // Marcar/desmarcar sesión como completada
 window.toggleCompletarSesion = async function(sesionId) {
+    // Prevenir en vista de admin
+    if (window.esVistaAdmin) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Solo lectura',
+            text: 'No puedes modificar sesiones en modo de visualización.',
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+        return;
+    }
+    
     const sesion = sesionesEstudio.find(s => s.id === sesionId);
     
     if (!sesion) return;
@@ -1437,6 +1476,18 @@ window.toggleCompletarSesion = async function(sesionId) {
 
 // Iniciar sesión de estudio
 window.iniciarSesion = function(sesionId) {
+    // Prevenir en vista de admin
+    if (window.esVistaAdmin) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Solo lectura',
+            text: 'No puedes iniciar sesiones en modo de visualización.',
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+        return;
+    }
+    
     const sesion = sesionesEstudio.find(s => s.id === sesionId);
     
     if (!sesion) return;
@@ -1472,6 +1523,18 @@ window.iniciarSesion = function(sesionId) {
 
 // Pausar sesión de estudio
 window.pausarSesion = function(sesionId) {
+    // Prevenir en vista de admin
+    if (window.esVistaAdmin) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Solo lectura',
+            text: 'No puedes pausar sesiones en modo de visualización.',
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+        return;
+    }
+    
     const sesion = sesionesEstudio.find(s => s.id === sesionId);
     
     if (!sesion || !sesion.enCurso) return;

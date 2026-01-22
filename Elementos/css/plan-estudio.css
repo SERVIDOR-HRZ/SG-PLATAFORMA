@@ -1363,6 +1363,25 @@ body {
     color: #ff6b6b;
 }
 
+/* Badge de solo lectura para admin */
+.badge-solo-lectura {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 165, 0, 0.2);
+    border: 1px solid rgba(255, 165, 0, 0.4);
+    border-radius: 8px;
+    color: #ffa500;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-solo-lectura i {
+    font-size: 1rem;
+}
+
 .btn-agregar-sesion {
     display: flex;
     align-items: center;
