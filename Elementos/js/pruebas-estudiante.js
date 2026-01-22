@@ -53,6 +53,37 @@ function setupEventListeners() {
     // Type tabs
     setupTypeTabs();
 
+    // Search and filter functionality
+    const searchInput = document.getElementById('searchTestsInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const filterStatusSelect = document.getElementById('filterStatusSelect');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            if (searchTerm) {
+                clearSearchBtn.style.display = 'flex';
+            } else {
+                clearSearchBtn.style.display = 'none';
+            }
+            renderStudentTests();
+        });
+    }
+    
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            this.style.display = 'none';
+            renderStudentTests();
+        });
+    }
+    
+    if (filterStatusSelect) {
+        filterStatusSelect.addEventListener('change', function() {
+            renderStudentTests();
+        });
+    }
+
     // Logout button en dropdown (manejado por perfil-compartido.js)
 }
 
@@ -424,22 +455,130 @@ async function checkCompletedBlocks(testId, studentId) {
 // Render student tests
 function renderStudentTests() {
     const studentTestsList = document.getElementById('studentTestsList');
+    
+    // Obtener filtros
+    const searchInput = document.getElementById('searchTestsInput');
+    const filterStatusSelect = document.getElementById('filterStatusSelect');
+    const searchTerm = searchInput ? searchInput.value.trim() : '';
+    const statusFilter = filterStatusSelect ? filterStatusSelect.value : 'all';
 
     // Filter tests by current type
-    const filteredTests = studentTests.filter(test => {
+    let filteredTests = studentTests.filter(test => {
         const testType = test.tipo || 'prueba'; // Default to 'prueba' if no type
         return testType === currentTestType;
     });
 
+    // Aplicar filtro de búsqueda
+    if (searchTerm) {
+        filteredTests = filteredTests.filter(test => 
+            test.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+
+    // Aplicar filtro de estado
+    if (statusFilter !== 'all') {
+        const now = new Date();
+        filteredTests = filteredTests.filter(test => {
+            const [year, month, day] = test.fechaDisponible.split('-').map(Number);
+            const testDate = new Date(year, month - 1, day);
+            const isToday = testDate.toDateString() === now.toDateString();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            
+            // Verificar si tiene bloques completados
+            const hasCompletedBlocks = test.completedBlocks && test.completedBlocks.length > 0;
+            const allBlocksCompleted = test.completedBlocks && 
+                ((test.bloque1 && test.bloque2 && test.completedBlocks.length === 2) ||
+                 (test.bloque1 && !test.bloque2 && test.completedBlocks.includes(1)) ||
+                 (!test.bloque1 && test.bloque2 && test.completedBlocks.includes(2)));
+            
+            if (statusFilter === 'completed') {
+                return allBlocksCompleted;
+            } else if (statusFilter === 'available') {
+                if (allBlocksCompleted) return false;
+                if (testDate > now) return false;
+                
+                // Verificar si hay algún bloque disponible ahora
+                if (isToday) {
+                    let hasAvailableBlock = false;
+                    
+                    if (test.bloque1 && (!test.completedBlocks || !test.completedBlocks.includes(1))) {
+                        const [startHour1, startMin1] = test.bloque1.horaInicio.split(':').map(Number);
+                        const [endHour1, endMin1] = test.bloque1.horaFin.split(':').map(Number);
+                        const block1Start = startHour1 * 60 + startMin1;
+                        const block1End = endHour1 * 60 + endMin1;
+                        if (currentTime >= block1Start && currentTime <= block1End) {
+                            hasAvailableBlock = true;
+                        }
+                    }
+                    
+                    if (test.bloque2 && (!test.completedBlocks || !test.completedBlocks.includes(2))) {
+                        const [startHour2, startMin2] = test.bloque2.horaInicio.split(':').map(Number);
+                        const [endHour2, endMin2] = test.bloque2.horaFin.split(':').map(Number);
+                        const block2Start = startHour2 * 60 + startMin2;
+                        const block2End = endHour2 * 60 + endMin2;
+                        if (currentTime >= block2Start && currentTime <= block2End) {
+                            hasAvailableBlock = true;
+                        }
+                    }
+                    
+                    return hasAvailableBlock;
+                }
+                return false;
+            } else if (statusFilter === 'pending') {
+                if (allBlocksCompleted) return false;
+                return testDate > now || (isToday && !hasCompletedBlocks);
+            } else if (statusFilter === 'expired') {
+                if (allBlocksCompleted) return false;
+                
+                // Verificar si todos los bloques han expirado
+                if (testDate < now && !isToday) return true;
+                
+                if (isToday) {
+                    let allExpired = true;
+                    
+                    if (test.bloque1 && (!test.completedBlocks || !test.completedBlocks.includes(1))) {
+                        const [endHour1, endMin1] = test.bloque1.horaFin.split(':').map(Number);
+                        const block1End = endHour1 * 60 + endMin1;
+                        if (currentTime <= block1End) {
+                            allExpired = false;
+                        }
+                    }
+                    
+                    if (test.bloque2 && (!test.completedBlocks || !test.completedBlocks.includes(2))) {
+                        const [endHour2, endMin2] = test.bloque2.horaFin.split(':').map(Number);
+                        const block2End = endHour2 * 60 + endMin2;
+                        if (currentTime <= block2End) {
+                            allExpired = false;
+                        }
+                    }
+                    
+                    return allExpired;
+                }
+                return false;
+            }
+            return true;
+        });
+    }
+
     if (filteredTests.length === 0) {
-        const typeLabel = currentTestType === 'prueba' ? 'pruebas' : 'minisimulacros';
-        studentTestsList.innerHTML = `
-            <div class="empty-state">
-                <i class="bi bi-file-earmark-text"></i>
-                <h3>No tienes ${typeLabel} asignados</h3>
-                <p>Cuando tu profesor te asigne ${typeLabel}, aparecerán aquí</p>
-            </div>
-        `;
+        if (searchTerm || statusFilter !== 'all') {
+            studentTestsList.innerHTML = `
+                <div class="no-results-message">
+                    <i class="bi bi-search"></i>
+                    <h3>No se encontraron resultados</h3>
+                    <p>No hay pruebas que coincidan con los filtros aplicados</p>
+                </div>
+            `;
+        } else {
+            const typeLabel = currentTestType === 'prueba' ? 'pruebas' : 'minisimulacros';
+            studentTestsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <h3>No tienes ${typeLabel} asignados</h3>
+                    <p>Cuando tu profesor te asigne ${typeLabel}, aparecerán aquí</p>
+                </div>
+            `;
+        }
         return;
     }
 

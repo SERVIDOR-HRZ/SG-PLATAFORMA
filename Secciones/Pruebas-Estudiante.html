@@ -79,6 +79,28 @@
 
             <div class="assigned-tests">
                 <h2 id="sectionTitle"><i class="bi bi-clipboard-check"></i> Mis Pruebas Asignadas</h2>
+                
+                <!-- Search and Filter -->
+                <div class="search-filter-container">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="searchTestsInput" placeholder="Buscar por nombre de prueba...">
+                        <button class="clear-search" id="clearSearchBtn" style="display: none;">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                    </div>
+                    <div class="filter-status-container">
+                        <label><i class="bi bi-funnel"></i> Estado:</label>
+                        <select id="filterStatusSelect" class="filter-status-select">
+                            <option value="all">Todas</option>
+                            <option value="available">Disponibles</option>
+                            <option value="completed">Completadas</option>
+                            <option value="pending">Pendientes</option>
+                            <option value="expired">Vencidas</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="student-tests-list" id="studentTestsList">
                     <!-- Student tests will be loaded here -->
                 </div>

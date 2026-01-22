@@ -92,6 +92,27 @@
             <!-- Tests List -->
             <div class="tests-container" id="testsContainer">
                 <h2><i class="bi bi-clipboard-check"></i> Pruebas Creadas</h2>
+                
+                <!-- Search and Filter -->
+                <div class="search-filter-container">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="searchTestsInput" placeholder="Buscar por nombre de prueba...">
+                        <button class="clear-search" id="clearSearchBtn" style="display: none;">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                    </div>
+                    <div class="filter-status-container">
+                        <label><i class="bi bi-funnel"></i> Estado:</label>
+                        <select id="filterStatusSelect" class="filter-status-select">
+                            <option value="all">Todas</option>
+                            <option value="active">Activas</option>
+                            <option value="upcoming">Próximas</option>
+                            <option value="expired">Vencidas</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="tests-list" id="testsList">
                     <!-- Tests will be loaded here -->
                 </div>

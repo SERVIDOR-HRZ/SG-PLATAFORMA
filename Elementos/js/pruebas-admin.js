@@ -192,6 +192,37 @@ function setupEventListeners() {
             hideEditTestModal();
         }
     });
+
+    // Search and filter functionality
+    const searchInput = document.getElementById('searchTestsInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const filterStatusSelect = document.getElementById('filterStatusSelect');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            if (searchTerm) {
+                clearSearchBtn.style.display = 'flex';
+            } else {
+                clearSearchBtn.style.display = 'none';
+            }
+            applyFilters();
+        });
+    }
+    
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            this.style.display = 'none';
+            applyFilters();
+        });
+    }
+    
+    if (filterStatusSelect) {
+        filterStatusSelect.addEventListener('change', function() {
+            applyFilters();
+        });
+    }
 }
 
 // Go back to appropriate panel
@@ -923,40 +954,77 @@ function renderTestsList() {
     const testsList = document.getElementById('testsList');
     const currentType = typeof getCurrentTestType === 'function' ? getCurrentTestType() : 'prueba';
     
+    // Obtener filtros
+    const searchInput = document.getElementById('searchTestsInput');
+    const filterStatusSelect = document.getElementById('filterStatusSelect');
+    const searchTerm = searchInput ? searchInput.value.trim() : '';
+    const statusFilter = filterStatusSelect ? filterStatusSelect.value : 'all';
+    
     // Filtrar pruebas según el tipo seleccionado
-    // Si es 'reto', por ahora no mostramos nada (será diferente)
     let filteredTests = [];
     
     if (currentType === 'reto') {
-        // Los retos tendrán su propia lógica después
         filteredTests = allTests.filter(test => test.tipo === 'reto');
     } else {
-        // Para pruebas y minisimulacros, filtrar por tipo
-        // Si no tiene tipo definido, se considera 'prueba' por defecto
         filteredTests = allTests.filter(test => {
             const testType = test.tipo || 'prueba';
             return testType === currentType;
         });
     }
 
+    // Aplicar filtro de búsqueda
+    if (searchTerm) {
+        filteredTests = filteredTests.filter(test => 
+            test.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+
+    // Aplicar filtro de estado
+    if (statusFilter !== 'all') {
+        const now = new Date();
+        filteredTests = filteredTests.filter(test => {
+            const startDate = new Date(test.fechaInicio);
+            const endDate = new Date(test.fechaFin);
+            
+            if (statusFilter === 'active') {
+                return now >= startDate && now <= endDate;
+            } else if (statusFilter === 'upcoming') {
+                return now < startDate;
+            } else if (statusFilter === 'expired') {
+                return now > endDate;
+            }
+            return true;
+        });
+    }
+
     if (filteredTests.length === 0) {
-        const typeLabels = {
-            'prueba': 'pruebas creadas',
-            'minisimulacro': 'minisimulacros creados',
-            'reto': 'retos creados'
-        };
-        const btnLabels = {
-            'prueba': 'Crear Nueva Prueba',
-            'minisimulacro': 'Crear Nuevo Minisimulacro',
-            'reto': 'Crear Nuevo Reto'
-        };
-        testsList.innerHTML = `
-            <div class="empty-state">
-                <i class="bi bi-file-earmark-text"></i>
-                <h3>No hay ${typeLabels[currentType]}</h3>
-                <p>Crea tu primer registro haciendo clic en "${btnLabels[currentType]}"</p>
-            </div>
-        `;
+        if (searchTerm || statusFilter !== 'all') {
+            testsList.innerHTML = `
+                <div class="no-results-message">
+                    <i class="bi bi-search"></i>
+                    <h3>No se encontraron resultados</h3>
+                    <p>No hay pruebas que coincidan con los filtros aplicados</p>
+                </div>
+            `;
+        } else {
+            const typeLabels = {
+                'prueba': 'pruebas creadas',
+                'minisimulacro': 'minisimulacros creados',
+                'reto': 'retos creados'
+            };
+            const btnLabels = {
+                'prueba': 'Crear Nueva Prueba',
+                'minisimulacro': 'Crear Nuevo Minisimulacro',
+                'reto': 'Crear Nuevo Reto'
+            };
+            testsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <h3>No hay ${typeLabels[currentType]}</h3>
+                    <p>Crea tu primer registro haciendo clic en "${btnLabels[currentType]}"</p>
+                </div>
+            `;
+        }
         return;
     }
 
@@ -966,6 +1034,11 @@ function renderTestsList() {
         const testCard = createTestCard(test);
         testsList.appendChild(testCard);
     });
+}
+
+// Apply all filters
+function applyFilters() {
+    renderTestsList();
 }
 
 // Create test card element

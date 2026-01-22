@@ -116,15 +116,14 @@
 }
 
 .tests-container h2 {
-    margin: 0 0 2rem 0;
+    margin: 0 0 0 0;
     color: #1a1a1a;
     font-size: 1.6rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 0;
 }
 
 .tests-container h2 i {
@@ -923,9 +922,8 @@
 
 .assigned-tests h2 {
     color: #1a1a1a;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 0;
+    padding-bottom: 0;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -3923,5 +3921,187 @@ input.invalid {
     .video-tipo-select {
         flex-direction: column;
         gap: 0.5rem;
+    }
+}
+
+/* ========================================
+   SEARCH AND FILTER CONTAINER
+   ======================================== */
+.search-filter-container {
+    margin-bottom: 1.5rem;
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    max-width: 500px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.85rem 3rem 0.85rem 3rem;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #333;
+    font-family: inherit;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.search-box input::placeholder {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #ff0000;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.15), 0 4px 12px rgba(255, 0, 0, 0.1);
+}
+
+.search-box i.bi-search {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.clear-search {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.clear-search:hover {
+    color: #ff0000;
+    background: rgba(255, 0, 0, 0.1);
+}
+
+.clear-search i {
+    font-size: 1.1rem;
+}
+
+/* Student View Search Box */
+.student-view .search-box input {
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    color: #333;
+}
+
+.student-view .search-box input::placeholder {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.student-view .search-box input:focus {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: #ff0000;
+}
+
+/* ========================================
+   FILTER STATUS CONTAINER
+   ======================================== */
+.filter-status-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.filter-status-container label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.filter-status-container label i {
+    color: #ff0000;
+}
+
+.filter-status-select {
+    padding: 0.6rem 2.5rem 0.6rem 1rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.8);
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px;
+}
+
+.filter-status-select:hover {
+    border-color: rgba(255, 0, 0, 0.5);
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+.filter-status-select:focus {
+    outline: none;
+    border-color: #ff0000;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.15);
+}
+
+.student-view .filter-status-container {
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+.student-view .filter-status-select {
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .search-filter-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        max-width: 100%;
+    }
+    
+    .filter-status-container {
+        justify-content: space-between;
     }
 }
