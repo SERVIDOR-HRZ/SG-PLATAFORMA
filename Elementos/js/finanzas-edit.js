@@ -219,9 +219,12 @@
         document.getElementById('editDescripcionMovimiento').value = movimiento.descripcion || '';
         document.getElementById('editNotasMovimiento').value = movimiento.notas || '';
 
-        // Fecha
+        // Fecha - Formatear correctamente para evitar problemas de zona horaria
         const fecha = movimiento.fecha ? movimiento.fecha.toDate() : new Date();
-        document.getElementById('editFechaMovimiento').value = fecha.toISOString().split('T')[0];
+        const year = fecha.getFullYear();
+        const month = String(fecha.getMonth() + 1).padStart(2, '0');
+        const day = String(fecha.getDate()).padStart(2, '0');
+        document.getElementById('editFechaMovimiento').value = `${year}-${month}-${day}`;
 
         // Monto
         const montoInput = document.getElementById('editMontoMovimiento');
@@ -354,12 +357,16 @@
             });
 
             // Actualizar el movimiento
+            // Crear fecha correctamente sin problemas de zona horaria
+            const [year, month, day] = fecha.split('-');
+            const fechaCorrecta = new Date(year, month - 1, day, 12, 0, 0); // Usar mediodía para evitar problemas de zona horaria
+            
             const updateData = {
                 cuentaId: cuentaIdNueva,
                 monto: montoNuevo,
                 categoria: categoria,
                 descripcion: descripcion,
-                fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
+                fecha: firebase.firestore.Timestamp.fromDate(fechaCorrecta),
                 notas: notas,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };

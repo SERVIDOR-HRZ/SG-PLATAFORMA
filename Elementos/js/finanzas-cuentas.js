@@ -703,8 +703,12 @@ async function openNuevoIngreso() {
     // Cargar categorías de ingresos
     await loadCategoriasSelect('ingreso');
 
-    // Establecer fecha actual
-    document.getElementById('fechaMovimientoForm').valueAsDate = new Date();
+    // Establecer fecha actual sin problemas de zona horaria
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, '0');
+    const day = String(hoy.getDate()).padStart(2, '0');
+    document.getElementById('fechaMovimientoForm').value = `${year}-${month}-${day}`;
 
     // Limpiar el dataset de formateado
     const montoInput = document.getElementById('montoMovimientoForm');
@@ -741,8 +745,12 @@ async function openNuevoGasto() {
     // Cargar categorías de gastos
     await loadCategoriasSelect('gasto');
 
-    // Establecer fecha actual
-    document.getElementById('fechaMovimientoForm').valueAsDate = new Date();
+    // Establecer fecha actual sin problemas de zona horaria
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, '0');
+    const day = String(hoy.getDate()).padStart(2, '0');
+    document.getElementById('fechaMovimientoForm').value = `${year}-${month}-${day}`;
 
     // Limpiar el dataset de formateado
     const montoInput = document.getElementById('montoMovimientoForm');
@@ -841,13 +849,17 @@ async function handleSaveMovimiento(e) {
         }
 
         // Crear movimiento
+        // Crear fecha correctamente sin problemas de zona horaria
+        const [year, month, day] = fecha.split('-');
+        const fechaCorrecta = new Date(year, month - 1, day, 12, 0, 0); // Usar mediodía para evitar problemas de zona horaria
+        
         const movimientoData = {
             tipo,
             cuentaId,
             monto,
             categoria,
             descripcion,
-            fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
+            fecha: firebase.firestore.Timestamp.fromDate(fechaCorrecta),
             notas,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
