@@ -945,18 +945,24 @@ function analizarDatos() {
                             correctasMateria++;
                         } else {
                             // Registrar tema con error (MEJORADO - con más información)
-                            const tema = pregunta.tema || pregunta.competencia || 'Sin tema';
-                            if (!temas[tema]) {
-                                temas[tema] = {
+                            const nombreTema = pregunta.tema || 'Sin tema especificado';
+                            const competencia = pregunta.competencia || 'No especificada';
+                            const componente = pregunta.componente || 'No especificado';
+                            
+                            // Usar el tema como clave, pero guardar toda la información
+                            const claveTema = nombreTema;
+                            
+                            if (!temas[claveTema]) {
+                                temas[claveTema] = {
                                     errores: 0,
                                     materia: materiaKey,
-                                    componente: pregunta.componente || 'No especificado',
-                                    competencia: pregunta.competencia || 'No especificada',
+                                    componente: componente,
+                                    competencia: competencia,
                                     afirmacion: pregunta.afirmacion || '',
-                                    tema: tema
+                                    tema: nombreTema
                                 };
                             }
-                            temas[tema].errores++;
+                            temas[claveTema].errores++;
                         }
                     });
 
@@ -1614,6 +1620,16 @@ function renderizarTemasDificiles() {
         const color = coloresMaterias[tema.materia] || '#999';
         const nombreMateria = nombresMaterias[tema.materia] || tema.materia;
         const icono = iconosMaterias[tema.materia] || 'bi-book';
+        
+        // Determinar si mostrar competencia (siempre mostrar si existe y no es "No especificada")
+        const mostrarCompetencia = tema.competencia && 
+                                   tema.competencia !== 'No especificada' && 
+                                   tema.competencia !== 'Sin competencia';
+        
+        // Determinar si mostrar componente
+        const mostrarComponente = tema.componente && 
+                                  tema.componente !== 'No especificado' && 
+                                  tema.componente !== 'Sin componente';
 
         return `
             <div class="tema-dificil-item" data-materia="${tema.materia}">
@@ -1626,14 +1642,14 @@ function renderizarTemasDificiles() {
                         <span class="tema-materia-badge" style="background: ${color};">
                             ${nombreMateria}
                         </span>
-                        ${tema.componente && tema.componente !== 'No especificado' ? `
-                            <span class="tema-detalle-badge">
-                                <i class="bi bi-puzzle"></i> ${tema.componente}
+                        ${mostrarCompetencia ? `
+                            <span class="tema-detalle-badge tema-competencia-badge">
+                                <i class="bi bi-award"></i> ${tema.competencia}
                             </span>
                         ` : ''}
-                        ${tema.competencia && tema.competencia !== 'No especificada' ? `
+                        ${mostrarComponente ? `
                             <span class="tema-detalle-badge">
-                                <i class="bi bi-award"></i> ${tema.competencia}
+                                <i class="bi bi-puzzle"></i> ${tema.componente}
                             </span>
                         ` : ''}
                     </div>
@@ -2103,28 +2119,31 @@ async function cargarComparativaDesdeFirebase() {
                 : 0;
         }
 
-        // 3. Convertir a array y FILTRAR instituciones sin datos
+        // 3. Convertir a array - MOSTRAR TODAS las instituciones
         const institucionesArray = Object.values(institucionesDatos)
             .filter(inst => {
-                // Solo incluir instituciones que tengan:
-                // - Al menos 1 estudiante
-                // - Al menos 1 respuesta/prueba
-                // - Promedio mayor a 0
-                return inst.estudiantes.length > 0 &&
-                    inst.totalRespuestas > 0 &&
-                    inst.promedio > 0;
+                // Solo incluir instituciones que tengan al menos 1 estudiante
+                // No importa si tienen promedio o no
+                return inst.estudiantes.length > 0;
             })
-            .sort((a, b) => b.promedio - a.promedio);
+            .sort((a, b) => {
+                // Ordenar por promedio (de mayor a menor)
+                // Las instituciones sin promedio irán al final
+                if (b.promedio === 0 && a.promedio === 0) return 0;
+                if (b.promedio === 0) return -1;
+                if (a.promedio === 0) return 1;
+                return b.promedio - a.promedio;
+            });
 
         console.log('Instituciones con datos válidos:', institucionesArray);
 
-        // 4. Verificar si hay suficientes datos
+        // 4. Verificar si hay instituciones registradas
         if (institucionesArray.length === 0) {
             mostrarMensajeSinDatos();
             return;
         }
 
-        // 5. Tomar solo el TOP 5
+        // 5. Tomar solo el TOP 5 (o las que haya si son menos)
         const top5Instituciones = institucionesArray.slice(0, 5);
 
         // Guardar en caché
@@ -2194,13 +2213,13 @@ function actualizarPuestoEnHeader(posicion) {
     }
 }
 
-// Renderizar tabla de posiciones de instituciones (TOP 5)
+// Renderizar tabla de posiciones de instituciones (TOP 5 o las que haya)
 function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituciones) {
     const container = document.getElementById('tablaPosicionesInstituciones');
     if (!container) return;
 
     if (top5Instituciones.length === 0) {
-        container.innerHTML = '<p class="no-data">No hay datos suficientes</p>';
+        container.innerHTML = '<p class="no-data">No hay instituciones registradas</p>';
         return;
     }
 
@@ -2212,10 +2231,10 @@ function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituc
     actualizarPuestoEnHeader(posicionActual);
     guardarPuestoEnCache(posicionActual);
 
-    // Si la institución actual no está en el top 5, buscarla en todas
+    // Mensaje de posición
     const mensajePosicion = posicionActual > 0
-        ? `Tu institución está en la posición <strong>#${posicionActual}</strong> del TOP ${top5Instituciones.length}`
-        : `Tu institución no está en el TOP ${top5Instituciones.length}`;
+        ? `Tu institución está en la posición <strong>#${posicionActual}</strong> de ${top5Instituciones.length} ${top5Instituciones.length === 1 ? 'institución' : 'instituciones'}`
+        : `Tu institución no está en el ranking actual`;
 
     container.innerHTML = `
         ${institucionActual ? `
@@ -2229,8 +2248,8 @@ function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituc
                     <p>${mensajePosicion}</p>
                     <div class="posicion-stats">
                         <span><i class="bi bi-graph-up"></i> ${institucionActual.promedio}% promedio</span>
-                        <span><i class="bi bi-people"></i> ${institucionActual.estudiantes.length} estudiantes</span>
-                        <span><i class="bi bi-clipboard-check"></i> ${institucionActual.totalRespuestas} pruebas</span>
+                        <span><i class="bi bi-people"></i> ${institucionActual.estudiantes.length} estudiante${institucionActual.estudiantes.length !== 1 ? 's' : ''}</span>
+                        <span><i class="bi bi-clipboard-check"></i> ${institucionActual.totalRespuestas} prueba${institucionActual.totalRespuestas !== 1 ? 's' : ''}</span>
                     </div>
                 </div>
             </div>
@@ -2241,18 +2260,23 @@ function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituc
                 </div>
                 <div class="posicion-info">
                     <h4>${institucionCoordinador}</h4>
-                    <p>Tu institución aún no tiene suficientes datos para aparecer en el ranking</p>
-                    <small>Completa más pruebas para ver tu posición</small>
+                    <p>Tu institución no aparece en el ranking actual</p>
+                    <small>Verifica que los estudiantes estén registrados correctamente</small>
                 </div>
             </div>
         `}
         
         <div class="ranking-instituciones">
-            <h4><i class="bi bi-list-ol"></i> TOP ${top5Instituciones.length} Instituciones</h4>
-            <p class="ranking-subtitle">Instituciones con mejor rendimiento académico</p>
+            <h4><i class="bi bi-list-ol"></i> ${top5Instituciones.length === 1 ? 'Institución Registrada' : `TOP ${Math.min(top5Instituciones.length, 5)} Instituciones`}</h4>
+            <p class="ranking-subtitle">${top5Instituciones.length === 1 ? 'Institución en el sistema' : 'Instituciones ordenadas por rendimiento académico'}</p>
             ${top5Instituciones.map((inst, index) => {
         const esActual = inst.nombre === institucionCoordinador;
         const medalla = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+        
+        // Manejar instituciones sin promedio
+        const tienePromedio = inst.promedio > 0;
+        const promedioTexto = tienePromedio ? `${inst.promedio}%` : 'Sin datos';
+        const promedioClass = tienePromedio ? getScoreClass(inst.promedio) : 'sin-datos';
 
         return `
                     <div class="institucion-item ${esActual ? 'actual' : ''}">
@@ -2265,13 +2289,13 @@ function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituc
                                 ${esActual ? '<span class="badge-tu-institucion">Tu Institución</span>' : ''}
                             </div>
                             <div class="institucion-meta">
-                                <i class="bi bi-people-fill"></i> ${inst.estudiantes.length} estudiantes • 
-                                <i class="bi bi-clipboard-check-fill"></i> ${inst.totalRespuestas} pruebas • 
-                                <i class="bi bi-question-circle-fill"></i> ${inst.totalPreguntas} preguntas
+                                <i class="bi bi-people-fill"></i> ${inst.estudiantes.length} estudiante${inst.estudiantes.length !== 1 ? 's' : ''}
+                                ${inst.totalRespuestas > 0 ? ` • <i class="bi bi-clipboard-check-fill"></i> ${inst.totalRespuestas} prueba${inst.totalRespuestas !== 1 ? 's' : ''}` : ''}
+                                ${inst.totalPreguntas > 0 ? ` • <i class="bi bi-question-circle-fill"></i> ${inst.totalPreguntas} pregunta${inst.totalPreguntas !== 1 ? 's' : ''}` : ''}
                             </div>
                         </div>
-                        <div class="institucion-promedio ${getScoreClass(inst.promedio)}">
-                            ${inst.promedio}%
+                        <div class="institucion-promedio ${promedioClass}">
+                            ${promedioTexto}
                         </div>
                     </div>
                 `;
@@ -2281,7 +2305,12 @@ function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituc
         ${totalInstituciones > 5 ? `
             <div class="ranking-footer">
                 <i class="bi bi-info-circle"></i>
-                Mostrando TOP 5 de ${totalInstituciones} instituciones con datos
+                Mostrando TOP 5 de ${totalInstituciones} instituciones registradas
+            </div>
+        ` : totalInstituciones > 1 ? `
+            <div class="ranking-footer">
+                <i class="bi bi-info-circle"></i>
+                Mostrando ${totalInstituciones} ${totalInstituciones === 1 ? 'institución registrada' : 'instituciones registradas'}
             </div>
         ` : ''}
     `;
