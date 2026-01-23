@@ -312,9 +312,13 @@ async function cargarEstudiantes(db) {
         todosLosEstudiantes = [];
         estudiantesSnapshot.forEach(doc => {
             const estudiante = doc.data();
+            // Usar la misma lógica de ID que en resultados.js
+            // Priorizar numeroDocumento o numeroIdentidad sobre doc.id
+            const idFiltro = estudiante.numeroDocumento || estudiante.numeroIdentidad || doc.id;
+
             todosLosEstudiantes.push({
                 id: doc.id,
-                idFiltro: doc.id,
+                idFiltro: idFiltro,
                 nombre: estudiante.nombre || 'Sin nombre',
                 email: estudiante.email || '',
                 documento: estudiante.numeroDocumento || estudiante.numeroIdentidad || ''
@@ -421,6 +425,7 @@ function mapearNombreMateriaAKey(nombreMateria) {
         'ciencias': 'CN',
         'Ciencias Naturales': 'CN',
         'cienciasNaturales': 'CN',
+        'naturales': 'CN',
         'ingles': 'IN',
         'Inglés': 'IN',
         'LC': 'LC',
@@ -1928,7 +1933,7 @@ async function cargarDatosAsistencia() {
         for (const estudiante of todosLosEstudiantes) {
             // Buscar asistencias por estudiante (colección singular: asistencia)
             const asistenciasSnapshot = await db.collection('asistencia')
-                .where('estudianteId', '==', estudiante.idFiltro)
+                .where('estudianteId', '==', estudiante.id)
                 .get();
 
             totalRegistrosEncontrados += asistenciasSnapshot.size;
@@ -2366,7 +2371,7 @@ async function cargarDatosTareas() {
 
         for (const estudiante of todosLosEstudiantes) {
             const entregasSnapshot = await db.collection('entregas')
-                .where('estudianteId', '==', estudiante.idFiltro)
+                .where('estudianteId', '==', estudiante.id)
                 .get();
 
             console.log(`Entregas de ${estudiante.nombre}:`, entregasSnapshot.size);
