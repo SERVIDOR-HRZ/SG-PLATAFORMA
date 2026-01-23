@@ -47,7 +47,7 @@ const iconosMaterias = {
 };
 
 // Inicialización
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     verificarAutenticacion();
     inicializarSidebar();
     inicializarTabs();
@@ -62,18 +62,18 @@ function verificarAutenticacion() {
         window.location.href = '../index.html';
         return;
     }
-    
+
     const usuario = JSON.parse(usuarioActual);
     // Aceptar tanto tipoUsuario como rol
     const esCoordinador = usuario.tipoUsuario === 'coordinador' || usuario.rol === 'coordinador';
     const esAdmin = usuario.tipoUsuario === 'admin' || usuario.rol === 'admin';
-    
+
     if (!esCoordinador && !esAdmin) {
         console.error('Usuario no autorizado. Tipo:', usuario.tipoUsuario, 'Rol:', usuario.rol);
         window.location.href = 'Panel_Estudiantes.html';
         return;
     }
-    
+
     console.log('✓ Usuario autorizado:', esCoordinador ? 'Coordinador' : 'Admin');
 }
 
@@ -83,49 +83,49 @@ async function cargarDatosUsuario() {
     if (usuarioActual) {
         try {
             const usuario = JSON.parse(usuarioActual);
-            
+
             console.log('=== CARGANDO DATOS DE USUARIO ===');
             console.log('Usuario desde sessionStorage:', usuario);
-            
+
             const userNameElement = document.getElementById('coordinadorName');
             if (userNameElement && usuario.nombre) {
                 userNameElement.textContent = usuario.nombre.toUpperCase();
             }
-            
+
             // Intentar obtener institución de múltiples fuentes
-            institucionCoordinador = usuario.institucion || 
-                                    usuario.Institucion || 
-                                    usuario.nombreInstitucion || 
-                                    usuario.institution || 
-                                    null;
-            
+            institucionCoordinador = usuario.institucion ||
+                usuario.Institucion ||
+                usuario.nombreInstitucion ||
+                usuario.institution ||
+                null;
+
             console.log('Institución desde sessionStorage:', institucionCoordinador);
-            
+
             // Si no tiene institución en sessionStorage, buscar en Firebase
             if (!institucionCoordinador) {
                 console.log('⚠️ No se encontró institución en sessionStorage, buscando en Firebase...');
-                
+
                 if (!window.firebaseDB) {
                     await esperarFirebase();
                 }
-                
+
                 const db = window.firebaseDB;
                 const usuarioDoc = await db.collection('usuarios').doc(usuario.id).get();
-                
+
                 if (usuarioDoc.exists) {
                     const datosUsuario = usuarioDoc.data();
                     console.log('Datos completos de Firebase:', datosUsuario);
-                    
+
                     // Buscar institución en todos los campos posibles
-                    institucionCoordinador = datosUsuario.institucion || 
-                                            datosUsuario.Institucion || 
-                                            datosUsuario.nombreInstitucion || 
-                                            datosUsuario.institution || 
-                                            datosUsuario.nombreInstitucion ||
-                                            null;
-                    
+                    institucionCoordinador = datosUsuario.institucion ||
+                        datosUsuario.Institucion ||
+                        datosUsuario.nombreInstitucion ||
+                        datosUsuario.institution ||
+                        datosUsuario.nombreInstitucion ||
+                        null;
+
                     console.log('Institución desde Firebase:', institucionCoordinador);
-                    
+
                     // Si aún no hay institución, mostrar todos los campos disponibles
                     if (!institucionCoordinador) {
                         console.error('❌ NO SE ENCONTRÓ INSTITUCIÓN');
@@ -139,7 +139,7 @@ async function cargarDatosUsuario() {
                     }
                 }
             }
-            
+
             const institucionNombreEl = document.getElementById('institucionNombre');
             if (institucionNombreEl) {
                 if (institucionCoordinador) {
@@ -152,11 +152,11 @@ async function cargarDatosUsuario() {
                     console.error('❌ No se pudo cargar la institución');
                 }
             }
-            
+
             await cargarFotoPerfil(usuario.id);
-            
+
             console.log('=== FIN CARGA DE DATOS ===');
-            
+
         } catch (error) {
             console.error('❌ Error al cargar datos del usuario:', error);
         }
@@ -169,16 +169,16 @@ async function cargarFotoPerfil(usuarioId) {
         if (!window.firebaseDB) {
             await esperarFirebase();
         }
-        
+
         const db = window.firebaseDB;
         const usuarioDoc = await db.collection('usuarios').doc(usuarioId).get();
-        
+
         if (usuarioDoc.exists) {
             const datosUsuario = usuarioDoc.data();
             if (datosUsuario.fotoPerfil) {
                 const avatarDefault = document.getElementById('userAvatarDefault');
                 const avatarImage = document.getElementById('userAvatarImage');
-                
+
                 if (avatarDefault && avatarImage) {
                     avatarDefault.style.display = 'none';
                     avatarImage.src = datosUsuario.fotoPerfil;
@@ -212,13 +212,13 @@ function inicializarSidebar() {
     const sidebarOverlay = document.getElementById('sidebarOverlay');
 
     if (mobileMenuToggle && sidebarPanel && sidebarOverlay) {
-        mobileMenuToggle.addEventListener('click', function() {
+        mobileMenuToggle.addEventListener('click', function () {
             sidebarPanel.classList.toggle('active');
             sidebarOverlay.classList.toggle('active');
             mobileMenuToggle.classList.toggle('active');
         });
 
-        sidebarOverlay.addEventListener('click', function() {
+        sidebarOverlay.addEventListener('click', function () {
             sidebarPanel.classList.remove('active');
             sidebarOverlay.classList.remove('active');
             mobileMenuToggle.classList.remove('active');
@@ -247,7 +247,7 @@ function inicializarSidebar() {
 function inicializarTabs() {
     const tabs = document.querySelectorAll('.dashboard-tab');
     tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
+        tab.addEventListener('click', function () {
             const targetTab = this.getAttribute('data-tab');
             cambiarTab(targetTab);
         });
@@ -257,7 +257,7 @@ function inicializarTabs() {
 function cambiarTab(tab) {
     document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`.dashboard-tab[data-tab="${tab}"]`).classList.add('active');
-    
+
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById(`${tab}-panel`).classList.add('active');
 }
@@ -268,31 +268,31 @@ async function cargarDatosDashboard() {
         if (!window.firebaseDB) {
             await esperarFirebase();
         }
-        
+
         const db = window.firebaseDB;
-        
+
         if (!institucionCoordinador) {
             mostrarError('No se pudo identificar la institución del coordinador. Por favor, verifica que tu perfil tenga una institución asignada.');
             return;
         }
-        
+
         console.log('Cargando datos para institución:', institucionCoordinador);
-        
+
         // Cargar estudiantes de la institución
         await cargarEstudiantes(db);
-        
+
         // Cargar respuestas de los estudiantes
         await cargarRespuestas(db);
-        
+
         // Cargar planes de estudio
         await cargarPlanes(db);
-        
+
         // Analizar datos
         datosAnalisis = analizarDatos();
-        
+
         // Renderizar dashboard
         renderizarDashboard();
-        
+
     } catch (error) {
         console.error('Error al cargar datos del dashboard:', error);
         mostrarError('Error al cargar los datos: ' + error.message);
@@ -303,28 +303,28 @@ async function cargarDatosDashboard() {
 async function cargarEstudiantes(db) {
     try {
         console.log('Buscando estudiantes de la institución:', institucionCoordinador);
-        
+
         const estudiantesSnapshot = await db.collection('usuarios')
             .where('tipoUsuario', '==', 'estudiante')
             .where('institucion', '==', institucionCoordinador)
             .get();
-        
+
         todosLosEstudiantes = [];
         estudiantesSnapshot.forEach(doc => {
             const estudiante = doc.data();
             todosLosEstudiantes.push({
                 id: doc.id,
-                idFiltro: estudiante.numeroDocumento || estudiante.numeroIdentidad || doc.id,
+                idFiltro: doc.id,
                 nombre: estudiante.nombre || 'Sin nombre',
                 email: estudiante.email || '',
                 documento: estudiante.numeroDocumento || estudiante.numeroIdentidad || ''
             });
         });
-        
+
         console.log(`Se encontraron ${todosLosEstudiantes.length} estudiantes`);
-        
+
         document.getElementById('totalEstudiantes').textContent = todosLosEstudiantes.length;
-        
+
         if (todosLosEstudiantes.length === 0) {
             console.warn('No se encontraron estudiantes para esta institución');
         }
@@ -337,23 +337,23 @@ async function cargarEstudiantes(db) {
 // Cargar respuestas
 async function cargarRespuestas(db) {
     todasLasRespuestas = [];
-    
+
     console.log('Cargando respuestas para', todosLosEstudiantes.length, 'estudiantes...');
-    
+
     for (const estudiante of todosLosEstudiantes) {
         const respuestasSnapshot = await db.collection('respuestas')
             .where('estudianteId', '==', estudiante.idFiltro)
             .get();
-        
+
         for (const doc of respuestasSnapshot.docs) {
             const respuesta = doc.data();
-            
+
             // Verificar que tenga pruebaId
             if (!respuesta.pruebaId) {
                 console.warn('Respuesta sin pruebaId:', doc.id);
                 continue;
             }
-            
+
             // Obtener información de la prueba
             try {
                 const pruebaDoc = await db.collection('pruebas').doc(respuesta.pruebaId).get();
@@ -361,9 +361,9 @@ async function cargarRespuestas(db) {
                     console.warn('Prueba no encontrada:', respuesta.pruebaId);
                     continue;
                 }
-                
+
                 const pruebaData = pruebaDoc.data();
-                
+
                 todasLasRespuestas.push({
                     id: doc.id,
                     estudianteId: estudiante.idFiltro,
@@ -379,7 +379,7 @@ async function cargarRespuestas(db) {
             }
         }
     }
-    
+
     console.log(`✓ Se cargaron ${todasLasRespuestas.length} respuestas`);
     document.getElementById('totalPruebas').textContent = todasLasRespuestas.length;
 }
@@ -387,12 +387,12 @@ async function cargarRespuestas(db) {
 // Cargar planes de estudio
 async function cargarPlanes(db) {
     todosLosPlanes = [];
-    
+
     const planesSnapshot = await db.collection('planesEstudio').get();
-    
+
     planesSnapshot.forEach(doc => {
         const plan = doc.data();
-        
+
         // Verificar si el estudiante pertenece a la institución
         const estudiante = todosLosEstudiantes.find(e => e.idFiltro === plan.estudianteId);
         if (estudiante) {
@@ -403,7 +403,7 @@ async function cargarPlanes(db) {
             });
         }
     });
-    
+
     document.getElementById('totalPlanes').textContent = todosLosPlanes.length;
 }
 
@@ -437,7 +437,7 @@ function analizarDatos() {
     console.log('=== INICIANDO ANÁLISIS DE DATOS ===');
     console.log('Estudiantes:', todosLosEstudiantes.length);
     console.log('Respuestas:', todasLasRespuestas.length);
-    
+
     const analisis = {
         estudiantes: [],
         promedioGeneral: 0,
@@ -447,11 +447,11 @@ function analizarDatos() {
         estudiantesRiesgo: [],
         evolucion: []
     };
-    
+
     // Analizar cada estudiante
     todosLosEstudiantes.forEach(estudiante => {
         const respuestasEstudiante = todasLasRespuestas.filter(r => r.estudianteId === estudiante.idFiltro);
-        
+
         if (respuestasEstudiante.length === 0) {
             analisis.estudiantes.push({
                 ...estudiante,
@@ -462,12 +462,12 @@ function analizarDatos() {
             });
             return;
         }
-        
+
         let totalCorrectas = 0;
         let totalPreguntas = 0;
         const materias = { LC: [], MT: [], SC: [], CN: [], IN: [] };
         const temas = {};
-        
+
         respuestasEstudiante.forEach(respuesta => {
             // Estadísticas generales
             if (respuesta.estadisticas && typeof respuesta.estadisticas === 'object') {
@@ -476,26 +476,26 @@ function analizarDatos() {
                 totalPreguntas += total;
                 totalCorrectas += correctas;
             }
-            
+
             // Analizar por materia
             if (respuesta.respuestasEvaluadas && typeof respuesta.respuestasEvaluadas === 'object') {
                 Object.keys(respuesta.respuestasEvaluadas).forEach(materiaOriginal => {
                     const respuestasMateria = respuesta.respuestasEvaluadas[materiaOriginal];
-                    
+
                     // Verificar que respuestasMateria sea un objeto
                     if (!respuestasMateria || typeof respuestasMateria !== 'object') {
                         return;
                     }
-                    
+
                     // Mapear nombre de materia a clave estándar
                     const materiaKey = mapearNombreMateriaAKey(materiaOriginal);
-                    
+
                     let correctasMateria = 0;
                     let totalMateria = 0;
-                    
+
                     Object.values(respuestasMateria).forEach(pregunta => {
                         if (!pregunta || typeof pregunta !== 'object') return;
-                        
+
                         totalMateria++;
                         if (pregunta.esCorrecta) {
                             correctasMateria++;
@@ -503,8 +503,8 @@ function analizarDatos() {
                             // Registrar tema con error (MEJORADO - con más información)
                             const tema = pregunta.tema || pregunta.competencia || 'Sin tema';
                             if (!temas[tema]) {
-                                temas[tema] = { 
-                                    errores: 0, 
+                                temas[tema] = {
+                                    errores: 0,
                                     materia: materiaKey,
                                     componente: pregunta.componente || 'No especificado',
                                     competencia: pregunta.competencia || 'No especificada',
@@ -515,7 +515,7 @@ function analizarDatos() {
                             temas[tema].errores++;
                         }
                     });
-                    
+
                     if (totalMateria > 0) {
                         const porcentaje = (correctasMateria / totalMateria) * 100;
                         if (materias[materiaKey]) {
@@ -525,9 +525,9 @@ function analizarDatos() {
                 });
             }
         });
-        
+
         const promedio = totalPreguntas > 0 ? (totalCorrectas / totalPreguntas) * 100 : 0;
-        
+
         // Calcular promedios por materia
         const promediosMaterias = {};
         Object.keys(materias).forEach(materia => {
@@ -538,18 +538,18 @@ function analizarDatos() {
                 promediosMaterias[materia] = 0;
             }
         });
-        
+
         // Calcular tendencia
         let tendencia = 'estable';
         if (respuestasEstudiante.length >= 2) {
             const ultimasDos = respuestasEstudiante.slice(-2);
             const promedio1 = calcularPromedioRespuesta(ultimasDos[0]);
             const promedio2 = calcularPromedioRespuesta(ultimasDos[1]);
-            
+
             if (promedio2 > promedio1 + 5) tendencia = 'subiendo';
             else if (promedio2 < promedio1 - 5) tendencia = 'bajando';
         }
-        
+
         analisis.estudiantes.push({
             ...estudiante,
             promedio: Math.round(promedio),
@@ -558,13 +558,13 @@ function analizarDatos() {
             tendencia,
             temas
         });
-        
+
         // Distribución
         if (promedio >= 80) analisis.distribucion.excelente++;
         else if (promedio >= 60) analisis.distribucion.bueno++;
         else if (promedio >= 40) analisis.distribucion.regular++;
         else analisis.distribucion.bajo++;
-        
+
         // Estudiantes en riesgo
         if (promedio < 50) {
             analisis.estudiantesRiesgo.push({
@@ -573,22 +573,22 @@ function analizarDatos() {
             });
         }
     });
-    
+
     // Ordenar estudiantes por promedio
     analisis.estudiantes.sort((a, b) => b.promedio - a.promedio);
-    
+
     // Calcular promedio general
     const sumaPromedios = analisis.estudiantes.reduce((sum, e) => sum + e.promedio, 0);
-    analisis.promedioGeneral = analisis.estudiantes.length > 0 
-        ? Math.round(sumaPromedios / analisis.estudiantes.length) 
+    analisis.promedioGeneral = analisis.estudiantes.length > 0
+        ? Math.round(sumaPromedios / analisis.estudiantes.length)
         : 0;
-    
+
     // Calcular promedios por materia
     ['LC', 'MT', 'SC', 'CN', 'IN'].forEach(materia => {
         const promedios = analisis.estudiantes
             .map(e => e.materias[materia] || 0)
             .filter(p => p > 0);
-        
+
         if (promedios.length > 0) {
             const suma = promedios.reduce((a, b) => a + b, 0);
             analisis.promediosPorMateria[materia] = Math.round(suma / promedios.length);
@@ -596,16 +596,16 @@ function analizarDatos() {
             analisis.promediosPorMateria[materia] = 0;
         }
     });
-    
+
     // Identificar temas más difíciles (MEJORADO - con más información)
     const todosLosTemas = {};
     analisis.estudiantes.forEach(est => {
         if (est.temas && typeof est.temas === 'object') {
             Object.keys(est.temas).forEach(tema => {
                 if (!todosLosTemas[tema]) {
-                    todosLosTemas[tema] = { 
-                        tema, 
-                        errores: 0, 
+                    todosLosTemas[tema] = {
+                        tema,
+                        errores: 0,
                         materia: est.temas[tema].materia,
                         componente: est.temas[tema].componente || 'No especificado',
                         competencia: est.temas[tema].competencia || 'No especificada',
@@ -616,16 +616,16 @@ function analizarDatos() {
             });
         }
     });
-    
+
     analisis.temasDificiles = Object.values(todosLosTemas)
         .sort((a, b) => b.errores - a.errores)
         .slice(0, 5);
-    
+
     console.log('=== ANÁLISIS COMPLETADO ===');
     console.log('Promedio general:', analisis.promedioGeneral);
     console.log('Promedios por materia:', analisis.promediosPorMateria);
     console.log('Distribución:', analisis.distribucion);
-    
+
     return analisis;
 }
 
@@ -640,7 +640,7 @@ function calcularPromedioRespuesta(respuesta) {
 function renderizarDashboard() {
     // Actualizar estadísticas del header
     document.getElementById('promedioGeneral').textContent = datosAnalisis.promedioGeneral + '%';
-    
+
     // Renderizar cada sección
     renderizarTopEstudiantes();
     renderizarDistribucion();
@@ -656,7 +656,7 @@ function renderizarDashboard() {
     renderizarGraficoRadar();
     renderizarEstadisticasAvanzadas();
     renderizarComparativaInstituciones(); // Solo tabla de ranking, sin gráfica
-    
+
     // Configurar búsqueda
     document.getElementById('searchRanking')?.addEventListener('input', filtrarTablaRanking);
 }
@@ -665,12 +665,12 @@ function renderizarDashboard() {
 function renderizarTopEstudiantes() {
     const container = document.getElementById('topEstudiantes');
     const top5 = datosAnalisis.estudiantes.slice(0, 5);
-    
+
     if (top5.length === 0) {
         container.innerHTML = '<p class="no-data">No hay datos disponibles</p>';
         return;
     }
-    
+
     container.innerHTML = top5.map((est, index) => {
         const medalla = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
         return `
@@ -697,14 +697,14 @@ function getScoreClass(promedio) {
 function renderizarDistribucion() {
     const ctx = document.getElementById('chartDistribucion');
     if (!ctx) return;
-    
+
     const dist = datosAnalisis.distribucion;
-    
+
     document.getElementById('countExcelente').textContent = dist.excelente;
     document.getElementById('countBueno').textContent = dist.bueno;
     document.getElementById('countRegular').textContent = dist.regular;
     document.getElementById('countBajo').textContent = dist.bajo;
-    
+
     new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -734,18 +734,18 @@ function renderizarTablaRanking() {
 
 function renderizarPaginaRanking() {
     const tbody = document.getElementById('tablaRankingBody');
-    
+
     if (estudiantesFiltrados.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" class="text-center">No hay datos disponibles</td></tr>';
         actualizarPaginacion(0);
         return;
     }
-    
+
     // Calcular índices
     const inicio = (paginaActual - 1) * estudiantesPorPagina;
     const fin = inicio + estudiantesPorPagina;
     const estudiantesPagina = estudiantesFiltrados.slice(inicio, fin);
-    
+
     // Renderizar filas
     tbody.innerHTML = estudiantesPagina.map((est, index) => {
         const posicionGlobal = inicio + index + 1;
@@ -764,7 +764,7 @@ function renderizarPaginaRanking() {
             </tr>
         `;
     }).join('');
-    
+
     // Actualizar controles de paginación
     actualizarPaginacion(estudiantesFiltrados.length);
 }
@@ -772,16 +772,16 @@ function renderizarPaginaRanking() {
 function actualizarPaginacion(totalEstudiantes) {
     const totalPaginas = Math.ceil(totalEstudiantes / estudiantesPorPagina);
     const paginacionContainer = document.getElementById('paginacionRanking');
-    
+
     if (!paginacionContainer) return;
-    
+
     if (totalPaginas <= 1) {
         paginacionContainer.style.display = 'none';
         return;
     }
-    
+
     paginacionContainer.style.display = 'flex';
-    
+
     let html = `
         <button class="btn-paginacion" onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}>
             <i class="bi bi-chevron-left"></i> Anterior
@@ -795,34 +795,34 @@ function actualizarPaginacion(totalEstudiantes) {
             Siguiente <i class="bi bi-chevron-right"></i>
         </button>
     `;
-    
+
     paginacionContainer.innerHTML = html;
 }
 
-window.cambiarPagina = function(nuevaPagina) {
+window.cambiarPagina = function (nuevaPagina) {
     const totalPaginas = Math.ceil(estudiantesFiltrados.length / estudiantesPorPagina);
-    
+
     if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
-    
+
     paginaActual = nuevaPagina;
     renderizarPaginaRanking();
-    
+
     // Scroll suave a la tabla
     document.getElementById('tablaRanking').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
 function filtrarTablaRanking() {
     const searchTerm = document.getElementById('searchRanking').value.toLowerCase();
-    
+
     if (searchTerm === '') {
         estudiantesFiltrados = [...datosAnalisis.estudiantes];
     } else {
-        estudiantesFiltrados = datosAnalisis.estudiantes.filter(est => 
+        estudiantesFiltrados = datosAnalisis.estudiantes.filter(est =>
             est.nombre.toLowerCase().includes(searchTerm) ||
             est.documento.toLowerCase().includes(searchTerm)
         );
     }
-    
+
     paginaActual = 1;
     renderizarPaginaRanking();
 }
@@ -831,11 +831,11 @@ function filtrarTablaRanking() {
 function renderizarGraficoMaterias() {
     const ctx = document.getElementById('chartMaterias');
     if (!ctx) return;
-    
+
     const promedios = datosAnalisis.promediosPorMateria;
-    
+
     console.log('📊 Renderizando gráfico de materias:', promedios);
-    
+
     const materiasOrden = [
         { key: 'LC', nombre: 'Lectura Crítica', color: '#FF4D4D', gradient: ['#FF6B6B', '#FF4D4D'] },
         { key: 'MT', nombre: 'Matemáticas', color: '#33CCFF', gradient: ['#5DDBFF', '#33CCFF'] },
@@ -843,24 +843,24 @@ function renderizarGraficoMaterias() {
         { key: 'CN', nombre: 'Ciencias', color: '#33FF77', gradient: ['#5FFF99', '#33FF77'] },
         { key: 'IN', nombre: 'Inglés', color: '#B366FF', gradient: ['#CC8FFF', '#B366FF'] }
     ];
-    
+
     const labels = [];
     const data = [];
     const backgroundColors = [];
-    
+
     // Crear gradientes para cada barra
     materiasOrden.forEach(materia => {
         const valor = promedios[materia.key] || 0;
         labels.push(materia.nombre);
         data.push(valor);
-        
+
         // Crear gradiente
         const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, materia.gradient[0]);
         gradient.addColorStop(1, materia.gradient[1]);
         backgroundColors.push(gradient);
     });
-    
+
     new Chart(ctx, {
         type: 'bar',
         data: {
@@ -890,17 +890,17 @@ function renderizarGraficoMaterias() {
                 y: {
                     beginAtZero: true,
                     max: 100,
-                    ticks: { 
+                    ticks: {
                         color: 'rgba(255, 255, 255, 0.8)',
                         font: {
                             size: 12,
                             weight: '500'
                         },
-                        callback: function(value) {
+                        callback: function (value) {
                             return value + '%';
                         }
                     },
-                    grid: { 
+                    grid: {
                         color: 'rgba(255, 255, 255, 0.08)',
                         lineWidth: 1
                     },
@@ -909,15 +909,15 @@ function renderizarGraficoMaterias() {
                     }
                 },
                 x: {
-                    ticks: { 
+                    ticks: {
                         color: 'rgba(255, 255, 255, 0.9)',
                         font: {
                             size: 13,
                             weight: '600'
                         }
                     },
-                    grid: { 
-                        display: false 
+                    grid: {
+                        display: false
                     },
                     border: {
                         display: false
@@ -925,8 +925,8 @@ function renderizarGraficoMaterias() {
                 }
             },
             plugins: {
-                legend: { 
-                    display: false 
+                legend: {
+                    display: false
                 },
                 tooltip: {
                     enabled: true,
@@ -946,10 +946,10 @@ function renderizarGraficoMaterias() {
                         weight: 'bold'
                     },
                     callbacks: {
-                        title: function(context) {
+                        title: function (context) {
                             return context[0].label;
                         },
-                        label: function(context) {
+                        label: function (context) {
                             return 'Promedio: ' + context.parsed.y + '%';
                         }
                     }
@@ -969,12 +969,12 @@ function renderizarGraficoMaterias() {
 // Renderizar análisis de materias
 function renderizarAnalisisMaterias() {
     const promedios = datosAnalisis.promediosPorMateria;
-    
+
     // SIEMPRE usar todas las materias, sin filtrar por promedio
     const todasLasMaterias = ['LC', 'MT', 'SC', 'CN', 'IN'];
-    
+
     console.log('📊 Análisis de materias (TODAS):', promedios);
-    
+
     // Ordenar materias por promedio (de mayor a menor)
     const materiasOrdenadas = todasLasMaterias
         .map(key => ({
@@ -983,25 +983,25 @@ function renderizarAnalisisMaterias() {
             nombre: nombresMaterias[key]
         }))
         .sort((a, b) => b.promedio - a.promedio);
-    
+
     console.log('📊 Materias ordenadas:', materiasOrdenadas);
-    
+
     // Materia más fuerte (la primera)
     const materiaFuerte = materiasOrdenadas[0];
-    
+
     // Materias más débiles: SOLO las que están por debajo del 75%
     const materiasDebiles = materiasOrdenadas
         .filter(m => m.promedio < 75)
         .sort((a, b) => a.promedio - b.promedio) // Ordenar de menor a mayor (más débil primero)
         .slice(0, 3); // Máximo 3
-    
+
     console.log('✅ Materia más fuerte:', materiaFuerte);
     console.log('⚠️ Materias más débiles (<75%):', materiasDebiles);
-    
+
     // Renderizar materia más fuerte
     document.getElementById('materiaFuerte').textContent = materiaFuerte.nombre;
     document.getElementById('promedioFuerte').textContent = Math.round(materiaFuerte.promedio) + '%';
-    
+
     // Renderizar materias más débiles
     const containerDebil = document.querySelector('.analysis-item.debil > div');
     if (containerDebil) {
@@ -1030,7 +1030,7 @@ function renderizarRankingsPorMateria() {
     ['LC', 'MT', 'SC', 'CN', 'IN'].forEach(materia => {
         const container = document.getElementById(`ranking${materia}`);
         if (!container) return;
-        
+
         // INCLUIR TODOS los estudiantes, incluso con 0%
         const ranking = datosAnalisis.estudiantes
             .map(e => ({
@@ -1039,12 +1039,12 @@ function renderizarRankingsPorMateria() {
             }))
             .sort((a, b) => b.promedioMateria - a.promedioMateria)
             .slice(0, 5);
-        
+
         if (ranking.length === 0) {
             container.innerHTML = '<p class="no-data">Sin datos</p>';
             return;
         }
-        
+
         container.innerHTML = ranking.map((est, index) => `
             <div class="mini-ranking-item">
                 <span class="position">${index + 1}</span>
@@ -1061,42 +1061,42 @@ let todosTemasDificiles = [];
 // Renderizar temas difíciles (MEJORADO - con filtro por materia)
 function renderizarTemasDificiles() {
     const container = document.getElementById('temasDificiles');
-    
+
     // Guardar todos los temas si aún no están guardados
     if (todosTemasDificiles.length === 0) {
         todosTemasDificiles = [...datosAnalisis.temasDificiles];
     }
-    
+
     if (todosTemasDificiles.length === 0) {
         container.innerHTML = '<p class="no-data">No hay datos suficientes</p>';
         return;
     }
-    
+
     // Agregar event listener al filtro
     const filtro = document.getElementById('filtroMateriaTemas');
     if (filtro && !filtro.hasAttribute('data-listener')) {
         filtro.setAttribute('data-listener', 'true');
         filtro.addEventListener('change', filtrarTemasPorMateria);
     }
-    
+
     // Obtener materia seleccionada
     const materiaSeleccionada = filtro ? filtro.value : 'todas';
-    
+
     // Filtrar temas según materia seleccionada
-    const temasFiltrados = materiaSeleccionada === 'todas' 
-        ? todosTemasDificiles 
+    const temasFiltrados = materiaSeleccionada === 'todas'
+        ? todosTemasDificiles
         : todosTemasDificiles.filter(t => t.materia === materiaSeleccionada);
-    
+
     if (temasFiltrados.length === 0) {
         container.innerHTML = '<p class="no-data">No hay temas difíciles en esta materia</p>';
         return;
     }
-    
+
     container.innerHTML = temasFiltrados.map(tema => {
         const color = coloresMaterias[tema.materia] || '#999';
         const nombreMateria = nombresMaterias[tema.materia] || tema.materia;
         const icono = iconosMaterias[tema.materia] || 'bi-book';
-        
+
         return `
             <div class="tema-dificil-item" data-materia="${tema.materia}">
                 <div class="tema-icon" style="background: ${color};">
@@ -1143,12 +1143,12 @@ function filtrarTemasPorMateria() {
 // Renderizar estudiantes en riesgo
 function renderizarEstudiantesRiesgo() {
     const container = document.getElementById('estudiantesRiesgo');
-    
+
     if (datosAnalisis.estudiantesRiesgo.length === 0) {
         container.innerHTML = '<div class="success-message"><i class="bi bi-check-circle-fill"></i> ¡Excelente! No hay estudiantes en riesgo</div>';
         return;
     }
-    
+
     container.innerHTML = datosAnalisis.estudiantesRiesgo.map(est => `
         <div class="estudiante-riesgo-item">
             <div class="estudiante-avatar">${est.nombre.charAt(0)}</div>
@@ -1167,7 +1167,7 @@ function renderizarEstudiantesRiesgo() {
 function renderizarPlanesActivos() {
     const container = document.getElementById('planesActivos');
     const countEl = document.getElementById('countPlanesActivos');
-    
+
     if (todosLosPlanes.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -1179,20 +1179,20 @@ function renderizarPlanesActivos() {
         countEl.textContent = '0 planes';
         return;
     }
-    
+
     countEl.textContent = `${todosLosPlanes.length} plan(es)`;
-    
+
     container.innerHTML = todosLosPlanes.slice(0, 6).map(plan => {
         const totalSesiones = plan.sesiones ? plan.sesiones.length : 0;
         const sesionesCompletadas = plan.sesiones ? plan.sesiones.filter(s => s.completada).length : 0;
         const progreso = totalSesiones > 0 ? Math.round((sesionesCompletadas / totalSesiones) * 100) : 0;
-        
+
         // Determinar color según progreso
         let colorProgreso = '#ff4d4d';
         if (progreso >= 75) colorProgreso = '#33ff77';
         else if (progreso >= 50) colorProgreso = '#33ccff';
         else if (progreso >= 25) colorProgreso = '#ffa500';
-        
+
         return `
             <div class="plan-card-mejorado">
                 <div class="plan-header-mejorado">
@@ -1225,10 +1225,10 @@ function renderizarPlanesActivos() {
 }
 
 // Ver plan de estudio
-window.verPlanEstudio = function(planId) {
+window.verPlanEstudio = function (planId) {
     // Buscar el plan en los datos
     const plan = todosLosPlanes.find(p => p.id === planId);
-    
+
     if (!plan) {
         Swal.fire({
             icon: 'error',
@@ -1240,7 +1240,7 @@ window.verPlanEstudio = function(planId) {
         });
         return;
     }
-    
+
     // Redirigir a la página de plan de estudio con los parámetros necesarios
     // Agregamos adminView=true para indicar que es vista de coordinador/admin
     // Agregamos fromResumen=true para indicar que viene desde Resumen-General
@@ -1253,7 +1253,7 @@ function renderizarRecomendaciones() {
     const container = document.getElementById('recomendacionesList');
     const countEl = document.getElementById('countRecomendaciones');
     const recomendaciones = [];
-    
+
     // 1. Recomendación URGENTE por estudiantes en riesgo crítico (< 40%)
     const estudiantesCriticos = datosAnalisis.estudiantesRiesgo.filter(e => e.promedio < 40);
     if (estudiantesCriticos.length > 0) {
@@ -1267,7 +1267,7 @@ function renderizarRecomendaciones() {
             onClick: () => cambiarTab('mejoras')
         });
     }
-    
+
     // 2. Recomendación por estudiantes en riesgo moderado (40-50%)
     const estudiantesRiesgo = datosAnalisis.estudiantesRiesgo.filter(e => e.promedio >= 40 && e.promedio < 50);
     if (estudiantesRiesgo.length > 0) {
@@ -1281,13 +1281,13 @@ function renderizarRecomendaciones() {
             onClick: () => window.location.href = 'Plan-Estudio.html'
         });
     }
-    
+
     // 3. Recomendación por materias débiles (< 60%)
     const promedios = datosAnalisis.promediosPorMateria;
     const materiasDebiles = Object.keys(promedios)
         .filter(m => promedios[m] < 60 && promedios[m] > 0)
         .sort((a, b) => promedios[a] - promedios[b]);
-    
+
     if (materiasDebiles.length > 0) {
         const materiasMasDebiles = materiasDebiles.slice(0, 2);
         recomendaciones.push({
@@ -1300,7 +1300,7 @@ function renderizarRecomendaciones() {
             onClick: () => cambiarTab('materias')
         });
     }
-    
+
     // 4. Recomendación por temas específicos difíciles
     if (datosAnalisis.temasDificiles.length > 0) {
         const top3Temas = datosAnalisis.temasDificiles.slice(0, 3);
@@ -1315,7 +1315,7 @@ function renderizarRecomendaciones() {
             onClick: () => cambiarTab('mejoras')
         });
     }
-    
+
     // 5. Recomendación por planes sin completar
     const planesSinCompletar = todosLosPlanes.filter(p => {
         const totalSesiones = p.sesiones ? p.sesiones.length : 0;
@@ -1323,7 +1323,7 @@ function renderizarRecomendaciones() {
         const progreso = totalSesiones > 0 ? (completadas / totalSesiones) * 100 : 0;
         return progreso < 50;
     });
-    
+
     if (planesSinCompletar.length > 0) {
         recomendaciones.push({
             tipo: 'advertencia',
@@ -1335,7 +1335,7 @@ function renderizarRecomendaciones() {
             onClick: () => cambiarTab('mejoras')
         });
     }
-    
+
     // 6. Recomendación positiva por buen rendimiento
     if (datosAnalisis.promedioGeneral >= 70) {
         const estudiantesExcelentes = datosAnalisis.estudiantes.filter(e => e.promedio >= 80).length;
@@ -1349,7 +1349,7 @@ function renderizarRecomendaciones() {
             onClick: () => cambiarTab('ranking')
         });
     }
-    
+
     // 7. Recomendación por mejora en tendencia
     const estudiantesMejorando = datosAnalisis.estudiantes.filter(e => e.tendencia === 'subiendo').length;
     if (estudiantesMejorando > 0) {
@@ -1363,15 +1363,15 @@ function renderizarRecomendaciones() {
             onClick: () => cambiarTab('ranking')
         });
     }
-    
+
     // Ordenar por prioridad
     recomendaciones.sort((a, b) => a.prioridad - b.prioridad);
-    
+
     // Actualizar contador
     if (countEl) {
         countEl.textContent = recomendaciones.length;
     }
-    
+
     if (recomendaciones.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -1382,7 +1382,7 @@ function renderizarRecomendaciones() {
         `;
         return;
     }
-    
+
     container.innerHTML = recomendaciones.map(rec => `
         <div class="recomendacion-item-mejorada ${rec.tipo}">
             <div class="recomendacion-icon">
@@ -1405,30 +1405,30 @@ function renderizarRecomendaciones() {
 function renderizarGraficoEvolucion() {
     const ctx = document.getElementById('chartEvolucion');
     if (!ctx) return;
-    
+
     // Agrupar respuestas por fecha
     const respuestasPorFecha = {};
     todasLasRespuestas.forEach(resp => {
         if (!resp.fecha) return;
         const fecha = resp.fecha.toDate();
         const fechaStr = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
-        
+
         if (!respuestasPorFecha[fechaStr]) {
             respuestasPorFecha[fechaStr] = { total: 0, correctas: 0 };
         }
-        
+
         if (resp.estadisticas) {
             respuestasPorFecha[fechaStr].total += resp.estadisticas.totalPreguntas || 0;
             respuestasPorFecha[fechaStr].correctas += resp.estadisticas.respuestasCorrectas || resp.estadisticas.correctas || 0;
         }
     });
-    
+
     const fechas = Object.keys(respuestasPorFecha).sort();
     const promedios = fechas.map(fecha => {
         const datos = respuestasPorFecha[fecha];
         return datos.total > 0 ? Math.round((datos.correctas / datos.total) * 100) : 0;
     });
-    
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -1474,22 +1474,22 @@ async function renderizarComparativaInstituciones() {
         if (!window.firebaseDB) {
             await esperarFirebase();
         }
-        
+
         const db = window.firebaseDB;
-        
+
         console.log('=== CARGANDO COMPARATIVA DE INSTITUCIONES ===');
-        
+
         // 1. Cargar todas las instituciones únicas de los estudiantes
         const estudiantesSnapshot = await db.collection('usuarios')
             .where('tipoUsuario', '==', 'estudiante')
             .get();
-        
+
         const institucionesDatos = {};
-        
+
         estudiantesSnapshot.forEach(doc => {
             const estudiante = doc.data();
             const institucion = estudiante.institucion;
-            
+
             if (institucion && institucion.trim()) {
                 if (!institucionesDatos[institucion]) {
                     institucionesDatos[institucion] = {
@@ -1500,7 +1500,7 @@ async function renderizarComparativaInstituciones() {
                         totalPreguntas: 0
                     };
                 }
-                
+
                 institucionesDatos[institucion].estudiantes.push({
                     id: doc.id,
                     idFiltro: estudiante.numeroDocumento || estudiante.numeroIdentidad || doc.id,
@@ -1508,38 +1508,38 @@ async function renderizarComparativaInstituciones() {
                 });
             }
         });
-        
+
         console.log('Instituciones encontradas:', Object.keys(institucionesDatos));
-        
+
         // 2. Cargar respuestas de cada institución
         for (const institucion in institucionesDatos) {
             const datos = institucionesDatos[institucion];
-            
+
             for (const estudiante of datos.estudiantes) {
                 const respuestasSnapshot = await db.collection('respuestas')
                     .where('estudianteId', '==', estudiante.idFiltro)
                     .get();
-                
+
                 respuestasSnapshot.forEach(doc => {
                     const respuesta = doc.data();
                     datos.totalRespuestas++;
-                    
+
                     if (respuesta.estadisticas) {
                         const total = respuesta.estadisticas.totalPreguntas || 0;
                         const correctas = respuesta.estadisticas.respuestasCorrectas || respuesta.estadisticas.correctas || 0;
-                        
+
                         datos.totalPreguntas += total;
                         datos.totalCorrectas += correctas;
                     }
                 });
             }
-            
+
             // Calcular promedio
-            datos.promedio = datos.totalPreguntas > 0 
-                ? Math.round((datos.totalCorrectas / datos.totalPreguntas) * 100) 
+            datos.promedio = datos.totalPreguntas > 0
+                ? Math.round((datos.totalCorrectas / datos.totalPreguntas) * 100)
                 : 0;
         }
-        
+
         // 3. Convertir a array y FILTRAR instituciones sin datos
         const institucionesArray = Object.values(institucionesDatos)
             .filter(inst => {
@@ -1547,29 +1547,29 @@ async function renderizarComparativaInstituciones() {
                 // - Al menos 1 estudiante
                 // - Al menos 1 respuesta/prueba
                 // - Promedio mayor a 0
-                return inst.estudiantes.length > 0 && 
-                       inst.totalRespuestas > 0 && 
-                       inst.promedio > 0;
+                return inst.estudiantes.length > 0 &&
+                    inst.totalRespuestas > 0 &&
+                    inst.promedio > 0;
             })
             .sort((a, b) => b.promedio - a.promedio);
-        
+
         console.log('Instituciones con datos válidos:', institucionesArray);
-        
+
         // 4. Verificar si hay suficientes datos
         if (institucionesArray.length === 0) {
             mostrarMensajeSinDatos();
             return;
         }
-        
+
         // 5. Tomar solo el TOP 5
         const top5Instituciones = institucionesArray.slice(0, 5);
-        
+
         // 6. Renderizar gráfico comparativo (dona/pie)
         renderizarGraficoComparativaInstituciones(top5Instituciones);
-        
+
         // 7. Renderizar tabla de posiciones (solo top 5)
         renderizarTablaPosicionesInstituciones(top5Instituciones, institucionesArray.length);
-        
+
     } catch (error) {
         console.error('Error al cargar comparativa de instituciones:', error);
         mostrarMensajeSinDatos();
@@ -1580,7 +1580,7 @@ async function renderizarComparativaInstituciones() {
 function mostrarMensajeSinDatos() {
     const chartContainer = document.getElementById('chartComparativaInstituciones');
     const tablaContainer = document.getElementById('tablaPosicionesInstituciones');
-    
+
     const mensaje = `
         <div class="no-data-comparativa">
             <i class="bi bi-info-circle"></i>
@@ -1589,7 +1589,7 @@ function mostrarMensajeSinDatos() {
             <small>Se necesitan al menos 2 instituciones con estudiantes y pruebas completadas.</small>
         </div>
     `;
-    
+
     if (chartContainer) {
         chartContainer.parentElement.innerHTML = mensaje;
     }
@@ -1609,21 +1609,21 @@ function renderizarGraficoComparativaInstituciones(instituciones) {
 function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituciones) {
     const container = document.getElementById('tablaPosicionesInstituciones');
     if (!container) return;
-    
+
     if (top5Instituciones.length === 0) {
         container.innerHTML = '<p class="no-data">No hay datos suficientes</p>';
         return;
     }
-    
+
     // Encontrar posición de la institución actual
     const posicionActual = top5Instituciones.findIndex(inst => inst.nombre === institucionCoordinador) + 1;
     const institucionActual = top5Instituciones.find(inst => inst.nombre === institucionCoordinador);
-    
+
     // Si la institución actual no está en el top 5, buscarla en todas
-    const mensajePosicion = posicionActual > 0 
+    const mensajePosicion = posicionActual > 0
         ? `Tu institución está en la posición <strong>#${posicionActual}</strong> del TOP ${top5Instituciones.length}`
         : `Tu institución no está en el TOP ${top5Instituciones.length}`;
-    
+
     container.innerHTML = `
         ${institucionActual ? `
             <div class="posicion-actual-card">
@@ -1658,10 +1658,10 @@ function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituc
             <h4><i class="bi bi-list-ol"></i> TOP ${top5Instituciones.length} Instituciones</h4>
             <p class="ranking-subtitle">Instituciones con mejor rendimiento académico</p>
             ${top5Instituciones.map((inst, index) => {
-                const esActual = inst.nombre === institucionCoordinador;
-                const medalla = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
-                
-                return `
+        const esActual = inst.nombre === institucionCoordinador;
+        const medalla = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+
+        return `
                     <div class="institucion-item ${esActual ? 'actual' : ''}">
                         <div class="institucion-posicion">
                             ${medalla || `#${index + 1}`}
@@ -1682,7 +1682,7 @@ function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituc
                         </div>
                     </div>
                 `;
-            }).join('')}
+    }).join('')}
         </div>
         
         ${totalInstituciones > 5 ? `
@@ -1698,9 +1698,9 @@ function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituc
 function renderizarGraficoRadar() {
     const ctx = document.getElementById('chartRadar');
     if (!ctx) return;
-    
+
     const promedios = datosAnalisis.promediosPorMateria;
-    
+
     new Chart(ctx, {
         type: 'radar',
         data: {
@@ -1738,7 +1738,7 @@ function renderizarGraficoRadar() {
 // Renderizar estadísticas avanzadas
 function renderizarEstadisticasAvanzadas() {
     const promedios = datosAnalisis.estudiantes.map(e => e.promedio).filter(p => p > 0);
-    
+
     if (promedios.length === 0) {
         document.getElementById('statMediana').textContent = '0%';
         document.getElementById('statDesviacion').textContent = '0';
@@ -1746,22 +1746,22 @@ function renderizarEstadisticasAvanzadas() {
         document.getElementById('statPeor').textContent = '0%';
         return;
     }
-    
+
     // Mediana
     const sorted = [...promedios].sort((a, b) => a - b);
     const mediana = sorted.length % 2 === 0
         ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
         : sorted[Math.floor(sorted.length / 2)];
-    
+
     // Desviación estándar
     const media = promedios.reduce((a, b) => a + b, 0) / promedios.length;
     const varianza = promedios.reduce((sum, p) => sum + Math.pow(p - media, 2), 0) / promedios.length;
     const desviacion = Math.sqrt(varianza);
-    
+
     // Mejor y peor
     const mejor = Math.max(...promedios);
     const peor = Math.min(...promedios);
-    
+
     document.getElementById('statMediana').textContent = Math.round(mediana) + '%';
     document.getElementById('statDesviacion').textContent = desviacion.toFixed(2);
     document.getElementById('statMejor').textContent = Math.round(mejor) + '%';
@@ -1769,11 +1769,11 @@ function renderizarEstadisticasAvanzadas() {
 }
 
 // Ver detalle de estudiante
-window.verDetalleEstudiante = function(estudianteId) {
+window.verDetalleEstudiante = function (estudianteId) {
     // Guardar flag para volver a resumen general
     sessionStorage.setItem('volverAResumenGeneral', 'true');
     sessionStorage.setItem('estudianteIdSeleccionado', estudianteId);
-    
+
     // Redirigir a resultados con el estudiante seleccionado
     window.location.href = `Resultados.html?estudianteId=${encodeURIComponent(estudianteId)}`;
 };
@@ -1781,7 +1781,7 @@ window.verDetalleEstudiante = function(estudianteId) {
 // Mostrar error
 function mostrarError(mensaje) {
     console.error('ERROR:', mensaje);
-    
+
     const mainContent = document.querySelector('.main-panel-content');
     if (mainContent) {
         mainContent.innerHTML = `
@@ -1879,18 +1879,18 @@ function mostrarError(mensaje) {
 // ============================================
 
 // Cargar datos de asistencia cuando se activa el tab
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const asistenciaTab = document.querySelector('.dashboard-tab[data-tab="asistencia"]');
     if (asistenciaTab) {
         asistenciaTab.addEventListener('click', cargarDatosAsistencia);
     }
-    
+
     // Setup filtro de materia para asistencia
     const filtroMateriaAsistencia = document.getElementById('filtroMateriaAsistencia');
     if (filtroMateriaAsistencia) {
         filtroMateriaAsistencia.addEventListener('change', filtrarAsistenciaPorMateria);
     }
-    
+
     // Setup botón de exportar asistencia
     const btnExportAsistencia = document.getElementById('btnExportAsistencia');
     if (btnExportAsistencia) {
@@ -1904,47 +1904,47 @@ async function cargarDatosAsistencia() {
         console.log('⚠️ Asistencias ya cargadas, omitiendo...');
         return;
     }
-    
+
     try {
         if (!window.firebaseDB) {
             await esperarFirebase();
         }
-        
+
         const db = window.firebaseDB;
-        
+
         if (!institucionCoordinador) {
             mostrarError('No se pudo identificar la institución');
             return;
         }
-        
+
         console.log('=== CARGANDO ASISTENCIAS ===');
         console.log('📍 Institución:', institucionCoordinador);
         console.log('👥 Total estudiantes:', todosLosEstudiantes.length);
-        
+
         // Obtener todas las asistencias de estudiantes de la institución
         const asistenciasData = [];
         let totalRegistrosEncontrados = 0;
-        
+
         for (const estudiante of todosLosEstudiantes) {
             // Buscar asistencias por estudiante (colección singular: asistencia)
             const asistenciasSnapshot = await db.collection('asistencia')
                 .where('estudianteId', '==', estudiante.idFiltro)
                 .get();
-            
+
             totalRegistrosEncontrados += asistenciasSnapshot.size;
-            
+
             if (asistenciasSnapshot.size > 0) {
                 console.log(`✓ ${estudiante.nombre}: ${asistenciasSnapshot.size} registro(s)`);
             }
-            
+
             asistenciasSnapshot.forEach(doc => {
                 const asistencia = doc.data();
-                
+
                 // Validar que tenga el campo presente
                 if (asistencia.presente === undefined || asistencia.presente === null) {
                     console.warn('⚠️ Registro sin campo "presente":', doc.id);
                 }
-                
+
                 asistenciasData.push({
                     id: doc.id,
                     estudianteId: estudiante.idFiltro,
@@ -1957,10 +1957,10 @@ async function cargarDatosAsistencia() {
                 });
             });
         }
-        
+
         console.log('📊 Total registros encontrados:', totalRegistrosEncontrados);
         console.log('📋 Registros procesados:', asistenciasData.length);
-        
+
         if (asistenciasData.length === 0) {
             console.warn('⚠️ No se encontraron registros de asistencia');
             // Mostrar mensaje en la UI
@@ -1979,24 +1979,24 @@ async function cargarDatosAsistencia() {
             asistenciaCargada = true;
             return;
         }
-        
+
         // Procesar datos de asistencia
         const resumen = procesarDatosAsistencia(asistenciasData);
-        
+
         // Renderizar resumen
         renderizarResumenAsistencia(resumen);
-        
+
         // Renderizar gráfico
         renderizarGraficoAsistenciaMaterias(resumen.porMateria);
-        
+
         // Renderizar tabla
         renderizarTablaAsistencia(resumen.porEstudiante);
-        
+
         // Marcar como cargada
         asistenciaCargada = true;
-        
+
         console.log('✅ Asistencias cargadas correctamente');
-        
+
     } catch (error) {
         console.error('❌ Error al cargar datos de asistencia:', error);
         mostrarError('Error al cargar asistencia: ' + error.message);
@@ -2012,7 +2012,7 @@ function procesarDatosAsistencia(asistenciasData) {
         porMateria: {},
         porEstudiante: []
     };
-    
+
     // Inicializar materias
     ['LC', 'MT', 'SC', 'CN', 'IN'].forEach(materia => {
         resumen.porMateria[materia] = {
@@ -2022,13 +2022,13 @@ function procesarDatosAsistencia(asistenciasData) {
             total: 0
         };
     });
-    
+
     console.log('📊 Procesando', asistenciasData.length, 'registros de asistencia...');
-    
+
     // Procesar cada asistencia
     asistenciasData.forEach(asistencia => {
         const materiaKey = mapearNombreMateriaAKey(asistencia.materia);
-        
+
         // DEBUG: Ver estructura de cada asistencia
         if (asistenciasData.indexOf(asistencia) < 3) {
             console.log('Ejemplo de asistencia:', {
@@ -2038,7 +2038,7 @@ function procesarDatosAsistencia(asistenciasData) {
                 tipo: typeof asistencia.presente
             });
         }
-        
+
         // presente es un booleano: true = presente, false = ausente
         if (asistencia.presente === true) {
             resumen.totalAsistencias++;
@@ -2057,26 +2057,26 @@ function procesarDatosAsistencia(asistenciasData) {
             console.warn('⚠️ Valor inesperado para presente:', asistencia.presente, 'en', asistencia);
         }
     });
-    
+
     // Calcular porcentaje general
     const totalClases = resumen.totalAsistencias + resumen.totalFaltas;
-    resumen.porcentaje = totalClases > 0 
-        ? Math.round((resumen.totalAsistencias / totalClases) * 100) 
+    resumen.porcentaje = totalClases > 0
+        ? Math.round((resumen.totalAsistencias / totalClases) * 100)
         : 0;
-    
+
     console.log('📈 Totales generales:', {
         asistencias: resumen.totalAsistencias,
         faltas: resumen.totalFaltas,
         porcentaje: resumen.porcentaje + '%'
     });
-    
+
     // Procesar por estudiante y materia
     const estudiantesMap = {};
-    
+
     asistenciasData.forEach(asistencia => {
         const materiaKey = mapearNombreMateriaAKey(asistencia.materia);
         const key = `${asistencia.estudianteId}_${materiaKey}`;
-        
+
         if (!estudiantesMap[key]) {
             estudiantesMap[key] = {
                 estudianteId: asistencia.estudianteId,
@@ -2088,7 +2088,7 @@ function procesarDatosAsistencia(asistenciasData) {
                 total: 0
             };
         }
-        
+
         if (asistencia.presente === true) {
             estudiantesMap[key].asistencias++;
             estudiantesMap[key].total++;
@@ -2097,22 +2097,22 @@ function procesarDatosAsistencia(asistenciasData) {
             estudiantesMap[key].total++;
         }
     });
-    
+
     resumen.porEstudiante = Object.values(estudiantesMap);
-    
+
     console.log('👥 Estudiantes procesados:', resumen.porEstudiante.length);
     console.log('📊 Resumen por materia:', resumen.porMateria);
-    
+
     return resumen;
 }
 
 function renderizarResumenAsistencia(resumen) {
     console.log('📊 Renderizando resumen de asistencia:', resumen);
-    
+
     const totalAsistenciasEl = document.getElementById('totalAsistencias');
     const totalFaltasEl = document.getElementById('totalFaltas');
     const porcentajeAsistenciaEl = document.getElementById('porcentajeAsistencia');
-    
+
     // Validar que los elementos existan antes de actualizar
     if (!totalAsistenciasEl || !totalFaltasEl || !porcentajeAsistenciaEl) {
         console.error('❌ Elementos del DOM no encontrados:', {
@@ -2122,12 +2122,12 @@ function renderizarResumenAsistencia(resumen) {
         });
         return;
     }
-    
+
     // Actualizar valores
     totalAsistenciasEl.textContent = resumen.totalAsistencias;
     totalFaltasEl.textContent = resumen.totalFaltas;
     porcentajeAsistenciaEl.textContent = resumen.porcentaje + '%';
-    
+
     console.log('✅ Resumen de asistencia renderizado:', {
         asistencias: resumen.totalAsistencias,
         faltas: resumen.totalFaltas,
@@ -2141,20 +2141,20 @@ function renderizarGraficoAsistenciaMaterias(porMateria) {
         console.error('❌ Canvas chartAsistenciaMaterias no encontrado');
         return;
     }
-    
+
     // Destruir gráfico existente si existe
     if (chartAsistenciaMaterias) {
         chartAsistenciaMaterias.destroy();
         chartAsistenciaMaterias = null;
     }
-    
+
     const materias = ['LC', 'MT', 'SC', 'CN', 'IN'];
     const asistencias = materias.map(m => porMateria[m]?.asistencias || 0);
     const faltas = materias.map(m => porMateria[m]?.faltas || 0);
-    
+
     // Verificar si hay datos
     const hayDatos = asistencias.some(a => a > 0) || faltas.some(f => f > 0);
-    
+
     if (!hayDatos) {
         console.log('ℹ️ No hay datos para el gráfico de asistencia por materias');
         // Mostrar mensaje en lugar del gráfico
@@ -2169,9 +2169,9 @@ function renderizarGraficoAsistenciaMaterias(porMateria) {
         }
         return;
     }
-    
+
     console.log('📊 Creando gráfico de asistencia por materias');
-    
+
     chartAsistenciaMaterias = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -2197,14 +2197,14 @@ function renderizarGraficoAsistenciaMaterias(porMateria) {
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { 
+                    ticks: {
                         color: 'rgba(255, 255, 255, 0.7)',
                         font: { size: 12 }
                     },
                     grid: { color: 'rgba(255, 255, 255, 0.1)' }
                 },
                 x: {
-                    ticks: { 
+                    ticks: {
                         color: 'rgba(255, 255, 255, 0.7)',
                         font: { size: 12 }
                     },
@@ -2213,7 +2213,7 @@ function renderizarGraficoAsistenciaMaterias(porMateria) {
             },
             plugins: {
                 legend: {
-                    labels: { 
+                    labels: {
                         color: 'rgba(255, 255, 255, 0.8)',
                         font: { size: 13 }
                     }
@@ -2228,18 +2228,18 @@ function renderizarGraficoAsistenciaMaterias(porMateria) {
             }
         }
     });
-    
+
     console.log('✅ Gráfico de asistencia por materias creado');
 }
 
 function renderizarTablaAsistencia(porEstudiante) {
     const tbody = document.getElementById('tablaAsistenciaBody');
-    
+
     if (!tbody) {
         console.error('❌ Elemento tablaAsistenciaBody no encontrado en el DOM');
         return;
     }
-    
+
     if (porEstudiante.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -2253,19 +2253,19 @@ function renderizarTablaAsistencia(porEstudiante) {
         console.log('ℹ️ Tabla de asistencia vacía renderizada');
         return;
     }
-    
+
     console.log('📋 Renderizando', porEstudiante.length, 'registros en la tabla');
-    
+
     tbody.innerHTML = porEstudiante.map(item => {
-        const porcentaje = item.total > 0 
-            ? Math.round((item.asistencias / item.total) * 100) 
+        const porcentaje = item.total > 0
+            ? Math.round((item.asistencias / item.total) * 100)
             : 0;
-        
+
         let porcentajeClass = 'bajo';
         if (porcentaje >= 90) porcentajeClass = 'excelente';
         else if (porcentaje >= 75) porcentajeClass = 'bueno';
         else if (porcentaje >= 60) porcentajeClass = 'regular';
-        
+
         return `
             <tr>
                 <td>${item.estudianteNombre}</td>
@@ -2277,7 +2277,7 @@ function renderizarTablaAsistencia(porEstudiante) {
             </tr>
         `;
     }).join('');
-    
+
     console.log('✅ Tabla de asistencia renderizada correctamente');
 }
 
@@ -2285,7 +2285,7 @@ function filtrarAsistenciaPorMateria() {
     const filtro = document.getElementById('filtroMateriaAsistencia').value;
     const tbody = document.getElementById('tablaAsistenciaBody');
     const filas = tbody.querySelectorAll('tr');
-    
+
     filas.forEach(fila => {
         if (filtro === 'todas') {
             fila.style.display = '';
@@ -2307,18 +2307,18 @@ function exportarAsistencia() {
 // ============================================
 
 // Cargar datos de tareas cuando se activa el tab
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const tareasTab = document.querySelector('.dashboard-tab[data-tab="tareas"]');
     if (tareasTab) {
         tareasTab.addEventListener('click', cargarDatosTareas);
     }
-    
+
     // Setup filtro de materia para tareas
     const filtroMateriaTareas = document.getElementById('filtroMateriaTareas');
     if (filtroMateriaTareas) {
         filtroMateriaTareas.addEventListener('change', filtrarTareasPorMateria);
     }
-    
+
     // Setup botón de exportar tareas
     const btnExportTareas = document.getElementById('btnExportTareas');
     if (btnExportTareas) {
@@ -2331,50 +2331,50 @@ async function cargarDatosTareas() {
     if (tareasCargada) {
         return;
     }
-    
+
     try {
         if (!window.firebaseDB) {
             await esperarFirebase();
         }
-        
+
         const db = window.firebaseDB;
-        
+
         if (!institucionCoordinador) {
             mostrarError('No se pudo identificar la institución');
             return;
         }
-        
+
         console.log('=== CARGANDO TAREAS ===');
         console.log('Institución:', institucionCoordinador);
         console.log('Total estudiantes:', todosLosEstudiantes.length);
-        
+
         // Obtener todas las tareas
         const tareasSnapshot = await db.collection('tareas').get();
         const todasLasTareas = [];
-        
+
         tareasSnapshot.forEach(doc => {
             todasLasTareas.push({
                 id: doc.id,
                 ...doc.data()
             });
         });
-        
+
         console.log('Total tareas en BD:', todasLasTareas.length);
-        
+
         // Obtener entregas de estudiantes de la institución
         const tareasData = [];
-        
+
         for (const estudiante of todosLosEstudiantes) {
             const entregasSnapshot = await db.collection('entregas')
                 .where('estudianteId', '==', estudiante.idFiltro)
                 .get();
-            
+
             console.log(`Entregas de ${estudiante.nombre}:`, entregasSnapshot.size);
-            
+
             entregasSnapshot.forEach(doc => {
                 const entrega = doc.data();
                 const tarea = todasLasTareas.find(t => t.id === entrega.tareaId);
-                
+
                 if (tarea) {
                     tareasData.push({
                         id: doc.id,
@@ -2393,18 +2393,18 @@ async function cargarDatosTareas() {
                     console.warn('Tarea no encontrada para entrega:', entrega.tareaId);
                 }
             });
-            
+
             // Agregar tareas no entregadas
             todasLasTareas.forEach(tarea => {
-                const entregada = tareasData.some(t => 
+                const entregada = tareasData.some(t =>
                     t.estudianteId === estudiante.idFiltro && t.tareaId === tarea.id
                 );
-                
+
                 if (!entregada) {
                     const ahora = new Date();
                     const fechaEntrega = tarea.fechaEntrega ? (tarea.fechaEntrega.toDate ? tarea.fechaEntrega.toDate() : new Date(tarea.fechaEntrega)) : null;
                     const vencida = fechaEntrega && fechaEntrega < ahora;
-                    
+
                     tareasData.push({
                         id: `no-entregada-${estudiante.idFiltro}-${tarea.id}`,
                         estudianteId: estudiante.idFiltro,
@@ -2421,28 +2421,28 @@ async function cargarDatosTareas() {
                 }
             });
         }
-        
+
         console.log('Total registros de tareas (entregadas + no entregadas):', tareasData.length);
         console.log('Tareas entregadas:', tareasData.filter(t => t.estado === 'calificada' || t.estado === 'revision').length);
         console.log('Tareas pendientes:', tareasData.filter(t => t.estado === 'pendiente' || t.estado === 'vencida').length);
-        
+
         // Procesar datos de tareas
         const resumen = procesarDatosTareas(tareasData);
-        
+
         console.log('Resumen procesado:', resumen);
-        
+
         // Renderizar resumen
         renderizarResumenTareas(resumen);
-        
+
         // Renderizar gráfico
         renderizarGraficoTareasMaterias(resumen.porMateria);
-        
+
         // Renderizar tabla
         renderizarTablaTareas(tareasData);
-        
+
         // Marcar como cargada
         tareasCargada = true;
-        
+
     } catch (error) {
         console.error('Error al cargar datos de tareas:', error);
         mostrarError('Error al cargar tareas: ' + error.message);
@@ -2457,7 +2457,7 @@ function procesarDatosTareas(tareasData) {
         promedio: 0,
         porMateria: {}
     };
-    
+
     // Inicializar materias
     ['LC', 'MT', 'SC', 'CN', 'IN'].forEach(materia => {
         resumen.porMateria[materia] = {
@@ -2467,27 +2467,27 @@ function procesarDatosTareas(tareasData) {
             calificadas: 0
         };
     });
-    
+
     let sumaCalificaciones = 0;
     let totalCalificadas = 0;
-    
+
     // Procesar cada tarea
     tareasData.forEach(tarea => {
         const materiaKey = mapearNombreMateriaAKey(tarea.materia);
-        
+
         resumen.totalTareas++;
-        
+
         if (resumen.porMateria[materiaKey]) {
             resumen.porMateria[materiaKey].total++;
         }
-        
+
         if (tarea.estado === 'calificada') {
             resumen.totalEntregadas++;
             if (resumen.porMateria[materiaKey]) {
                 resumen.porMateria[materiaKey].entregadas++;
                 resumen.porMateria[materiaKey].calificadas++;
             }
-            
+
             if (tarea.calificacion !== null && tarea.calificacion !== undefined) {
                 const porcentaje = (tarea.calificacion / tarea.puntosMaximos) * 100;
                 sumaCalificaciones += porcentaje;
@@ -2505,12 +2505,12 @@ function procesarDatosTareas(tareasData) {
             }
         }
     });
-    
+
     // Calcular promedio general
-    resumen.promedio = totalCalificadas > 0 
-        ? Math.round(sumaCalificaciones / totalCalificadas) 
+    resumen.promedio = totalCalificadas > 0
+        ? Math.round(sumaCalificaciones / totalCalificadas)
         : 0;
-    
+
     return resumen;
 }
 
@@ -2524,16 +2524,16 @@ function renderizarResumenTareas(resumen) {
 function renderizarGraficoTareasMaterias(porMateria) {
     const ctx = document.getElementById('chartTareasMaterias');
     if (!ctx) return;
-    
+
     // Destruir gráfico existente si existe
     if (chartTareasMaterias) {
         chartTareasMaterias.destroy();
     }
-    
+
     const materias = ['LC', 'MT', 'SC', 'CN', 'IN'];
     const entregadas = materias.map(m => porMateria[m]?.entregadas || 0);
     const pendientes = materias.map(m => porMateria[m]?.pendientes || 0);
-    
+
     chartTareasMaterias = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -2576,24 +2576,24 @@ function renderizarGraficoTareasMaterias(porMateria) {
 
 function renderizarTablaTareas(tareasData) {
     const tbody = document.getElementById('tablaTareasBody');
-    
+
     if (tareasData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay datos de tareas disponibles</td></tr>';
         return;
     }
-    
+
     tbody.innerHTML = tareasData.map(tarea => {
-        const fechaEntrega = tarea.fechaEntrega 
+        const fechaEntrega = tarea.fechaEntrega
             ? (tarea.fechaEntrega.toDate ? tarea.fechaEntrega.toDate() : new Date(tarea.fechaEntrega))
             : null;
-        
-        const fechaFormateada = fechaEntrega 
+
+        const fechaFormateada = fechaEntrega
             ? fechaEntrega.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
             : 'Sin fecha';
-        
+
         let estadoHTML = '';
         let calificacionHTML = '';
-        
+
         if (tarea.estado === 'calificada') {
             estadoHTML = '<span class="tarea-estado entregada">Calificada</span>';
             const porcentaje = (tarea.calificacion / tarea.puntosMaximos) * 100;
@@ -2601,7 +2601,7 @@ function renderizarTablaTareas(tareasData) {
             if (porcentaje >= 90) calificacionClass = 'excelente';
             else if (porcentaje >= 70) calificacionClass = 'buena';
             else if (porcentaje >= 50) calificacionClass = 'regular';
-            
+
             calificacionHTML = `<span class="tarea-calificacion ${calificacionClass}">${tarea.calificacion}/${tarea.puntosMaximos}</span>`;
         } else if (tarea.estado === 'revision') {
             estadoHTML = '<span class="tarea-estado revision">En revisión</span>';
@@ -2613,7 +2613,7 @@ function renderizarTablaTareas(tareasData) {
             estadoHTML = '<span class="tarea-estado pendiente">Pendiente</span>';
             calificacionHTML = '<span class="tarea-calificacion sin-calificar">-</span>';
         }
-        
+
         return `
             <tr>
                 <td>${tarea.estudianteNombre}</td>
@@ -2631,7 +2631,7 @@ function filtrarTareasPorMateria() {
     const filtro = document.getElementById('filtroMateriaTareas').value;
     const tbody = document.getElementById('tablaTareasBody');
     const filas = tbody.querySelectorAll('tr');
-    
+
     filas.forEach(fila => {
         if (filtro === 'todas') {
             fila.style.display = '';
