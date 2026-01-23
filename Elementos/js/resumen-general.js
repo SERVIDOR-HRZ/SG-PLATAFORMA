@@ -14,12 +14,346 @@ let estudiantesPorPagina = 10;
 let estudiantesFiltrados = [];
 
 // Variables para gráficos de Chart.js
+let chartDistribucion = null;
+let chartMaterias = null;
+let chartEvolucion = null;
+let chartRadar = null;
 let chartAsistenciaMaterias = null;
 let chartTareasMaterias = null;
 
 // Banderas para evitar cargas múltiples
 let asistenciaCargada = false;
 let tareasCargada = false;
+
+// Sistema de caché
+const CACHE_KEY = 'resumenGeneral_cache';
+const CACHE_PUESTO_KEY = 'resumenGeneral_puesto_cache';
+const CACHE_COMPARATIVA_KEY = 'resumenGeneral_comparativa_cache';
+const CACHE_VERSION = '1.0';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+const CACHE_PUESTO_DURATION = 10 * 60 * 1000; // 10 minutos para el puesto
+const CACHE_COMPARATIVA_DURATION = 10 * 60 * 1000; // 10 minutos para la comparativa
+
+// Funciones de caché
+function guardarEnCache(datos) {
+    try {
+        const cache = {
+            version: CACHE_VERSION,
+            timestamp: Date.now(),
+            institucion: institucionCoordinador,
+            datos: datos
+        };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+        console.log('✅ Datos guardados en caché');
+    } catch (error) {
+        console.warn('⚠️ No se pudo guardar en caché:', error);
+    }
+}
+
+function obtenerDeCache() {
+    try {
+        const cacheStr = localStorage.getItem(CACHE_KEY);
+        if (!cacheStr) return null;
+
+        const cache = JSON.parse(cacheStr);
+        
+        // Verificar versión
+        if (cache.version !== CACHE_VERSION) {
+            console.log('🔄 Versión de caché obsoleta, limpiando...');
+            localStorage.removeItem(CACHE_KEY);
+            return null;
+        }
+
+        // Verificar institución
+        if (cache.institucion !== institucionCoordinador) {
+            console.log('🔄 Institución diferente, limpiando caché...');
+            localStorage.removeItem(CACHE_KEY);
+            return null;
+        }
+
+        // Verificar tiempo
+        const tiempoTranscurrido = Date.now() - cache.timestamp;
+        if (tiempoTranscurrido > CACHE_DURATION) {
+            console.log('🔄 Caché expirado, recargando datos...');
+            localStorage.removeItem(CACHE_KEY);
+            return null;
+        }
+
+        console.log(`✅ Datos cargados desde caché (${Math.round(tiempoTranscurrido / 1000)}s de antigüedad)`);
+        return cache.datos;
+    } catch (error) {
+        console.warn('⚠️ Error al leer caché:', error);
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+    }
+}
+
+function limpiarCache() {
+    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(CACHE_PUESTO_KEY);
+    localStorage.removeItem(CACHE_COMPARATIVA_KEY);
+    console.log('🗑️ Caché limpiado');
+}
+
+// Funciones de caché para el puesto
+function guardarPuestoEnCache(puesto) {
+    try {
+        const cache = {
+            version: CACHE_VERSION,
+            timestamp: Date.now(),
+            institucion: institucionCoordinador,
+            puesto: puesto
+        };
+        localStorage.setItem(CACHE_PUESTO_KEY, JSON.stringify(cache));
+        console.log('✅ Puesto guardado en caché:', puesto);
+    } catch (error) {
+        console.warn('⚠️ Error al guardar puesto en caché:', error);
+    }
+}
+
+function obtenerPuestoDeCache() {
+    try {
+        const cacheStr = localStorage.getItem(CACHE_PUESTO_KEY);
+        if (!cacheStr) return null;
+
+        const cache = JSON.parse(cacheStr);
+        
+        // Verificar versión
+        if (cache.version !== CACHE_VERSION) {
+            localStorage.removeItem(CACHE_PUESTO_KEY);
+            return null;
+        }
+
+        // Verificar institución
+        if (cache.institucion !== institucionCoordinador) {
+            localStorage.removeItem(CACHE_PUESTO_KEY);
+            return null;
+        }
+
+        // Verificar tiempo
+        const tiempoTranscurrido = Date.now() - cache.timestamp;
+        if (tiempoTranscurrido > CACHE_PUESTO_DURATION) {
+            localStorage.removeItem(CACHE_PUESTO_KEY);
+            return null;
+        }
+
+        console.log(`✅ Puesto cargado desde caché: ${cache.puesto}`);
+        return cache.puesto;
+    } catch (error) {
+        console.warn('⚠️ Error al leer puesto del caché:', error);
+        localStorage.removeItem(CACHE_PUESTO_KEY);
+        return null;
+    }
+}
+
+// Funciones de caché para la comparativa completa
+function guardarComparativaEnCache(datos) {
+    try {
+        const cache = {
+            version: CACHE_VERSION,
+            timestamp: Date.now(),
+            institucion: institucionCoordinador,
+            datos: datos
+        };
+        localStorage.setItem(CACHE_COMPARATIVA_KEY, JSON.stringify(cache));
+        console.log('✅ Comparativa guardada en caché');
+    } catch (error) {
+        console.warn('⚠️ Error al guardar comparativa en caché:', error);
+    }
+}
+
+function obtenerComparativaDeCache() {
+    try {
+        const cacheStr = localStorage.getItem(CACHE_COMPARATIVA_KEY);
+        if (!cacheStr) return null;
+
+        const cache = JSON.parse(cacheStr);
+        
+        // Verificar versión
+        if (cache.version !== CACHE_VERSION) {
+            localStorage.removeItem(CACHE_COMPARATIVA_KEY);
+            return null;
+        }
+
+        // Verificar institución
+        if (cache.institucion !== institucionCoordinador) {
+            localStorage.removeItem(CACHE_COMPARATIVA_KEY);
+            return null;
+        }
+
+        // Verificar tiempo
+        const tiempoTranscurrido = Date.now() - cache.timestamp;
+        if (tiempoTranscurrido > CACHE_COMPARATIVA_DURATION) {
+            localStorage.removeItem(CACHE_COMPARATIVA_KEY);
+            return null;
+        }
+
+        console.log(`✅ Comparativa cargada desde caché`);
+        return cache.datos;
+    } catch (error) {
+        console.warn('⚠️ Error al leer comparativa del caché:', error);
+        localStorage.removeItem(CACHE_COMPARATIVA_KEY);
+        return null;
+    }
+}
+
+// Función para verificar si hay cambios en Firebase
+async function verificarCambiosEnFirebase(db) {
+    try {
+        const cacheStr = localStorage.getItem(CACHE_KEY);
+        if (!cacheStr) return true; // No hay caché, cargar datos
+
+        const cache = JSON.parse(cacheStr);
+        
+        // Verificar si hay nuevas respuestas
+        const ultimaRespuestaCache = cache.datos.ultimaActualizacion || 0;
+        
+        // Consultar solo documentos más recientes que el caché
+        const respuestasRecientes = await db.collection('respuestas')
+            .where('fechaEnvio', '>', new Date(ultimaRespuestaCache))
+            .limit(1)
+            .get();
+
+        if (!respuestasRecientes.empty) {
+            console.log('🔄 Se detectaron cambios en Firebase, recargando...');
+            return true;
+        }
+
+        console.log('✅ No hay cambios, usando caché');
+        return false;
+    } catch (error) {
+        console.warn('⚠️ Error al verificar cambios:', error);
+        return true; // En caso de error, recargar
+    }
+}
+
+// Funciones de utilidad para carga
+function mostrarCargando() {
+    // Crear overlay de carga si no existe
+    if (!document.getElementById('loadingOverlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        `;
+        overlay.innerHTML = `
+            <div style="text-align: center;">
+                <div style="width: 60px; height: 60px; border: 4px solid rgba(255, 0, 0, 0.3); border-top: 4px solid #ff0000; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <p style="color: #fff; font-size: 18px; font-weight: 600; margin: 0;">Cargando Dashboard...</p>
+                <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px; margin: 10px 0 0;">Esto puede tomar unos segundos</p>
+            </div>
+            <style>
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        `;
+        document.body.appendChild(overlay);
+    }
+}
+
+function ocultarCargando() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => overlay.remove(), 300);
+    }
+}
+
+// Indicadores de carga para tabs específicos
+function mostrarCargandoTab(tabName) {
+    const panel = document.getElementById(`${tabName}-panel`);
+    if (!panel) return;
+
+    // Crear overlay de carga si no existe
+    let overlay = panel.querySelector('.tab-loading-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'tab-loading-overlay';
+        overlay.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(3px);
+        `;
+        overlay.innerHTML = `
+            <div style="text-align: center;">
+                <div style="width: 50px; height: 50px; border: 3px solid rgba(255, 0, 0, 0.3); border-top: 3px solid #ff0000; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 15px;"></div>
+                <p style="color: #fff; font-size: 16px; font-weight: 600; margin: 0;">Cargando ${tabName === 'asistencia' ? 'Asistencia' : 'Tareas'}...</p>
+                <p style="color: rgba(255, 255, 255, 0.6); font-size: 13px; margin: 8px 0 0;">Consultando base de datos</p>
+            </div>
+        `;
+        panel.style.position = 'relative';
+        panel.appendChild(overlay);
+    }
+}
+
+function ocultarCargandoTab(tabName) {
+    const panel = document.getElementById(`${tabName}-panel`);
+    if (!panel) return;
+
+    const overlay = panel.querySelector('.tab-loading-overlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => overlay.remove(), 300);
+    }
+}
+
+function mostrarError(mensaje) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            html: `
+                <p style="margin-bottom: 15px;">${mensaje}</p>
+                <p style="font-size: 14px; color: rgba(255,255,255,0.7);">
+                    <strong>Sugerencias:</strong><br>
+                    • Verifica que tu perfil tenga una institución asignada<br>
+                    • Intenta recargar la página<br>
+                    • Si el problema persiste, contacta al administrador
+                </p>
+            `,
+            background: '#1a1a1a',
+            color: '#fff',
+            confirmButtonColor: '#ff0000',
+            confirmButtonText: 'Reintentar',
+            showCancelButton: true,
+            cancelButtonText: 'Volver',
+            cancelButtonColor: '#666'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.reload();
+            } else {
+                window.location.href = 'Panel_Coordinador.html';
+            }
+        });
+    } else {
+        alert(mensaje);
+        window.location.href = 'Panel_Coordinador.html';
+    }
+}
 
 // Colores de materias
 const coloresMaterias = {
@@ -47,12 +381,37 @@ const iconosMaterias = {
 };
 
 // Inicialización
-document.addEventListener('DOMContentLoaded', function () {
-    verificarAutenticacion();
-    inicializarSidebar();
-    inicializarTabs();
-    cargarDatosUsuario();
-    cargarDatosDashboard();
+document.addEventListener('DOMContentLoaded', async function () {
+    try {
+        verificarAutenticacion();
+        inicializarSidebar();
+        inicializarTabs();
+        
+        // Mostrar indicador de carga
+        mostrarCargando();
+        
+        // Esperar a que Firebase esté listo
+        await esperarFirebase();
+        
+        // Cargar datos del usuario y esperar a que termine
+        await cargarDatosUsuario();
+        
+        // Verificar que tenemos institución antes de continuar
+        if (!institucionCoordinador) {
+            throw new Error('No se pudo identificar la institución del coordinador. Por favor, verifica que tu perfil tenga una institución asignada.');
+        }
+        
+        // Ahora sí cargar el dashboard
+        await cargarDatosDashboard();
+        
+        // Ocultar indicador de carga
+        ocultarCargando();
+        
+    } catch (error) {
+        console.error('❌ Error en inicialización:', error);
+        ocultarCargando();
+        mostrarError(error.message || 'Error al cargar los datos');
+    }
 });
 
 // Verificar autenticación
@@ -80,86 +439,84 @@ function verificarAutenticacion() {
 // Cargar datos del usuario
 async function cargarDatosUsuario() {
     const usuarioActual = sessionStorage.getItem('currentUser');
-    if (usuarioActual) {
-        try {
-            const usuario = JSON.parse(usuarioActual);
+    if (!usuarioActual) {
+        throw new Error('No se encontró información del usuario');
+    }
 
-            console.log('=== CARGANDO DATOS DE USUARIO ===');
-            console.log('Usuario desde sessionStorage:', usuario);
+    try {
+        const usuario = JSON.parse(usuarioActual);
 
-            const userNameElement = document.getElementById('coordinadorName');
-            if (userNameElement && usuario.nombre) {
-                userNameElement.textContent = usuario.nombre.toUpperCase();
-            }
+        console.log('=== CARGANDO DATOS DE USUARIO ===');
+        console.log('Usuario desde sessionStorage:', usuario);
 
-            // Intentar obtener institución de múltiples fuentes
-            institucionCoordinador = usuario.institucion ||
-                usuario.Institucion ||
-                usuario.nombreInstitucion ||
-                usuario.institution ||
-                null;
-
-            console.log('Institución desde sessionStorage:', institucionCoordinador);
-
-            // Si no tiene institución en sessionStorage, buscar en Firebase
-            if (!institucionCoordinador) {
-                console.log('⚠️ No se encontró institución en sessionStorage, buscando en Firebase...');
-
-                if (!window.firebaseDB) {
-                    await esperarFirebase();
-                }
-
-                const db = window.firebaseDB;
-                const usuarioDoc = await db.collection('usuarios').doc(usuario.id).get();
-
-                if (usuarioDoc.exists) {
-                    const datosUsuario = usuarioDoc.data();
-                    console.log('Datos completos de Firebase:', datosUsuario);
-
-                    // Buscar institución en todos los campos posibles
-                    institucionCoordinador = datosUsuario.institucion ||
-                        datosUsuario.Institucion ||
-                        datosUsuario.nombreInstitucion ||
-                        datosUsuario.institution ||
-                        datosUsuario.nombreInstitucion ||
-                        null;
-
-                    console.log('Institución desde Firebase:', institucionCoordinador);
-
-                    // Si aún no hay institución, mostrar todos los campos disponibles
-                    if (!institucionCoordinador) {
-                        console.error('❌ NO SE ENCONTRÓ INSTITUCIÓN');
-                        console.log('📋 Campos disponibles en Firebase:', Object.keys(datosUsuario));
-                        console.log('💡 Verifica en Firebase Console el campo correcto para la institución');
-                    } else {
-                        // Actualizar sessionStorage con la institución encontrada
-                        usuario.institucion = institucionCoordinador;
-                        sessionStorage.setItem('currentUser', JSON.stringify(usuario));
-                        console.log('✓ Institución actualizada en sessionStorage');
-                    }
-                }
-            }
-
-            const institucionNombreEl = document.getElementById('institucionNombre');
-            if (institucionNombreEl) {
-                if (institucionCoordinador) {
-                    institucionNombreEl.textContent = institucionCoordinador;
-                    institucionNombreEl.style.color = 'rgba(255, 255, 255, 0.6)';
-                    console.log('✓ Institución mostrada en UI:', institucionCoordinador);
-                } else {
-                    institucionNombreEl.textContent = '⚠️ Sin institución asignada - Verifica tu perfil';
-                    institucionNombreEl.style.color = '#ffa500';
-                    console.error('❌ No se pudo cargar la institución');
-                }
-            }
-
-            await cargarFotoPerfil(usuario.id);
-
-            console.log('=== FIN CARGA DE DATOS ===');
-
-        } catch (error) {
-            console.error('❌ Error al cargar datos del usuario:', error);
+        const userNameElement = document.getElementById('coordinadorName');
+        if (userNameElement && usuario.nombre) {
+            userNameElement.textContent = usuario.nombre.toUpperCase();
         }
+
+        // Intentar obtener institución de múltiples fuentes
+        institucionCoordinador = usuario.institucion ||
+            usuario.Institucion ||
+            usuario.nombreInstitucion ||
+            usuario.institution ||
+            null;
+
+        console.log('Institución desde sessionStorage:', institucionCoordinador);
+
+        // Si no tiene institución en sessionStorage, buscar en Firebase
+        if (!institucionCoordinador) {
+            console.log('⚠️ No se encontró institución en sessionStorage, buscando en Firebase...');
+
+            const db = window.firebaseDB;
+            const usuarioDoc = await db.collection('usuarios').doc(usuario.id).get();
+
+            if (usuarioDoc.exists) {
+                const datosUsuario = usuarioDoc.data();
+                console.log('Datos completos de Firebase:', datosUsuario);
+
+                // Buscar institución en todos los campos posibles
+                institucionCoordinador = datosUsuario.institucion ||
+                    datosUsuario.Institucion ||
+                    datosUsuario.nombreInstitucion ||
+                    datosUsuario.institution ||
+                    null;
+
+                console.log('Institución desde Firebase:', institucionCoordinador);
+
+                // Si aún no hay institución, mostrar todos los campos disponibles
+                if (!institucionCoordinador) {
+                    console.error('❌ NO SE ENCONTRÓ INSTITUCIÓN');
+                    console.log('📋 Campos disponibles en Firebase:', Object.keys(datosUsuario));
+                    throw new Error('No se encontró institución asignada en tu perfil. Por favor, contacta al administrador para que asigne una institución a tu cuenta.');
+                } else {
+                    // Actualizar sessionStorage con la institución encontrada
+                    usuario.institucion = institucionCoordinador;
+                    sessionStorage.setItem('currentUser', JSON.stringify(usuario));
+                    console.log('✓ Institución actualizada en sessionStorage');
+                }
+            } else {
+                throw new Error('No se encontró el perfil del usuario en la base de datos');
+            }
+        }
+
+        const institucionNombreEl = document.getElementById('institucionNombre');
+        if (institucionNombreEl) {
+            if (institucionCoordinador) {
+                institucionNombreEl.textContent = institucionCoordinador;
+                institucionNombreEl.style.color = 'rgba(255, 255, 255, 0.6)';
+                console.log('✓ Institución mostrada en UI:', institucionCoordinador);
+            } else {
+                throw new Error('No se pudo cargar la institución');
+            }
+        }
+
+        await cargarFotoPerfil(usuario.id);
+
+        console.log('=== FIN CARGA DE DATOS ===');
+
+    } catch (error) {
+        console.error('❌ Error al cargar datos del usuario:', error);
+        throw error;
     }
 }
 
@@ -191,13 +548,20 @@ async function cargarFotoPerfil(usuarioId) {
     }
 }
 
-// Esperar Firebase
+// Esperar Firebase con timeout
 function esperarFirebase() {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
+        let intentos = 0;
+        const maxIntentos = 50; // 5 segundos máximo
+        
         const verificar = () => {
             if (window.firebaseDB) {
+                console.log('✓ Firebase inicializado correctamente');
                 resolve();
+            } else if (intentos >= maxIntentos) {
+                reject(new Error('Timeout: Firebase no se pudo inicializar'));
             } else {
+                intentos++;
                 setTimeout(verificar, 100);
             }
         };
@@ -213,15 +577,46 @@ function inicializarSidebar() {
 
     if (mobileMenuToggle && sidebarPanel && sidebarOverlay) {
         mobileMenuToggle.addEventListener('click', function () {
-            sidebarPanel.classList.toggle('active');
+            const isActive = sidebarPanel.classList.toggle('active');
             sidebarOverlay.classList.toggle('active');
             mobileMenuToggle.classList.toggle('active');
+            
+            // Cambiar icono de la flecha
+            const icon = mobileMenuToggle.querySelector('i');
+            if (icon) {
+                if (isActive) {
+                    icon.className = 'bi bi-chevron-left';
+                } else {
+                    icon.className = 'bi bi-chevron-right';
+                }
+            }
         });
 
         sidebarOverlay.addEventListener('click', function () {
             sidebarPanel.classList.remove('active');
             sidebarOverlay.classList.remove('active');
             mobileMenuToggle.classList.remove('active');
+            
+            // Volver al icono de flecha derecha
+            const icon = mobileMenuToggle.querySelector('i');
+            if (icon) {
+                icon.className = 'bi bi-chevron-right';
+            }
+        });
+        
+        // Manejar cambio de tamaño de ventana
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebarPanel.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                mobileMenuToggle.classList.remove('active');
+                
+                // Asegurar que el icono sea flecha derecha
+                const icon = mobileMenuToggle.querySelector('i');
+                if (icon) {
+                    icon.className = 'bi bi-chevron-right';
+                }
+            }
         });
     }
 
@@ -234,7 +629,7 @@ function inicializarSidebar() {
     });
 
     document.getElementById('btnBack')?.addEventListener('click', () => {
-        window.location.href = 'Panel_Coordinador.html';
+        window.location.href = 'Progreso-Estudiantes.html';
     });
 
     document.getElementById('btnLogout')?.addEventListener('click', () => {
@@ -265,37 +660,81 @@ function cambiarTab(tab) {
 // Cargar datos del dashboard
 async function cargarDatosDashboard() {
     try {
-        if (!window.firebaseDB) {
-            await esperarFirebase();
-        }
-
         const db = window.firebaseDB;
 
         if (!institucionCoordinador) {
-            mostrarError('No se pudo identificar la institución del coordinador. Por favor, verifica que tu perfil tenga una institución asignada.');
-            return;
+            throw new Error('No se pudo identificar la institución del coordinador. Por favor, verifica que tu perfil tenga una institución asignada.');
         }
 
-        console.log('Cargando datos para institución:', institucionCoordinador);
+        console.log('📊 Cargando datos para institución:', institucionCoordinador);
+
+        // Intentar cargar desde caché primero
+        const datosCache = obtenerDeCache();
+        
+        if (datosCache) {
+            // Verificar si hay cambios en Firebase
+            const hayCambios = await verificarCambiosEnFirebase(db);
+            
+            if (!hayCambios) {
+                // Usar datos del caché
+                console.log('⚡ Cargando desde caché (instantáneo)');
+                todosLosEstudiantes = datosCache.estudiantes;
+                todasLasRespuestas = datosCache.respuestas;
+                todosLosPlanes = datosCache.planes;
+                
+                // Actualizar contadores
+                document.getElementById('totalEstudiantes').textContent = todosLosEstudiantes.length;
+                document.getElementById('totalPruebas').textContent = todasLasRespuestas.length;
+                document.getElementById('totalPlanes').textContent = todosLosPlanes.length;
+                
+                // Analizar y renderizar
+                datosAnalisis = analizarDatos();
+                renderizarDashboard();
+                
+                console.log('✅ Dashboard cargado desde caché');
+                return;
+            }
+        }
+
+        // Si no hay caché o hay cambios, cargar desde Firebase
+        console.log('⏳ Cargando desde Firebase...');
+        const tiempoInicio = Date.now();
 
         // Cargar estudiantes de la institución
+        console.log('⏳ Cargando estudiantes...');
         await cargarEstudiantes(db);
 
         // Cargar respuestas de los estudiantes
+        console.log('⏳ Cargando respuestas...');
         await cargarRespuestas(db);
 
         // Cargar planes de estudio
+        console.log('⏳ Cargando planes...');
         await cargarPlanes(db);
 
+        // Guardar en caché
+        const ultimaActualizacion = Date.now();
+        guardarEnCache({
+            estudiantes: todosLosEstudiantes,
+            respuestas: todasLasRespuestas,
+            planes: todosLosPlanes,
+            ultimaActualizacion: ultimaActualizacion
+        });
+
         // Analizar datos
+        console.log('⏳ Analizando datos...');
         datosAnalisis = analizarDatos();
 
         // Renderizar dashboard
+        console.log('⏳ Renderizando dashboard...');
         renderizarDashboard();
+        
+        const tiempoFin = Date.now();
+        console.log(`✅ Dashboard cargado desde Firebase en ${tiempoFin - tiempoInicio}ms`);
 
     } catch (error) {
-        console.error('Error al cargar datos del dashboard:', error);
-        mostrarError('Error al cargar los datos: ' + error.message);
+        console.error('❌ Error al cargar datos del dashboard:', error);
+        throw error;
     }
 }
 
@@ -644,7 +1083,66 @@ function calcularPromedioRespuesta(respuesta) {
 // Renderizar dashboard
 function renderizarDashboard() {
     // Actualizar estadísticas del header
-    document.getElementById('promedioGeneral').textContent = datosAnalisis.promedioGeneral + '%';
+    const promedioGeneralEl = document.getElementById('promedioGeneral');
+    if (promedioGeneralEl) {
+        promedioGeneralEl.textContent = datosAnalisis.promedioGeneral + '%';
+    }
+    
+    // Intentar cargar el puesto desde caché
+    const puestoCacheado = obtenerPuestoDeCache();
+    if (puestoCacheado !== null) {
+        actualizarPuestoEnHeader(puestoCacheado);
+    }
+
+    // Configurar botón de actualizar
+    const btnRefresh = document.getElementById('btnRefresh');
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', async function() {
+            if (this.classList.contains('loading')) return;
+            
+            this.classList.add('loading');
+            this.disabled = true;
+            
+            try {
+                // Limpiar caché
+                limpiarCache();
+                
+                // Resetear banderas de carga
+                asistenciaCargada = false;
+                tareasCargada = false;
+                
+                // Mostrar indicador de carga
+                mostrarCargando();
+                
+                // Recargar datos
+                await cargarDatosDashboard();
+                
+                // Ocultar indicador
+                ocultarCargando();
+                
+                // Mostrar mensaje de éxito
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Actualizado!',
+                        text: 'Los datos se han actualizado correctamente',
+                        background: '#1a1a1a',
+                        color: '#fff',
+                        confirmButtonColor: '#ff0000',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            } catch (error) {
+                console.error('Error al actualizar:', error);
+                ocultarCargando();
+                mostrarError('Error al actualizar los datos');
+            } finally {
+                this.classList.remove('loading');
+                this.disabled = false;
+            }
+        });
+    }
 
     // Renderizar cada sección
     renderizarTopEstudiantes();
@@ -660,7 +1158,11 @@ function renderizarDashboard() {
     renderizarGraficoEvolucion();
     renderizarGraficoRadar();
     renderizarEstadisticasAvanzadas();
-    renderizarComparativaInstituciones(); // Solo tabla de ranking, sin gráfica
+    
+    // Cargar comparativa de instituciones de forma asíncrona para actualizar el puesto
+    renderizarComparativaInstituciones().catch(err => {
+        console.error('Error al cargar comparativa:', err);
+    });
 
     // Configurar búsqueda
     document.getElementById('searchRanking')?.addEventListener('input', filtrarTablaRanking);
@@ -703,6 +1205,12 @@ function renderizarDistribucion() {
     const ctx = document.getElementById('chartDistribucion');
     if (!ctx) return;
 
+    // Destruir gráfico existente si existe
+    if (chartDistribucion) {
+        chartDistribucion.destroy();
+        chartDistribucion = null;
+    }
+
     const dist = datosAnalisis.distribucion;
 
     document.getElementById('countExcelente').textContent = dist.excelente;
@@ -710,7 +1218,7 @@ function renderizarDistribucion() {
     document.getElementById('countRegular').textContent = dist.regular;
     document.getElementById('countBajo').textContent = dist.bajo;
 
-    new Chart(ctx, {
+    chartDistribucion = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: ['Excelente', 'Bueno', 'Regular', 'Bajo'],
@@ -836,6 +1344,12 @@ function renderizarGraficoMaterias() {
     const ctx = document.getElementById('chartMaterias');
     if (!ctx) return;
 
+    // Destruir gráfico existente si existe
+    if (chartMaterias) {
+        chartMaterias.destroy();
+        chartMaterias = null;
+    }
+
     const promedios = datosAnalisis.promediosPorMateria;
 
     console.log('📊 Renderizando gráfico de materias:', promedios);
@@ -865,7 +1379,7 @@ function renderizarGraficoMaterias() {
         backgroundColors.push(gradient);
     });
 
-    new Chart(ctx, {
+    chartMaterias = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
@@ -1414,7 +1928,23 @@ function renderizarGraficoEvolucion() {
     const respuestasPorFecha = {};
     todasLasRespuestas.forEach(resp => {
         if (!resp.fecha) return;
-        const fecha = resp.fecha.toDate();
+        
+        // Convertir fecha de forma segura
+        let fecha;
+        if (resp.fecha.toDate && typeof resp.fecha.toDate === 'function') {
+            // Es un Timestamp de Firebase
+            fecha = resp.fecha.toDate();
+        } else if (resp.fecha instanceof Date) {
+            // Ya es un objeto Date
+            fecha = resp.fecha;
+        } else {
+            // Es un string o número, intentar convertir
+            fecha = new Date(resp.fecha);
+        }
+        
+        // Validar que la fecha sea válida
+        if (isNaN(fecha.getTime())) return;
+        
         const fechaStr = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
 
         if (!respuestasPorFecha[fechaStr]) {
@@ -1433,7 +1963,13 @@ function renderizarGraficoEvolucion() {
         return datos.total > 0 ? Math.round((datos.correctas / datos.total) * 100) : 0;
     });
 
-    new Chart(ctx, {
+    // Destruir gráfico existente si existe
+    if (chartEvolucion) {
+        chartEvolucion.destroy();
+        chartEvolucion = null;
+    }
+
+    chartEvolucion = new Chart(ctx, {
         type: 'line',
         data: {
             labels: fechas.map(f => {
@@ -1475,13 +2011,36 @@ function renderizarGraficoEvolucion() {
 // Renderizar comparativa entre instituciones
 async function renderizarComparativaInstituciones() {
     try {
+        // Intentar cargar desde caché primero
+        const datosCache = obtenerComparativaDeCache();
+        if (datosCache) {
+            console.log('⚡ Cargando comparativa desde caché (instantáneo)');
+            renderizarGraficoComparativaInstituciones(datosCache.top5Instituciones);
+            renderizarTablaPosicionesInstituciones(datosCache.top5Instituciones, datosCache.totalInstituciones);
+            
+            // Actualizar en segundo plano
+            cargarComparativaDesdeFirebase();
+            return;
+        }
+        
+        // Si no hay caché, cargar desde Firebase
+        await cargarComparativaDesdeFirebase();
+        
+    } catch (error) {
+        console.error('Error al cargar comparativa de instituciones:', error);
+    }
+}
+
+// Función separada para cargar desde Firebase
+async function cargarComparativaDesdeFirebase() {
+    try {
         if (!window.firebaseDB) {
             await esperarFirebase();
         }
 
         const db = window.firebaseDB;
 
-        console.log('=== CARGANDO COMPARATIVA DE INSTITUCIONES ===');
+        console.log('=== CARGANDO COMPARATIVA DE INSTITUCIONES DESDE FIREBASE ===');
 
         // 1. Cargar todas las instituciones únicas de los estudiantes
         const estudiantesSnapshot = await db.collection('usuarios')
@@ -1568,6 +2127,12 @@ async function renderizarComparativaInstituciones() {
         // 5. Tomar solo el TOP 5
         const top5Instituciones = institucionesArray.slice(0, 5);
 
+        // Guardar en caché
+        guardarComparativaEnCache({
+            top5Instituciones: top5Instituciones,
+            totalInstituciones: institucionesArray.length
+        });
+
         // 6. Renderizar gráfico comparativo (dona/pie)
         renderizarGraficoComparativaInstituciones(top5Instituciones);
 
@@ -1609,6 +2174,26 @@ function renderizarGraficoComparativaInstituciones(instituciones) {
     return;
 }
 
+// Función para actualizar el puesto en el header
+function actualizarPuestoEnHeader(posicion) {
+    const puestoHeader = document.getElementById('puestoInstitucion');
+    const puestoBadge = document.getElementById('puestoBadge');
+    
+    if (puestoHeader && puestoBadge) {
+        // Cambiar el icono a medalla
+        const icon = puestoBadge.querySelector('i');
+        if (icon) {
+            icon.className = 'bi bi-award-fill';
+        }
+        
+        if (posicion > 0) {
+            puestoHeader.textContent = `#${posicion}`;
+        } else {
+            puestoHeader.textContent = 'N/A';
+        }
+    }
+}
+
 // Renderizar tabla de posiciones de instituciones (TOP 5)
 function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituciones) {
     const container = document.getElementById('tablaPosicionesInstituciones');
@@ -1622,6 +2207,10 @@ function renderizarTablaPosicionesInstituciones(top5Instituciones, totalInstituc
     // Encontrar posición de la institución actual
     const posicionActual = top5Instituciones.findIndex(inst => inst.nombre === institucionCoordinador) + 1;
     const institucionActual = top5Instituciones.find(inst => inst.nombre === institucionCoordinador);
+
+    // Actualizar el puesto en el header y guardar en caché
+    actualizarPuestoEnHeader(posicionActual);
+    guardarPuestoEnCache(posicionActual);
 
     // Si la institución actual no está en el top 5, buscarla en todas
     const mensajePosicion = posicionActual > 0
@@ -1703,9 +2292,15 @@ function renderizarGraficoRadar() {
     const ctx = document.getElementById('chartRadar');
     if (!ctx) return;
 
+    // Destruir gráfico existente si existe
+    if (chartRadar) {
+        chartRadar.destroy();
+        chartRadar = null;
+    }
+
     const promedios = datosAnalisis.promediosPorMateria;
 
-    new Chart(ctx, {
+    chartRadar = new Chart(ctx, {
         type: 'radar',
         data: {
             labels: ['Lectura Crítica', 'Matemáticas', 'Sociales', 'Ciencias', 'Inglés'],
@@ -1910,6 +2505,9 @@ async function cargarDatosAsistencia() {
     }
 
     try {
+        // Mostrar indicador de carga
+        mostrarCargandoTab('asistencia');
+
         if (!window.firebaseDB) {
             await esperarFirebase();
         }
@@ -1917,31 +2515,43 @@ async function cargarDatosAsistencia() {
         const db = window.firebaseDB;
 
         if (!institucionCoordinador) {
+            ocultarCargandoTab('asistencia');
             mostrarError('No se pudo identificar la institución');
             return;
         }
 
-        console.log('=== CARGANDO ASISTENCIAS ===');
+        console.log('=== CARGANDO ASISTENCIAS (OPTIMIZADO) ===');
         console.log('📍 Institución:', institucionCoordinador);
         console.log('👥 Total estudiantes:', todosLosEstudiantes.length);
 
-        // Obtener todas las asistencias de estudiantes de la institución
+        const tiempoInicio = Date.now();
+
+        // OPTIMIZACIÓN: Cargar todas las asistencias en paralelo usando Promise.all
+        const promesasAsistencias = todosLosEstudiantes.map(estudiante =>
+            db.collection('asistencia')
+                .where('estudianteId', '==', estudiante.id)
+                .get()
+                .then(snapshot => ({
+                    estudiante,
+                    snapshot
+                }))
+        );
+
+        // Esperar todas las consultas en paralelo
+        const resultados = await Promise.all(promesasAsistencias);
+
+        // Procesar resultados
         const asistenciasData = [];
         let totalRegistrosEncontrados = 0;
 
-        for (const estudiante of todosLosEstudiantes) {
-            // Buscar asistencias por estudiante (colección singular: asistencia)
-            const asistenciasSnapshot = await db.collection('asistencia')
-                .where('estudianteId', '==', estudiante.id)
-                .get();
+        resultados.forEach(({ estudiante, snapshot }) => {
+            totalRegistrosEncontrados += snapshot.size;
 
-            totalRegistrosEncontrados += asistenciasSnapshot.size;
-
-            if (asistenciasSnapshot.size > 0) {
-                console.log(`✓ ${estudiante.nombre}: ${asistenciasSnapshot.size} registro(s)`);
+            if (snapshot.size > 0) {
+                console.log(`✓ ${estudiante.nombre}: ${snapshot.size} registro(s)`);
             }
 
-            asistenciasSnapshot.forEach(doc => {
+            snapshot.forEach(doc => {
                 const asistencia = doc.data();
 
                 // Validar que tenga el campo presente
@@ -1955,19 +2565,20 @@ async function cargarDatosAsistencia() {
                     estudianteNombre: estudiante.nombre,
                     materia: asistencia.materia || 'Sin materia',
                     fecha: asistencia.fechaRegistro || asistencia.fecha,
-                    presente: asistencia.presente, // boolean: true = presente, false = ausente
+                    presente: asistencia.presente,
                     aulaId: asistencia.aulaId || null,
                     claseId: asistencia.claseId || null
                 });
             });
-        }
+        });
 
+        const tiempoFin = Date.now();
+        console.log(`⚡ Asistencias cargadas en ${tiempoFin - tiempoInicio}ms`);
         console.log('📊 Total registros encontrados:', totalRegistrosEncontrados);
         console.log('📋 Registros procesados:', asistenciasData.length);
 
         if (asistenciasData.length === 0) {
             console.warn('⚠️ No se encontraron registros de asistencia');
-            // Mostrar mensaje en la UI
             const container = document.getElementById('tablaAsistenciaBody');
             if (container) {
                 container.innerHTML = `
@@ -1980,6 +2591,7 @@ async function cargarDatosAsistencia() {
                     </tr>
                 `;
             }
+            ocultarCargandoTab('asistencia');
             asistenciaCargada = true;
             return;
         }
@@ -1999,10 +2611,14 @@ async function cargarDatosAsistencia() {
         // Marcar como cargada
         asistenciaCargada = true;
 
+        // Ocultar indicador de carga
+        ocultarCargandoTab('asistencia');
+
         console.log('✅ Asistencias cargadas correctamente');
 
     } catch (error) {
         console.error('❌ Error al cargar datos de asistencia:', error);
+        ocultarCargandoTab('asistencia');
         mostrarError('Error al cargar asistencia: ' + error.message);
     }
 }
@@ -2333,10 +2949,14 @@ document.addEventListener('DOMContentLoaded', function () {
 async function cargarDatosTareas() {
     // Evitar cargas múltiples
     if (tareasCargada) {
+        console.log('⚠️ Tareas ya cargadas, omitiendo...');
         return;
     }
 
     try {
+        // Mostrar indicador de carga
+        mostrarCargandoTab('tareas');
+
         if (!window.firebaseDB) {
             await esperarFirebase();
         }
@@ -2344,15 +2964,18 @@ async function cargarDatosTareas() {
         const db = window.firebaseDB;
 
         if (!institucionCoordinador) {
+            ocultarCargandoTab('tareas');
             mostrarError('No se pudo identificar la institución');
             return;
         }
 
-        console.log('=== CARGANDO TAREAS ===');
-        console.log('Institución:', institucionCoordinador);
-        console.log('Total estudiantes:', todosLosEstudiantes.length);
+        console.log('=== CARGANDO TAREAS (OPTIMIZADO) ===');
+        console.log('📍 Institución:', institucionCoordinador);
+        console.log('👥 Total estudiantes:', todosLosEstudiantes.length);
 
-        // Obtener todas las tareas
+        const tiempoInicio = Date.now();
+
+        // OPTIMIZACIÓN 1: Cargar todas las tareas una sola vez
         const tareasSnapshot = await db.collection('tareas').get();
         const todasLasTareas = [];
 
@@ -2363,19 +2986,31 @@ async function cargarDatosTareas() {
             });
         });
 
-        console.log('Total tareas en BD:', todasLasTareas.length);
+        console.log('📚 Total tareas en BD:', todasLasTareas.length);
 
-        // Obtener entregas de estudiantes de la institución
+        // OPTIMIZACIÓN 2: Cargar entregas en paralelo usando Promise.all
+        const promesasEntregas = todosLosEstudiantes.map(estudiante =>
+            db.collection('entregas')
+                .where('estudianteId', '==', estudiante.id)
+                .get()
+                .then(snapshot => ({
+                    estudiante,
+                    snapshot
+                }))
+        );
+
+        // Esperar todas las consultas en paralelo
+        const resultados = await Promise.all(promesasEntregas);
+
+        // Procesar resultados
         const tareasData = [];
 
-        for (const estudiante of todosLosEstudiantes) {
-            const entregasSnapshot = await db.collection('entregas')
-                .where('estudianteId', '==', estudiante.id)
-                .get();
+        resultados.forEach(({ estudiante, snapshot }) => {
+            if (snapshot.size > 0) {
+                console.log(`✓ ${estudiante.nombre}: ${snapshot.size} entrega(s)`);
+            }
 
-            console.log(`Entregas de ${estudiante.nombre}:`, entregasSnapshot.size);
-
-            entregasSnapshot.forEach(doc => {
+            snapshot.forEach(doc => {
                 const entrega = doc.data();
                 const tarea = todasLasTareas.find(t => t.id === entrega.tareaId);
 
@@ -2394,7 +3029,7 @@ async function cargarDatosTareas() {
                         estado: entrega.calificacion !== undefined && entrega.calificacion !== null ? 'calificada' : 'revision'
                     });
                 } else {
-                    console.warn('Tarea no encontrada para entrega:', entrega.tareaId);
+                    console.warn('⚠️ Tarea no encontrada para entrega:', entrega.tareaId);
                 }
             });
 
@@ -2424,16 +3059,18 @@ async function cargarDatosTareas() {
                     });
                 }
             });
-        }
+        });
 
-        console.log('Total registros de tareas (entregadas + no entregadas):', tareasData.length);
-        console.log('Tareas entregadas:', tareasData.filter(t => t.estado === 'calificada' || t.estado === 'revision').length);
-        console.log('Tareas pendientes:', tareasData.filter(t => t.estado === 'pendiente' || t.estado === 'vencida').length);
+        const tiempoFin = Date.now();
+        console.log(`⚡ Tareas cargadas en ${tiempoFin - tiempoInicio}ms`);
+        console.log('📊 Total registros de tareas:', tareasData.length);
+        console.log('✅ Tareas entregadas:', tareasData.filter(t => t.estado === 'calificada' || t.estado === 'revision').length);
+        console.log('⏳ Tareas pendientes:', tareasData.filter(t => t.estado === 'pendiente' || t.estado === 'vencida').length);
 
         // Procesar datos de tareas
         const resumen = procesarDatosTareas(tareasData);
 
-        console.log('Resumen procesado:', resumen);
+        console.log('📈 Resumen procesado:', resumen);
 
         // Renderizar resumen
         renderizarResumenTareas(resumen);
@@ -2447,8 +3084,14 @@ async function cargarDatosTareas() {
         // Marcar como cargada
         tareasCargada = true;
 
+        // Ocultar indicador de carga
+        ocultarCargandoTab('tareas');
+
+        console.log('✅ Tareas cargadas correctamente');
+
     } catch (error) {
-        console.error('Error al cargar datos de tareas:', error);
+        console.error('❌ Error al cargar datos de tareas:', error);
+        ocultarCargandoTab('tareas');
         mostrarError('Error al cargar tareas: ' + error.message);
     }
 }

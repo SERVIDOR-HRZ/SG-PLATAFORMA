@@ -183,11 +183,6 @@ function setupEventListeners() {
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     
     if (mobileMenuToggle && sidebarPanel && sidebarOverlay) {
-        // Show mobile menu toggle on small screens
-        if (window.innerWidth <= 768) {
-            mobileMenuToggle.style.display = 'flex';
-        }
-        
         mobileMenuToggle.addEventListener('click', () => {
             const isActive = sidebarPanel.classList.toggle('active');
             sidebarOverlay.classList.toggle('active');
@@ -214,10 +209,7 @@ function setupEventListeners() {
         
         // Handle window resize
         window.addEventListener('resize', () => {
-            if (window.innerWidth <= 768) {
-                mobileMenuToggle.style.display = 'flex';
-            } else {
-                mobileMenuToggle.style.display = 'none';
+            if (window.innerWidth > 768) {
                 sidebarPanel.classList.remove('active');
                 sidebarOverlay.classList.remove('active');
                 mobileMenuToggle.classList.remove('active');

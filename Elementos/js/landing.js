@@ -310,12 +310,32 @@ function updateLoginButton() {
     if (userData) {
         try {
             const user = JSON.parse(userData);
+            console.log('Usuario detectado en landing:', user); // Debug
+            
             const buttonText = 'Ir al Panel';
             const clickHandler = (e) => {
                 e.preventDefault();
-                if (user.tipoUsuario === 'admin') {
+                
+                // Log para debug
+                console.log('Verificando rol del usuario:', {
+                    rol: user.rol,
+                    tipoUsuario: user.tipoUsuario
+                });
+                
+                // Verificar el rol del usuario para redirigir al panel correcto
+                // PRIMERO verificar coordinador (más específico)
+                if (user.rol === 'coordinador' || user.tipoUsuario === 'coordinador') {
+                    console.log('Redirigiendo a Panel Coordinador');
+                    window.location.href = 'Secciones/Panel_Coordinador.html';
+                }
+                // LUEGO verificar admin/superusuario
+                else if (user.tipoUsuario === 'admin' || user.tipoUsuario === 'superusuario' || user.rol === 'admin' || user.rol === 'superusuario') {
+                    console.log('Redirigiendo a Panel Admin');
                     window.location.href = 'Secciones/Panel_Admin.html';
-                } else {
+                } 
+                // Por defecto, estudiante
+                else {
+                    console.log('Redirigiendo a Panel Estudiante');
                     window.location.href = 'Secciones/Panel_Estudiantes.html';
                 }
             };

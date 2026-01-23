@@ -118,25 +118,28 @@ body {
 }
 
 .btn-panel {
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-panel:hover {
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-profile {
     background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
     box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
 }
 
-.btn-panel:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
-}
-
-.btn-profile {
-    background: linear-gradient(135deg, #6c757d, #5a6268);
-    color: white;
-    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-}
-
 .btn-profile:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.5);
+    box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
+    background: linear-gradient(135deg, #ff1a1a, #d60000);
 }
 
 .btn-home {

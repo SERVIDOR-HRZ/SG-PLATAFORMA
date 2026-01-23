@@ -70,10 +70,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 nombre: userData.nombre,
                 email: userData.email,
                 tipoUsuario: userData.tipoUsuario,
-                rol: userData.rol || userData.tipoUsuario, // Nuevo campo rol
+                rol: userData.rol || userData.tipoUsuario, // Asegurar que rol esté presente
                 numeroDocumento: userData.numeroDocumento,
                 numeroIdentidad: userData.numeroIdentidad
             }));
+            
+            // Log para debug
+            console.log('Usuario guardado en sessionStorage:', {
+                tipoUsuario: userData.tipoUsuario,
+                rol: userData.rol || userData.tipoUsuario
+            });
             
             return userData;
             
