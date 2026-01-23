@@ -65,10 +65,6 @@ function setupEventListeners() {
     // Back button
     document.getElementById('backBtn').addEventListener('click', goBack);
 
-    // Navigation controls
-    document.getElementById('prevBtn').addEventListener('click', previousQuestion);
-    document.getElementById('nextBtn').addEventListener('click', nextQuestion);
-
     // Submit test
     document.getElementById('submitTestBtn').addEventListener('click', showSubmitModal);
     document.getElementById('confirmSubmit').addEventListener('click', submitTest);
@@ -76,6 +72,12 @@ function setupEventListeners() {
 
     // Block change modal
     document.getElementById('continueToBlock2').addEventListener('click', continueToBlock2);
+
+    // Selector toggle button (mobile)
+    const toggleBtn = document.getElementById('selectorToggleBtn');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleQuestionSelector);
+    }
 
     // Close modals on overlay click
     document.getElementById('blockChangeModal').addEventListener('click', function (e) {
@@ -89,6 +91,18 @@ function setupEventListeners() {
             hideSubmitModal();
         }
     });
+
+    // Close selector when clicking outside on mobile
+    document.addEventListener('click', function(e) {
+        const selector = document.querySelector('.question-selector-fixed');
+        const toggleBtn = document.getElementById('selectorToggleBtn');
+        
+        if (selector && selector.classList.contains('active') && 
+            !selector.contains(e.target) && 
+            !toggleBtn.contains(e.target)) {
+            toggleQuestionSelector();
+        }
+    });
 }
 
 // Go back to student tests - DISABLED during test
@@ -96,6 +110,44 @@ function goBack() {
     // Función desactivada durante la prueba para evitar salidas accidentales
     // Los estudiantes deben completar la prueba o esperar a que termine el tiempo
     return false;
+}
+
+// Toggle question selector (mobile)
+function toggleQuestionSelector() {
+    const selector = document.querySelector('.question-selector-fixed');
+    const toggleBtn = document.getElementById('selectorToggleBtn');
+    
+    if (selector && toggleBtn) {
+        const isActive = selector.classList.toggle('active');
+        toggleBtn.classList.toggle('active', isActive);
+        
+        // Change icon
+        const icon = toggleBtn.querySelector('i');
+        if (icon) {
+            if (isActive) {
+                icon.className = 'bi bi-x-lg';
+            } else {
+                icon.className = 'bi bi-list';
+            }
+        }
+        
+        // Create or toggle overlay for mobile
+        if (window.innerWidth <= 1200) {
+            let overlay = document.querySelector('.selector-overlay');
+            
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'selector-overlay';
+                overlay.addEventListener('click', toggleQuestionSelector);
+                document.body.appendChild(overlay);
+            }
+            
+            overlay.classList.toggle('active', isActive);
+            
+            // Prevent body scroll when selector is open
+            document.body.style.overflow = isActive ? 'hidden' : '';
+        }
+    }
 }
 
 // Prevent navigation away from test
@@ -683,7 +735,10 @@ function createSubjectNavigation() {
             button.className = `subject-btn ${subject}`;
             button.innerHTML = `
                 <i class="${config.icon}"></i>
-                ${config.name}
+                <span class="subject-name">${config.name}</span>
+                <span class="completion-badge">
+                    <i class="bi bi-check-lg"></i>
+                </span>
             `;
             button.addEventListener('click', () => showSubject(subject));
             subjectsNav.appendChild(button);
@@ -704,9 +759,6 @@ function showSubject(subject) {
 
     // Show questions
     showCurrentQuestion();
-
-    // Show controls
-    document.getElementById('questionControls').style.display = 'flex';
 }
 
 // Show current question
@@ -730,38 +782,20 @@ function showCurrentQuestion() {
     // Recopilar títulos y párrafos anteriores a la pregunta actual
     const contextElements = getContextElements(currentQuestionIndex);
 
+    // Render question content (without selector)
     questionContainer.innerHTML = `
         <div class="question-layout">
-            <div class="question-selector">
-                <div class="selector-header">
-                    <div class="selector-subject">
-                        <div class="subject-icon ${currentSubject}">
-                            <i class="${config.icon}"></i>
-                        </div>
-                        <span>${config.name}</span>
-                    </div>
-                    <div class="selector-info">
-                        ${realQuestions.length} pregunta${realQuestions.length !== 1 ? 's' : ''}
-                    </div>
-                </div>
-                <div class="questions-grid">
-                    ${createQuestionsSelector(subjectQuestions)}
-                </div>
-            </div>
-            
             <div class="question-content active">
                 ${renderCurrentItem(currentItem, contextElements, realQuestionNumber, config)}
             </div>
         </div>
     `;
 
+    // Create or update the fixed selector outside the container
+    createFixedSelector(subjectQuestions, config);
+
     // Update navigation info
     const totalRealQuestions = realQuestions.length;
-    document.getElementById('questionNumber').textContent = realQuestionNumber > 0 ? realQuestionNumber : 1;
-    document.getElementById('totalQuestions').textContent = totalRealQuestions;
-
-    // Update navigation buttons
-    updateNavigationButtons();
 
     // Update progress
     updateProgress();
@@ -775,6 +809,61 @@ function showCurrentQuestion() {
     setTimeout(() => {
         loadSavedAnswer();
     }, 100);
+}
+
+// Create fixed selector outside question container
+function createFixedSelector(subjectQuestions, config) {
+    const realQuestions = subjectQuestions.filter(q =>
+        q.type === 'multiple' || q.type === 'short' || q.type === 'open'
+    );
+
+    // Remove existing selector if any
+    const existingSelector = document.querySelector('.question-selector-fixed');
+    if (existingSelector) {
+        existingSelector.remove();
+    }
+
+    // Create new fixed selector
+    const selectorHTML = `
+        <div class="question-selector question-selector-fixed">
+            <div class="selector-header">
+                <div class="selector-subject">
+                    <div class="subject-icon ${currentSubject}">
+                        <i class="${config.icon}"></i>
+                    </div>
+                    <span>${config.name}</span>
+                </div>
+                <div class="selector-info">
+                    ${realQuestions.length} pregunta${realQuestions.length !== 1 ? 's' : ''}
+                </div>
+            </div>
+            <div class="questions-grid">
+                ${createQuestionsSelector(subjectQuestions)}
+            </div>
+        </div>
+    `;
+
+    // Insert selector into body (outside main-content)
+    document.body.insertAdjacentHTML('beforeend', selectorHTML);
+
+    // Add click events to question buttons
+    document.querySelectorAll('.question-btn').forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            const targetIndex = parseInt(btn.dataset.index);
+            if (!isNaN(targetIndex)) {
+                currentQuestionIndex = targetIndex;
+                showCurrentQuestion();
+                
+                // Close selector on mobile after selecting a question
+                if (window.innerWidth <= 1200) {
+                    const selector = document.querySelector('.question-selector-fixed');
+                    if (selector && selector.classList.contains('active')) {
+                        toggleQuestionSelector();
+                    }
+                }
+            }
+        });
+    });
 }
 
 // Clean LaTeX document code (remove document structure, keep only math)
@@ -1036,8 +1125,7 @@ function createQuestionsSelector(allItems) {
             // Botón para texto de lectura
             html += `
                 <button class="reading-btn ${isActive ? 'active' : ''}" 
-                        onclick="goToQuestion(${i})" 
-                        title="Texto de Lectura">
+                        onclick="goToQuestion(${i})">
                     <i class="bi bi-book-half"></i>
                 </button>
             `;
@@ -1051,8 +1139,7 @@ function createQuestionsSelector(allItems) {
 
             html += `
                 <button class="question-btn ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" 
-                        onclick="goToQuestion(${i})" 
-                        title="Pregunta ${questionNumber}${isAnswered ? ' (Respondida)' : ''}">
+                        onclick="goToQuestion(${i})">
                     ${questionNumber}
                 </button>
             `;
@@ -1216,34 +1303,6 @@ function loadSavedAnswer() {
     }
 }
 
-// Previous question
-function previousQuestion() {
-    if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        showCurrentQuestion();
-    }
-}
-
-// Next question
-function nextQuestion() {
-    const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
-
-    if (currentQuestionIndex < subjectQuestions.length - 1) {
-        currentQuestionIndex++;
-        showCurrentQuestion();
-    }
-}
-
-// Update navigation buttons
-function updateNavigationButtons() {
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
-
-    prevBtn.disabled = currentQuestionIndex === 0;
-    nextBtn.disabled = currentQuestionIndex === subjectQuestions.length - 1;
-}
-
 // Update progress
 function updateProgress() {
     let totalQuestions = 0;
@@ -1271,35 +1330,46 @@ function updateProgress() {
     document.getElementById('progressText').textContent =
         `${answeredQuestions} de ${totalQuestions} preguntas completadas`;
 
-    // Show submit button if all questions are answered
+    // Enable/disable submit button based on completion
+    const submitBtn = document.getElementById('submitTestBtn');
     if (answeredQuestions === totalQuestions && totalQuestions > 0) {
-        document.getElementById('submitContainer').style.display = 'block';
+        submitBtn.disabled = false;
     } else {
-        document.getElementById('submitContainer').style.display = 'none';
+        submitBtn.disabled = true;
     }
 }
 
 // Update subject completion
 function updateSubjectCompletion() {
-    Object.keys(userAnswers).forEach(subject => {
-        const subjectAnswers = userAnswers[subject];
-        let completed = true;
+    testQuestions.forEach(subjectData => {
+        Object.keys(subjectData).forEach(subject => {
+            const items = subjectData[subject];
+            let totalQuestions = 0;
+            let answeredQuestions = 0;
 
-        Object.keys(subjectAnswers).forEach(questionIndex => {
-            const answer = subjectAnswers[questionIndex];
-            if (answer === null || answer === undefined || answer === '') {
-                completed = false;
+            // Count only real questions (not paragraphs or titles)
+            items.forEach((item, index) => {
+                if (item.type === 'multiple' || item.type === 'short' || item.type === 'open') {
+                    totalQuestions++;
+                    if (userAnswers[subject] && 
+                        userAnswers[subject][index] !== null &&
+                        userAnswers[subject][index] !== undefined && 
+                        userAnswers[subject][index] !== '') {
+                        answeredQuestions++;
+                    }
+                }
+            });
+
+            // Mark as completed only if all questions are answered
+            const subjectBtn = document.querySelector(`.subject-btn.${subject}`);
+            if (subjectBtn) {
+                if (totalQuestions > 0 && answeredQuestions === totalQuestions) {
+                    subjectBtn.classList.add('completed');
+                } else {
+                    subjectBtn.classList.remove('completed');
+                }
             }
         });
-
-        const subjectBtn = document.querySelector(`.subject-btn.${subject}`);
-        if (subjectBtn) {
-            if (completed) {
-                subjectBtn.classList.add('completed');
-            } else {
-                subjectBtn.classList.remove('completed');
-            }
-        }
     });
 }
 
@@ -1523,8 +1593,6 @@ function showNoQuestions() {
             <p>Este bloque no tiene preguntas configuradas.</p>
         </div>
     `;
-
-    document.getElementById('questionControls').style.display = 'none';
 }
 
 // Show submit modal
@@ -1560,10 +1628,12 @@ function showSubmitModal() {
         // Only show subjects that have questions
         if (totalQuestions > 0) {
             summaryHTML += `
-                <div class="summary-item">
+                <div class="summary-item" data-subject="${subject}">
                     <div class="summary-subject">
-                        <i class="${config.icon}"></i>
-                        ${config.name}
+                        <div class="subject-icon-modal ${subject}">
+                            <i class="${config.icon}"></i>
+                        </div>
+                        <span class="subject-name-modal">${config.name}</span>
                     </div>
                     <div class="summary-count">${answeredCount}/${totalQuestions} respondidas</div>
                 </div>
@@ -1580,9 +1650,26 @@ function hideSubmitModal() {
     document.getElementById('submitModal').classList.remove('active');
 }
 
+// Variable to prevent double submission
+let isSubmitting = false;
+
 // Submit test
 async function submitTest() {
+    // Prevent double submission
+    if (isSubmitting) {
+        console.log('Ya se está enviando la prueba...');
+        return;
+    }
+
     try {
+        isSubmitting = true;
+        
+        // Disable submit button immediately
+        const submitBtn = document.getElementById('confirmSubmit');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+
         // Clear timer
         if (testTimer) {
             clearInterval(testTimer);
@@ -1650,6 +1737,14 @@ async function submitTest() {
     } catch (error) {
         console.error('Error submitting test:', error);
         showNotification('Error al enviar la prueba: ' + error.message, 'error');
+        
+        // Re-enable submit button on error
+        isSubmitting = false;
+        const submitBtn = document.getElementById('confirmSubmit');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Finalizar Prueba';
+        }
     }
 }
 

@@ -81,6 +81,11 @@
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Selector Toggle Button (Mobile) -->
+        <button class="selector-toggle-btn" id="selectorToggleBtn" title="Mostrar/Ocultar Preguntas">
+            <i class="bi bi-list"></i>
+        </button>
+
         <!-- Test Info -->
         <div class="test-info-card" id="testInfoCard">
             <div class="test-info-header">
@@ -90,17 +95,23 @@
                     <span class="block-time" id="blockTime">08:00 - 10:00</span>
                 </div>
             </div>
-            <div class="test-progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+            <div class="test-progress-row">
+                <div class="test-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">0 de 0 preguntas completadas</span>
                 </div>
-                <span class="progress-text" id="progressText">0 de 0 preguntas completadas</span>
+                <button class="btn btn-success btn-submit-inline" id="submitTestBtn" disabled>
+                    <i class="bi bi-check-circle"></i>
+                    Finalizar Prueba
+                </button>
             </div>
-        </div>
-
-        <!-- Subject Navigation -->
-        <div class="subjects-nav" id="subjectsNav">
-            <!-- Subject buttons will be loaded here -->
+            
+            <!-- Subject Navigation Inside Card -->
+            <div class="subjects-nav-inline" id="subjectsNav">
+                <!-- Subject buttons will be loaded here -->
+            </div>
         </div>
 
         <!-- Question Container -->
@@ -113,28 +124,7 @@
 
 
 
-        <!-- Navigation Controls -->
-        <div class="question-controls" id="questionControls" style="display: none;">
-            <button class="btn btn-secondary" id="prevBtn" disabled>
-                <i class="bi bi-arrow-left"></i>
-                Anterior
-            </button>
-            <div class="question-info">
-                <span id="questionNumber">1</span> de <span id="totalQuestions">0</span>
-            </div>
-            <button class="btn btn-primary" id="nextBtn">
-                Siguiente
-                <i class="bi bi-arrow-right"></i>
-            </button>
-        </div>
 
-        <!-- Submit Test -->
-        <div class="submit-container" id="submitContainer" style="display: none;">
-            <button class="btn btn-success btn-lg" id="submitTestBtn">
-                <i class="bi bi-check-circle"></i>
-                Finalizar Prueba
-            </button>
-        </div>
     </main>
 
     <!-- Block Change Modal -->
