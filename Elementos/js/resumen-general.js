@@ -765,7 +765,6 @@ function renderizarPaginaRanking() {
                 <td>${Math.round(est.materias.SC || 0)}%</td>
                 <td>${Math.round(est.materias.CN || 0)}%</td>
                 <td>${Math.round(est.materias.IN || 0)}%</td>
-                <td><i class="bi bi-arrow-${est.tendencia === 'subiendo' ? 'up' : est.tendencia === 'bajando' ? 'down' : 'right'}" style="color: ${est.tendencia === 'subiendo' ? '#33ff77' : est.tendencia === 'bajando' ? '#ff4d4d' : '#ffa500'}"></i></td>
             </tr>
         `;
     }).join('');
