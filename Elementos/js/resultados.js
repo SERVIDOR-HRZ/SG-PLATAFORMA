@@ -6,6 +6,8 @@ let todosLosMinisimulacros = [];
 
 // Variables para administrador
 let esAdmin = false;
+let esCoordinador = false;
+let institucionCoordinador = null;
 let todosLosEstudiantes = [];
 let estudianteSeleccionado = null;
 let todasLasInstituciones = [];
@@ -48,14 +50,25 @@ async function cargarDatosUsuario() {
 
             // Actualizar rol
             const userRoleElement = document.getElementById('userRole');
-            if (userRoleElement && usuario.tipoUsuario) {
+            if (userRoleElement) {
+                // Verificar si viene desde modo coordinador
+                const modoCoordinadorFlag = sessionStorage.getItem('modoCoordinador');
+                const tipoUsuario = usuario.tipoUsuario || usuario.rol;
+                
                 const roles = {
                     'admin': 'Administrador',
                     'coordinador': 'Coordinador',
                     'estudiante': 'Estudiante',
                     'profesor': 'Profesor'
                 };
-                userRoleElement.textContent = roles[usuario.tipoUsuario] || 'Usuario';
+                
+                // Si viene desde modo coordinador O es admin/coordinador en página de resultados, mostrar "Coordinador"
+                // La página de Resultados es una vista de coordinador, no de admin
+                if (modoCoordinadorFlag === 'true' || tipoUsuario === 'coordinador' || tipoUsuario === 'admin') {
+                    userRoleElement.textContent = 'Coordinador';
+                } else {
+                    userRoleElement.textContent = roles[tipoUsuario] || 'Usuario';
+                }
             }
 
             // Cargar foto de perfil desde Firebase
@@ -189,12 +202,12 @@ function inicializarMenuTabs() {
             }
             
             // Si es el tab de plan de estudio (estudiante), cargar las pruebas
-            if (targetTab === 'plan-estudio' && !esAdmin) {
+            if (targetTab === 'plan-estudio' && !esAdmin && !esCoordinador) {
                 cargarPruebasParaPlanEstudio();
             }
             
             // Si es el tab de planes admin, cargar los planes de estudiantes
-            if (targetTab === 'planes-admin' && esAdmin) {
+            if (targetTab === 'planes-admin' && (esAdmin || esCoordinador)) {
                 cargarPlanesEstudiantesAdmin();
             }
         });
@@ -285,6 +298,17 @@ if (btnHome) {
 const btnBack = document.getElementById('btnBack');
 if (btnBack) {
     btnBack.addEventListener('click', function () {
+        // Verificar si viene desde progreso-estudiantes
+        const volverAProgresoEstudiantes = sessionStorage.getItem('volverAProgresoEstudiantes');
+        
+        if (volverAProgresoEstudiantes === 'true') {
+            // Limpiar el flag
+            sessionStorage.removeItem('volverAProgresoEstudiantes');
+            // Volver a progreso-estudiantes
+            window.location.href = 'Progreso-Estudiantes.html';
+            return;
+        }
+        
         const usuarioActual = sessionStorage.getItem('currentUser');
 
         if (usuarioActual) {
@@ -468,15 +492,38 @@ async function cargarResultados() {
 
         const db = window.firebaseDB;
 
-        // Verificar si es admin o coordinador
-        esAdmin = usuario.tipoUsuario === 'admin' || usuario.tipoUsuario === 'coordinador';
+        // Verificar si es admin o coordinador (soporta tanto tipoUsuario como rol)
+        esAdmin = usuario.tipoUsuario === 'admin' || usuario.rol === 'admin';
+        esCoordinador = usuario.tipoUsuario === 'coordinador' || usuario.rol === 'coordinador';
+        
+        // Verificar si viene desde modo coordinador (desde progreso-estudiantes.js)
+        const modoCoordinadorFlag = sessionStorage.getItem('modoCoordinador');
+        if (modoCoordinadorFlag === 'true') {
+            esCoordinador = true;
+            // Limpiar el flag después de usarlo
+            sessionStorage.removeItem('modoCoordinador');
+        }
 
-        if (esAdmin) {
+        if (esAdmin || esCoordinador) {
+            // Si es coordinador, obtener su institución
+            if (esCoordinador) {
+                // Primero intentar desde sessionStorage (viene de progreso-estudiantes)
+                institucionCoordinador = sessionStorage.getItem('institucionCoordinador');
+                // Si no está, obtener del usuario
+                if (!institucionCoordinador) {
+                    institucionCoordinador = usuario.institucion || null;
+                } else {
+                    // Limpiar después de usar
+                    sessionStorage.removeItem('institucionCoordinador');
+                }
+                console.log('Institución del coordinador:', institucionCoordinador);
+            }
+            
             // Mostrar interfaz de admin
             configurarInterfazAdmin();
-            // Cargar todos los estudiantes
+            // Cargar todos los estudiantes (filtrados por institución si es coordinador)
             await cargarTodosLosEstudiantes(db);
-            // Cargar todos los resultados
+            // Cargar todos los resultados (filtrados por institución si es coordinador)
             await cargarTodosLosResultados(db);
         } else {
             // Obtener el ID del estudiante (puede ser numeroDocumento, numeroIdentidad o id)
@@ -492,12 +539,29 @@ async function cargarResultados() {
 
 // Configurar interfaz para administrador
 function configurarInterfazAdmin() {
-    // Cambiar título
+    // Cambiar título según el rol
     const titulo = document.getElementById('panelTitle');
     const subtitulo = document.getElementById('panelSubtitle');
     
-    if (titulo) titulo.textContent = 'Todos los Resultados';
-    if (subtitulo) subtitulo.textContent = 'Consulta los resultados de todos los estudiantes';
+    if (esCoordinador) {
+        if (titulo) titulo.textContent = 'Resultados de Mi Institución';
+        if (subtitulo) subtitulo.textContent = 'Consulta los resultados de los estudiantes de tu institución';
+        
+        // Actualizar el texto del botón "Volver al Panel" si viene desde progreso-estudiantes
+        const volverAProgresoEstudiantes = sessionStorage.getItem('volverAProgresoEstudiantes');
+        if (volverAProgresoEstudiantes === 'true') {
+            const btnBack = document.getElementById('btnBack');
+            if (btnBack) {
+                const btnSpan = btnBack.querySelector('span');
+                if (btnSpan) {
+                    btnSpan.textContent = 'Volver a Progreso';
+                }
+            }
+        }
+    } else {
+        if (titulo) titulo.textContent = 'Todos los Resultados';
+        if (subtitulo) subtitulo.textContent = 'Consulta los resultados de todos los estudiantes';
+    }
     
     // Mostrar filtro de estudiante
     const adminFilter = document.getElementById('adminFilterContainer');
@@ -528,13 +592,24 @@ function configurarInterfazAdmin() {
         searchMinisimulacros.placeholder = 'Buscar por nombre de minisimulacro o estudiante...';
     }
     
-    // Configurar evento del filtro de institución
+    // Configurar evento del filtro de institución (solo para admin, no coordinador)
     const filterInstitucion = document.getElementById('filterInstitucionAdmin');
     if (filterInstitucion) {
-        filterInstitucion.addEventListener('change', function() {
-            institucionSeleccionada = this.value || null;
-            actualizarSelectorEstudiantes();
-        });
+        if (esCoordinador) {
+            // Ocultar completamente el filtro de institución para coordinadores
+            const institucionFilterGroup = filterInstitucion.closest('.filter-group-admin');
+            if (institucionFilterGroup) {
+                institucionFilterGroup.style.display = 'none';
+            }
+            // También ocultar el select directamente por si acaso
+            filterInstitucion.style.display = 'none';
+        } else {
+            // Solo admin puede cambiar institución
+            filterInstitucion.addEventListener('change', function() {
+                institucionSeleccionada = this.value || null;
+                actualizarSelectorEstudiantes();
+            });
+        }
     }
     
     // Configurar buscador de estudiante (input de texto)
@@ -568,15 +643,19 @@ function configurarInterfazAdmin() {
     if (btnLimpiar) {
         btnLimpiar.addEventListener('click', async function() {
             // Limpiar todos los filtros
-            const filterInstitucion = document.getElementById('filterInstitucionAdmin');
             const searchEstudiante = document.getElementById('searchEstudianteAdmin');
             const filterEstudiante = document.getElementById('filterEstudiante');
             
-            if (filterInstitucion) filterInstitucion.value = '';
+            // Solo limpiar filtro de institución si es admin (no coordinador)
+            if (!esCoordinador) {
+                const filterInstitucion = document.getElementById('filterInstitucionAdmin');
+                if (filterInstitucion) filterInstitucion.value = '';
+                institucionSeleccionada = null;
+            }
+            
             if (searchEstudiante) searchEstudiante.value = '';
             if (filterEstudiante) filterEstudiante.value = '';
             
-            institucionSeleccionada = null;
             estudianteSeleccionado = null;
             
             // Actualizar selector de estudiantes
@@ -607,8 +686,15 @@ function actualizarSelectorEstudiantes() {
     
     // Filtrar estudiantes
     let estudiantesFiltrados = todosLosEstudiantes.filter(est => {
-        // Filtro por institución
-        const matchInstitucion = !institucionSeleccionada || est.institucion === institucionSeleccionada;
+        // Si es coordinador, solo mostrar estudiantes de su institución
+        if (esCoordinador && institucionCoordinador) {
+            if (est.institucion !== institucionCoordinador) {
+                return false;
+            }
+        }
+        
+        // Filtro por institución (solo para admin)
+        const matchInstitucion = esCoordinador || !institucionSeleccionada || est.institucion === institucionSeleccionada;
         
         // Filtro por búsqueda de texto
         const matchBusqueda = !searchTerm || 
@@ -625,7 +711,7 @@ function actualizarSelectorEstudiantes() {
         const option = document.createElement('option');
         option.value = est.idFiltro;
         option.textContent = `${est.nombre} ${est.documento ? `(${est.documento})` : ''}`;
-        if (est.institucion) {
+        if (est.institucion && !esCoordinador) {
             option.textContent += ` - ${est.institucion}`;
         }
         select.appendChild(option);
@@ -641,12 +727,20 @@ function actualizarSelectorEstudiantes() {
 // Cargar todos los estudiantes para el filtro
 async function cargarTodosLosEstudiantes(db) {
     try {
-        // Primero cargar las instituciones
-        await cargarInstitucionesAdmin(db);
+        // Primero cargar las instituciones (solo para admin)
+        if (!esCoordinador) {
+            await cargarInstitucionesAdmin(db);
+        }
         
-        const usuariosSnapshot = await db.collection('usuarios')
-            .where('tipoUsuario', '==', 'estudiante')
-            .get();
+        // Construir query base
+        let query = db.collection('usuarios').where('tipoUsuario', '==', 'estudiante');
+        
+        // Si es coordinador, filtrar por su institución
+        if (esCoordinador && institucionCoordinador) {
+            query = query.where('institucion', '==', institucionCoordinador);
+        }
+        
+        const usuariosSnapshot = await query.get();
         
         todosLosEstudiantes = [];
         const select = document.getElementById('filterEstudiante');
@@ -689,7 +783,8 @@ async function cargarTodosLosEstudiantes(db) {
             const option = document.createElement('option');
             option.value = est.idFiltro;
             option.textContent = `${est.nombre} ${est.documento ? `(${est.documento})` : ''}`;
-            if (est.institucion) {
+            // Solo mostrar institución si es admin (coordinador ya sabe que todos son de su institución)
+            if (est.institucion && !esCoordinador) {
                 option.textContent += ` - ${est.institucion}`;
             }
             select.appendChild(option);
@@ -822,6 +917,13 @@ async function cargarTodosLosResultados(db) {
             const estudianteInfo = todosLosEstudiantes.find(e => e.idFiltro === respuesta.estudianteId);
             const nombreEstudiante = estudianteInfo ? estudianteInfo.nombre : respuesta.estudianteId;
             const institucionEstudiante = estudianteInfo ? estudianteInfo.institucion : '';
+
+            // Si es coordinador, filtrar solo estudiantes de su institución
+            if (esCoordinador && institucionCoordinador) {
+                if (institucionEstudiante !== institucionCoordinador) {
+                    return; // Saltar este resultado
+                }
+            }
 
             // Crear objeto de resultado
             const resultado = {
@@ -1336,8 +1438,8 @@ document.addEventListener('click', function (e) {
         // Construir URL con parámetros
         let url = `Detalle-Resultados.html?id=${id}&pruebaId=${pruebaId}&tipo=${type}`;
         
-        // Si es admin y hay un estudianteId, agregarlo a la URL
-        if (esAdmin && estudianteIdAttr) {
+        // Si es admin/coordinador y hay un estudianteId, agregarlo a la URL
+        if ((esAdmin || esCoordinador) && estudianteIdAttr) {
             url += `&estudianteId=${encodeURIComponent(estudianteIdAttr)}`;
         }
 
@@ -1425,8 +1527,8 @@ function filtrarPruebas() {
         // Filtro por búsqueda de texto (nombre de prueba o estudiante)
         const nombrePruebaMatch = prueba.nombrePrueba.toLowerCase().includes(searchTerm);
         
-        // Filtro por nombre de estudiante (solo admin)
-        const nombreEstudianteMatch = esAdmin && prueba.nombreEstudiante ? 
+        // Filtro por nombre de estudiante (solo admin/coordinador)
+        const nombreEstudianteMatch = (esAdmin || esCoordinador) && prueba.nombreEstudiante ? 
             prueba.nombreEstudiante.toLowerCase().includes(searchTerm) : false;
         
         const searchMatch = nombrePruebaMatch || nombreEstudianteMatch;
@@ -1453,8 +1555,8 @@ function filtrarMinisimulacros() {
         // Filtro por búsqueda de texto (nombre de minisimulacro o estudiante)
         const nombreMinisimuMatch = minisimu.nombrePrueba.toLowerCase().includes(searchTerm);
         
-        // Filtro por nombre de estudiante (solo admin)
-        const nombreEstudianteMatch = esAdmin && minisimu.nombreEstudiante ? 
+        // Filtro por nombre de estudiante (solo admin/coordinador)
+        const nombreEstudianteMatch = (esAdmin || esCoordinador) && minisimu.nombreEstudiante ? 
             minisimu.nombreEstudiante.toLowerCase().includes(searchTerm) : false;
         
         const searchMatch = nombreMinisimuMatch || nombreEstudianteMatch;
@@ -1503,8 +1605,8 @@ function mostrarPruebasFiltradas(pruebas) {
 
     pruebasContainer.innerHTML = '';
     pruebas.forEach(prueba => {
-        // Usar función de admin si es admin y tiene nombre de estudiante
-        const pruebaCard = (esAdmin && prueba.nombreEstudiante) ? 
+        // Usar función de admin si es admin/coordinador y tiene nombre de estudiante
+        const pruebaCard = ((esAdmin || esCoordinador) && prueba.nombreEstudiante) ? 
             crearTarjetaPruebaAdmin(prueba) : crearTarjetaPrueba(prueba);
         pruebasContainer.appendChild(pruebaCard);
     });
@@ -1527,8 +1629,8 @@ function mostrarMinisimuFiltrados(minisimulacros) {
 
     minisimuContainer.innerHTML = '';
     minisimulacros.forEach(minisimu => {
-        // Usar función de admin si es admin y tiene nombre de estudiante
-        const minisimuCard = (esAdmin && minisimu.nombreEstudiante) ? 
+        // Usar función de admin si es admin/coordinador y tiene nombre de estudiante
+        const minisimuCard = ((esAdmin || esCoordinador) && minisimu.nombreEstudiante) ? 
             crearTarjetaMinisimulacroAdmin(minisimu) : crearTarjetaMinisimulacro(minisimu);
         minisimuContainer.appendChild(minisimuCard);
     });

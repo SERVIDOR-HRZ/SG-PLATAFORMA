@@ -90,14 +90,26 @@ async function cargarDatosUsuario() {
             }
             
             const sidebarUserRole = document.getElementById('sidebarUserRole');
-            if (sidebarUserRole && usuario.tipoUsuario) {
+            if (sidebarUserRole) {
+                // Obtener el tipo de usuario desde tipoUsuario o rol
+                let tipoUsuario = usuario.tipoUsuario || usuario.rol;
+                
+                // Si es admin pero está en vista de coordinador (adminView), mostrar como Coordinador
+                const params = new URLSearchParams(window.location.search);
+                const adminView = params.get('adminView') === 'true';
+                
+                if (tipoUsuario === 'admin' && adminView) {
+                    tipoUsuario = 'coordinador';
+                }
+                
                 const roles = {
                     'admin': 'Administrador',
                     'coordinador': 'Coordinador',
                     'estudiante': 'Estudiante',
                     'profesor': 'Profesor'
                 };
-                sidebarUserRole.textContent = roles[usuario.tipoUsuario] || 'Usuario';
+                
+                sidebarUserRole.textContent = roles[tipoUsuario] || 'Usuario';
             }
             
             await cargarFotoPerfil(usuario.id);
@@ -178,9 +190,26 @@ function inicializarSidebar() {
         window.location.href = '../index.html';
     });
 
-    document.getElementById('btnBack')?.addEventListener('click', () => {
-        window.location.href = 'Resultados.html';
-    });
+    // Configurar botón de volver según de dónde viene
+    const params = new URLSearchParams(window.location.search);
+    const adminView = params.get('adminView') === 'true';
+    const fromResumen = params.get('fromResumen') === 'true';
+    const btnBack = document.getElementById('btnBack');
+    
+    if (btnBack) {
+        if (adminView && fromResumen) {
+            // Si viene desde Resumen-General, volver ahí
+            btnBack.querySelector('span').textContent = 'Volver a Resumen';
+            btnBack.addEventListener('click', () => {
+                window.location.href = 'Resumen-General.html';
+            });
+        } else {
+            // En cualquier otro caso, volver a Resultados
+            btnBack.addEventListener('click', () => {
+                window.location.href = 'Resultados.html';
+            });
+        }
+    }
 
     document.getElementById('btnLogout')?.addEventListener('click', async () => {
         if (typeof Swal !== 'undefined') {

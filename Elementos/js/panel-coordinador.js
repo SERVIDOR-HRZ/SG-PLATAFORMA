@@ -456,9 +456,7 @@ function handleCardClick(event) {
                 window.location.href = 'Mis-Estudiantes.html';
                 break;
             case 'progreso':
-                // TODO: Crear página de progreso
-                console.log('Navegando a Progreso de Estudiantes...');
-                // window.location.href = 'Progreso-Estudiantes.html';
+                window.location.href = 'Progreso-Estudiantes.html';
                 break;
             default:
                 console.log('Sección no implementada:', section);

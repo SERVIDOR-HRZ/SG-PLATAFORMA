@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Resumen general del rendimiento de estudiantes">
+    <title>Resumen General - Seamos Genios</title>
+
+    <!-- Security headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+    <!-- Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../Elementos/css/resumen-general.css">
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;" aria-label="Abrir menú de navegación">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+    <!-- Sidebar Panel -->
+    <aside class="sidebar-panel" id="sidebarPanel" role="navigation" aria-label="Menú principal">
+        <!-- Perfil Usuario -->
+        <div class="sidebar-profile">
+            <div class="sidebar-avatar" id="userAvatarContainer">
+                <div class="sidebar-avatar-default" id="userAvatarDefault" aria-hidden="true">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <img class="sidebar-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto de perfil del coordinador">
+            </div>
+            <div class="sidebar-user-name" id="coordinadorName" role="heading" aria-level="2">Coordinador</div>
+            <div class="sidebar-user-role">Resumen General</div>
+
+            <!-- Botones de Perfil y Web -->
+            <div class="sidebar-profile-actions">
+                <button class="sidebar-btn btn-profile" id="btnProfile" aria-label="Ir a mi perfil">
+                    <i class="bi bi-person-gear" aria-hidden="true"></i>
+                    <span>Mi Perfil</span>
+                </button>
+                <button class="sidebar-btn btn-home" id="btnHome" aria-label="Ir a la página principal">
+                    <i class="bi bi-house-door-fill" aria-hidden="true"></i>
+                    <span>Web Principal</span>
+                </button>
+                <button class="sidebar-btn btn-back" id="btnBack" aria-label="Volver a progreso de estudiantes">
+                    <i class="bi bi-arrow-left-circle-fill" aria-hidden="true"></i>
+                    <span>Volver</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="sidebar-actions">
+            <button class="sidebar-btn btn-logout" id="btnLogout" aria-label="Cerrar sesión">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-panel-content" role="main">
+        <!-- Header con estadísticas generales -->
+        <header class="dashboard-header">
+            <div class="header-title">
+                <h1><i class="bi bi-graph-up-arrow"></i> Dashboard Institucional</h1>
+                <p id="institucionNombre">Cargando institución...</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #33ff77, #00cc55);">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Estudiantes</span>
+                        <span class="stat-value" id="totalEstudiantes">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #33ccff, #0099cc);">
+                        <i class="bi bi-clipboard-check-fill"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Pruebas Realizadas</span>
+                        <span class="stat-value" id="totalPruebas">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ff0000, #cc0000);">
+                        <i class="bi bi-trophy-fill"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Promedio General</span>
+                        <span class="stat-value" id="promedioGeneral">0%</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ffa500, #ff8c00);">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Planes Activos</span>
+                        <span class="stat-value" id="totalPlanes">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tabs de navegación -->
+        <div class="dashboard-tabs">
+            <button class="dashboard-tab active" data-tab="ranking">
+                <i class="bi bi-trophy"></i> Ranking General
+            </button>
+            <button class="dashboard-tab" data-tab="materias">
+                <i class="bi bi-book"></i> Por Materias
+            </button>
+            <button class="dashboard-tab" data-tab="mejoras">
+                <i class="bi bi-graph-up"></i> Puntos a Mejorar
+            </button>
+            <button class="dashboard-tab" data-tab="asistencia">
+                <i class="bi bi-calendar-check"></i> Asistencia
+            </button>
+            <button class="dashboard-tab" data-tab="tareas">
+                <i class="bi bi-clipboard-check"></i> Tareas
+            </button>
+            <button class="dashboard-tab" data-tab="comparativa">
+                <i class="bi bi-bar-chart"></i> Comparativa
+            </button>
+        </div>
+
+        <!-- Contenido de tabs -->
+        <div class="dashboard-content">
+            <!-- Tab: Ranking General -->
+            <div class="tab-panel active" id="ranking-panel">
+                <div class="panel-grid">
+                    <!-- Top 5 Estudiantes -->
+                    <div class="dashboard-card ranking-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-trophy-fill"></i> Top 5 Estudiantes</h3>
+                            <span class="badge-info">Mejores promedios</span>
+                        </div>
+                        <div class="ranking-list" id="topEstudiantes">
+                            <div class="loading-spinner"><i class="bi bi-arrow-repeat"></i> Cargando...</div>
+                        </div>
+                    </div>
+
+                    <!-- Distribución de Rendimiento -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-pie-chart-fill"></i> Distribución de Rendimiento</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chartDistribucion"></canvas>
+                        </div>
+                        <div class="legend-grid">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #33ff77;"></span>
+                                <span>Excelente (80-100%)</span>
+                                <strong id="countExcelente">0</strong>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #33ccff;"></span>
+                                <span>Bueno (60-79%)</span>
+                                <strong id="countBueno">0</strong>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #ffa500;"></span>
+                                <span>Regular (40-59%)</span>
+                                <strong id="countRegular">0</strong>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #ff4d4d;"></span>
+                                <span>Bajo (0-39%)</span>
+                                <strong id="countBajo">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla completa de estudiantes -->
+                <div class="dashboard-card full-width">
+                    <div class="card-header">
+                        <h3><i class="bi bi-table"></i> Ranking Completo</h3>
+                        <div class="card-actions">
+                            <input type="text" id="searchRanking" placeholder="Buscar estudiante..." class="search-input">
+                            <button class="btn-export" id="btnExportRanking">
+                                <i class="bi bi-download"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="ranking-table" id="tablaRanking">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Estudiante</th>
+                                    <th>Pruebas</th>
+                                    <th>Promedio</th>
+                                    <th>LC</th>
+                                    <th>MT</th>
+                                    <th>SC</th>
+                                    <th>CN</th>
+                                    <th>IN</th>
+                                    <th>Tendencia</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaRankingBody">
+                                <tr><td colspan="10" class="text-center">Cargando datos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Paginación -->
+                    <div class="paginacion-container" id="paginacionRanking" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Por Materias -->
+            <div class="tab-panel" id="materias-panel">
+                <div class="panel-grid">
+                    <!-- Promedios por Materia -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-bar-chart-fill"></i> Promedios por Materia</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chartMaterias"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Materia más fuerte y más débil -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-award-fill"></i> Análisis de Materias</h3>
+                        </div>
+                        <div class="materia-analysis">
+                            <div class="analysis-item fuerte">
+                                <i class="bi bi-trophy-fill"></i>
+                                <div>
+                                    <span class="label">Materia más fuerte</span>
+                                    <h4 id="materiaFuerte">-</h4>
+                                    <span class="value" id="promedioFuerte">0%</span>
+                                </div>
+                            </div>
+                            <div class="analysis-item debil">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <div>
+                                    <span class="label">Materia más débil</span>
+                                    <h4 id="materiaDebil">-</h4>
+                                    <span class="value" id="promedioDebil">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ranking por cada materia -->
+                <div class="materias-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3 style="color: #ff4d4d;"><i class="bi bi-book-fill"></i> Lectura Crítica</h3>
+                        </div>
+                        <div class="mini-ranking" id="rankingLC"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3 style="color: #33ccff;"><i class="bi bi-calculator-fill"></i> Matemáticas</h3>
+                        </div>
+                        <div class="mini-ranking" id="rankingMT"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3 style="color: #ff8c00;"><i class="bi bi-globe-americas"></i> Sociales</h3>
+                        </div>
+                        <div class="mini-ranking" id="rankingSC"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3 style="color: #33ff77;"><i class="bi bi-tree-fill"></i> Ciencias</h3>
+                        </div>
+                        <div class="mini-ranking" id="rankingCN"></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3 style="color: #b366ff;"><i class="bi bi-translate"></i> Inglés</h3>
+                        </div>
+                        <div class="mini-ranking" id="rankingIN"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Puntos a Mejorar -->
+            <div class="tab-panel" id="mejoras-panel">
+                <div class="panel-grid">
+                    <!-- Temas más difíciles -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-exclamation-triangle-fill"></i> Temas Más Difíciles</h3>
+                            <div class="card-actions">
+                                <select id="filtroMateriaTemas" class="filtro-materia">
+                                    <option value="todas">Todas las materias</option>
+                                    <option value="LC">Lectura Crítica</option>
+                                    <option value="MT">Matemáticas</option>
+                                    <option value="SC">Ciencias Sociales</option>
+                                    <option value="CN">Ciencias Naturales</option>
+                                    <option value="IN">Inglés</option>
+                                </select>
+                                <span class="badge-danger">Requieren atención</span>
+                            </div>
+                        </div>
+                        <div class="temas-dificiles" id="temasDificiles"></div>
+                    </div>
+
+                    <!-- Estudiantes que necesitan apoyo -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-person-exclamation"></i> Estudiantes en Riesgo</h3>
+                            <span class="badge-warning">Promedio < 50%</span>
+                        </div>
+                        <div class="estudiantes-riesgo" id="estudiantesRiesgo"></div>
+                    </div>
+                </div>
+
+                <!-- Planes de estudio activos -->
+                <div class="dashboard-card full-width">
+                    <div class="card-header">
+                        <h3><i class="bi bi-calendar-check-fill"></i> Planes de Estudio Activos</h3>
+                        <span class="badge-info" id="countPlanesActivos">0 planes</span>
+                    </div>
+                    <div class="planes-grid" id="planesActivos"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Asistencia -->
+            <div class="tab-panel" id="asistencia-panel">
+                <div class="panel-grid">
+                    <!-- Resumen de asistencia general -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-calendar-check-fill"></i> Resumen de Asistencia</h3>
+                        </div>
+                        <div class="asistencia-resumen">
+                            <div class="asistencia-stat">
+                                <div class="asistencia-stat-icon" style="background: #4CAF50;">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <div class="asistencia-stat-info">
+                                    <span class="asistencia-stat-label">Asistencias</span>
+                                    <span class="asistencia-stat-value" id="totalAsistencias">0</span>
+                                </div>
+                            </div>
+                            <div class="asistencia-stat">
+                                <div class="asistencia-stat-icon" style="background: #F44336;">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </div>
+                                <div class="asistencia-stat-info">
+                                    <span class="asistencia-stat-label">Faltas</span>
+                                    <span class="asistencia-stat-value" id="totalFaltas">0</span>
+                                </div>
+                            </div>
+                            <div class="asistencia-stat">
+                                <div class="asistencia-stat-icon" style="background: #2196F3;">
+                                    <i class="bi bi-percent"></i>
+                                </div>
+                                <div class="asistencia-stat-info">
+                                    <span class="asistencia-stat-label">Porcentaje</span>
+                                    <span class="asistencia-stat-value" id="porcentajeAsistencia">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de asistencia por materia -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-bar-chart-fill"></i> Asistencia por Materia</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chartAsistenciaMaterias"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asistencia detallada por materia -->
+                <div class="dashboard-card full-width">
+                    <div class="card-header">
+                        <h3><i class="bi bi-table"></i> Detalle por Materia</h3>
+                        <div class="card-actions">
+                            <select id="filtroMateriaAsistencia" class="filtro-materia">
+                                <option value="todas">Todas las materias</option>
+                                <option value="LC">Lectura Crítica</option>
+                                <option value="MT">Matemáticas</option>
+                                <option value="SC">Ciencias Sociales</option>
+                                <option value="CN">Ciencias Naturales</option>
+                                <option value="IN">Inglés</option>
+                            </select>
+                            <button class="btn-export" id="btnExportAsistencia">
+                                <i class="bi bi-download"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="asistencia-table" id="tablaAsistencia">
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Materia</th>
+                                    <th>Asistencias</th>
+                                    <th>Faltas</th>
+                                    <th>Total Clases</th>
+                                    <th>Porcentaje</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaAsistenciaBody">
+                                <tr><td colspan="6" class="text-center">Cargando datos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Tareas -->
+            <div class="tab-panel" id="tareas-panel">
+                <div class="panel-grid">
+                    <!-- Resumen de tareas -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-clipboard-check-fill"></i> Resumen de Tareas</h3>
+                        </div>
+                        <div class="tareas-resumen">
+                            <div class="tarea-stat">
+                                <div class="tarea-stat-icon" style="background: #2196F3;">
+                                    <i class="bi bi-journal-text"></i>
+                                </div>
+                                <div class="tarea-stat-info">
+                                    <span class="tarea-stat-label">Total Tareas</span>
+                                    <span class="tarea-stat-value" id="totalTareas">0</span>
+                                </div>
+                            </div>
+                            <div class="tarea-stat">
+                                <div class="tarea-stat-icon" style="background: #4CAF50;">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <div class="tarea-stat-info">
+                                    <span class="tarea-stat-label">Entregadas</span>
+                                    <span class="tarea-stat-value" id="totalTareasEntregadas">0</span>
+                                </div>
+                            </div>
+                            <div class="tarea-stat">
+                                <div class="tarea-stat-icon" style="background: #FF9800;">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </div>
+                                <div class="tarea-stat-info">
+                                    <span class="tarea-stat-label">Pendientes</span>
+                                    <span class="tarea-stat-value" id="totalTareasPendientes">0</span>
+                                </div>
+                            </div>
+                            <div class="tarea-stat">
+                                <div class="tarea-stat-icon" style="background: #9C27B0;">
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <div class="tarea-stat-info">
+                                    <span class="tarea-stat-label">Promedio</span>
+                                    <span class="tarea-stat-value" id="promedioTareas">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de tareas por materia -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-pie-chart-fill"></i> Tareas por Materia</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chartTareasMaterias"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tareas detalladas por materia -->
+                <div class="dashboard-card full-width">
+                    <div class="card-header">
+                        <h3><i class="bi bi-table"></i> Detalle por Materia</h3>
+                        <div class="card-actions">
+                            <select id="filtroMateriaTareas" class="filtro-materia">
+                                <option value="todas">Todas las materias</option>
+                                <option value="LC">Lectura Crítica</option>
+                                <option value="MT">Matemáticas</option>
+                                <option value="SC">Ciencias Sociales</option>
+                                <option value="CN">Ciencias Naturales</option>
+                                <option value="IN">Inglés</option>
+                            </select>
+                            <button class="btn-export" id="btnExportTareas">
+                                <i class="bi bi-download"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="tareas-table" id="tablaTareas">
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Materia</th>
+                                    <th>Tarea</th>
+                                    <th>Fecha Entrega</th>
+                                    <th>Estado</th>
+                                    <th>Calificación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaTareasBody">
+                                <tr><td colspan="6" class="text-center">Cargando datos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Comparativa -->
+            <div class="tab-panel" id="comparativa-panel">
+                <div class="panel-grid">
+                    <!-- Tabla de Posiciones -->
+                    <div class="dashboard-card full-width">
+                        <div class="card-header">
+                            <h3><i class="bi bi-trophy"></i> Posición de tu Institución</h3>
+                        </div>
+                        <div id="tablaPosicionesInstituciones"></div>
+                    </div>
+                    
+                    <!-- Evolución temporal -->
+                    <div class="dashboard-card full-width">
+                        <div class="card-header">
+                            <h3><i class="bi bi-graph-up"></i> Evolución del Promedio</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chartEvolucion"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Comparativa de materias -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-speedometer"></i> Rendimiento por Materia</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chartRadar"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas avanzadas -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="bi bi-calculator"></i> Estadísticas Avanzadas</h3>
+                        </div>
+                        <div class="stats-advanced">
+                            <div class="stat-item">
+                                <span class="label">Mediana</span>
+                                <span class="value" id="statMediana">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="label">Desviación Estándar</span>
+                                <span class="value" id="statDesviacion">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="label">Mejor Resultado</span>
+                                <span class="value" id="statMejor">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="label">Peor Resultado</span>
+                                <span class="value" id="statPeor">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" defer></script>
+
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- SweetAlert2 para modales -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/resumen-general.js"></script>
+</body>
+
+</html>

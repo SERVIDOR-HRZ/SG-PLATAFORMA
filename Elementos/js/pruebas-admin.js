@@ -1419,15 +1419,46 @@ async function deleteTest(testId) {
                 console.log(`✅ ${cantidadRespuestas} respuestas eliminadas correctamente`);
             }
             
+            // Obtener y eliminar todos los planes de estudio asociados a esta prueba
+            const planesSnapshot = await db.collection('planesEstudio')
+                .where('pruebaId', '==', testId)
+                .get();
+            
+            const cantidadPlanes = planesSnapshot.size;
+            
+            if (cantidadPlanes > 0) {
+                console.log(`Eliminando ${cantidadPlanes} planes de estudio asociados a la prueba ${testId}...`);
+                
+                // Eliminar planes en batches
+                const batchSize = 500;
+                const planDocs = planesSnapshot.docs;
+                
+                for (let i = 0; i < planDocs.length; i += batchSize) {
+                    const batch = db.batch();
+                    const chunk = planDocs.slice(i, i + batchSize);
+                    
+                    chunk.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    
+                    await batch.commit();
+                }
+                
+                console.log(`✅ ${cantidadPlanes} planes de estudio eliminados correctamente`);
+            }
+            
             // Ahora eliminar la prueba
             await db.collection('pruebas').doc(testId).delete();
             
             // Mostrar mensaje con información de lo eliminado
-            if (cantidadRespuestas > 0) {
-                showNotification(`Prueba y ${cantidadRespuestas} respuesta(s) eliminadas exitosamente`, 'success');
-            } else {
-                showNotification('Prueba eliminada exitosamente', 'success');
+            let mensaje = 'Prueba eliminada exitosamente';
+            if (cantidadRespuestas > 0 || cantidadPlanes > 0) {
+                const detalles = [];
+                if (cantidadRespuestas > 0) detalles.push(`${cantidadRespuestas} respuesta(s)`);
+                if (cantidadPlanes > 0) detalles.push(`${cantidadPlanes} plan(es) de estudio`);
+                mensaje = `Prueba y ${detalles.join(' y ')} eliminadas exitosamente`;
             }
+            showNotification(mensaje, 'success');
             
             await loadAllTests();
             renderTestsList();
@@ -1448,7 +1479,7 @@ function showDeleteTestModal() {
                         <i class="bi bi-exclamation-triangle panel-modal-icon"></i>
                         <p class="panel-modal-message">¿Estás seguro de que deseas eliminar esta prueba?</p>
                         <p style="font-size: 0.9em; color: #666; margin-top: -15px; margin-bottom: 20px;">
-                            <i class="bi bi-info-circle"></i> También se eliminarán todas las respuestas de los estudiantes asociadas a esta prueba.
+                            <i class="bi bi-info-circle"></i> También se eliminarán todas las respuestas de los estudiantes y los planes de estudio asociados a esta prueba.
                         </p>
                         <div class="panel-modal-footer">
                             <button class="panel-modal-btn panel-btn-cancel" id="deleteTestModalCancel">

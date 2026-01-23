@@ -1,4 +1,4 @@
-/* Panel Coordinador Moderno - Estilo Independiente */
+/* Progreso de Estudiantes - Coordinador */
 * {
     margin: 0;
     padding: 0;
@@ -28,7 +28,6 @@ body {
     transition: all 0.3s ease;
 }
 
-/* Perfil Usuario en Sidebar */
 .sidebar-profile {
     text-align: center;
     padding: 2rem 0 2.5rem;
@@ -87,7 +86,6 @@ body {
     margin-bottom: 2rem;
 }
 
-/* Botones de Perfil dentro del Profile */
 .sidebar-profile-actions {
     display: flex;
     flex-direction: column;
@@ -95,7 +93,6 @@ body {
     margin-top: 1.5rem;
 }
 
-/* Botones de Acción Sidebar */
 .sidebar-actions {
     padding-top: 2rem;
     margin-top: auto;
@@ -129,7 +126,6 @@ body {
 .btn-profile:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(255, 0, 0, 0.5);
-    background: linear-gradient(135deg, #ff1a1a, #d60000);
 }
 
 .btn-home {
@@ -141,31 +137,17 @@ body {
 .btn-home:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(255, 165, 0, 0.5);
-    background: linear-gradient(135deg, #ffb520, #ff9500);
 }
 
-.btn-desafios {
-    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+.btn-back {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
     color: white;
-    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
 }
 
-.btn-desafios:hover {
+.btn-back:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(156, 39, 176, 0.5);
-    background: linear-gradient(135deg, #ba68c8, #8e24aa);
-}
-
-.btn-chat {
-    background: linear-gradient(135deg, #00bcd4, #0097a7);
-    color: white;
-    box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
-}
-
-.btn-chat:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 188, 212, 0.5);
-    background: linear-gradient(135deg, #26c6da, #00acc1);
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.5);
 }
 
 .btn-logout {
@@ -176,7 +158,6 @@ body {
 
 .btn-logout:hover {
     background: rgba(139, 0, 0, 0.5);
-    border-color: rgba(139, 0, 0, 0.7);
     color: #ffcccc;
     transform: translateY(-2px);
 }
@@ -188,7 +169,7 @@ body {
     min-height: 100vh;
 }
 
-/* Header Superior */
+/* Header */
 .panel-header {
     background: #cc0000;
     padding: 2.5rem 3rem;
@@ -199,8 +180,6 @@ body {
     justify-content: space-between;
     align-items: center;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-    overflow: hidden;
 }
 
 .panel-title {
@@ -208,9 +187,15 @@ body {
     font-weight: 700;
     color: white;
     letter-spacing: -0.5px;
-    margin: 0;
-    position: relative;
+    margin: 0 0 0.5rem 0;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.panel-subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    font-weight: 500;
 }
 
 .panel-time {
@@ -219,7 +204,6 @@ body {
     flex-direction: column;
     align-items: flex-end;
     gap: 0.5rem;
-    position: relative;
 }
 
 .time-display {
@@ -257,42 +241,35 @@ body {
     font-weight: 500;
     text-transform: capitalize;
     letter-spacing: 0.5px;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Grid de Tarjetas */
-.dashboard-grid-modern {
+/* Grid de Tarjetas de Progreso */
+.progress-cards-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 
-@media (max-width: 1400px) {
-    .dashboard-grid-modern {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 1100px) {
-    .dashboard-grid-modern {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Tarjetas Modernas */
-.card-modern {
+/* Tarjetas de Progreso */
+.progress-card {
     background: #1a1a1a;
     border-radius: 24px;
     padding: 2.5rem;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-height: 320px;
+    height: 100%;
 }
 
-.card-modern::before {
+.progress-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -302,44 +279,192 @@ body {
     background: linear-gradient(90deg, #ff0000, #cc0000);
 }
 
-.card-modern:hover {
+.progress-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     border-color: rgba(255, 0, 0, 0.3);
 }
 
-.card-modern-icon {
-    width: 70px;
-    height: 70px;
-    border-radius: 18px;
+.progress-card:hover .progress-card-arrow i {
+    transform: translateY(5px);
+}
+
+.progress-card-header {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    flex: 1;
+}
+
+.progress-card-icon {
+    width: 90px;
+    height: 90px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.2rem;
-    margin-bottom: 1.75rem;
+    font-size: 2.8rem;
     background: linear-gradient(135deg, #ff0000, #cc0000);
     color: white;
-    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.3);
+    box-shadow: 0 8px 24px rgba(255, 0, 0, 0.4);
+    flex-shrink: 0;
 }
 
-.card-icon-progreso {
-    background: linear-gradient(135deg, #ff0000, #cc0000);
-    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.3);
+.card-icon-aulas {
+    background: linear-gradient(135deg, #28a745, #218838);
+    box-shadow: 0 8px 24px rgba(40, 167, 69, 0.4);
 }
 
-.card-modern-content h3 {
-    font-size: 1.4rem;
+.card-icon-evaluaciones {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+    box-shadow: 0 8px 24px rgba(156, 39, 176, 0.4);
+}
+
+.progress-card-content {
+    flex: 1;
+}
+
+.progress-card-content h3 {
+    font-size: 1.5rem;
     font-weight: 700;
     color: #ffffff;
     margin-bottom: 0.75rem;
     letter-spacing: -0.3px;
+    line-height: 1.3;
 }
 
-.card-modern-content p {
+.progress-card-content p {
     color: rgba(255, 255, 255, 0.7);
-    font-size: 1rem;
+    font-size: 1.05rem;
     line-height: 1.6;
-    font-weight: 400;
+    margin: 0;
+}
+
+.progress-card-stats {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.mini-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.mini-stat i {
+    font-size: 1.5rem;
+    color: #ff0000;
+    margin-bottom: 0.25rem;
+}
+
+.mini-stat span {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+}
+
+.mini-stat label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.progress-card-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 2rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progress-card-arrow i {
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+    transform: rotate(90deg);
+}
+
+/* Sección de Contenido Dinámico */
+.content-section {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn-volver {
+    padding: 1rem 2rem;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-volver:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.5);
+}
+
+.section-content {
+    background: #1a1a1a;
+    border-radius: 24px;
+    padding: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.section-header {
+    border-bottom: 2px solid rgba(255, 0, 0, 0.3);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.section-header h2 i {
+    color: #ff0000;
+    font-size: 2rem;
+}
+
+.section-body {
+    min-height: 400px;
+}
+
+.coming-soon {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.2rem;
+    font-weight: 500;
 }
 
 /* Responsive */
@@ -351,12 +476,15 @@ body {
     .main-panel-content {
         margin-left: 260px;
     }
+    
+    .progress-cards-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
     .sidebar-panel {
         transform: translateX(-100%);
-        width: 300px;
     }
     
     .sidebar-panel.active {
@@ -385,63 +513,53 @@ body {
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s ease;
-    }
-    
-    .mobile-menu-toggle:hover {
-        background: #1a1a1a;
-        transform: scale(1.05);
     }
     
     .mobile-menu-toggle.active {
         left: auto;
         right: 5px;
-        top: 5px;
-    }
-    
-    .mobile-menu-toggle i {
-        transition: all 0.3s ease;
     }
     
     .panel-header {
         flex-direction: column;
-        gap: 0.75rem;
-        text-align: center;
-        padding: 1.25rem 1rem;
-        margin-bottom: 1.5rem;
-        border-radius: 16px;
+        gap: 1rem;
+        padding: 1.5rem;
     }
     
     .panel-title {
-        font-size: 1.3rem;
-        margin: 0;
-    }
-    
-    .panel-time {
-        align-items: center;
-        gap: 0.25rem;
+        font-size: 1.5rem;
     }
     
     .time-display {
-        font-size: 1.5rem;
-        gap: 0.5rem;
+        font-size: 1.8rem;
     }
     
-    #timeIcon {
+    .progress-cards-grid {
+        gap: 1.5rem;
+        grid-template-columns: 1fr;
+    }
+    
+    .progress-card {
+        padding: 2rem;
+        min-height: auto;
+    }
+    
+    .progress-card-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
+    }
+    
+    .progress-card-content h3 {
         font-size: 1.3rem;
     }
     
-    .date-display {
-        font-size: 0.8rem;
+    .progress-card-stats {
+        flex-wrap: wrap;
     }
     
-    .dashboard-grid-modern {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-    }
-    
-    .card-modern {
-        padding: 2rem;
+    .section-content {
+        padding: 1.5rem;
     }
 }
 
@@ -450,65 +568,30 @@ body {
         padding: 0.75rem;
     }
     
-    .sidebar-avatar {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .sidebar-avatar-default {
-        font-size: 3rem;
-    }
-    
-    .sidebar-user-name {
-        font-size: 1.2rem;
-    }
-    
-    .card-modern {
-        padding: 1.75rem;
-        border-radius: 20px;
-    }
-    
-    .card-modern-icon {
-        width: 55px;
-        height: 55px;
-        font-size: 1.8rem;
-        margin-bottom: 1.25rem;
-    }
-    
-    .card-modern-content h3 {
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .card-modern-content p {
-        font-size: 0.9rem;
-    }
-    
     .panel-header {
-        padding: 1rem 0.75rem;
-        margin-bottom: 1rem;
-        border-radius: 14px;
+        padding: 1rem;
     }
     
     .panel-title {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
     
     .time-display {
-        font-size: 1.3rem;
-        gap: 0.4rem;
+        font-size: 1.5rem;
     }
     
-    #timeIcon {
-        font-size: 1.1rem;
+    .progress-card {
+        padding: 1.5rem;
     }
     
-    .date-display {
-        font-size: 0.75rem;
+    .progress-card-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
     }
     
-    .dashboard-grid-modern {
-        gap: 1rem;
+    .mini-stat span {
+        font-size: 1.5rem;
     }
 }
 
@@ -526,4 +609,17 @@ body {
 
 .sidebar-overlay.active {
     display: block;
+}
+
+/* Screen reader only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
