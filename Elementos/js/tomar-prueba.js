@@ -73,11 +73,7 @@ function setupEventListeners() {
     // Block change modal
     document.getElementById('continueToBlock2').addEventListener('click', continueToBlock2);
 
-    // Selector toggle button (mobile)
-    const toggleBtn = document.getElementById('selectorToggleBtn');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', toggleQuestionSelector);
-    }
+    // Selector toggle button removed for mobile - not needed anymore
 
     // Close modals on overlay click
     document.getElementById('blockChangeModal').addEventListener('click', function (e) {
@@ -92,17 +88,7 @@ function setupEventListeners() {
         }
     });
 
-    // Close selector when clicking outside on mobile
-    document.addEventListener('click', function(e) {
-        const selector = document.querySelector('.question-selector-fixed');
-        const toggleBtn = document.getElementById('selectorToggleBtn');
-        
-        if (selector && selector.classList.contains('active') && 
-            !selector.contains(e.target) && 
-            !toggleBtn.contains(e.target)) {
-            toggleQuestionSelector();
-        }
-    });
+    // Selector auto-close removed - not needed on mobile anymore
 }
 
 // Go back to student tests - DISABLED during test
@@ -149,6 +135,9 @@ function toggleQuestionSelector() {
         }
     }
 }
+
+// Make toggle function globally accessible
+window.toggleQuestionSelector = toggleQuestionSelector;
 
 // Prevent navigation away from test
 function preventNavigation() {
@@ -846,21 +835,13 @@ function createFixedSelector(subjectQuestions, config) {
     // Insert selector into body (outside main-content)
     document.body.insertAdjacentHTML('beforeend', selectorHTML);
 
-    // Add click events to question buttons
-    document.querySelectorAll('.question-btn').forEach((btn, index) => {
+    // Add click events to question buttons and reading buttons
+    document.querySelectorAll('.question-btn, .reading-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
             const targetIndex = parseInt(btn.dataset.index);
             if (!isNaN(targetIndex)) {
                 currentQuestionIndex = targetIndex;
                 showCurrentQuestion();
-                
-                // Close selector on mobile after selecting a question
-                if (window.innerWidth <= 1200) {
-                    const selector = document.querySelector('.question-selector-fixed');
-                    if (selector && selector.classList.contains('active')) {
-                        toggleQuestionSelector();
-                    }
-                }
             }
         });
     });
@@ -1109,6 +1090,24 @@ function renderCurrentItem(item, contextElements, questionNumber, config) {
         `;
     }
 
+    // Add navigation buttons at the bottom
+    const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
+    const isFirst = currentQuestionIndex === 0;
+    const isLast = currentQuestionIndex === subjectQuestions.length - 1;
+
+    html += `
+        <div class="question-navigation-buttons">
+            <button class="btn btn-secondary btn-nav" onclick="goToPreviousQuestion()" ${isFirst ? 'disabled' : ''}>
+                <i class="bi bi-chevron-left"></i>
+                Anterior
+            </button>
+            <button class="btn btn-primary btn-nav" onclick="goToNextQuestion()" ${isLast ? 'disabled' : ''}>
+                Siguiente
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    `;
+
     return html;
 }
 
@@ -1125,7 +1124,7 @@ function createQuestionsSelector(allItems) {
             // Botón para texto de lectura
             html += `
                 <button class="reading-btn ${isActive ? 'active' : ''}" 
-                        onclick="goToQuestion(${i})">
+                        data-index="${i}">
                     <i class="bi bi-book-half"></i>
                 </button>
             `;
@@ -1139,7 +1138,7 @@ function createQuestionsSelector(allItems) {
 
             html += `
                 <button class="question-btn ${isActive ? 'active' : ''} ${isAnswered ? 'answered' : ''}" 
-                        onclick="goToQuestion(${i})">
+                        data-index="${i}">
                     ${questionNumber}
                 </button>
             `;
@@ -1153,6 +1152,32 @@ function goToQuestion(questionIndex) {
     currentQuestionIndex = questionIndex;
     showCurrentQuestion();
 }
+
+// Navigate to previous question/item
+function goToPreviousQuestion() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        showCurrentQuestion();
+    } else {
+        showNotification('Ya estás en el primer elemento', 'info');
+    }
+}
+
+// Navigate to next question/item
+function goToNextQuestion() {
+    const subjectQuestions = testQuestions.find(q => q[currentSubject])[currentSubject];
+    if (currentQuestionIndex < subjectQuestions.length - 1) {
+        currentQuestionIndex++;
+        showCurrentQuestion();
+    } else {
+        showNotification('Ya estás en el último elemento', 'info');
+    }
+}
+
+// Make navigation functions globally accessible
+window.goToQuestion = goToQuestion;
+window.goToPreviousQuestion = goToPreviousQuestion;
+window.goToNextQuestion = goToNextQuestion;
 
 // Toggle context visibility
 function toggleContext(contextIndex) {

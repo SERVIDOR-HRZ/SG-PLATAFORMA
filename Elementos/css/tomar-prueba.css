@@ -283,6 +283,114 @@ body::before {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Responsive improvements for subject buttons */
+@media (max-width: 1024px) {
+    .subjects-nav-inline {
+        gap: 0.75rem;
+    }
+    
+    .subjects-nav-inline .subject-btn {
+        padding: 0.85rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .subjects-nav-inline .subject-btn i {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .subjects-nav-inline {
+        gap: 0.6rem;
+        padding-top: 1.25rem;
+        margin-top: 1.25rem;
+    }
+    
+    .subjects-nav-inline .subject-btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.85rem;
+        flex: 1 1 calc(50% - 0.3rem);
+        min-width: 140px;
+    }
+    
+    .subjects-nav-inline .subject-btn i {
+        font-size: 1rem;
+    }
+    
+    .subjects-nav-inline .subject-name {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .subjects-nav-inline {
+        gap: 0.5rem;
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .subjects-nav-inline .subject-btn {
+        padding: 0.7rem 1rem;
+        font-size: 0.8rem;
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 120px;
+        border-radius: 12px;
+    }
+    
+    .subjects-nav-inline .subject-btn i {
+        font-size: 0.95rem;
+    }
+    
+    .subjects-nav-inline .subject-name {
+        font-size: 0.8rem;
+    }
+    
+    .completion-badge {
+        width: 28px;
+        height: 28px;
+        top: -6px;
+        right: -6px;
+    }
+    
+    .completion-badge i {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 360px) {
+    .subjects-nav-inline {
+        gap: 0.4rem;
+    }
+    
+    .subjects-nav-inline .subject-btn {
+        padding: 0.65rem 0.85rem;
+        font-size: 0.75rem;
+        flex: 1 1 calc(50% - 0.2rem);
+        min-width: 100px;
+        border-radius: 10px;
+    }
+    
+    .subjects-nav-inline .subject-btn i {
+        font-size: 0.9rem;
+    }
+    
+    .subjects-nav-inline .subject-name {
+        font-size: 0.75rem;
+    }
+    
+    .completion-badge {
+        width: 24px;
+        height: 24px;
+        top: -5px;
+        right: -5px;
+        border-width: 2px;
+    }
+    
+    .completion-badge i {
+        font-size: 14px;
+    }
+}
+
 /* ========================================
    SUBJECTS NAVIGATION - GLASS EFFECT
    ======================================== */
@@ -1126,58 +1234,6 @@ body::before {
         margin-top: 70px;
     }
     
-    .question-selector-fixed {
-        width: 280px;
-        border-radius: 0 16px 16px 0;
-    }
-    
-    .selector-header {
-        padding: 1.5rem 1.25rem;
-    }
-    
-    .selector-subject .subject-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-    }
-    
-    .selector-subject span {
-        font-size: 1.1rem;
-    }
-    
-    .selector-info {
-        font-size: 0.85rem;
-        margin-left: 48px;
-    }
-    
-    .questions-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.5rem;
-        padding: 1.25rem;
-    }
-    
-    .question-btn {
-        min-height: 45px;
-        font-size: 0.9rem;
-        border-radius: 8px;
-    }
-    
-    .question-btn.answered::after {
-        width: 20px;
-        height: 20px;
-        font-size: 11px;
-        top: -5px;
-        right: -5px;
-    }
-    
-    .selector-toggle-btn {
-        width: 55px;
-        height: 55px;
-        font-size: 1.3rem;
-        left: 15px;
-        bottom: 25px;
-    }
-    
     .test-progress-row {
         flex-direction: column;
         gap: 15px;
@@ -1195,16 +1251,6 @@ body::before {
         padding: 1rem 1.5rem;
     }
     
-    .subjects-nav-inline {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    
-    .subjects-nav-inline .subject-btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
     .question-layout {
         grid-template-columns: 1fr;
     }
@@ -1215,20 +1261,8 @@ body::before {
         text-align: center;
     }
     
-    .test-progress {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .subjects-nav {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .subject-btn {
-        width: 100%;
-        max-width: 300px;
-        justify-content: center;
+    .test-info-header h2 {
+        font-size: 1.5rem;
     }
     
     .question-container {
@@ -1241,15 +1275,17 @@ body::before {
         text-align: center;
     }
     
-    .question-controls {
-        flex-direction: column;
-        gap: 15px;
-        padding: 20px;
+    .question-text {
+        font-size: 1rem;
+        padding: 1.25rem;
     }
     
-    .question-controls .btn {
-        width: 100%;
-        justify-content: center;
+    .option-item {
+        padding: 1rem;
+    }
+    
+    .option-text {
+        font-size: 0.95rem;
     }
     
     .modal {
@@ -1272,60 +1308,6 @@ body::before {
 }
 
 @media (max-width: 480px) {
-    .question-selector-fixed {
-        width: 260px;
-        border-radius: 0 12px 12px 0;
-    }
-    
-    .selector-header {
-        padding: 1.25rem 1rem;
-    }
-    
-    .selector-subject .subject-icon {
-        width: 32px;
-        height: 32px;
-        font-size: 0.9rem;
-        border-radius: 10px;
-    }
-    
-    .selector-subject span {
-        font-size: 1rem;
-    }
-    
-    .selector-info {
-        font-size: 0.8rem;
-        margin-left: 42px;
-    }
-    
-    .questions-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-        padding: 1rem;
-    }
-    
-    .question-btn {
-        min-height: 50px;
-        font-size: 0.85rem;
-        border-radius: 8px;
-    }
-    
-    .question-btn.answered::after {
-        width: 18px;
-        height: 18px;
-        font-size: 10px;
-        top: -4px;
-        right: -4px;
-        border-width: 2px;
-    }
-    
-    .selector-toggle-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
-        left: 12px;
-        bottom: 20px;
-    }
-    
     .header {
         padding: 10px 15px;
     }
@@ -1335,34 +1317,64 @@ body::before {
     }
     
     .header-left h1 {
-        font-size: 18px;
+        font-size: 1.1rem;
     }
     
     .test-timer {
         padding: 8px 12px;
-        font-size: 14px;
+        font-size: 0.85rem;
+    }
+    
+    #timerDisplay {
+        font-size: 0.9rem;
     }
     
     .back-btn {
         padding: 8px 15px;
-        font-size: 14px;
+        font-size: 0.85rem;
     }
     
     .test-info-card {
-        padding: 20px;
+        padding: 1.5rem;
+    }
+    
+    .test-info-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .current-block {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .block-time {
+        font-size: 0.8rem;
+    }
+    
+    .progress-text {
+        font-size: 0.85rem;
+    }
+    
+    .question-container {
+        padding: 1.25rem;
     }
     
     .question-text {
-        font-size: 16px;
-        padding: 15px;
+        font-size: 0.95rem;
+        padding: 1rem;
     }
     
     .option-item {
-        padding: 15px;
+        padding: 1rem;
     }
     
     .option-text {
-        font-size: 15px;
+        font-size: 0.9rem;
+    }
+    
+    .question-number-badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
     }
 }
 
@@ -3771,68 +3783,16 @@ mjx-container[display="true"] {
 
 
 /* ========================================
-   SELECTOR TOGGLE BUTTON (MOBILE)
+   SELECTOR TOGGLE BUTTON - HIDDEN ON MOBILE
    ======================================== */
 .selector-toggle-btn {
-    display: none;
-    position: fixed;
-    left: 20px;
-    bottom: 30px;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    z-index: 1000;
-    box-shadow: 
-        0 8px 25px rgba(255, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    align-items: center;
-    justify-content: center;
+    display: none !important;
 }
 
-.selector-toggle-btn:hover {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 12px 35px rgba(255, 0, 0, 0.7);
-}
-
-.selector-toggle-btn:active {
-    transform: scale(0.95);
-}
-
-.selector-toggle-btn i {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.selector-toggle-btn.active {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    box-shadow: 
-        0 8px 25px rgba(40, 167, 69, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
+/* Hide selector on mobile completely */
 @media (max-width: 1200px) {
-    .selector-toggle-btn {
-        display: flex;
-    }
-    
     .question-selector-fixed {
-        transform: translateX(-100%);
-        opacity: 0;
-        pointer-events: none;
-        box-shadow: 
-            10px 0 40px rgba(0, 0, 0, 0.8),
-            inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-    }
-    
-    .question-selector-fixed.active {
-        transform: translateX(0);
-        opacity: 1;
-        pointer-events: all;
+        display: none !important;
     }
     
     .main-content {
@@ -3840,29 +3800,95 @@ mjx-container[display="true"] {
     }
 }
 
-/* Overlay for mobile selector */
+/* Overlay for mobile selector - not needed anymore */
 .selector-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    z-index: 899;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    display: none !important;
 }
 
-.selector-overlay.active {
-    display: block;
-    opacity: 1;
+/* ========================================
+   QUESTION NAVIGATION BUTTONS
+   ======================================== */
+.question-navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-@media (min-width: 1201px) {
-    .selector-overlay {
-        display: none !important;
+.btn-nav {
+    flex: 1;
+    max-width: 250px;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn-nav i {
+    font-size: 1.2rem;
+}
+
+.btn-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-nav:not(:disabled):hover {
+    transform: translateY(-2px);
+}
+
+/* Keep buttons side by side on all screen sizes */
+@media (max-width: 768px) {
+    .question-navigation-buttons {
+        gap: 0.75rem;
+    }
+    
+    .btn-nav {
+        max-width: none;
+        flex: 1;
+        padding: 0.9rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-nav i {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .question-navigation-buttons {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        gap: 0.5rem;
+    }
+    
+    .btn-nav {
+        padding: 0.85rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .btn-nav i {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .btn-nav {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+        gap: 0.5rem;
+    }
+    
+    .btn-nav i {
+        font-size: 0.9rem;
     }
 }
 
