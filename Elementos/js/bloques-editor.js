@@ -1961,18 +1961,154 @@ async function saveAllBlocks() {
         showLoadingOverlay();
 
         const db = window.firebaseDB;
+        
+        // Guardar los bloques actualizados
         await db.collection('pruebas').doc(currentTest.id).update({
             bloques: testBlocks,
             fechaActualizacion: firebase.firestore.Timestamp.now()
         });
 
-        showNotification('Bloques guardados exitosamente', 'success');
+        // IMPORTANTE: Recalcular todas las respuestas existentes con la nueva estructura
+        await recalcularRespuestasExistentes(db, currentTest.id, testBlocks);
+
+        showNotification('Bloques guardados y respuestas recalculadas exitosamente', 'success');
         hideLoadingOverlay();
 
     } catch (error) {
         console.error('Error saving blocks:', error);
         showNotification('Error al guardar los bloques: ' + error.message, 'error');
         hideLoadingOverlay();
+    }
+}
+
+// Recalcular todas las respuestas existentes cuando se actualiza la estructura de la prueba
+async function recalcularRespuestasExistentes(db, pruebaId, nuevaEstructura) {
+    try {
+        console.log('🔄 Iniciando recalculación de respuestas existentes...');
+        
+        // Obtener todas las respuestas de esta prueba
+        const respuestasSnapshot = await db.collection('respuestas')
+            .where('pruebaId', '==', pruebaId)
+            .get();
+        
+        if (respuestasSnapshot.empty) {
+            console.log('✅ No hay respuestas existentes para recalcular');
+            return;
+        }
+        
+        console.log(`📊 Encontradas ${respuestasSnapshot.size} respuestas para recalcular`);
+        
+        const batch = db.batch();
+        let respuestasActualizadas = 0;
+        
+        respuestasSnapshot.forEach(doc => {
+            const respuestaData = doc.data();
+            const bloqueNum = respuestaData.bloque || 1;
+            const bloqueKey = `bloque${bloqueNum}`;
+            const respuestasEvaluadas = respuestaData.respuestasEvaluadas || {};
+            
+            // Recalcular cada materia
+            Object.keys(respuestasEvaluadas).forEach(materia => {
+                const respuestasMateria = respuestasEvaluadas[materia];
+                
+                // Verificar que la materia existe en la nueva estructura
+                if (!nuevaEstructura[bloqueKey] || !nuevaEstructura[bloqueKey][materia]) {
+                    console.warn(`⚠️ Materia ${materia} no encontrada en ${bloqueKey}`);
+                    return;
+                }
+                
+                const preguntasActuales = nuevaEstructura[bloqueKey][materia].questions || [];
+                
+                // Filtrar solo preguntas reales (no textos de lectura)
+                const preguntasReales = [];
+                for (let i = 0; i < preguntasActuales.length; i++) {
+                    const q = preguntasActuales[i];
+                    if (q.type === 'multiple' || q.type === 'short' || q.type === 'open') {
+                        preguntasReales.push(q);
+                    }
+                }
+                
+                // Recalcular cada pregunta
+                Object.keys(respuestasMateria).forEach(preguntaIndex => {
+                    const respuestaPregunta = respuestasMateria[preguntaIndex];
+                    const indexNum = parseInt(preguntaIndex);
+                    
+                    // Buscar la pregunta actual en la nueva estructura
+                    if (indexNum >= 0 && indexNum < preguntasReales.length) {
+                        const preguntaActual = preguntasReales[indexNum];
+                        
+                        // Solo recalcular preguntas de selección múltiple
+                        if (preguntaActual.type === 'multiple') {
+                            // Encontrar la respuesta correcta actual
+                            const correctOptionIndex = preguntaActual.options.findIndex(opt => opt.isCorrect);
+                            
+                            // Obtener la respuesta del estudiante
+                            const respuestaUsuario = respuestaPregunta.respuestaUsuario;
+                            
+                            // Recalcular si es correcta
+                            const esCorrectaAhora = parseInt(respuestaUsuario) === correctOptionIndex;
+                            
+                            // Actualizar los campos
+                            respuestasMateria[preguntaIndex].respuestaCorrecta = correctOptionIndex;
+                            respuestasMateria[preguntaIndex].esCorrecta = esCorrectaAhora;
+                            
+                            // Actualizar todas las opciones (por si se agregaron o quitaron)
+                            respuestasMateria[preguntaIndex].opciones = preguntaActual.options.map(opt => opt.text);
+                            
+                            // Actualizar opciones legacy (primeras 4)
+                            respuestasMateria[preguntaIndex].opcionA = preguntaActual.options[0] ? preguntaActual.options[0].text : '';
+                            respuestasMateria[preguntaIndex].opcionB = preguntaActual.options[1] ? preguntaActual.options[1].text : '';
+                            respuestasMateria[preguntaIndex].opcionC = preguntaActual.options[2] ? preguntaActual.options[2].text : '';
+                            respuestasMateria[preguntaIndex].opcionD = preguntaActual.options[3] ? preguntaActual.options[3].text : '';
+                            
+                            console.log(`✏️ Recalculada: ${materia} - Pregunta ${indexNum} - Correcta: ${correctOptionIndex} - Estudiante: ${respuestaUsuario} - Es correcta: ${esCorrectaAhora}`);
+                        }
+                    }
+                });
+            });
+            
+            // Recalcular estadísticas generales
+            let totalPreguntas = 0;
+            let correctas = 0;
+            let incorrectas = 0;
+            
+            Object.keys(respuestasEvaluadas).forEach(materia => {
+                Object.values(respuestasEvaluadas[materia]).forEach(pregunta => {
+                    totalPreguntas++;
+                    if (pregunta.esCorrecta) {
+                        correctas++;
+                    } else {
+                        incorrectas++;
+                    }
+                });
+            });
+            
+            // Actualizar estadísticas
+            const estadisticasActualizadas = {
+                totalPreguntas: totalPreguntas,
+                correctas: correctas,
+                incorrectas: incorrectas,
+                porcentaje: totalPreguntas > 0 ? Math.round((correctas / totalPreguntas) * 100) : 0
+            };
+            
+            // Agregar al batch
+            batch.update(doc.ref, {
+                respuestasEvaluadas: respuestasEvaluadas,
+                estadisticas: estadisticasActualizadas,
+                fechaRecalculo: firebase.firestore.Timestamp.now()
+            });
+            
+            respuestasActualizadas++;
+        });
+        
+        // Ejecutar el batch
+        await batch.commit();
+        
+        console.log(`✅ Recalculadas ${respuestasActualizadas} respuestas exitosamente`);
+        
+    } catch (error) {
+        console.error('❌ Error recalculando respuestas:', error);
+        throw error;
     }
 }
 
