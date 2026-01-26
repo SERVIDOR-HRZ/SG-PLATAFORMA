@@ -988,11 +988,16 @@ body {
 .current-media-item img {
     max-width: 150px;
     border-radius: 6px;
+    flex-shrink: 0; /* La imagen no se encoge */
 }
 
 .current-media-item span {
     flex: 1;
     color: #555;
+    overflow: hidden; /* Oculta el desbordamiento */
+    text-overflow: ellipsis; /* Agrega puntos suspensivos */
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    min-width: 0; /* Permite que se encoja */
 }
 
 .remove-media-btn {
@@ -1267,6 +1272,89 @@ body {
     border-radius: 8px;
 }
 
+/* TikTok containers - Medium (for materials) */
+.tiktok-container-medium {
+    position: relative;
+    width: 200px;
+    height: 355px; /* TikTok aspect ratio (9:16) */
+    overflow: hidden;
+    border-radius: 12px;
+    background: #000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tiktok-container-medium:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.tiktok-container-medium .tiktok-embed {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+/* TikTok containers - Fullscreen (for modal) */
+.tiktok-container-fullscreen {
+    position: relative;
+    width: 100%;
+    max-width: 400px; /* Más estrecho en PC */
+    min-height: 700px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.tiktok-container-fullscreen iframe {
+    width: 100%;
+    max-width: 400px; /* Limitar ancho en PC */
+    height: 700px;
+    border-radius: 12px;
+    background: #000;
+}
+
+/* Responsive: en móvil usar ancho completo */
+@media (max-width: 768px) {
+    .tiktok-container-fullscreen {
+        max-width: 100%;
+    }
+    
+    .tiktok-container-fullscreen iframe {
+        max-width: 100%;
+        height: 80vh; /* Ajustar altura en móvil */
+    }
+}
+
+/* TikTok video styling */
+.material-video.tiktok-video {
+    width: 200px;
+}
+
+.material-video.tiktok-video .tiktok-container-medium {
+    width: 100%;
+}
+
+/* Ensure TikTok embeds load properly */
+.tiktok-embed {
+    border: none;
+    background: transparent;
+}
+
+.tiktok-embed section {
+    margin: 0;
+    padding: 0;
+}
+
+/* TikTok icon (custom since Bootstrap Icons doesn't have it) */
+.bi-tiktok::before {
+    content: "♪";
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
 .drive-container-fullscreen {
     position: relative;
     width: 90vw;
@@ -1520,16 +1608,24 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0; /* Permite que el contenedor se encoja */
+    overflow: hidden; /* Oculta el desbordamiento */
 }
 
 .current-media-item .video-info i {
     font-size: 1.5rem;
     color: #ff0000;
+    flex-shrink: 0; /* El ícono no se encoge */
 }
 
 .current-media-item .video-info span {
     font-size: 0.9rem;
     color: #666;
+    overflow: hidden; /* Oculta el desbordamiento */
+    text-overflow: ellipsis; /* Agrega puntos suspensivos */
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    flex: 1; /* Toma el espacio disponible */
+    min-width: 0; /* Permite que se encoja */
 }
 
 .remove-current-btn {
@@ -1544,6 +1640,8 @@ body {
     gap: 0.3rem;
     font-size: 0.85rem;
     transition: all 0.2s ease;
+    flex-shrink: 0; /* El botón no se encoge */
+    white-space: nowrap; /* El texto del botón no se divide */
 }
 
 .remove-current-btn:hover {

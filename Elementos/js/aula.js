@@ -3829,6 +3829,25 @@ function createMaterialCard(id, material) {
                         </div>
                     `);
                 }
+            } else if (video.tipo === 'tiktok') {
+                const videoId = extractTikTokId(video.url);
+                if (videoId) {
+                    mediaItems.push(`
+                        <div class="material-video tiktok-video">
+                            <div class="tiktok-container-medium" onclick="openMediaModal('${videoId}', 'tiktok')">
+                                <blockquote class="tiktok-embed" 
+                                    cite="https://www.tiktok.com/video/${videoId}" 
+                                    data-video-id="${videoId}" 
+                                    style="max-width: 100%; min-width: 100%; margin: 0;">
+                                    <section></section>
+                                </blockquote>
+                                <div class="media-overlay">
+                                    <i class="bi bi-play-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                }
             } else if (video.tipo === 'drive') {
                 const fileId = extractDriveFileId(video.url);
                 if (fileId) {
@@ -3969,6 +3988,11 @@ function createMaterialCard(id, material) {
     // Wrap media items in grid container if there are any
     if (mediaItems.length > 0) {
         mediaHTML = `<div class="material-media-container">${mediaItems.join('')}</div>`;
+        
+        // Si hay videos de TikTok, cargar el script
+        if (material.videos && material.videos.some(v => v.tipo === 'tiktok')) {
+            loadTikTokScript();
+        }
     }
 
     // No external Drive links - files are shown as embedded thumbnails only
@@ -4023,6 +4047,69 @@ function extractYouTubeId(url) {
         }
     }
     return null;
+}
+
+// Extract TikTok video ID from URL
+function extractTikTokId(url) {
+    if (!url) return null;
+    
+    // Limpiar la URL de espacios
+    url = url.trim();
+    
+    console.log('🔍 Intentando extraer ID de TikTok de:', url);
+    
+    // Patrones para diferentes formatos de URL de TikTok
+    const patterns = [
+        // URL normal con o sin parámetros: https://www.tiktok.com/@username/video/1234567890?params
+        /tiktok\.com\/@[^\/]+\/video\/(\d+)/i,
+        // URL de embed/blockquote: data-video-id="1234567890"
+        /data-video-id="(\d+)"/i,
+        // URL corta: https://vm.tiktok.com/xxxxx/
+        /vm\.tiktok\.com\/([A-Za-z0-9]+)/i,
+        // Solo el ID numérico (19 dígitos típicamente)
+        /^(\d{16,20})$/
+    ];
+
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) {
+            console.log('✅ ID de TikTok extraído:', match[1]);
+            return match[1];
+        }
+    }
+    
+    // Si no se encontró con los patrones, intentar extraer cualquier número largo después de /video/
+    const fallbackMatch = url.match(/\/video\/(\d+)/i);
+    if (fallbackMatch && fallbackMatch[1]) {
+        console.log('✅ ID de TikTok extraído (fallback):', fallbackMatch[1]);
+        return fallbackMatch[1];
+    }
+    
+    console.log('❌ No se pudo extraer ID de TikTok');
+    return null;
+}
+
+// Load TikTok embed script
+function loadTikTokScript() {
+    // Check if script is already loaded
+    if (document.querySelector('script[src*="tiktok.com/embed.js"]')) {
+        // If already loaded, try to reinitialize embeds
+        if (window.tiktokEmbed) {
+            setTimeout(() => {
+                window.tiktokEmbed.lib.render(document.body);
+            }, 100);
+        }
+        return;
+    }
+
+    // Load the script
+    const script = document.createElement('script');
+    script.src = 'https://www.tiktok.com/embed.js';
+    script.async = true;
+    script.onload = () => {
+        console.log('TikTok embed script loaded');
+    };
+    document.body.appendChild(script);
 }
 
 // Extract Google Drive file ID from URL
@@ -4577,6 +4664,10 @@ function setupEventListeners() {
     const createMaterialBtn = document.getElementById('createMaterialBtn');
     if (createMaterialBtn) {
         createMaterialBtn.addEventListener('click', () => {
+            // Inicializar arrays de videos y archivos
+            window.currentMaterialVideos = [];
+            window.currentMaterialDriveFiles = [];
+            
             loadTopicsIntoSelect('materialTopic');
             const modal = document.getElementById('createMaterialModal');
             // Aplicar color de la materia al modal
@@ -4850,23 +4941,52 @@ function setupForms() {
 
     if (addMaterialVideoBtn) {
         addMaterialVideoBtn.addEventListener('click', () => {
-            const tipo = materialVideoType.value;
-            const url = materialVideoUrl.value;
+            const tipo = materialVideoType ? materialVideoType.value : '';
+            const url = materialVideoUrl ? materialVideoUrl.value.trim() : '';
 
-            if (!tipo || !url) {
-                showAlertModal('Error', 'Selecciona el tipo de video e ingresa la URL');
+            console.log('📹 Agregando video - Tipo:', tipo, 'URL:', url);
+
+            if (!tipo) {
+                showAlertModal('Error', 'Por favor selecciona el tipo de video (YouTube, TikTok o Drive)');
                 return;
             }
 
+            if (!url) {
+                showAlertModal('Error', 'Por favor ingresa la URL del video');
+                return;
+            }
+
+            // Validar que la URL sea válida según el tipo
+            if (tipo === 'youtube') {
+                const videoId = extractYouTubeId(url);
+                if (!videoId) {
+                    showAlertModal('Error', 'URL de YouTube inválida. Asegúrate de usar un enlace válido de YouTube.');
+                    return;
+                }
+            } else if (tipo === 'tiktok') {
+                const videoId = extractTikTokId(url);
+                if (!videoId) {
+                    showAlertModal('Error', 'URL de TikTok inválida. Asegúrate de usar un enlace válido de TikTok (ej: https://www.tiktok.com/@usuario/video/1234567890)');
+                    return;
+                }
+            }
+
             // Add to array
+            if (!window.currentMaterialVideos) {
+                window.currentMaterialVideos = [];
+            }
             window.currentMaterialVideos.push({ tipo, url });
+
+            console.log('✅ Video agregado. Total videos:', window.currentMaterialVideos.length);
 
             // Add to preview
             const previewItem = document.createElement('div');
             previewItem.className = 'video-preview-item';
+            const iconClass = tipo === 'youtube' ? 'youtube' : tipo === 'tiktok' ? 'tiktok' : 'google';
+            const labelText = tipo === 'youtube' ? 'YouTube' : tipo === 'tiktok' ? 'TikTok' : 'Drive';
             previewItem.innerHTML = `
-                <i class="bi bi-${tipo === 'youtube' ? 'youtube' : 'google'}"></i>
-                <span>${tipo === 'youtube' ? 'YouTube' : 'Drive'}: ${url.substring(0, 40)}...</span>
+                <i class="bi bi-${iconClass}"></i>
+                <span>${labelText}: ${url.substring(0, 40)}...</span>
                 <button type="button" class="remove-preview-btn" onclick="removeMaterialVideo(${window.currentMaterialVideos.length - 1})">
                     <i class="bi bi-x"></i>
                 </button>
@@ -4923,11 +5043,31 @@ function setupForms() {
     if (addEditMaterialVideoBtn) {
         addEditMaterialVideoBtn.addEventListener('click', () => {
             const tipo = editMaterialVideoType.value;
-            const url = editMaterialVideoUrl.value;
+            const url = editMaterialVideoUrl.value.trim();
 
-            if (!tipo || !url) {
-                showAlertModal('Error', 'Selecciona el tipo de video e ingresa la URL');
+            if (!tipo) {
+                showAlertModal('Error', 'Por favor selecciona el tipo de video');
                 return;
+            }
+
+            if (!url) {
+                showAlertModal('Error', 'Por favor ingresa la URL del video');
+                return;
+            }
+
+            // Validar que la URL sea válida según el tipo
+            if (tipo === 'youtube') {
+                const videoId = extractYouTubeId(url);
+                if (!videoId) {
+                    showAlertModal('Error', 'URL de YouTube inválida. Asegúrate de usar un enlace válido de YouTube.');
+                    return;
+                }
+            } else if (tipo === 'tiktok') {
+                const videoId = extractTikTokId(url);
+                if (!videoId) {
+                    showAlertModal('Error', 'URL de TikTok inválida. Asegúrate de usar un enlace válido de TikTok (ej: https://www.tiktok.com/@usuario/video/1234567890)');
+                    return;
+                }
             }
 
             // Initialize array if needed
@@ -4941,9 +5081,11 @@ function setupForms() {
             // Add to preview
             const previewItem = document.createElement('div');
             previewItem.className = 'video-preview-item';
+            const iconClass = tipo === 'youtube' ? 'youtube' : tipo === 'tiktok' ? 'tiktok' : 'google';
+            const labelText = tipo === 'youtube' ? 'YouTube' : tipo === 'tiktok' ? 'TikTok' : 'Drive';
             previewItem.innerHTML = `
-                <i class="bi bi-${tipo === 'youtube' ? 'youtube' : 'google'}"></i>
-                <span>${tipo === 'youtube' ? 'YouTube' : 'Drive'}: ${url.substring(0, 40)}...</span>
+                <i class="bi bi-${iconClass}"></i>
+                <span>${labelText}: ${url.substring(0, 40)}...</span>
                 <button type="button" class="remove-preview-btn" onclick="removeEditMaterialNewVideo(${window.editMaterialNewVideos.length - 1})">
                     <i class="bi bi-x"></i>
                 </button>
@@ -5975,10 +6117,12 @@ async function editarMaterial(id) {
             window.editMaterialCurrentVideos.forEach((video, index) => {
                 const videoItem = document.createElement('div');
                 videoItem.className = 'current-media-item';
+                const iconClass = video.tipo === 'youtube' ? 'youtube' : video.tipo === 'tiktok' ? 'music-note-beamed' : 'google';
+                const labelText = video.tipo === 'youtube' ? 'YouTube' : video.tipo === 'tiktok' ? 'TikTok' : 'Drive';
                 videoItem.innerHTML = `
                     <div class="video-info">
-                        <i class="bi bi-${video.tipo === 'youtube' ? 'youtube' : 'google'}"></i>
-                        <span>${video.tipo === 'youtube' ? 'YouTube' : 'Drive'}: ${video.url.substring(0, 50)}...</span>
+                        <i class="bi bi-${iconClass}"></i>
+                        <span>${labelText}: ${video.url.substring(0, 50)}...</span>
                     </div>
                     <button type="button" class="remove-current-btn" onclick="removeEditMaterialCurrentVideo(${index})">
                         <i class="bi bi-trash"></i>
@@ -6275,9 +6419,11 @@ function removeMaterialVideo(index) {
     window.currentMaterialVideos.forEach((video, i) => {
         const previewItem = document.createElement('div');
         previewItem.className = 'video-preview-item';
+        const iconClass = video.tipo === 'youtube' ? 'youtube' : video.tipo === 'tiktok' ? 'tiktok' : 'google';
+        const labelText = video.tipo === 'youtube' ? 'YouTube' : video.tipo === 'tiktok' ? 'TikTok' : 'Drive';
         previewItem.innerHTML = `
-            <i class="bi bi-${video.tipo === 'youtube' ? 'youtube' : 'google'}"></i>
-            <span>${video.tipo === 'youtube' ? 'YouTube' : 'Drive'}: ${video.url.substring(0, 40)}...</span>
+            <i class="bi bi-${iconClass}"></i>
+            <span>${labelText}: ${video.url.substring(0, 40)}...</span>
             <button type="button" class="remove-preview-btn" onclick="removeMaterialVideo(${i})">
                 <i class="bi bi-x"></i>
             </button>
@@ -6324,10 +6470,12 @@ function removeEditMaterialCurrentVideo(index) {
         window.editMaterialCurrentVideos.forEach((video, i) => {
             const videoItem = document.createElement('div');
             videoItem.className = 'current-media-item';
+            const iconClass = video.tipo === 'youtube' ? 'youtube' : video.tipo === 'tiktok' ? 'tiktok' : 'google';
+            const labelText = video.tipo === 'youtube' ? 'YouTube' : video.tipo === 'tiktok' ? 'TikTok' : 'Drive';
             videoItem.innerHTML = `
                 <div class="video-info">
-                    <i class="bi bi-${video.tipo === 'youtube' ? 'youtube' : 'google'}"></i>
-                    <span>${video.tipo === 'youtube' ? 'YouTube' : 'Drive'}: ${video.url.substring(0, 50)}...</span>
+                    <i class="bi bi-${iconClass}"></i>
+                    <span>${labelText}: ${video.url.substring(0, 50)}...</span>
                 </div>
                 <button type="button" class="remove-current-btn" onclick="removeEditMaterialCurrentVideo(${i})">
                     <i class="bi bi-trash"></i>
@@ -6352,9 +6500,11 @@ function removeEditMaterialNewVideo(index) {
     window.editMaterialNewVideos.forEach((video, i) => {
         const previewItem = document.createElement('div');
         previewItem.className = 'video-preview-item';
+        const iconClass = video.tipo === 'youtube' ? 'youtube' : video.tipo === 'tiktok' ? 'tiktok' : 'google';
+        const labelText = video.tipo === 'youtube' ? 'YouTube' : video.tipo === 'tiktok' ? 'TikTok' : 'Drive';
         previewItem.innerHTML = `
-            <i class="bi bi-${video.tipo === 'youtube' ? 'youtube' : 'google'}"></i>
-            <span>${video.tipo === 'youtube' ? 'YouTube' : 'Drive'}: ${video.url.substring(0, 40)}...</span>
+            <i class="bi bi-${iconClass}"></i>
+            <span>${labelText}: ${video.url.substring(0, 40)}...</span>
             <button type="button" class="remove-preview-btn" onclick="removeEditMaterialNewVideo(${i})">
                 <i class="bi bi-x"></i>
             </button>
@@ -6744,6 +6894,20 @@ function openMediaModal(src, type) {
                 </iframe>
             </div>
         `;
+    } else if (type === 'tiktok') {
+        // Use iframe embed for better reliability
+        modalContent.innerHTML = `
+            <div class="tiktok-container-fullscreen">
+                <iframe 
+                    src="https://www.tiktok.com/embed/v2/${src}?lang=es" 
+                    frameborder="0" 
+                    scrolling="no"
+                    allow="encrypted-media;"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        `;
+        
     } else if (type === 'drive') {
         modalContent.innerHTML = `
             <div class="drive-container-fullscreen">
