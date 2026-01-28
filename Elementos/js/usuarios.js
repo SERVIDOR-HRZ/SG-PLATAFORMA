@@ -22,6 +22,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize profile modal
     initializeProfileModal();
+
+    // Initialize all management systems
+    initializeDashboardMenuScroll();
+    initializeInsigniasManagement();
+    initializeInstitucionesManagement();
+    initializeCoordinadoresManagement();
+    initializeAulasManagement();
+    initializeResetProgressManagement();
+
+    // Create default instituciones if none exist (only once)
+    createDefaultInstituciones();
 });
 
 let allUsers = [];
@@ -2837,11 +2848,6 @@ function initializeDashboardMenuScroll() {
     window.addEventListener('scroll', requestTick);
 }
 
-// Initialize dashboard menu scroll effect
-document.addEventListener('DOMContentLoaded', function () {
-    initializeDashboardMenuScroll();
-});
-
 // ========================================
 // INSIGNIAS MANAGEMENT SYSTEM
 // ========================================
@@ -3572,11 +3578,6 @@ async function loadInsigniaIconsInTable() {
     }
 }
 
-// Initialize insignias management on page load
-document.addEventListener('DOMContentLoaded', function () {
-    initializeInsigniasManagement();
-});
-
 
 // ==========================================
 // INSTITUCIONES MANAGEMENT SYSTEM
@@ -4025,19 +4026,13 @@ async function handleDeleteInstitucion() {
 window.openEditInstitucionModal = openEditInstitucionModal;
 window.openDeleteInstitucionModalFn = openDeleteInstitucionModalFn;
 
-// Initialize instituciones management on page load
-document.addEventListener('DOMContentLoaded', function () {
-    initializeInstitucionesManagement();
-    // Create default instituciones if none exist
-    createDefaultInstituciones();
-});
-
 // Create default instituciones
 async function createDefaultInstituciones() {
     try {
         await waitForFirebase();
 
-        const snapshot = await window.firebaseDB.collection('instituciones').limit(1).get();
+        // Check if any instituciones exist
+        const snapshot = await window.firebaseDB.collection('instituciones').get();
 
         if (snapshot.empty) {
             // Create default instituciones
@@ -4063,10 +4058,17 @@ async function createDefaultInstituciones() {
             ];
 
             for (const inst of defaultInstituciones) {
-                await window.firebaseDB.collection('instituciones').add(inst);
+                // Double check that this institution doesn't exist by name
+                const existingInst = await window.firebaseDB.collection('instituciones')
+                    .where('nombre', '==', inst.nombre)
+                    .limit(1)
+                    .get();
+                
+                if (existingInst.empty) {
+                    await window.firebaseDB.collection('instituciones').add(inst);
+                    console.log(`Default institution created: ${inst.nombre}`);
+                }
             }
-
-            console.log('Default instituciones created');
         }
     } catch (error) {
         console.error('Error creating default instituciones:', error);
@@ -4548,11 +4550,6 @@ window.openEditCoordinadorModal = openEditCoordinadorModal;
 window.openDeleteCoordinadorModal = openDeleteCoordinadorModal;
 window.toggleCoordinadorStatus = toggleCoordinadorStatus;
 
-// Initialize coordinadores management on page load
-document.addEventListener('DOMContentLoaded', function () {
-    initializeCoordinadoresManagement();
-});
-
 
 // ==========================================
 // AULAS MANAGEMENT SYSTEM
@@ -4999,11 +4996,6 @@ async function handleDeleteAula() {
 // Make aula functions globally available
 window.openEditAulaModal = openEditAulaModal;
 window.openDeleteAulaModal = openDeleteAulaModal;
-
-// Initialize aulas management on page load
-document.addEventListener('DOMContentLoaded', function () {
-    initializeAulasManagement();
-});
 
 
 // ==========================================
@@ -6234,11 +6226,6 @@ function addLogEntry(type, message) {
     logContent.appendChild(entry);
     logContent.scrollTop = logContent.scrollHeight;
 }
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    initializeResetProgressManagement();
-});
 
 // Make functions globally available
 window.loadResetProgressStats = loadResetProgressStats;
