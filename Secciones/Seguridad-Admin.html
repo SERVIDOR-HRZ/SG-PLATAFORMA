@@ -9,100 +9,229 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../Elementos/css/seguridad-admin.css">
     <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <button class="back-btn" id="backBtn">
-                <i class="bi bi-arrow-left"></i>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Panel -->
+    <aside class="sidebar-panel" id="sidebarPanel">
+        <!-- Perfil Usuario -->
+        <div class="sidebar-profile">
+            <div class="sidebar-avatar" id="userAvatarContainer">
+                <div class="sidebar-avatar-default" id="userAvatarDefault">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <img class="sidebar-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto de perfil">
+            </div>
+            <div class="sidebar-user-name" id="userName">ADMIN</div>
+            <div class="sidebar-user-role">Panel de Seguridad</div>
+
+            <!-- Botones de Perfil y Web -->
+            <div class="sidebar-profile-actions">
+                <button class="sidebar-btn btn-profile" id="btnProfile">
+                    <i class="bi bi-person-gear"></i>
+                    <span>Mi Perfil</span>
+                </button>
+                <button class="sidebar-btn btn-home" id="btnHome">
+                    <i class="bi bi-house-door-fill"></i>
+                    <span>Web Principal</span>
+                </button>
+                <button class="sidebar-btn btn-back" id="btnBack">
+                    <i class="bi bi-arrow-left-circle-fill"></i>
+                    <span>Volver al Panel</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="sidebar-actions">
+            <button class="sidebar-btn btn-logout" id="btnLogout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Cerrar Sesión</span>
             </button>
-            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
-            <h1><i class="bi bi-shield-lock"></i> Seguridad y Seguimiento</h1>
         </div>
-        <div class="header-right">
-            <div class="user-info" id="userInfoContainer">
-                <span class="user-name" id="userName">ADMIN</span>
-                <div class="user-avatar" id="userAvatarContainer">
-                    <div class="user-avatar-default" id="userAvatarDefault">
-                        <i class="bi bi-person-fill"></i>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-panel-content">
+        <!-- Header -->
+        <header class="panel-header">
+            <div>
+                <h1 class="panel-title"><i class="bi bi-shield-lock-fill"></i> Seguridad y Monitoreo</h1>
+                <p class="panel-subtitle">Sistema de detección y prevención de amenazas</p>
+            </div>
+            <div class="panel-time">
+                <div class="time-display">
+                    <i class="bi bi-sun-fill" id="timeIcon"></i>
+                    <time id="currentTime">3:02:47 PM</time>
+                </div>
+                <div class="date-display" id="currentDate">miércoles, 28 de enero de 2026</div>
+            </div>
+        </header>
+
+        <!-- Menú de Navegación -->
+        <nav class="security-menu">
+            <button class="menu-tab active" data-tab="resumen">
+                <i class="bi bi-speedometer2"></i>
+                <span>Resumen General</span>
+            </button>
+            <button class="menu-tab" data-tab="sospechosos">
+                <i class="bi bi-shield-exclamation"></i>
+                <span>Usuarios Sospechosos</span>
+                <span class="badge-count" id="badgeSospechosos">0</span>
+            </button>
+            <button class="menu-tab" data-tab="registro">
+                <i class="bi bi-table"></i>
+                <span>Registro de Descargas</span>
+            </button>
+            <button class="menu-tab" data-tab="configuracion">
+                <i class="bi bi-gear-fill"></i>
+                <span>Configuración</span>
+            </button>
+        </nav>
+
+        <!-- TAB: Resumen General -->
+        <section class="tab-content active" id="resumen-content">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="bi bi-download"></i>
                     </div>
-                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto">
+                    <div class="stat-info">
+                        <span class="stat-value" id="totalDescargas">0</span>
+                        <span class="stat-label">Total Descargas</span>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon red">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="usuariosSospechosos">0</span>
+                        <span class="stat-label">Usuarios Sospechosos</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="usuariosActivos">0</span>
+                        <span class="stat-label">Usuarios Activos</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="descargasHoy">0</span>
+                        <span class="stat-label">Descargas Hoy</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Page Title -->
-        <div class="page-title">
-            <div class="title-info">
-                <h2>Panel de Monitoreo de Descargas</h2>
-                <p>Supervisa la actividad de descarga de documentos y detecta comportamientos sospechosos</p>
-            </div>
-            <div class="title-badge">
-                <i class="bi bi-shield-check"></i>
-                <span>Protección Activa</span>
-            </div>
-        </div>
+            <!-- Gráficos y Resumen -->
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <h3><i class="bi bi-bar-chart-fill"></i> Actividad Reciente</h3>
+                    </div>
+                    <div class="summary-body">
+                        <div class="activity-list" id="activityList">
+                            <div class="activity-item">
+                                <i class="bi bi-hourglass-split"></i>
+                                <span>Cargando actividad...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon blue">
-                    <i class="bi bi-download"></i>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-value" id="totalDescargas">0</span>
-                    <span class="stat-label">Total Descargas</span>
-                </div>
-                <div class="stat-trend up">
-                    <i class="bi bi-graph-up"></i>
-                </div>
-            </div>
-            <div class="stat-card warning">
-                <div class="stat-icon red">
-                    <i class="bi bi-exclamation-triangle"></i>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-value" id="usuariosSospechosos">0</span>
-                    <span class="stat-label">Usuarios Sospechosos</span>
-                </div>
-                <div class="stat-indicator">
-                    <span class="indicator-dot"></span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon green">
-                    <i class="bi bi-people"></i>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-value" id="usuariosActivos">0</span>
-                    <span class="stat-label">Usuarios Activos</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon purple">
-                    <i class="bi bi-calendar-check"></i>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-value" id="descargasHoy">0</span>
-                    <span class="stat-label">Descargas Hoy</span>
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <h3><i class="bi bi-laptop-fill"></i> Sistemas Operativos</h3>
+                    </div>
+                    <div class="summary-body">
+                        <div class="os-stats" id="osStats">
+                            <div class="os-stat-item">
+                                <div class="os-stat-icon windows">
+                                    <i class="bi bi-windows"></i>
+                                </div>
+                                <div class="os-stat-info">
+                                    <span class="os-stat-value" id="windowsCount">0</span>
+                                    <span class="os-stat-label">Windows</span>
+                                </div>
+                            </div>
+                            <div class="os-stat-item">
+                                <div class="os-stat-icon mac">
+                                    <i class="bi bi-apple"></i>
+                                </div>
+                                <div class="os-stat-info">
+                                    <span class="os-stat-value" id="macCount">0</span>
+                                    <span class="os-stat-label">macOS</span>
+                                </div>
+                            </div>
+                            <div class="os-stat-item">
+                                <div class="os-stat-icon linux">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </div>
+                                <div class="os-stat-info">
+                                    <span class="os-stat-value" id="linuxCount">0</span>
+                                    <span class="os-stat-label">Linux (No permitido)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Filters -->
-        <div class="filters-container">
-            <div class="filters-row">
+        <!-- TAB: Usuarios Sospechosos -->
+        <section class="tab-content" id="sospechosos-content">
+            <div class="suspicious-header">
+                <div class="suspicious-title">
+                    <i class="bi bi-shield-exclamation"></i>
+                    <h2>Usuarios con Actividad Sospechosa</h2>
+                </div>
+                <p class="suspicious-subtitle">Usuarios detectados con comportamiento anómalo o acceso desde sistemas no autorizados</p>
+            </div>
+
+            <div class="suspicious-grid" id="suspiciousGrid">
+                <div class="empty-state">
+                    <i class="bi bi-shield-check"></i>
+                    <h3>No hay usuarios sospechosos</h3>
+                    <p>El sistema no ha detectado actividad sospechosa</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Registro de Descargas -->
+        <section class="tab-content" id="registro-content">
+            <!-- Filtros -->
+            <div class="filters-container">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre, email, documento o IP...">
+                </div>
                 <div class="filter-group">
-                    <label for="filterStatus"><i class="bi bi-funnel"></i> Estado:</label>
+                    <label for="filterStatus"><i class="bi bi-funnel-fill"></i> Estado:</label>
                     <select id="filterStatus">
                         <option value="todos">Todos</option>
                         <option value="sospechoso">Sospechosos</option>
@@ -110,7 +239,7 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="filterDate"><i class="bi bi-calendar"></i> Período:</label>
+                    <label for="filterDate"><i class="bi bi-calendar3"></i> Período:</label>
                     <select id="filterDate">
                         <option value="todos">Todo el tiempo</option>
                         <option value="hoy">Hoy</option>
@@ -118,95 +247,128 @@
                         <option value="mes">Último mes</option>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <label for="filterAula"><i class="bi bi-book"></i> Aula:</label>
-                    <select id="filterAula">
-                        <option value="">Todas las aulas</option>
-                    </select>
-                </div>
-                <div class="search-group">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar por nombre, email, documento o IP...">
-                </div>
-                <button class="refresh-btn" id="refreshBtn" title="Actualizar datos">
+                <button class="btn-clear-filters" id="clearFiltersBtn">
                     <i class="bi bi-arrow-clockwise"></i>
-                    <span>Actualizar</span>
-                </button>
-                <button class="clear-all-btn" id="clearAllBtn" title="Limpiar todo el historial">
-                    <i class="bi bi-trash3"></i>
-                    <span>Limpiar Todo</span>
+                    Limpiar Filtros
                 </button>
             </div>
-        </div>
 
-        <!-- Suspicious Users Alert -->
-        <div class="alert-section" id="alertSection" style="display: none;">
-            <div class="alert-header">
-                <div class="alert-title">
-                    <i class="bi bi-shield-exclamation"></i>
-                    <h3>Usuarios con Actividad Sospechosa</h3>
+            <!-- Downloads Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title">
+                        <i class="bi bi-table"></i>
+                        <h3>Registro de Descargas</h3>
+                    </div>
+                    <div class="table-actions">
+                        <button class="btn-refresh" id="refreshBtn">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Actualizar
+                        </button>
+                        <button class="btn-export" id="exportBtn">
+                            <i class="bi bi-file-earmark-excel-fill"></i>
+                            Exportar
+                        </button>
+                        <button class="btn-clear-all" id="clearAllBtn">
+                            <i class="bi bi-trash3-fill"></i>
+                            Limpiar Todo
+                        </button>
+                    </div>
                 </div>
-                <span class="alert-subtitle">Usuarios con descargas desde múltiples IPs diferentes</span>
+                <div class="table-responsive">
+                    <table class="downloads-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Aula</th>
+                                <th>Fecha</th>
+                                <th>Sistema Operativo</th>
+                                <th>IP</th>
+                                <th>Descargas</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="downloadsTableBody">
+                            <!-- Datos dinámicos -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-pagination">
+                    <span id="paginationInfo">Mostrando 0 de 0</span>
+                    <div class="pagination-btns">
+                        <button id="prevPage" disabled>
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <span id="currentPage">1</span>
+                        <button id="nextPage" disabled>
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="alert-list" id="alertList">
-                <!-- Alertas dinámicas -->
-            </div>
-        </div>
+        </section>
 
-        <!-- Downloads Table -->
-        <div class="table-container">
-            <div class="table-header">
-                <div class="table-title">
-                    <i class="bi bi-table"></i>
-                    <h3>Registro de Descargas</h3>
-                    <span class="table-subtitle">Historial completo de actividad</span>
+        <!-- TAB: Configuración -->
+        <section class="tab-content" id="configuracion-content">
+            <div class="config-container">
+                <div class="config-card">
+                    <div class="config-header">
+                        <i class="bi bi-sliders"></i>
+                        <h3>Configuración de Seguridad</h3>
+                    </div>
+                    <div class="config-body">
+                        <div class="config-item">
+                            <div class="config-info">
+                                <h4>Umbral de IPs Sospechosas</h4>
+                                <p>Número máximo de IPs diferentes antes de marcar como sospechoso</p>
+                            </div>
+                            <div class="config-value">
+                                <span class="config-badge">3 IPs</span>
+                            </div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-info">
+                                <h4>Umbral de Descargas</h4>
+                                <p>Número máximo de descargas antes de marcar como sospechoso</p>
+                            </div>
+                            <div class="config-value">
+                                <span class="config-badge">15 descargas</span>
+                            </div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-info">
+                                <h4>Límite de Sospechosos por Mes</h4>
+                                <p>Máximo de usuarios sospechosos detectados por mes</p>
+                            </div>
+                            <div class="config-value">
+                                <span class="config-badge">1 usuario</span>
+                            </div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-info">
+                                <h4>Sistemas Operativos Permitidos</h4>
+                                <p>Sistemas operativos autorizados para acceder a la plataforma</p>
+                            </div>
+                            <div class="config-value">
+                                <span class="config-badge success">Windows 10/11</span>
+                                <span class="config-badge success">macOS</span>
+                                <span class="config-badge danger">Linux (Bloqueado)</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button class="export-btn" id="exportBtn">
-                    <i class="bi bi-file-earmark-excel"></i>
-                    Exportar CSV
-                </button>
             </div>
-            <div class="table-responsive">
-                <table class="downloads-table">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Documento</th>
-                            <th>Aula</th>
-                            <th>Materia</th>
-                            <th>Fecha</th>
-                            <th>Dispositivo</th>
-                            <th>IP</th>
-                            <th>Descargas</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="downloadsTableBody">
-                        <!-- Datos dinámicos -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="table-pagination">
-                <span id="paginationInfo">Mostrando 0 de 0</span>
-                <div class="pagination-btns">
-                    <button id="prevPage" disabled title="Página anterior">
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-                    <span id="currentPage">1</span>
-                    <button id="nextPage" disabled title="Página siguiente">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+        </section>
+    </main>
+
     </main>
 
     <!-- User Detail Modal -->
     <div class="modal" id="userDetailModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="bi bi-person-badge"></i> Detalle de Usuario</h3>
+                <h3><i class="bi bi-person-badge-fill"></i> Detalle de Usuario</h3>
                 <button class="close-btn" onclick="closeUserModal()">
                     <i class="bi bi-x-lg"></i>
                 </button>

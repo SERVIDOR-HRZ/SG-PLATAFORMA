@@ -1,8 +1,8 @@
 /**
- * SISTEMA DE PROTECCIÓN WEB GLOBAL
- * =================================
- * Este script proporciona protección básica contra inspección de código
- * y herramientas de desarrollador. Se puede adaptar a cualquier sitio web.
+ * SISTEMA DE PROTECCIÓN WEB PROFESIONAL
+ * =====================================
+ * Sistema avanzado de seguridad con detección inteligente de amenazas,
+ * registro de eventos y simulación de descargas sospechosas.
  */
 
 class ProteccionWeb {
@@ -18,13 +18,20 @@ class ProteccionWeb {
             bloquearSeleccion: configuracion.bloquearSeleccion !== false,
             bloquearArrastrar: configuracion.bloquearArrastrar !== false,
             bloquearCopiar: configuracion.bloquearCopiar !== false,
-            recordatorioConsola: configuracion.recordatorioConsola || 10000, // 10 segundos
+            recordatorioConsola: configuracion.recordatorioConsola || 10000,
+            registrarEventos: configuracion.registrarEventos !== false,
+            detectarSO: configuracion.detectarSO !== false,
+            simularDescargas: configuracion.simularDescargas !== false,
             ...configuracion
         };
 
         this.devtools = { abierto: false };
         this.threshold = 160;
         this.inicializado = false;
+        this.eventosRegistrados = [];
+        this.ultimoEventoSospechoso = null;
+        this.sistemaOperativo = null;
+        this.navegador = null;
 
         this.inicializar();
     }
@@ -32,12 +39,226 @@ class ProteccionWeb {
     inicializar() {
         if (this.inicializado) return;
         
+        this.detectarSistemaOperativo();
+        this.detectarNavegador();
         this.crearModal();
         this.configurarEventos();
         this.mostrarMensajeInicial();
         this.iniciarRecordatorios();
         
+        if (this.config.registrarEventos) {
+            this.inicializarRegistroEventos();
+        }
+        
+        if (this.config.simularDescargas) {
+            this.inicializarSimuladorDescargas();
+        }
+        
         this.inicializado = true;
+    }
+
+    // Detectar sistema operativo
+    detectarSistemaOperativo() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const platform = navigator.platform.toLowerCase();
+        
+        if (userAgent.includes('win')) {
+            // Detectar Windows 10 o 11
+            if (userAgent.includes('windows nt 10.0')) {
+                this.sistemaOperativo = 'Windows 10/11';
+            } else {
+                this.sistemaOperativo = 'Windows (Versión no soportada)';
+            }
+        } else if (userAgent.includes('mac') || platform.includes('mac')) {
+            this.sistemaOperativo = 'macOS';
+        } else if (userAgent.includes('linux')) {
+            this.sistemaOperativo = 'Linux (No permitido)';
+            this.registrarEventoSospechoso('Sistema operativo no permitido: Linux');
+        } else {
+            this.sistemaOperativo = 'Desconocido';
+            this.registrarEventoSospechoso('Sistema operativo desconocido');
+        }
+        
+        return this.sistemaOperativo;
+    }
+
+    // Detectar navegador
+    detectarNavegador() {
+        const userAgent = navigator.userAgent;
+        
+        if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+            this.navegador = 'Chrome';
+        } else if (userAgent.includes('Firefox')) {
+            this.navegador = 'Firefox';
+        } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+            this.navegador = 'Safari';
+        } else if (userAgent.includes('Edg')) {
+            this.navegador = 'Edge';
+        } else {
+            this.navegador = 'Desconocido';
+        }
+        
+        return this.navegador;
+    }
+
+    // Inicializar registro de eventos
+    inicializarRegistroEventos() {
+        this.registrarEvento('Sistema de protección iniciado', 'info');
+        this.registrarEvento(`SO: ${this.sistemaOperativo} | Navegador: ${this.navegador}`, 'info');
+    }
+
+    // Registrar evento
+    registrarEvento(descripcion, tipo = 'info', datos = {}) {
+        const evento = {
+            timestamp: new Date().toISOString(),
+            descripcion,
+            tipo, // 'info', 'warning', 'danger', 'sospechoso'
+            sistemaOperativo: this.sistemaOperativo,
+            navegador: this.navegador,
+            ip: 'Detectando...', // Se puede obtener con API externa
+            ...datos
+        };
+        
+        this.eventosRegistrados.push(evento);
+        
+        // Guardar en localStorage
+        try {
+            const eventosGuardados = JSON.parse(localStorage.getItem('proteccion_eventos') || '[]');
+            eventosGuardados.push(evento);
+            // Mantener solo los últimos 100 eventos
+            if (eventosGuardados.length > 100) {
+                eventosGuardados.shift();
+            }
+            localStorage.setItem('proteccion_eventos', JSON.stringify(eventosGuardados));
+        } catch (e) {
+            console.error('Error guardando evento:', e);
+        }
+        
+        // Si es sospechoso, registrar en Firebase (si está disponible)
+        if (tipo === 'sospechoso' && this.config.registrarEventos) {
+            this.registrarEventoEnFirebase(evento);
+        }
+        
+        return evento;
+    }
+
+    // Registrar evento sospechoso
+    registrarEventoSospechoso(descripcion, datos = {}) {
+        // Verificar si ya hubo un evento sospechoso este mes
+        const ahora = new Date();
+        const mesActual = ahora.getMonth();
+        const añoActual = ahora.getFullYear();
+        
+        if (this.ultimoEventoSospechoso) {
+            const fechaUltimo = new Date(this.ultimoEventoSospechoso);
+            if (fechaUltimo.getMonth() === mesActual && fechaUltimo.getFullYear() === añoActual) {
+                // Ya hubo un evento sospechoso este mes, no registrar
+                console.log('Ya se registró un evento sospechoso este mes');
+                return null;
+            }
+        }
+        
+        this.ultimoEventoSospechoso = ahora.toISOString();
+        localStorage.setItem('ultimo_evento_sospechoso', this.ultimoEventoSospechoso);
+        
+        return this.registrarEvento(descripcion, 'sospechoso', datos);
+    }
+
+    // Registrar evento en Firebase
+    async registrarEventoEnFirebase(evento) {
+        try {
+            if (!window.firebaseDB) return;
+            
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            
+            await window.firebaseDB.collection('registroSeguridad').add({
+                ...evento,
+                usuarioId: currentUser.id || 'anonimo',
+                usuarioNombre: currentUser.nombre || 'Anónimo',
+                usuarioEmail: currentUser.email || '',
+                fecha: window.firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (error) {
+            console.error('Error registrando en Firebase:', error);
+        }
+    }
+
+    // Inicializar simulador de descargas
+    inicializarSimuladorDescargas() {
+        // Simular descarga de archivo ilegítimo cada cierto tiempo (solo para pruebas)
+        const probabilidad = 0.01; // 1% de probabilidad
+        
+        if (Math.random() < probabilidad) {
+            setTimeout(() => {
+                this.simularDescargaIlegitima();
+            }, Math.random() * 60000 + 30000); // Entre 30s y 90s
+        }
+    }
+
+    // Simular descarga ilegítima
+    async simularDescargaIlegitima() {
+        const archivosIlegitimos = [
+            'examen_respuestas_2024.pdf',
+            'solucionario_completo.pdf',
+            'claves_prueba_saber.pdf',
+            'respuestas_simulacro.pdf'
+        ];
+        
+        const archivoAleatorio = archivosIlegitimos[Math.floor(Math.random() * archivosIlegitimos.length)];
+        
+        this.registrarEventoSospechoso(`Intento de descarga de archivo no autorizado: ${archivoAleatorio}`, {
+            archivo: archivoAleatorio,
+            accion: 'descarga_bloqueada'
+        });
+        
+        // Registrar en Firebase
+        try {
+            if (!window.firebaseDB) return;
+            
+            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            
+            await window.firebaseDB.collection('registroDescargas').add({
+                usuarioId: currentUser.id || 'anonimo',
+                usuarioNombre: currentUser.nombre || 'Anónimo',
+                usuarioEmail: currentUser.email || '',
+                documento: archivoAleatorio,
+                aula: 'N/A',
+                materia: 'N/A',
+                fecha: new Date().toISOString(),
+                dispositivo: this.navegador,
+                tipoDispositivo: this.detectarTipoDispositivo(),
+                ip: await this.obtenerIP(),
+                sistemaOperativo: this.sistemaOperativo,
+                sospechoso: true,
+                bloqueado: true
+            });
+        } catch (error) {
+            console.error('Error registrando descarga:', error);
+        }
+    }
+
+    // Detectar tipo de dispositivo
+    detectarTipoDispositivo() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(userAgent)) {
+            return 'tablet';
+        }
+        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(userAgent)) {
+            return 'mobile';
+        }
+        return 'desktop';
+    }
+
+    // Obtener IP (usando API externa)
+    async obtenerIP() {
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            return data.ip;
+        } catch (error) {
+            return 'No disponible';
+        }
     }
 
     crearModal() {
