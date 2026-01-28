@@ -2019,26 +2019,19 @@ async function recalcularRespuestasExistentes(db, pruebaId, nuevaEstructura) {
                 
                 const preguntasActuales = nuevaEstructura[bloqueKey][materia].questions || [];
                 
-                // Filtrar solo preguntas reales (no textos de lectura)
-                const preguntasReales = [];
-                for (let i = 0; i < preguntasActuales.length; i++) {
-                    const q = preguntasActuales[i];
-                    if (q.type === 'multiple' || q.type === 'short' || q.type === 'open') {
-                        preguntasReales.push(q);
-                    }
-                }
-                
+                // NO filtrar - usar el array completo con índices originales
                 // Recalcular cada pregunta
                 Object.keys(respuestasMateria).forEach(preguntaIndex => {
                     const respuestaPregunta = respuestasMateria[preguntaIndex];
                     const indexNum = parseInt(preguntaIndex);
                     
-                    // Buscar la pregunta actual en la nueva estructura
-                    if (indexNum >= 0 && indexNum < preguntasReales.length) {
-                        const preguntaActual = preguntasReales[indexNum];
+                    // CRÍTICO: Usar el índice EXACTO del array completo (no filtrado)
+                    // preguntaIndex corresponde al índice en el array original que incluye textos de lectura
+                    if (indexNum >= 0 && indexNum < preguntasActuales.length) {
+                        const preguntaActual = preguntasActuales[indexNum];
                         
-                        // Solo recalcular preguntas de selección múltiple
-                        if (preguntaActual.type === 'multiple') {
+                        // Solo recalcular preguntas de selección múltiple (skip textos de lectura)
+                        if (preguntaActual && preguntaActual.type === 'multiple') {
                             // Encontrar la respuesta correcta actual
                             const correctOptionIndex = preguntaActual.options.findIndex(opt => opt.isCorrect);
                             
@@ -2061,7 +2054,8 @@ async function recalcularRespuestasExistentes(db, pruebaId, nuevaEstructura) {
                             respuestasMateria[preguntaIndex].opcionC = preguntaActual.options[2] ? preguntaActual.options[2].text : '';
                             respuestasMateria[preguntaIndex].opcionD = preguntaActual.options[3] ? preguntaActual.options[3].text : '';
                             
-                            console.log(`✏️ Recalculada: ${materia} - Pregunta ${indexNum} - Correcta: ${correctOptionIndex} - Estudiante: ${respuestaUsuario} - Es correcta: ${esCorrectaAhora}`);
+                            console.log(`✏️ Recalculada: ${materia} - Índice ${indexNum} - Pregunta: "${preguntaActual.text?.substring(0, 40)}..." - Correcta: ${correctOptionIndex} - Estudiante: ${respuestaUsuario} - Es correcta: ${esCorrectaAhora}`);
+                            console.log(`   Opciones actualizadas:`, preguntaActual.options.map(o => o.text?.substring(0, 30)));
                         }
                     }
                 });

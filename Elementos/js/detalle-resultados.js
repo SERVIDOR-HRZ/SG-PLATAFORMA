@@ -1405,8 +1405,25 @@ function renderizarPreguntaCard(pregunta, numero, materia) {
         }
     }
     
+    // CRÍTICO: Asegurar que opcionesArray sea realmente un array y no un objeto
+    // Si es un objeto, convertirlo a array en el orden correcto
+    if (opcionesArray && typeof opcionesArray === 'object' && !Array.isArray(opcionesArray)) {
+        console.warn('⚠️ opciones es un objeto, no un array. Convirtiendo...');
+        const tempArray = [];
+        const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (let i = 0; i < letras.length; i++) {
+            if (opcionesArray[i] !== undefined) {
+                tempArray.push(opcionesArray[i]);
+            } else {
+                break;
+            }
+        }
+        opcionesArray = tempArray;
+    }
+    
     console.log(`=== PREGUNTA ${numero} - OPCIONES ===`);
     console.log('Array de opciones:', opcionesArray);
+    console.log('Tipo de opciones:', Array.isArray(opcionesArray) ? 'Array' : typeof opcionesArray);
     console.log('Cantidad de opciones:', opcionesArray.length);
     
     const cantidadOpciones = opcionesArray.length;
@@ -1545,12 +1562,22 @@ function renderizarPreguntaCard(pregunta, numero, materia) {
         }
         if (esRespuestaEstudiante) clases.push('seleccionada');
 
-        // Obtener texto de opción desde el array dinámico o campo legacy
-        let textoOpcion;
-        if (opcionesArray && opcionesArray[index]) {
+        // CRÍTICO: Obtener texto de opción SIEMPRE desde el array en el índice correcto
+        let textoOpcion = '';
+        if (opcionesArray && Array.isArray(opcionesArray) && opcionesArray[index] !== undefined) {
             textoOpcion = opcionesArray[index];
+        } else if (pregunta[`opcion${opcion}`]) {
+            // Fallback a campos legacy
+            textoOpcion = pregunta[`opcion${opcion}`];
         } else {
-            textoOpcion = pregunta[`opcion${opcion}`] || `Opción ${opcion}`;
+            textoOpcion = `Opción ${opcion}`;
+        }
+        
+        // DEBUG: Log para verificar el orden
+        if (index === 0) {
+            console.log(`🔍 Renderizando opciones para pregunta ${numero}:`);
+            console.log(`   - Opción ${opcion} (índice ${index}): "${textoOpcion}"`);
+            console.log(`   - Array completo:`, opcionesArray);
         }
 
         // Obtener porcentaje real de esta opción

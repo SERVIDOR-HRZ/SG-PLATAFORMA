@@ -1839,12 +1839,21 @@ function evaluateAnswers() {
 
         Object.keys(userAnswers[subject]).forEach(questionIndex => {
             const userAnswer = userAnswers[subject][questionIndex];
-            const question = subjectQuestions[parseInt(questionIndex)];
+            const actualIndex = parseInt(questionIndex);
+            
+            // CRÍTICO: Usar el índice EXACTO del array de preguntas
+            // questionIndex corresponde al índice en el array completo (incluyendo textos de lectura)
+            const question = subjectQuestions[actualIndex];
 
             // Skip non-question items (reading texts, paragraphs, titles)
             if (!question || question.type === 'reading' || question.type === 'paragraph' || question.type === 'title') {
                 return;
             }
+            
+            // DEBUG: Verificar que estamos obteniendo la pregunta correcta
+            console.log(`📝 Evaluando ${subject} - Índice ${actualIndex}:`);
+            console.log(`   Pregunta: "${question.text?.substring(0, 50)}..."`);
+            console.log(`   Opciones:`, question.options?.map(o => o.text?.substring(0, 30)));
 
             let isCorrect = false;
             let correctAnswer = null;
