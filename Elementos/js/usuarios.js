@@ -708,22 +708,21 @@ function updateColumnVisibility(view) {
     const table = document.getElementById('usersTable');
     if (!table) return;
 
-    // All column selectors - use more specific selectors (actualizado con nueva columna Nombre Aulas)
+    // All column selectors - use more specific selectors
     const rolColumn = table.querySelector('thead th:nth-child(3)'); // Rol column
     const estadoColumn = table.querySelector('thead th:nth-child(4)'); // Estado column
     const puntosColumn = table.querySelector('thead th:nth-child(5)'); // Puntos column
     const insigniasColumn = table.querySelector('thead th:nth-child(6)'); // Insignias column
-    const aulasColumn = table.querySelector('thead th:nth-child(7)'); // Aulas Asignadas column
-    const nombreAulasColumn = table.querySelector('thead th:nth-child(8)'); // Nombre Aulas column (NUEVA)
-    const telefonoColumn = table.querySelector('thead th:nth-child(9)'); // Teléfono column
-    const documentoColumn = table.querySelector('thead th:nth-child(10)'); // Documento column
-    const institucionColumn = table.querySelector('thead th:nth-child(11)'); // Institución column
-    const gradoColumn = table.querySelector('thead th:nth-child(12)'); // Grado column
-    const departamentoColumn = table.querySelector('thead th:nth-child(13)'); // Departamento column
-    const emailRecuperacionColumn = table.querySelector('thead th:nth-child(14)'); // Email Recuperación column
-    const codigoRecuperacionColumn = table.querySelector('thead th:nth-child(15)'); // Código Recuperación column
-    const fechaColumn = table.querySelector('thead th:nth-child(16)'); // Fecha Registro column
-    const accionesColumn = table.querySelector('thead th:nth-child(17)'); // Acciones column
+    const nombreAulasColumn = table.querySelector('thead th:nth-child(7)'); // Nombre Aulas column
+    const telefonoColumn = table.querySelector('thead th:nth-child(8)'); // Teléfono column
+    const documentoColumn = table.querySelector('thead th:nth-child(9)'); // Documento column
+    const institucionColumn = table.querySelector('thead th:nth-child(10)'); // Institución column
+    const gradoColumn = table.querySelector('thead th:nth-child(11)'); // Grado column
+    const departamentoColumn = table.querySelector('thead th:nth-child(12)'); // Departamento column
+    const emailRecuperacionColumn = table.querySelector('thead th:nth-child(13)'); // Email Recuperación column
+    const codigoRecuperacionColumn = table.querySelector('thead th:nth-child(14)'); // Código Recuperación column
+    const fechaColumn = table.querySelector('thead th:nth-child(15)'); // Fecha Registro column
+    const accionesColumn = table.querySelector('thead th:nth-child(16)'); // Acciones column
 
     // Hide gamification columns for profesores and superusuarios only (NOT for estudiantes - they need to see their coins and badges)
     const shouldHideGamification = view === 'profesores' || view === 'superusuarios';
@@ -773,7 +772,6 @@ function updateColumnVisibility(view) {
         if (estadoColumn) estadoColumn.style.display = 'none';
         if (puntosColumn) puntosColumn.style.display = 'none';
         if (insigniasColumn) insigniasColumn.style.display = 'none';
-        if (aulasColumn) aulasColumn.style.display = 'none';
         if (nombreAulasColumn) nombreAulasColumn.style.display = 'none';
         if (telefonoColumn) telefonoColumn.style.display = 'none';
         if (documentoColumn) documentoColumn.style.display = 'none';
@@ -792,7 +790,6 @@ function updateColumnVisibility(view) {
         if (estadoColumn) estadoColumn.style.display = 'none';
         if (puntosColumn) puntosColumn.style.display = ''; // Show Puntos column
         if (insigniasColumn) insigniasColumn.style.display = ''; // Show Insignias column
-        if (aulasColumn) aulasColumn.style.display = 'none';
         if (nombreAulasColumn) nombreAulasColumn.style.display = 'none';
         if (telefonoColumn) telefonoColumn.style.display = 'none';
         if (documentoColumn) documentoColumn.style.display = 'none';
@@ -808,7 +805,6 @@ function updateColumnVisibility(view) {
         // Show all columns for other views, then apply specific hiding rules
         if (rolColumn) rolColumn.style.display = '';
         if (estadoColumn) estadoColumn.style.display = '';
-        if (aulasColumn) aulasColumn.style.display = '';
         if (nombreAulasColumn) nombreAulasColumn.style.display = '';
         if (telefonoColumn) telefonoColumn.style.display = '';
         if (fechaColumn) fechaColumn.style.display = '';
@@ -844,25 +840,24 @@ function updateColumnVisibility(view) {
     // Update all table rows in the users table specifically
     const tableRows = table.querySelectorAll('tbody tr');
     tableRows.forEach(row => {
-        // All cell selectors (actualizado con nueva columna Nombre Aulas)
+        // All cell selectors
         const cells = row.querySelectorAll('td');
-        if (cells.length < 17) return; // Skip if row doesn't have all cells (ahora son 17)
+        if (cells.length < 16) return; // Skip if row doesn't have all cells (now 16 columns)
 
         const rolCell = cells[2]; // 3rd column (index 2)
         const estadoCell = cells[3]; // 4th column
         const puntosCell = cells[4]; // 5th column
         const insigniasCell = cells[5]; // 6th column
-        const aulasCell = cells[6]; // 7th column - Aulas Asignadas
-        const nombreAulasCell = cells[7]; // 8th column - Nombre Aulas (NUEVA)
-        const telefonoCell = cells[8]; // 9th column
-        const documentoCell = cells[9]; // 10th column
-        const institucionCell = cells[10]; // 11th column
-        const gradoCell = cells[11]; // 12th column
-        const departamentoCell = cells[12]; // 13th column
-        const emailRecuperacionCell = cells[13]; // 14th column
-        const codigoRecuperacionCell = cells[14]; // 15th column
-        const fechaCell = cells[15]; // 16th column
-        const accionesCell = cells[16]; // 17th column
+        const nombreAulasCell = cells[6]; // 7th column - Nombre Aulas
+        const telefonoCell = cells[7]; // 8th column
+        const documentoCell = cells[8]; // 9th column
+        const institucionCell = cells[9]; // 10th column
+        const gradoCell = cells[10]; // 11th column
+        const departamentoCell = cells[11]; // 12th column
+        const emailRecuperacionCell = cells[12]; // 13th column
+        const codigoRecuperacionCell = cells[13]; // 14th column
+        const fechaCell = cells[14]; // 15th column
+        const accionesCell = cells[15]; // 16th column
 
         if (isRecoveryView) {
             // Hide most cells for recovery view, but keep Rol visible
@@ -870,7 +865,6 @@ function updateColumnVisibility(view) {
             if (estadoCell) estadoCell.style.display = 'none';
             if (puntosCell) puntosCell.style.display = 'none';
             if (insigniasCell) insigniasCell.style.display = 'none';
-            if (aulasCell) aulasCell.style.display = 'none';
             if (nombreAulasCell) nombreAulasCell.style.display = 'none';
             if (telefonoCell) telefonoCell.style.display = 'none';
             if (documentoCell) documentoCell.style.display = 'none';
@@ -889,7 +883,6 @@ function updateColumnVisibility(view) {
             if (estadoCell) estadoCell.style.display = 'none';
             if (puntosCell) puntosCell.style.display = ''; // Show Puntos cell
             if (insigniasCell) insigniasCell.style.display = ''; // Show Insignias cell
-            if (aulasCell) aulasCell.style.display = 'none';
             if (nombreAulasCell) nombreAulasCell.style.display = 'none';
             if (telefonoCell) telefonoCell.style.display = 'none';
             if (documentoCell) documentoCell.style.display = 'none';
@@ -905,7 +898,6 @@ function updateColumnVisibility(view) {
             // Show all cells for other views, then apply specific hiding rules
             if (rolCell) rolCell.style.display = '';
             if (estadoCell) estadoCell.style.display = '';
-            if (aulasCell) aulasCell.style.display = '';
             if (nombreAulasCell) nombreAulasCell.style.display = '';
             if (telefonoCell) telefonoCell.style.display = '';
             if (fechaCell) fechaCell.style.display = '';
@@ -1001,9 +993,25 @@ function updateStats() {
     // Get coordinadores element
     const totalCoordinadoresEl = document.getElementById('totalCoordinadores');
 
+    // Get stat card elements
+    const statCardTotalUsers = document.getElementById('statCardTotalUsers');
+    const statCardProfesores = document.getElementById('statCardProfesores');
+    const statCardSuperusers = document.getElementById('statCardSuperusers');
+    const statCardEstudiantes = document.getElementById('statCardEstudiantes');
+    const statCardActivos = document.getElementById('statCardActivos');
+    const statCardCoordinadores = document.getElementById('statCardCoordinadores');
+
     // Update stats based on current dashboard view
     switch (currentDashboardView) {
         case 'profesores':
+            // Show only relevant cards for profesores view
+            if (statCardTotalUsers) statCardTotalUsers.style.display = 'flex';
+            if (statCardProfesores) statCardProfesores.style.display = 'flex';
+            if (statCardSuperusers) statCardSuperusers.style.display = 'none';
+            if (statCardEstudiantes) statCardEstudiantes.style.display = 'none';
+            if (statCardActivos) statCardActivos.style.display = 'flex';
+            if (statCardCoordinadores) statCardCoordinadores.style.display = 'none';
+
             elements.totalUsers.textContent = totalAdminsCount;
             elements.totalAdmins.textContent = totalAdminsCount;
             elements.totalSuperusers.textContent = '0';
@@ -1012,6 +1020,14 @@ function updateStats() {
             if (totalCoordinadoresEl) totalCoordinadoresEl.textContent = '0';
             break;
         case 'estudiantes':
+            // Show only relevant cards for estudiantes view
+            if (statCardTotalUsers) statCardTotalUsers.style.display = 'flex';
+            if (statCardProfesores) statCardProfesores.style.display = 'none';
+            if (statCardSuperusers) statCardSuperusers.style.display = 'none';
+            if (statCardEstudiantes) statCardEstudiantes.style.display = 'flex';
+            if (statCardActivos) statCardActivos.style.display = 'flex';
+            if (statCardCoordinadores) statCardCoordinadores.style.display = 'none';
+
             elements.totalUsers.textContent = totalStudentsCount;
             elements.totalAdmins.textContent = '0';
             elements.totalSuperusers.textContent = '0';
@@ -1020,6 +1036,14 @@ function updateStats() {
             if (totalCoordinadoresEl) totalCoordinadoresEl.textContent = '0';
             break;
         case 'superusuarios':
+            // Show only relevant cards for superusuarios view
+            if (statCardTotalUsers) statCardTotalUsers.style.display = 'flex';
+            if (statCardProfesores) statCardProfesores.style.display = 'none';
+            if (statCardSuperusers) statCardSuperusers.style.display = 'flex';
+            if (statCardEstudiantes) statCardEstudiantes.style.display = 'none';
+            if (statCardActivos) statCardActivos.style.display = 'flex';
+            if (statCardCoordinadores) statCardCoordinadores.style.display = 'none';
+
             elements.totalUsers.textContent = totalSuperusersCount;
             elements.totalAdmins.textContent = '0';
             elements.totalSuperusers.textContent = totalSuperusersCount;
@@ -1028,6 +1052,14 @@ function updateStats() {
             if (totalCoordinadoresEl) totalCoordinadoresEl.textContent = '0';
             break;
         case 'coordinadores':
+            // Show only relevant cards for coordinadores view
+            if (statCardTotalUsers) statCardTotalUsers.style.display = 'flex';
+            if (statCardProfesores) statCardProfesores.style.display = 'none';
+            if (statCardSuperusers) statCardSuperusers.style.display = 'none';
+            if (statCardEstudiantes) statCardEstudiantes.style.display = 'none';
+            if (statCardActivos) statCardActivos.style.display = 'flex';
+            if (statCardCoordinadores) statCardCoordinadores.style.display = 'flex';
+
             elements.totalUsers.textContent = totalCoordinadoresCount;
             elements.totalAdmins.textContent = '0';
             elements.totalSuperusers.textContent = '0';
@@ -1037,6 +1069,14 @@ function updateStats() {
             break;
         case 'dashboard':
         default:
+            // Show all cards for dashboard view
+            if (statCardTotalUsers) statCardTotalUsers.style.display = 'flex';
+            if (statCardProfesores) statCardProfesores.style.display = 'flex';
+            if (statCardSuperusers) statCardSuperusers.style.display = 'flex';
+            if (statCardEstudiantes) statCardEstudiantes.style.display = 'flex';
+            if (statCardActivos) statCardActivos.style.display = 'flex';
+            if (statCardCoordinadores) statCardCoordinadores.style.display = 'flex';
+
             // Show global statistics
             const globalTotalAdmins = allUsers.filter(user =>
                 (user.tipoUsuario === 'admin' || user.rol === 'admin') &&
@@ -1148,20 +1188,6 @@ function renderUsers() {
                 `<div class="insignias-cell-simple" onclick="verInsigniasUsuario('${user.id}', '${user.nombre}')" title="Click para ver insignias">
                         <span class="insignias-count-badge"><i class="bi bi-award-fill"></i> ${user.insignias && user.insignias.length > 0 ? user.insignias.length : 0}</span>
                     </div>` : 'N/A'}
-            </td>
-            <td>
-                ${user.tipoUsuario === 'estudiante' && user.aulasAsignadas && user.aulasAsignadas.length > 0 ?
-                `<div class="aulas-cell" data-aulas='${JSON.stringify(user.aulasAsignadas)}'>
-                        <span class="aulas-count-badge"><i class="bi bi-door-open"></i> ${user.aulasAsignadas.length} aula${user.aulasAsignadas.length > 1 ? 's' : ''}</span>
-                    </div>` :
-                (user.tipoUsuario === 'estudiante' ? '<span class="text-muted">Sin aulas</span>' :
-                    (user.tipoUsuario === 'admin' && user.aulasAsignadas && user.aulasAsignadas.length > 0 ?
-                        `<div class="aulas-cell">
-                            <span class="aulas-count-badge" title="${user.aulasAsignadas.map(a => typeof a === 'object' ? a.aulaId : a).join(', ')}">
-                                <i class="bi bi-door-open"></i> ${user.aulasAsignadas.length} aula${user.aulasAsignadas.length > 1 ? 's' : ''}
-                            </span>
-                        </div>` :
-                        (user.tipoUsuario === 'admin' ? '<span class="text-muted">Sin aulas</span>' : 'N/A')))}
             </td>
             <td>
                 ${(() => {
@@ -3043,7 +3069,17 @@ function switchDashboardView(view) {
         if (coordinadoresManagement) coordinadoresManagement.style.display = 'none';
         if (aulasManagement) aulasManagement.style.display = 'none';
         if (resetProgressManagement) resetProgressManagement.style.display = 'none';
-        if (statsGrid) statsGrid.style.display = 'grid';
+        if (statsGrid) statsGrid.style.display = 'flex';
+    }
+
+    // Hide/show user type filter based on view
+    const userTypeFilter = document.getElementById('userTypeFilter');
+    if (userTypeFilter) {
+        if (view === 'estudiantes' || view === 'profesores') {
+            userTypeFilter.style.display = 'none';
+        } else {
+            userTypeFilter.style.display = 'block';
+        }
     }
 
     // Update institucion filter visibility
