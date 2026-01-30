@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await checkAuth();
     initializeWeek();
     setupEventListeners();
+    setupSidebarListeners();
     // Inicializar formateo numérico
     inicializarFormateoNumerico();
     // Cargar aulas disponibles
@@ -143,6 +144,10 @@ async function seleccionarAulaFinanzas(aulaId) {
     const aulaInfo = document.getElementById('aulaActualInfo');
     aulaInfo.style.background = `linear-gradient(135deg, ${currentAulaData.color || '#ff0000'}, ${adjustColorFinanzas(currentAulaData.color || '#ff0000', -30)})`;
 
+    // Ocultar botones de perfil/web/panel y mostrar menú de navegación
+    document.getElementById('sidebarProfileActions').style.display = 'none';
+    document.getElementById('sidebarMenu').style.display = 'flex';
+
     // Cargar datos del tab activo (cuentas por defecto)
     await loadCuentas();
 }
@@ -154,6 +159,10 @@ function volverASelectorAulasFinanzas() {
 
     document.getElementById('finanzasContainer').style.display = 'none';
     document.getElementById('aulaSelectorContainer').style.display = 'block';
+
+    // Mostrar botones de perfil/web/panel y ocultar menú de navegación
+    document.getElementById('sidebarProfileActions').style.display = 'flex';
+    document.getElementById('sidebarMenu').style.display = 'none';
 }
 
 // Hacer funciones globales
@@ -258,32 +267,14 @@ function updateWeekDisplay() {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Back button
-    document.getElementById('backBtn').addEventListener('click', () => {
-        window.location.href = 'Panel_Admin.html';
-    });
-
     // Botón cambiar aula
     document.getElementById('btnCambiarAula').addEventListener('click', volverASelectorAulasFinanzas);
-
-    // Tabs
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tab = btn.dataset.tab;
-            switchTab(tab);
-        });
-    });
 
     // Cuentas bancarias
     document.getElementById('btnNuevaCuenta').addEventListener('click', openNuevaCuenta);
     document.getElementById('closeModalCuenta').addEventListener('click', closeModalCuenta);
     document.getElementById('cancelarCuenta').addEventListener('click', closeModalCuenta);
     document.getElementById('formCuenta').addEventListener('submit', handleSaveCuenta);
-    
-    // Filtros de cuentas
-    document.getElementById('filtroTipoCuenta').addEventListener('change', aplicarFiltrosCuentas);
-    document.getElementById('filtroBuscarCuenta').addEventListener('input', aplicarFiltrosCuentas);
-    document.getElementById('btnLimpiarFiltros').addEventListener('click', limpiarFiltrosCuentas);
 
     // Movimientos
     document.getElementById('btnNuevoIngreso').addEventListener('click', openNuevoIngreso);
@@ -2071,3 +2062,284 @@ window.filtrarTablaTarifas = filtrarTablaTarifas;
 window.filtrarTablaPagos = filtrarTablaPagos;
 window.limpiarBusquedaTarifas = limpiarBusquedaTarifas;
 window.limpiarBusquedaPagos = limpiarBusquedaPagos;
+
+
+// ========== SIDEBAR LISTENERS ==========
+
+function setupSidebarListeners() {
+    // Profile button
+    const btnProfile = document.getElementById('btnProfile');
+    if (btnProfile) {
+        btnProfile.addEventListener('click', () => {
+            window.location.href = 'panelUsuario.html';
+        });
+    }
+    
+    // Home button
+    const btnHome = document.getElementById('btnHome');
+    if (btnHome) {
+        btnHome.addEventListener('click', () => {
+            window.location.href = '../index.html';
+        });
+    }
+    
+    // Panel button
+    const btnPanel = document.getElementById('btnPanel');
+    if (btnPanel) {
+        btnPanel.addEventListener('click', () => {
+            window.location.href = 'Panel_Admin.html';
+        });
+    }
+    
+    // Logout button
+    const btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', handleLogout);
+    }
+
+    // Sidebar menu items (tabs de finanzas)
+    const menuItems = document.querySelectorAll('.sidebar-menu-item');
+    menuItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const tab = item.dataset.tab;
+            
+            // Actualizar estado activo en el menú
+            menuItems.forEach(mi => mi.classList.remove('active'));
+            item.classList.add('active');
+            
+            // Cambiar tab
+            switchTab(tab);
+            
+            // Cerrar menú en móvil
+            if (window.innerWidth <= 768) {
+                const sidebarPanel = document.getElementById('sidebarPanel');
+                const sidebarOverlay = document.getElementById('sidebarOverlay');
+                const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+                
+                sidebarPanel.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                mobileMenuToggle.classList.remove('active');
+                
+                const icon = mobileMenuToggle.querySelector('i');
+                icon.className = 'bi bi-chevron-right';
+            }
+        });
+    });
+    
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const sidebarPanel = document.getElementById('sidebarPanel');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    if (mobileMenuToggle && sidebarPanel && sidebarOverlay) {
+        // Show mobile menu toggle on small screens
+        if (window.innerWidth <= 768) {
+            mobileMenuToggle.style.display = 'flex';
+        }
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            const isActive = sidebarPanel.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+            mobileMenuToggle.classList.toggle('active');
+            
+            // Cambiar icono entre chevron derecha y chevron izquierda
+            const icon = mobileMenuToggle.querySelector('i');
+            if (isActive) {
+                icon.className = 'bi bi-chevron-left';
+            } else {
+                icon.className = 'bi bi-chevron-right';
+            }
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebarPanel.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+            
+            // Volver al icono de chevron derecha
+            const icon = mobileMenuToggle.querySelector('i');
+            icon.className = 'bi bi-chevron-right';
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                mobileMenuToggle.style.display = 'flex';
+            } else {
+                mobileMenuToggle.style.display = 'none';
+                sidebarPanel.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                mobileMenuToggle.classList.remove('active');
+                
+                // Asegurar que el icono sea chevron derecha
+                const icon = mobileMenuToggle.querySelector('i');
+                icon.className = 'bi bi-chevron-right';
+            }
+        });
+    }
+}
+
+// Handle logout
+async function handleLogout() {
+    const confirmed = await showLogoutModal();
+    
+    if (confirmed) {
+        // Clear session storage
+        sessionStorage.removeItem('currentUser');
+        
+        // Redirect to login
+        window.location.href = '../index.html';
+    }
+}
+
+// Show logout confirmation modal
+function showLogoutModal() {
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="panel-modal-overlay" id="panelModalOverlay" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            ">
+                <div class="panel-modal" style="
+                    background: white;
+                    border-radius: 12px;
+                    padding: 0;
+                    max-width: 400px;
+                    width: 90%;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                    transform: scale(0.8);
+                    transition: all 0.3s ease;
+                    overflow: hidden;
+                ">
+                    <div class="panel-modal-body" style="
+                        padding: 30px;
+                        text-align: center;
+                    ">
+                        <i class="bi bi-exclamation-triangle" style="
+                            font-size: 48px;
+                            color: #ffc107;
+                            margin-bottom: 20px;
+                            display: block;
+                        "></i>
+                        <p style="
+                            font-size: 18px;
+                            color: #333;
+                            margin: 0 0 30px 0;
+                            line-height: 1.5;
+                        ">¿Estás seguro de que deseas cerrar sesión?</p>
+                        <div style="
+                            display: flex;
+                            gap: 10px;
+                            justify-content: center;
+                        ">
+                            <button id="panelModalCancel" style="
+                                padding: 12px 24px;
+                                border: 1px solid #ddd;
+                                border-radius: 8px;
+                                font-size: 16px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                min-width: 100px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 8px;
+                                background: #f5f5f5;
+                                color: #333;
+                            ">
+                                <i class="bi bi-x-lg"></i>
+                                No
+                            </button>
+                            <button id="panelModalConfirm" style="
+                                padding: 12px 24px;
+                                border: none;
+                                border-radius: 8px;
+                                font-size: 16px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                min-width: 100px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 8px;
+                                background: #dc3545;
+                                color: white;
+                            ">
+                                <i class="bi bi-check-lg"></i>
+                                Sí
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const overlay = document.getElementById('panelModalOverlay');
+        const confirmBtn = document.getElementById('panelModalConfirm');
+        const cancelBtn = document.getElementById('panelModalCancel');
+        
+        // Show modal with animation
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            overlay.style.visibility = 'visible';
+            overlay.querySelector('.panel-modal').style.transform = 'scale(1)';
+        }, 10);
+
+        // Handle confirm
+        confirmBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(true);
+        });
+
+        // Handle cancel
+        cancelBtn.addEventListener('click', () => {
+            closeModal(overlay);
+            resolve(false);
+        });
+
+        // Handle overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal(overlay);
+                resolve(false);
+            }
+        });
+
+        // Handle ESC key
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(overlay);
+                resolve(false);
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+    });
+}
+
+// Close modal
+function closeModal(overlay) {
+    overlay.style.opacity = '0';
+    overlay.style.visibility = 'hidden';
+    overlay.querySelector('.panel-modal').style.transform = 'scale(0.8)';
+    setTimeout(() => {
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+        }
+    }, 300);
+}

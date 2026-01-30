@@ -16,31 +16,83 @@
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <button class="back-btn" id="backBtn">
-                <i class="bi bi-arrow-left"></i>
-            </button>
-            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
-            <h1>Gestión de Finanzas</h1>
-        </div>
-        <div class="header-right">
-            <div class="user-info" id="userInfoContainer">
-                <span class="user-name" id="userName">USUARIO</span>
-                <div class="user-avatar" id="userAvatarContainer">
-                    <div class="user-avatar-default" id="userAvatarDefault">
-                        <i class="bi bi-person-fill"></i>
-                    </div>
-                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src=""
-                        alt="Foto de perfil">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Panel -->
+    <aside class="sidebar-panel" id="sidebarPanel">
+        <!-- Perfil Usuario -->
+        <div class="sidebar-profile">
+            <div class="sidebar-avatar" id="userAvatarContainer">
+                <div class="sidebar-avatar-default" id="userAvatarDefault">
+                    <i class="bi bi-person-fill"></i>
                 </div>
+                <img class="sidebar-avatar-image" id="userAvatarImage" style="display: none;" src="" alt="Foto de perfil">
+            </div>
+            <div class="sidebar-user-name" id="userName">USUARIO</div>
+            <div class="sidebar-user-role">Gestión de Finanzas</div>
+            
+            <!-- Botones de Perfil y Web (se ocultan al seleccionar aula) -->
+            <div class="sidebar-profile-actions" id="sidebarProfileActions">
+                <button class="sidebar-btn btn-profile" id="btnProfile">
+                    <i class="bi bi-person-gear"></i>
+                    <span>Mi Perfil</span>
+                </button>
+                <button class="sidebar-btn btn-home" id="btnHome">
+                    <i class="bi bi-house-door-fill"></i>
+                    <span>Web Principal</span>
+                </button>
+                <button class="sidebar-btn btn-panel" id="btnPanel">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Panel Admin</span>
+                </button>
             </div>
         </div>
-    </header>
+
+        <!-- Menú de Navegación de Finanzas (se muestra al seleccionar aula) -->
+        <nav class="sidebar-menu" id="sidebarMenu" style="display: none;">
+            <button class="sidebar-menu-item active" data-tab="cuentas">
+                <i class="bi bi-bank"></i>
+                <span>Cuentas Bancarias</span>
+            </button>
+            <button class="sidebar-menu-item" data-tab="movimientos">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Ingresos y Gastos</span>
+            </button>
+            <button class="sidebar-menu-item" data-tab="tarifas">
+                <i class="bi bi-cash-coin"></i>
+                <span>Tarifas por Hora</span>
+            </button>
+            <button class="sidebar-menu-item" data-tab="pagos">
+                <i class="bi bi-calendar-check"></i>
+                <span>Pagos Semanales</span>
+            </button>
+            <button class="sidebar-menu-item" data-tab="historial">
+                <i class="bi bi-clock-history"></i>
+                <span>Historial de Pagos</span>
+            </button>
+            <button class="sidebar-menu-item" data-tab="recompensas">
+                <i class="bi bi-coin"></i>
+                <span>Otorgar Monedas</span>
+            </button>
+        </nav>
+
+        <!-- Botones de Acción -->
+        <div class="sidebar-actions">
+            <button class="sidebar-btn btn-logout" id="btnLogout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </aside>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-panel-content">
         <!-- Selector de Aula -->
         <div class="aula-selector-container" id="aulaSelectorContainer">
             <div class="aula-selector-header">
@@ -70,34 +122,6 @@
                 </div>
             </div>
 
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="cuentas">
-                    <i class="bi bi-bank"></i>
-                    Cuentas Bancarias
-                </button>
-                <button class="tab-btn" data-tab="movimientos">
-                    <i class="bi bi-arrow-left-right"></i>
-                    Ingresos y Gastos
-                </button>
-                <button class="tab-btn" data-tab="tarifas">
-                    <i class="bi bi-cash-coin"></i>
-                    Tarifas por Hora
-                </button>
-                <button class="tab-btn" data-tab="pagos">
-                    <i class="bi bi-calendar-check"></i>
-                    Pagos Semanales
-                </button>
-                <button class="tab-btn" data-tab="historial">
-                    <i class="bi bi-clock-history"></i>
-                    Historial de Pagos
-                </button>
-                <button class="tab-btn" data-tab="recompensas">
-                    <i class="bi bi-coin"></i>
-                    Otorgar Monedas
-                </button>
-            </div>
-
         <!-- Tab: Cuentas Bancarias -->
         <div class="tab-content active" id="cuentasTab">
             <div class="section-header">
@@ -108,18 +132,7 @@
                 </button>
             </div>
 
-            <!-- Filtros de Cuentas -->
-            <div class="cuentas-filters">
-                <select id="filtroTipoCuenta" class="filter-select">
-                    <option value="">Todos los tipos</option>
-                    <!-- Se cargarán dinámicamente según las cuentas existentes -->
-                </select>
-                <input type="text" id="filtroBuscarCuenta" class="filter-input" placeholder="Buscar por nombre o número...">
-                <button class="btn-secondary" id="btnLimpiarFiltros">
-                    <i class="bi bi-x-circle"></i>
-                    Limpiar
-                </button>
-            </div>
+
 
             <!-- Dashboard de Cuentas -->
             <div class="cuentas-dashboard">

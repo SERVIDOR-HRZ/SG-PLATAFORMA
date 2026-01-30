@@ -3,6 +3,7 @@
 let editingCuentaId = null;
 let cuentasList = [];
 let categoriasList = [];
+let todosLosEstudiantesRecompensa = [];
 
 // Cargar cuentas bancarias
 async function loadCuentas() {
@@ -35,11 +36,8 @@ async function loadCuentas() {
             cuentasList.push(cuenta);
         });
 
-        // Cargar tipos disponibles en el filtro
-        cargarTiposCuentasDisponibles();
-        
-        // Aplicar filtros y renderizar
-        aplicarFiltrosCuentas();
+        // Renderizar todas las cuentas
+        renderizarCuentas(cuentasList);
         updateDashboard();
     } catch (error) {
         console.error('Error loading cuentas:', error);
@@ -53,64 +51,26 @@ async function loadCuentas() {
     }
 }
 
-// Cargar tipos de cuentas disponibles en el filtro
-function cargarTiposCuentasDisponibles() {
-    const filtroTipo = document.getElementById('filtroTipoCuenta');
-    
-    // Obtener tipos únicos de las cuentas existentes
-    const tiposUnicos = [...new Set(cuentasList.map(cuenta => cuenta.tipo))].sort();
-    
-    // Limpiar y agregar opción "Todos"
-    filtroTipo.innerHTML = '<option value="">Todos los tipos</option>';
-    
-    // Agregar solo los tipos que existen
-    tiposUnicos.forEach(tipo => {
-        const option = document.createElement('option');
-        option.value = tipo;
-        option.textContent = tipo;
-        filtroTipo.appendChild(option);
-    });
-}
-
-// Aplicar filtros a las cuentas
-function aplicarFiltrosCuentas() {
+// Renderizar cuentas
+function renderizarCuentas(cuentas) {
     const cuentasGrid = document.getElementById('cuentasGrid');
-    const filtroTipo = document.getElementById('filtroTipoCuenta').value;
-    const filtroBuscar = document.getElementById('filtroBuscarCuenta').value.toLowerCase();
-
     cuentasGrid.innerHTML = '';
 
-    const cuentasFiltradas = cuentasList.filter(cuenta => {
-        const matchTipo = !filtroTipo || cuenta.tipo === filtroTipo;
-        const matchBuscar = !filtroBuscar || 
-            cuenta.nombre.toLowerCase().includes(filtroBuscar) ||
-            (cuenta.numeroCuenta && cuenta.numeroCuenta.includes(filtroBuscar));
-        
-        return matchTipo && matchBuscar;
-    });
-
-    if (cuentasFiltradas.length === 0) {
+    if (cuentas.length === 0) {
         cuentasGrid.innerHTML = `
             <div class="empty-state">
-                <i class="bi bi-funnel"></i>
-                <h3>No se encontraron cuentas</h3>
-                <p>Intenta con otros filtros</p>
+                <i class="bi bi-bank"></i>
+                <h3>No hay cuentas registradas</h3>
+                <p>Agrega tu primera cuenta bancaria para comenzar</p>
             </div>
         `;
         return;
     }
 
-    cuentasFiltradas.forEach(cuenta => {
+    cuentas.forEach(cuenta => {
         const cuentaCard = createCuentaCard(cuenta);
         cuentasGrid.appendChild(cuentaCard);
     });
-}
-
-// Limpiar filtros
-function limpiarFiltrosCuentas() {
-    document.getElementById('filtroTipoCuenta').value = '';
-    document.getElementById('filtroBuscarCuenta').value = '';
-    aplicarFiltrosCuentas();
 }
 
 // Crear tarjeta de cuenta
@@ -1202,7 +1162,6 @@ window.openNuevoGasto = openNuevoGasto;
 window.deleteMovimiento = deleteMovimiento;
 window.loadCuentas = loadCuentas;
 window.loadMovimientos = loadMovimientos;
-window.aplicarFiltrosCuentas = aplicarFiltrosCuentas;
 window.limpiarFiltrosCuentas = limpiarFiltrosCuentas;
 window.cargarTiposCuentasDisponibles = cargarTiposCuentasDisponibles;
 window.inicializarFormateoNumerico = inicializarFormateoNumerico;
@@ -1396,9 +1355,6 @@ window.filterEstudiantesByInstitucion = filterEstudiantesByInstitucion;
 // ============================================
 // SECCIÓN: OTORGAR MONEDAS A ESTUDIANTES
 // ============================================
-
-// Variable para almacenar todos los usuarios cargados (estudiantes, admins, superusuarios)
-let todosLosEstudiantesRecompensa = [];
 
 // Cargar la pestaña de recompensas
 async function loadRecompensasTab() {
