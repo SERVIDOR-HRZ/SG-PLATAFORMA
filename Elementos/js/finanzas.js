@@ -473,7 +473,15 @@ function createTarifaRow(profesor) {
     const tarifa = profesor.tarifaPorHora || 0;
     const avatarUrl = profesor.fotoPerfil || '';
     const emailDisplay = profesor.email || profesor.usuario || 'Sin email';
-    const rolDisplay = profesor.rol === 'profesor' ? 'Profesor' : profesor.rol === 'admin' ? 'Administrador' : 'Docente';
+    
+    // Determinar el texto del rol
+    let rolDisplay = 'Profesor';
+    let rolClass = 'badge-rol-profesor';
+    
+    if (profesor.rol === 'superusuario') {
+        rolDisplay = 'Super';
+        rolClass = 'badge-rol-super';
+    }
 
     const metodoPago = profesor.metodoPago || '';
     const numeroCuenta = profesor.numeroCuenta || '';
@@ -515,7 +523,7 @@ function createTarifaRow(profesor) {
             </div>
         </td>
         <td>${emailDisplay}</td>
-        <td><span class="badge-rol">${rolDisplay}</span></td>
+        <td><span class="badge-rol ${rolClass}">${rolDisplay}</span></td>
         <td class="tarifa-cell">${formatNumber(tarifa)}</td>
         <td>${metodoPagoHTML}</td>
         <td>${numeroCuentaHTML}</td>
@@ -618,7 +626,9 @@ async function handleSaveTarifa(e) {
 // Load pagos semana (filtrado por profesores del aula)
 async function loadPagosSemana() {
     const pagosTableBody = document.getElementById('pagosTableBody');
-    pagosTableBody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div></div></td></tr>';
+    
+    // Limpiar completamente la tabla antes de empezar
+    pagosTableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div></div></td></tr>';
 
     try {
         // Obtener todos los profesores (usuarios admin con rol profesor)
@@ -651,7 +661,7 @@ async function loadPagosSemana() {
         if (profesoresDocs.length === 0) {
             pagosTableBody.innerHTML = `
                 <tr>
-                    <td colspan="11" style="text-align: center; padding: 3rem;">
+                    <td colspan="10" style="text-align: center; padding: 3rem;">
                         <div class="empty-state">
                             <i class="bi bi-person-x"></i>
                             <h3>No hay profesores asignados a esta aula</h3>
@@ -662,25 +672,58 @@ async function loadPagosSemana() {
             return;
         }
 
-        pagosTableBody.innerHTML = '';
-
-        for (const doc of profesoresDocs) {
+        // Crear promesas para procesar todos los profesores en paralelo
+        const profesoresPromises = profesoresDocs.map(async (doc) => {
             const profesor = { id: doc.id, ...doc.data() };
 
-            // Calcular clases de la semana
-            const clasesData = await calcularClasesSemana(profesor.id);
+            // Ejecutar ambas consultas en paralelo
+            const [clasesData, pagoExistente] = await Promise.all([
+                calcularClasesSemana(profesor.id),
+                verificarPagoSemana(profesor.id)
+            ]);
 
-            // Verificar si ya existe un pago para esta semana
-            const pagoExistente = await verificarPagoSemana(profesor.id);
+            // Solo retornar si tiene clases pendientes de pago
+            if (clasesData.totalClases > 0 && !pagoExistente) {
+                return { profesor, clasesData };
+            }
+            return null;
+        });
 
-            const pagoRow = createPagoRow(profesor, clasesData, pagoExistente);
-            pagosTableBody.appendChild(pagoRow);
+        // Esperar a que todas las promesas se resuelvan
+        const resultados = await Promise.all(profesoresPromises);
+
+        // Filtrar resultados nulos y crear las filas
+        const filasTemporales = resultados
+            .filter(resultado => resultado !== null)
+            .map(({ profesor, clasesData }) => createPagoRow(profesor, clasesData, null));
+
+        // Limpiar la tabla completamente antes de agregar las nuevas filas
+        pagosTableBody.innerHTML = '';
+
+        // Si no hay profesores con pagos pendientes, mostrar mensaje
+        if (filasTemporales.length === 0) {
+            pagosTableBody.innerHTML = `
+                <tr>
+                    <td colspan="10" style="text-align: center; padding: 3rem;">
+                        <div class="empty-state">
+                            <i class="bi bi-check-circle"></i>
+                            <h3>No hay pagos pendientes</h3>
+                            <p>Todos los profesores con clases en esta semana ya han sido pagados</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        } else {
+            // Agregar todas las filas de una vez usando un fragmento de documento
+            const fragment = document.createDocumentFragment();
+            filasTemporales.forEach(fila => fragment.appendChild(fila));
+            pagosTableBody.appendChild(fragment);
         }
     } catch (error) {
         console.error('Error loading pagos:', error);
         pagosTableBody.innerHTML = `
             <tr>
-                <td colspan="11" style="text-align: center; padding: 3rem;">
+                <td colspan="10" style="text-align: center; padding: 3rem;">
                     <div class="empty-state">
                         <i class="bi bi-exclamation-triangle"></i>
                         <h3>Error al cargar pagos</h3>
@@ -809,26 +852,15 @@ function createPagoRow(profesor, clasesData, pagoExistente) {
     const tarifa = profesor.tarifaPorHora || 0;
     const totalPagar = tarifa * parseFloat(clasesData.totalHoras);
     const avatarUrl = profesor.fotoPerfil || '';
-    const emailDisplay = profesor.email || profesor.usuario || 'Sin email';
 
     const metodoPago = profesor.metodoPago || '';
     const numeroCuenta = profesor.numeroCuenta || '';
     const nombreCuenta = profesor.nombreCuenta || '';
 
-    // Determinar estado y clase de fila
-    let status = 'sin-clases';
-    let statusText = 'Sin clases';
-    let rowClass = '';
-    
-    if (pagoExistente) {
-        status = 'pagado';
-        statusText = 'Pagado';
-        rowClass = 'row-pagado';
-    } else if (clasesData.totalClases > 0) {
-        status = 'pendiente';
-        statusText = 'Pendiente';
-        rowClass = 'row-pendiente';
-    }
+    // Solo mostramos profesores pendientes, así que siempre será pendiente
+    const status = 'pendiente';
+    const statusText = 'Pendiente';
+    row.classList.add('row-pendiente');
 
     const avatarHTML = avatarUrl 
         ? `<img src="${avatarUrl}" alt="${profesor.nombre}" class="table-avatar">`
@@ -856,28 +888,12 @@ function createPagoRow(profesor, clasesData, pagoExistente) {
            </div>`
         : '<span class="text-muted">No especificado</span>';
 
-    // Botones de acción
-    let accionesHTML = '';
-    if (!pagoExistente && clasesData.totalClases > 0) {
-        accionesHTML = `
-            <button class="btn-icon edit" onclick="openRegistrarPago('${profesor.id}', ${JSON.stringify(clasesData).replace(/"/g, '&quot;')}, ${tarifa})" title="Registrar pago">
-                <i class="bi bi-check-circle"></i>
-            </button>
-        `;
-    } else if (pagoExistente) {
-        accionesHTML = `
-            <button class="btn-icon view" onclick="verComprobante('${pagoExistente.comprobanteUrl}')" title="Ver comprobante">
-                <i class="bi bi-eye"></i>
-            </button>
-        `;
-    } else {
-        accionesHTML = '<span class="text-muted">Sin clases</span>';
-    }
-
-    // Agregar clase a la fila según el estado
-    if (rowClass) {
-        row.classList.add(rowClass);
-    }
+    // Botón de acción para registrar pago
+    const accionesHTML = `
+        <button class="btn-icon edit" onclick="openRegistrarPago('${profesor.id}', ${JSON.stringify(clasesData).replace(/"/g, '&quot;')}, ${tarifa})" title="Registrar pago">
+            <i class="bi bi-check-circle"></i>
+        </button>
+    `;
 
     row.innerHTML = `
         <td>
@@ -888,9 +904,8 @@ function createPagoRow(profesor, clasesData, pagoExistente) {
                 </div>
             </div>
         </td>
-        <td>${emailDisplay}</td>
         <td style="text-align: center;">${clasesData.totalClases}</td>
-        <td style="text-align: center;">${clasesData.totalHoras}h</td>
+        <td style="text-align: center;">${Math.round(parseFloat(clasesData.totalHoras))}h</td>
         <td class="tarifa-cell">${formatNumber(tarifa)}</td>
         <td class="tarifa-cell" style="font-weight: bold; font-size: 1.1rem;">${formatNumber(totalPagar)}</td>
         <td>${metodoPagoHTML}</td>
@@ -899,7 +914,7 @@ function createPagoRow(profesor, clasesData, pagoExistente) {
         <td style="text-align: center;">
             <span class="pago-status ${status}">${statusText}</span>
         </td>
-        <td style="text-align: center;">
+        <td class="acciones-fija" style="text-align: center;">
             ${accionesHTML}
         </td>
     `;
@@ -2015,9 +2030,8 @@ function filtrarTablaPagos() {
         }
         
         const nombre = row.querySelector('.profesor-cell strong')?.textContent.toLowerCase() || '';
-        const email = row.cells[1]?.textContent.toLowerCase() || '';
         
-        const matches = nombre.includes(searchTerm) || email.includes(searchTerm);
+        const matches = nombre.includes(searchTerm);
         
         row.style.display = matches ? '' : 'none';
         if (matches) visibleCount++;
