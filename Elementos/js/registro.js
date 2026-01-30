@@ -11,7 +11,10 @@ document.addEventListener('DOMContentLoaded', function () {
         emailRecuperacion: document.getElementById('emailRecuperacion'),
         password: document.getElementById('password'),
         confirmPassword: document.getElementById('confirmPassword'),
-        nombre: document.getElementById('nombre'),
+        primerNombre: document.getElementById('primerNombre'),
+        segundoNombre: document.getElementById('segundoNombre'),
+        primerApellido: document.getElementById('primerApellido'),
+        segundoApellido: document.getElementById('segundoApellido'),
         telefono: document.getElementById('telefono'),
         institucion: document.getElementById('institucion'),
         grado: document.getElementById('grado'),
@@ -117,15 +120,48 @@ document.addEventListener('DOMContentLoaded', function () {
         if (touched.confirmPassword) validateConfirmPassword();
     });
 
-    inputs.nombre.addEventListener('input', function () {
-        touched.nombre = true;
+    inputs.primerNombre.addEventListener('input', function () {
+        touched.primerNombre = true;
         // Convertir automáticamente a mayúsculas mientras escribe
         const cursorPosition = this.selectionStart;
         this.value = this.value.toUpperCase();
         this.setSelectionRange(cursorPosition, cursorPosition);
     });
-    inputs.nombre.addEventListener('blur', () => {
-        if (touched.nombre) validateName();
+    inputs.primerNombre.addEventListener('blur', () => {
+        if (touched.primerNombre) validatePrimerNombre();
+    });
+
+    inputs.segundoNombre.addEventListener('input', function () {
+        touched.segundoNombre = true;
+        // Convertir automáticamente a mayúsculas mientras escribe
+        const cursorPosition = this.selectionStart;
+        this.value = this.value.toUpperCase();
+        this.setSelectionRange(cursorPosition, cursorPosition);
+    });
+    inputs.segundoNombre.addEventListener('blur', () => {
+        if (touched.segundoNombre) validateSegundoNombre();
+    });
+
+    inputs.primerApellido.addEventListener('input', function () {
+        touched.primerApellido = true;
+        // Convertir automáticamente a mayúsculas mientras escribe
+        const cursorPosition = this.selectionStart;
+        this.value = this.value.toUpperCase();
+        this.setSelectionRange(cursorPosition, cursorPosition);
+    });
+    inputs.primerApellido.addEventListener('blur', () => {
+        if (touched.primerApellido) validatePrimerApellido();
+    });
+
+    inputs.segundoApellido.addEventListener('input', function () {
+        touched.segundoApellido = true;
+        // Convertir automáticamente a mayúsculas mientras escribe
+        const cursorPosition = this.selectionStart;
+        this.value = this.value.toUpperCase();
+        this.setSelectionRange(cursorPosition, cursorPosition);
+    });
+    inputs.segundoApellido.addEventListener('blur', () => {
+        if (touched.segundoApellido) validateSegundoApellido();
     });
 
     inputs.telefono.addEventListener('input', () => touched.telefono = true);
@@ -262,20 +298,84 @@ document.addEventListener('DOMContentLoaded', function () {
         return true;
     }
 
-    function validateName() {
-        const name = inputs.nombre.value.trim();
-        const validationMsg = inputs.nombre.closest('.input-group').querySelector('.validation-message');
+    function validatePrimerNombre() {
+        const nombre = inputs.primerNombre.value.trim();
+        const validationMsg = inputs.primerNombre.closest('.input-group').querySelector('.validation-message');
 
-        if (name.length < 2) {
-            inputs.nombre.classList.add('invalid');
-            inputs.nombre.classList.remove('valid');
-            validationMsg.textContent = 'El nombre debe tener al menos 2 caracteres';
+        if (nombre.length < 2) {
+            inputs.primerNombre.classList.add('invalid');
+            inputs.primerNombre.classList.remove('valid');
+            validationMsg.textContent = 'El primer nombre debe tener al menos 2 caracteres';
             validationMsg.classList.add('show');
             return false;
         }
 
-        inputs.nombre.classList.add('valid');
-        inputs.nombre.classList.remove('invalid');
+        inputs.primerNombre.classList.add('valid');
+        inputs.primerNombre.classList.remove('invalid');
+        validationMsg.classList.remove('show');
+        return true;
+    }
+
+    function validateSegundoNombre() {
+        const nombre = inputs.segundoNombre.value.trim();
+        const validationMsg = inputs.segundoNombre.closest('.input-group').querySelector('.validation-message');
+
+        // El segundo nombre es opcional, pero si se ingresa debe ser válido
+        if (nombre.length > 0 && nombre.length < 2) {
+            inputs.segundoNombre.classList.add('invalid');
+            inputs.segundoNombre.classList.remove('valid');
+            validationMsg.textContent = 'El segundo nombre debe tener al menos 2 caracteres';
+            validationMsg.classList.add('show');
+            return false;
+        }
+
+        if (nombre.length > 0) {
+            inputs.segundoNombre.classList.add('valid');
+            inputs.segundoNombre.classList.remove('invalid');
+        } else {
+            inputs.segundoNombre.classList.remove('valid', 'invalid');
+        }
+        validationMsg.classList.remove('show');
+        return true;
+    }
+
+    function validatePrimerApellido() {
+        const apellido = inputs.primerApellido.value.trim();
+        const validationMsg = inputs.primerApellido.closest('.input-group').querySelector('.validation-message');
+
+        if (apellido.length < 2) {
+            inputs.primerApellido.classList.add('invalid');
+            inputs.primerApellido.classList.remove('valid');
+            validationMsg.textContent = 'El primer apellido debe tener al menos 2 caracteres';
+            validationMsg.classList.add('show');
+            return false;
+        }
+
+        inputs.primerApellido.classList.add('valid');
+        inputs.primerApellido.classList.remove('invalid');
+        validationMsg.classList.remove('show');
+        return true;
+    }
+
+    function validateSegundoApellido() {
+        const apellido = inputs.segundoApellido.value.trim();
+        const validationMsg = inputs.segundoApellido.closest('.input-group').querySelector('.validation-message');
+
+        // El segundo apellido es opcional, pero si se ingresa debe ser válido
+        if (apellido.length > 0 && apellido.length < 2) {
+            inputs.segundoApellido.classList.add('invalid');
+            inputs.segundoApellido.classList.remove('valid');
+            validationMsg.textContent = 'El segundo apellido debe tener al menos 2 caracteres';
+            validationMsg.classList.add('show');
+            return false;
+        }
+
+        if (apellido.length > 0) {
+            inputs.segundoApellido.classList.add('valid');
+            inputs.segundoApellido.classList.remove('invalid');
+        } else {
+            inputs.segundoApellido.classList.remove('valid', 'invalid');
+        }
         validationMsg.classList.remove('show');
         return true;
     }
@@ -440,7 +540,10 @@ document.addEventListener('DOMContentLoaded', function () {
             validateRecoveryEmail(),
             validatePassword(),
             validateConfirmPassword(),
-            validateName(),
+            validatePrimerNombre(),
+            validateSegundoNombre(),
+            validatePrimerApellido(),
+            validateSegundoApellido(),
             validatePhone(),
             validateInstitution(),
             validateDocumentNumber(),
@@ -467,11 +570,23 @@ document.addEventListener('DOMContentLoaded', function () {
             const telefonoCompletoInput = document.getElementById('telefonoCompleto');
             const telefonoCompleto = telefonoCompletoInput ? telefonoCompletoInput.value : inputs.telefono.value.trim();
 
+            // Construir nombre completo
+            const nombreCompleto = [
+                inputs.primerNombre.value.trim().toUpperCase(),
+                inputs.segundoNombre.value.trim().toUpperCase(),
+                inputs.primerApellido.value.trim().toUpperCase(),
+                inputs.segundoApellido.value.trim().toUpperCase()
+            ].filter(part => part.length > 0).join(' ');
+
             const formData = {
                 email: inputs.email.value.trim(),
                 emailRecuperacion: inputs.emailRecuperacion.value.trim(),
                 password: inputs.password.value,
-                nombre: inputs.nombre.value.trim().toUpperCase(), // Convertir nombre a mayúsculas
+                primerNombre: inputs.primerNombre.value.trim().toUpperCase(),
+                segundoNombre: inputs.segundoNombre.value.trim().toUpperCase(),
+                primerApellido: inputs.primerApellido.value.trim().toUpperCase(),
+                segundoApellido: inputs.segundoApellido.value.trim().toUpperCase(),
+                nombreCompleto: nombreCompleto,
                 telefono: telefonoCompleto, // Guardar teléfono con código de país
                 institucion: inputs.institucion.value.trim(),
                 grado: inputs.grado.value,
@@ -501,7 +616,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 usuario: formData.email, // Usuario es el correo electrónico
                 emailRecuperacion: formData.emailRecuperacion,
                 password: formData.password, // En producción, deberías hashear la contraseña
-                nombre: formData.nombre,
+                primerNombre: formData.primerNombre,
+                segundoNombre: formData.segundoNombre,
+                primerApellido: formData.primerApellido,
+                segundoApellido: formData.segundoApellido,
+                nombre: formData.nombreCompleto, // Nombre completo concatenado
                 telefono: formData.telefono,
                 institucion: formData.institucion,
                 grado: formData.grado,
@@ -517,7 +636,7 @@ document.addEventListener('DOMContentLoaded', function () {
             await window.firebaseDB.collection('usuarios').add(userData);
 
             // Generar y descargar imagen con credenciales
-            await generateCredentialsImage(formData.email, formData.password, recoveryCode, formData.nombre);
+            await generateCredentialsImage(formData.email, formData.password, recoveryCode, formData.nombreCompleto);
 
             showMessage(`¡Cuenta creada exitosamente! Se ha descargado una imagen con tus credenciales. Tu cuenta está pendiente de activación. Redirigiendo...`, 'success');
 
