@@ -3846,6 +3846,219 @@ body {
     flex-wrap: wrap;
 }
 
+/* Pricing Section Styles */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    color: #28a745;
+    font-weight: 700;
+    font-size: 1.1rem;
+    z-index: 1;
+}
+
+.input-with-icon input {
+    padding-left: 2.5rem !important;
+}
+
+.cuotas-resumen {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.05), rgba(32, 201, 151, 0.05));
+    border: 2px solid rgba(40, 167, 69, 0.2);
+    border-radius: 12px;
+}
+
+.cuotas-resumen h5 {
+    color: #28a745;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cuotas-resumen h5 i {
+    font-size: 1.2rem;
+}
+
+.cuotas-resumen h6 {
+    color: #28a745;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 1.5rem 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid rgba(40, 167, 69, 0.2);
+}
+
+.resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.resumen-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.resumen-label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 600;
+}
+
+.resumen-value {
+    font-size: 1rem;
+    color: #28a745;
+    font-weight: 700;
+}
+
+/* Cuotas Detalle Section */
+.cuotas-detalle-section {
+    margin-top: 1.5rem;
+}
+
+.cuotas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.cuota-item {
+    background: white;
+    border: 2px solid rgba(40, 167, 69, 0.2);
+    border-radius: 10px;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 1rem;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.cuota-item:hover {
+    border-color: rgba(40, 167, 69, 0.4);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+}
+
+.cuota-numero {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.cuota-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.cuota-monto-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cuota-monto-input input {
+    width: 120px;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #28a745;
+}
+
+.cuota-monto-input input:focus {
+    outline: none;
+    border-color: #28a745;
+}
+
+.cuota-fecha-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cuota-fecha-input input {
+    padding: 0.5rem 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.cuota-fecha-input input:focus {
+    outline: none;
+    border-color: #28a745;
+}
+
+.cuota-label {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 600;
+}
+
+/* Responsive para pricing section */
+@media (max-width: 768px) {
+    .resumen-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .cuotas-resumen {
+        padding: 1rem;
+    }
+
+    .resumen-item {
+        padding: 0.6rem 0.8rem;
+    }
+
+    .cuota-item {
+        grid-template-columns: auto 1fr;
+        gap: 0.75rem;
+    }
+
+    .cuota-monto-input,
+    .cuota-fecha-input {
+        grid-column: 1 / -1;
+    }
+
+    .cuota-monto-input input {
+        width: 100%;
+    }
+}
+
+/* Insignias cell styling */
+.insignias-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
 /* Simplified insignias cell styling */
 .insignias-cell-simple {
     display: flex;

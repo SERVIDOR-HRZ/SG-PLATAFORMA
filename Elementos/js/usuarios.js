@@ -4621,6 +4621,47 @@ function initializeAulasManagement() {
         aulaForm.addEventListener('submit', handleSaveAula);
     }
 
+    // Event listeners para cálculo de cuotas
+    const precioTotal = document.getElementById('aulaPrecioTotal');
+    const cuotaInicial = document.getElementById('aulaCuotaInicial');
+    const numeroCuotas = document.getElementById('aulaNumeroCuotas');
+    const frecuenciaPago = document.getElementById('aulaFrecuenciaPago');
+    const fechaPrimeraCuota = document.getElementById('aulaFechaPrimeraCuota');
+
+    if (precioTotal) {
+        precioTotal.addEventListener('input', function(e) {
+            formatearInputMoneda(e.target);
+            calcularResumenCuotas();
+        });
+        precioTotal.addEventListener('blur', function() {
+            if (this.value) {
+                const valor = limpiarFormatoMoneda(this.value);
+                this.value = formatearMoneda(Math.round(valor));
+            }
+        });
+    }
+    if (cuotaInicial) {
+        cuotaInicial.addEventListener('input', function(e) {
+            formatearInputMoneda(e.target);
+            calcularResumenCuotas();
+        });
+        cuotaInicial.addEventListener('blur', function() {
+            if (this.value) {
+                const valor = limpiarFormatoMoneda(this.value);
+                this.value = formatearMoneda(Math.round(valor));
+            }
+        });
+    }
+    if (numeroCuotas) {
+        numeroCuotas.addEventListener('input', calcularResumenCuotas);
+    }
+    if (frecuenciaPago) {
+        frecuenciaPago.addEventListener('change', calcularResumenCuotas);
+    }
+    if (fechaPrimeraCuota) {
+        fechaPrimeraCuota.addEventListener('change', calcularResumenCuotas);
+    }
+
     if (closeDeleteAulaModal) {
         closeDeleteAulaModal.addEventListener('click', closeDeleteAulaModalFn);
     }
@@ -4632,25 +4673,199 @@ function initializeAulasManagement() {
     if (confirmDeleteAula) {
         confirmDeleteAula.addEventListener('click', handleDeleteAula);
     }
+}
 
-    // Close modals on outside click
-    const aulaModal = document.getElementById('aulaModal');
-    const deleteAulaModal = document.getElementById('deleteAulaModal');
+// Limpiar formato de moneda (quitar puntos y símbolos)
+function limpiarFormatoMoneda(valor) {
+    if (typeof valor === 'number') return valor;
+    return parseFloat(String(valor).replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
+}
 
-    if (aulaModal) {
-        aulaModal.addEventListener('click', function (e) {
-            if (e.target === aulaModal) closeAulaModalFn();
-        });
+// Formatear input de moneda mientras se escribe
+function formatearInputMoneda(input) {
+    // Guardar posición del cursor
+    const cursorPos = input.selectionStart;
+    const valorAnterior = input.value;
+    
+    // Limpiar y obtener solo números
+    let valor = input.value.replace(/\D/g, '');
+    
+    // Si está vacío, dejar vacío
+    if (valor === '') {
+        input.value = '';
+        return;
+    }
+    
+    // Convertir a número y formatear
+    const numero = parseInt(valor);
+    const formateado = formatearMoneda(numero);
+    
+    // Actualizar valor
+    input.value = formateado;
+    
+    // Ajustar posición del cursor
+    const diferencia = formateado.length - valorAnterior.length;
+    const nuevaPos = cursorPos + diferencia;
+    input.setSelectionRange(nuevaPos, nuevaPos);
+}
+
+// Calcular resumen de cuotas
+function calcularResumenCuotas() {
+    const precioTotalInput = document.getElementById('aulaPrecioTotal');
+    const cuotaInicialInput = document.getElementById('aulaCuotaInicial');
+    
+    const precioTotal = limpiarFormatoMoneda(precioTotalInput.value);
+    const cuotaInicial = limpiarFormatoMoneda(cuotaInicialInput.value);
+    const numeroCuotas = parseInt(document.getElementById('aulaNumeroCuotas').value) || 1;
+    const frecuenciaPago = document.getElementById('aulaFrecuenciaPago').value;
+    const fechaPrimeraCuota = document.getElementById('aulaFechaPrimeraCuota').value;
+
+    const resumenDiv = document.getElementById('cuotasResumen');
+    const cuotasDetalleSection = document.getElementById('cuotasDetalleSection');
+    
+    if (precioTotal > 0) {
+        resumenDiv.style.display = 'block';
+        
+        const saldoRestante = precioTotal - cuotaInicial;
+        const valorCuota = saldoRestante / numeroCuotas;
+
+        document.getElementById('resumenPrecioTotal').textContent = `$${formatearMoneda(precioTotal)}`;
+        document.getElementById('resumenCuotaInicial').textContent = `$${formatearMoneda(cuotaInicial)}`;
+        document.getElementById('resumenSaldoRestante').textContent = `$${formatearMoneda(saldoRestante)}`;
+        document.getElementById('resumenValorCuota').textContent = `$${formatearMoneda(valorCuota)}`;
+        document.getElementById('resumenNumeroCuotas').textContent = numeroCuotas;
+
+        // Generar detalle de cuotas si hay fecha
+        if (fechaPrimeraCuota && numeroCuotas > 0) {
+            cuotasDetalleSection.style.display = 'block';
+            generarDetalleCuotas(numeroCuotas, valorCuota, fechaPrimeraCuota, frecuenciaPago);
+        } else {
+            cuotasDetalleSection.style.display = 'none';
+        }
+    } else {
+        resumenDiv.style.display = 'none';
+        cuotasDetalleSection.style.display = 'none';
+    }
+}
+
+// Formatear moneda sin decimales y con separador de miles
+function formatearMoneda(valor) {
+    return Math.round(valor).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+// Generar detalle de cuotas editables
+function generarDetalleCuotas(numeroCuotas, valorCuota, fechaInicial, frecuencia) {
+    const cuotasLista = document.getElementById('cuotasLista');
+    cuotasLista.innerHTML = '';
+
+    let fechaActual = new Date(fechaInicial + 'T00:00:00');
+
+    for (let i = 0; i < numeroCuotas; i++) {
+        const cuotaItem = document.createElement('div');
+        cuotaItem.className = 'cuota-item';
+        const valorFormateado = formatearMoneda(Math.round(valorCuota));
+        cuotaItem.innerHTML = `
+            <div class="cuota-numero">${i + 1}</div>
+            <div class="cuota-info">
+                <div class="cuota-monto-input">
+                    <span class="cuota-label">Monto:</span>
+                    <input type="text" 
+                           class="cuota-monto" 
+                           data-cuota="${i}" 
+                           value="${valorFormateado}" 
+                           placeholder="0">
+                </div>
+            </div>
+            <div class="cuota-fecha-input">
+                <span class="cuota-label">Fecha Límite:</span>
+                <input type="date" 
+                       class="cuota-fecha" 
+                       data-cuota="${i}" 
+                       value="${fechaActual.toISOString().split('T')[0]}">
+            </div>
+        `;
+
+        cuotasLista.appendChild(cuotaItem);
+
+        // Calculate next payment date
+        switch (frecuencia) {
+            case 'semanal':
+                fechaActual.setDate(fechaActual.getDate() + 7);
+                break;
+            case 'quincenal':
+                fechaActual.setDate(fechaActual.getDate() + 15);
+                break;
+            case 'mensual':
+                fechaActual.setMonth(fechaActual.getMonth() + 1);
+                break;
+            case 'bimestral':
+                fechaActual.setMonth(fechaActual.getMonth() + 2);
+                break;
+            case 'trimestral':
+                fechaActual.setMonth(fechaActual.getMonth() + 3);
+                break;
+        }
     }
 
-    if (deleteAulaModal) {
-        deleteAulaModal.addEventListener('click', function (e) {
-            if (e.target === deleteAulaModal) closeDeleteAulaModalFn();
+    // Add event listeners to format and recalculate when cuota values change
+    document.querySelectorAll('.cuota-monto').forEach(input => {
+        input.addEventListener('input', function(e) {
+            formatearInputMoneda(e.target);
+            recalcularTotalCuotas();
         });
-    }
+        input.addEventListener('blur', function() {
+            if (this.value) {
+                const valor = limpiarFormatoMoneda(this.value);
+                this.value = formatearMoneda(Math.round(valor));
+            }
+        });
+    });
+}
 
-    // Populate institucion selector for aulas
-    populateAulaInstitucionSelector();
+// Recalcular total de cuotas cuando se editan
+function recalcularTotalCuotas() {
+    let totalCuotas = 0;
+    document.querySelectorAll('.cuota-monto').forEach(input => {
+        totalCuotas += limpiarFormatoMoneda(input.value);
+    });
+
+    const cuotaInicialInput = document.getElementById('aulaCuotaInicial');
+    const cuotaInicial = limpiarFormatoMoneda(cuotaInicialInput.value);
+    const totalCalculado = cuotaInicial + totalCuotas;
+
+    // Update saldo restante display
+    document.getElementById('resumenSaldoRestante').textContent = `$${formatearMoneda(totalCuotas)}`;
+    
+    // Show warning if totals don't match
+    const precioTotalInput = document.getElementById('aulaPrecioTotal');
+    const precioTotal = limpiarFormatoMoneda(precioTotalInput.value);
+    
+    if (Math.abs(totalCalculado - precioTotal) > 1) {
+        document.getElementById('resumenSaldoRestante').style.color = '#dc3545';
+        document.getElementById('resumenSaldoRestante').title = `Total calculado: $${formatearMoneda(totalCalculado)} (Diferencia: $${formatearMoneda(precioTotal - totalCalculado)})`;
+    } else {
+        document.getElementById('resumenSaldoRestante').style.color = '#28a745';
+        document.getElementById('resumenSaldoRestante').title = '';
+    }
+}
+
+// Cargar cuotas existentes al editar
+function cargarCuotasExistentes(cuotas) {
+    const cuotasInputs = document.querySelectorAll('.cuota-monto');
+    const fechasInputs = document.querySelectorAll('.cuota-fecha');
+    
+    cuotas.forEach((cuota, index) => {
+        if (cuotasInputs[index]) {
+            const montoFormateado = formatearMoneda(Math.round(cuota.monto));
+            cuotasInputs[index].value = montoFormateado;
+        }
+        if (fechasInputs[index] && cuota.fechaVencimiento) {
+            fechasInputs[index].value = cuota.fechaVencimiento;
+        }
+    });
+    
+    // Recalculate totals
+    recalcularTotalCuotas();
 }
 
 // Populate institucion selector in aula modal
@@ -4797,6 +5012,14 @@ function openCreateAulaModal() {
 
     document.getElementById('aulaId').value = '';
 
+    // Reset pricing fields
+    document.getElementById('aulaPrecioTotal').value = '';
+    document.getElementById('aulaCuotaInicial').value = '';
+    document.getElementById('aulaNumeroCuotas').value = '1';
+    document.getElementById('aulaFrecuenciaPago').value = 'mensual';
+    document.getElementById('aulaFechaPrimeraCuota').value = '';
+    document.getElementById('cuotasResumen').style.display = 'none';
+
     // Refresh institucion selector
     populateAulaInstitucionSelector();
 
@@ -4835,6 +5058,25 @@ async function openEditAulaModal(aulaId) {
     if (aulaInstitucion) aulaInstitucion.value = aula.institucion || '';
     if (aulaGrado) aulaGrado.value = aula.grado || '';
     if (aulaIdField) aulaIdField.value = aula.id;
+
+    // Set pricing data
+    document.getElementById('aulaPrecioTotal').value = aula.precioTotal ? formatearMoneda(aula.precioTotal) : '';
+    document.getElementById('aulaCuotaInicial').value = aula.cuotaInicial ? formatearMoneda(aula.cuotaInicial) : '';
+    document.getElementById('aulaNumeroCuotas').value = aula.numeroCuotas || 1;
+    document.getElementById('aulaFrecuenciaPago').value = aula.frecuenciaPago || 'mensual';
+    document.getElementById('aulaFechaPrimeraCuota').value = aula.fechaPrimeraCuota || '';
+    
+    // Calculate and show resumen if there's pricing data
+    if (aula.precioTotal) {
+        calcularResumenCuotas();
+        
+        // Load existing cuotas if available
+        if (aula.cuotas && aula.cuotas.length > 0) {
+            setTimeout(() => {
+                cargarCuotasExistentes(aula.cuotas);
+            }, 100);
+        }
+    }
 
     // Set materias
     const materias = aula.materias || [];
@@ -4885,6 +5127,13 @@ async function handleSaveAula(e) {
     const aulaId = aulaIdEl ? aulaIdEl.value : '';
     const color = document.querySelector('input[name="colorAula"]:checked')?.value || '#667eea';
 
+    // Get pricing data
+    const precioTotal = limpiarFormatoMoneda(document.getElementById('aulaPrecioTotal').value);
+    const cuotaInicial = limpiarFormatoMoneda(document.getElementById('aulaCuotaInicial').value);
+    const numeroCuotas = parseInt(document.getElementById('aulaNumeroCuotas').value) || 1;
+    const frecuenciaPago = document.getElementById('aulaFrecuenciaPago').value;
+    const fechaPrimeraCuota = document.getElementById('aulaFechaPrimeraCuota').value;
+
     // Get selected materias
     const materias = [];
     document.querySelectorAll('input[name="materiaAula"]:checked').forEach(cb => {
@@ -4908,8 +5157,75 @@ async function handleSaveAula(e) {
         return;
     }
 
+    if (precioTotal <= 0) {
+        showMessage('El precio total debe ser mayor a 0', 'error');
+        return;
+    }
+
+    if (cuotaInicial > precioTotal) {
+        showMessage('La cuota inicial no puede ser mayor al precio total', 'error');
+        return;
+    }
+
     try {
         await waitForFirebase();
+
+        // Calculate payment plan
+        const saldoRestante = precioTotal - cuotaInicial;
+        const valorCuota = saldoRestante / numeroCuotas;
+
+        // Generate cuotas array from the editable inputs
+        const cuotas = [];
+        const cuotasInputs = document.querySelectorAll('.cuota-monto');
+        
+        if (cuotasInputs.length > 0) {
+            // Get cuotas from the editable inputs
+            cuotasInputs.forEach((input, index) => {
+                const monto = limpiarFormatoMoneda(input.value);
+                const fechaInput = document.querySelector(`.cuota-fecha[data-cuota="${index}"]`);
+                const fechaVencimiento = fechaInput ? fechaInput.value : '';
+                
+                cuotas.push({
+                    numero: index + 1,
+                    monto: monto,
+                    fechaVencimiento: fechaVencimiento,
+                    pagada: false,
+                    fechaPago: null
+                });
+            });
+        } else if (fechaPrimeraCuota) {
+            // Fallback: generate cuotas automatically if no inputs exist
+            let fechaActual = new Date(fechaPrimeraCuota + 'T00:00:00');
+            
+            for (let i = 0; i < numeroCuotas; i++) {
+                cuotas.push({
+                    numero: i + 1,
+                    monto: valorCuota,
+                    fechaVencimiento: fechaActual.toISOString().split('T')[0],
+                    pagada: false,
+                    fechaPago: null
+                });
+
+                // Calculate next payment date based on frequency
+                switch (frecuenciaPago) {
+                    case 'semanal':
+                        fechaActual.setDate(fechaActual.getDate() + 7);
+                        break;
+                    case 'quincenal':
+                        fechaActual.setDate(fechaActual.getDate() + 15);
+                        break;
+                    case 'mensual':
+                        fechaActual.setMonth(fechaActual.getMonth() + 1);
+                        break;
+                    case 'bimestral':
+                        fechaActual.setMonth(fechaActual.getMonth() + 2);
+                        break;
+                    case 'trimestral':
+                        fechaActual.setMonth(fechaActual.getMonth() + 3);
+                        break;
+                }
+            }
+        }
 
         const aulaData = {
             nombre,
@@ -4918,6 +5234,15 @@ async function handleSaveAula(e) {
             grado,
             materias,
             color,
+            // Pricing data
+            precioTotal,
+            cuotaInicial,
+            saldoRestante,
+            numeroCuotas,
+            valorCuota,
+            frecuenciaPago,
+            fechaPrimeraCuota: fechaPrimeraCuota || null,
+            cuotas,
             updatedAt: new Date().toISOString()
         };
 

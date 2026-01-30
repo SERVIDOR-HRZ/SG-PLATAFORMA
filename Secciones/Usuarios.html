@@ -1648,6 +1648,98 @@
                         </div>
                     </div>
 
+                    <!-- Pricing Section -->
+                    <div class="form-section">
+                        <h4><i class="bi bi-cash-coin"></i> Configuración de Precios y Cuotas</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Define el precio del aula y configura el plan de pagos</p>
+                        
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="aulaPrecioTotal">Precio Total del Aula *</label>
+                                <div class="input-with-icon">
+                                    <span class="input-icon">$</span>
+                                    <input type="text" id="aulaPrecioTotal" 
+                                           placeholder="0" required>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="aulaCuotaInicial">Cuota Inicial</label>
+                                <div class="input-with-icon">
+                                    <span class="input-icon">$</span>
+                                    <input type="text" id="aulaCuotaInicial" 
+                                           placeholder="0">
+                                </div>
+                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    Monto que se paga al inscribirse (opcional)
+                                </small>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="aulaNumeroCuotas">Número de Cuotas Restantes</label>
+                                <input type="number" id="aulaNumeroCuotas" min="1" max="24" 
+                                       placeholder="1" value="1">
+                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    Cuotas para pagar el saldo restante
+                                </small>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="aulaFrecuenciaPago">Frecuencia de Pago</label>
+                                <select id="aulaFrecuenciaPago">
+                                    <option value="mensual">Mensual</option>
+                                    <option value="quincenal">Quincenal</option>
+                                    <option value="semanal">Semanal</option>
+                                    <option value="bimestral">Bimestral</option>
+                                    <option value="trimestral">Trimestral</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="aulaFechaPrimeraCuota">Fecha Límite Primera Cuota *</label>
+                                <input type="date" id="aulaFechaPrimeraCuota" required>
+                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    Fecha límite de pago de la primera cuota
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Resumen de Cuotas -->
+                        <div class="cuotas-resumen" id="cuotasResumen" style="display: none;">
+                            <h5><i class="bi bi-calculator"></i> Resumen del Plan de Pagos</h5>
+                            <div class="resumen-grid">
+                                <div class="resumen-item">
+                                    <span class="resumen-label">Precio Total:</span>
+                                    <span class="resumen-value" id="resumenPrecioTotal">$0.00</span>
+                                </div>
+                                <div class="resumen-item">
+                                    <span class="resumen-label">Cuota Inicial:</span>
+                                    <span class="resumen-value" id="resumenCuotaInicial">$0.00</span>
+                                </div>
+                                <div class="resumen-item">
+                                    <span class="resumen-label">Saldo Restante:</span>
+                                    <span class="resumen-value" id="resumenSaldoRestante">$0.00</span>
+                                </div>
+                                <div class="resumen-item">
+                                    <span class="resumen-label">Valor por Cuota:</span>
+                                    <span class="resumen-value" id="resumenValorCuota">$0.00</span>
+                                </div>
+                                <div class="resumen-item">
+                                    <span class="resumen-label">Número de Cuotas:</span>
+                                    <span class="resumen-value" id="resumenNumeroCuotas">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Detalle de Cuotas -->
+                            <div class="cuotas-detalle-section" id="cuotasDetalleSection" style="display: none;">
+                                <h6><i class="bi bi-calendar-check"></i> Detalle de Cuotas</h6>
+                                <div class="cuotas-lista" id="cuotasLista">
+                                    <!-- Las cuotas se generarán dinámicamente aquí -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Asignar Estudiantes -->
                     <div class="form-section">
                         <h4>Asignar Estudiantes</h4>
