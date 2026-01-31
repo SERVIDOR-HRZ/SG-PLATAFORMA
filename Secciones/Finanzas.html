@@ -54,6 +54,18 @@
             </div>
         </div>
 
+        <!-- Información del Aula Actual (se muestra al seleccionar aula) -->
+        <div class="sidebar-aula-info" id="sidebarAulaInfo" style="display: none;">
+            <div class="sidebar-aula-nombre" id="sidebarAulaNombre">
+                <i class="bi bi-door-open"></i>
+                <span id="sidebarAulaNombreText">Aula</span>
+            </div>
+            <button class="btn-cambiar-aula-sidebar" id="btnCambiarAulaSidebar">
+                <i class="bi bi-arrow-left-circle"></i>
+                <span>Cambiar Aula</span>
+            </button>
+        </div>
+
         <!-- Menú de Navegación de Finanzas (se muestra al seleccionar aula) -->
         <nav class="sidebar-menu" id="sidebarMenu" style="display: none;">
             <button class="sidebar-menu-item active" data-tab="cuentas">
@@ -110,26 +122,35 @@
 
         <!-- Contenedor de Finanzas (oculto inicialmente) -->
         <div class="finanzas-container" id="finanzasContainer" style="display: none;">
-            <!-- Breadcrumb de navegación -->
-            <div class="finanzas-breadcrumb">
-                <button class="btn-cambiar-aula" id="btnCambiarAula">
-                    <i class="bi bi-arrow-left"></i>
-                    Cambiar Aula
-                </button>
-                <div class="aula-actual-info" id="aulaActualInfo">
-                    <i class="bi bi-door-open"></i>
-                    <span id="aulaActualNombre">Aula</span>
-                </div>
-            </div>
 
         <!-- Tab: Cuentas Bancarias -->
         <div class="tab-content active" id="cuentasTab">
             <div class="section-header">
                 <h2>Gestión de Cuentas Bancarias</h2>
-                <button class="btn-primary" id="btnNuevaCuenta">
-                    <i class="bi bi-plus-circle"></i>
-                    Nueva Cuenta
-                </button>
+                <div class="header-actions">
+                    <select id="filtroAnioCuentas" class="filtro-periodo">
+                        <!-- Se llenará dinámicamente -->
+                    </select>
+                    <select id="filtroMesCuentas" class="filtro-periodo">
+                        <option value="">Todos los meses</option>
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                    <button class="btn-primary" id="btnNuevaCuenta">
+                        <i class="bi bi-plus-circle"></i>
+                        Nueva Cuenta
+                    </button>
+                </div>
             </div>
 
 
@@ -145,13 +166,13 @@
                         <div class="dashboard-value" id="saldoTotal">$0</div>
                     </div>
                 </div>
-                <div class="dashboard-card total-cuentas">
+                <div class="dashboard-card promedio-mes">
                     <div class="dashboard-icon">
-                        <i class="bi bi-bank"></i>
+                        <i class="bi bi-graph-up"></i>
                     </div>
                     <div class="dashboard-info">
-                        <div class="dashboard-label">Cuentas Activas</div>
-                        <div class="dashboard-value" id="totalCuentas">0</div>
+                        <div class="dashboard-label">Promedio por Mes</div>
+                        <div class="dashboard-value" id="promedioMes">$0</div>
                     </div>
                 </div>
                 <div class="dashboard-card ingresos-mes">
@@ -159,7 +180,7 @@
                         <i class="bi bi-arrow-down-circle"></i>
                     </div>
                     <div class="dashboard-info">
-                        <div class="dashboard-label">Ingresos del Mes</div>
+                        <div class="dashboard-label">Ingresos del Periodo</div>
                         <div class="dashboard-value" id="ingresosMes">$0</div>
                     </div>
                 </div>
@@ -168,7 +189,7 @@
                         <i class="bi bi-arrow-up-circle"></i>
                     </div>
                     <div class="dashboard-info">
-                        <div class="dashboard-label">Gastos del Mes</div>
+                        <div class="dashboard-label">Gastos del Periodo</div>
                         <div class="dashboard-value" id="gastosMes">$0</div>
                     </div>
                 </div>
@@ -207,7 +228,6 @@
                     <thead>
                         <tr>
                             <th>Profesor</th>
-                            <th>Email</th>
                             <th>Rol</th>
                             <th>Tarifa por Hora</th>
                             <th>Método de Pago</th>
@@ -354,7 +374,7 @@
             <div class="section-header">
                 <h2>Ingresos y Gastos</h2>
                 <div class="movimientos-actions">
-                    <button class="btn-primary" id="btnNuevoIngreso">
+                    <button class="btn-success" id="btnNuevoIngreso">
                         <i class="bi bi-plus-circle"></i>
                         Nuevo Ingreso
                     </button>
@@ -389,8 +409,8 @@
             <div class="categorias-resumen" id="categoriasResumen" style="display: none;">
                 <div class="resumen-header">
                     <h3>Resumen por Categorías</h3>
-                    <button class="btn-icon-small" id="btnCerrarResumen" title="Ocultar resumen">
-                        <i class="bi bi-x-lg"></i>
+                    <button class="btn-icon-small btn-toggle-resumen" id="btnToggleResumen" title="Colapsar resumen">
+                        <i class="bi bi-chevron-up"></i>
                     </button>
                 </div>
                 <div class="resumen-categorias-grid" id="resumenCategoriasGrid">
@@ -680,6 +700,9 @@
                     <div class="form-group">
                         <label for="saldoInicialForm">Saldo Inicial *</label>
                         <input type="text" id="saldoInicialForm" placeholder="0" required inputmode="numeric">
+                        <small class="form-help" id="saldoHelpText" style="display: none; color: rgba(255, 193, 7, 0.9); margin-top: 0.5rem;">
+                            <i class="bi bi-info-circle"></i> El saldo solo se puede establecer al crear la cuenta. Para modificarlo, usa ingresos o gastos.
+                        </small>
                     </div>
 
                     <div class="form-group">

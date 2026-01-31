@@ -1,4 +1,4 @@
-// ========== GESTIÓN DE CUENTAS BANCARIAS ==========
+﻿// ========== GESTIÓN DE CUENTAS BANCARIAS ==========
 
 let editingCuentaId = null;
 let cuentasList = [];
@@ -7,6 +7,11 @@ let todosLosEstudiantesRecompensa = [];
 
 // Cargar cuentas bancarias
 async function loadCuentas() {
+    // Inicializar selector de años si existe
+    if (typeof window.inicializarSelectorAnios === 'function') {
+        window.inicializarSelectorAnios();
+    }
+    
     const cuentasGrid = document.getElementById('cuentasGrid');
     cuentasGrid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
 
@@ -125,11 +130,14 @@ function createCuentaCard(cuenta) {
                     ${iconHTML}
                 </div>
                 <div class="cuenta-info">
-                    <h4>${cuenta.nombre}</h4>
-                    <p>${cuenta.tipo}</p>
+                    <p class="cuenta-info-tipo">${cuenta.tipo}</p>
+                                        <h4>${cuenta.nombre}</h4>
                 </div>
             </div>
             <div class="cuenta-actions">
+                <button class="btn-icon toggle-saldo" type="button" title="Ocultar/Mostrar saldo" data-cuenta-id="${cuenta.id}">
+                    <i class="bi bi-eye-fill"></i>
+                </button>
                 <button class="btn-icon edit" type="button" title="Editar cuenta">
                     <i class="bi bi-pencil-fill"></i>
                 </button>
@@ -139,16 +147,25 @@ function createCuentaCard(cuenta) {
             </div>
         </div>
         <div class="cuenta-saldo">
-            <div class="cuenta-saldo-label">Saldo Actual</div>
-            <div class="cuenta-saldo-valor">$${formatNumber(cuenta.saldo || 0)}</div>
+            <div class="cuenta-saldo-label">SALDO ACTUAL</div>
+            <div class="cuenta-saldo-valor" data-saldo="${cuenta.saldo || 0}">${formatNumber(cuenta.saldo || 0)}</div>
         </div>
         ${cuenta.numeroCuenta ? `<div class="cuenta-numero"><i class="bi bi-credit-card"></i> ${cuenta.numeroCuenta}</div>` : ''}
         ${cuenta.notas ? `<div class="cuenta-notas-box"><i class="bi bi-sticky"></i> ${cuenta.notas}</div>` : ''}
     `;
 
     // Agregar event listeners después de crear el HTML
+    const toggleBtn = card.querySelector('.btn-icon.toggle-saldo');
     const editBtn = card.querySelector('.btn-icon.edit');
     const deleteBtn = card.querySelector('.btn-icon.delete');
+    
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleSaldoVisibility(card, toggleBtn);
+        });
+    }
     
     if (editBtn) {
         editBtn.addEventListener('click', (e) => {
@@ -167,6 +184,30 @@ function createCuentaCard(cuenta) {
     }
 
     return card;
+}
+
+// Función para ocultar/mostrar saldo
+function toggleSaldoVisibility(card, button) {
+    const saldoValor = card.querySelector('.cuenta-saldo-valor');
+    const icon = button.querySelector('i');
+    const saldoOriginal = parseFloat(saldoValor.dataset.saldo) || 0;
+    
+    if (saldoValor.classList.contains('oculto')) {
+        // Mostrar saldo
+        if (typeof formatNumber === 'function') {
+            saldoValor.textContent = formatNumber(saldoOriginal);
+        } else {
+            // Fallback si formatNumber no está disponible
+            saldoValor.textContent = new Intl.NumberFormat('es-CO').format(Math.round(saldoOriginal));
+        }
+        saldoValor.classList.remove('oculto');
+        icon.className = 'bi bi-eye-fill';
+    } else {
+        // Ocultar saldo
+        saldoValor.textContent = '••••••';
+        saldoValor.classList.add('oculto');
+        icon.className = 'bi bi-eye-slash-fill';
+    }
 }
 
 // Ajustar color (oscurecer o aclarar)
@@ -190,8 +231,15 @@ async function updateDashboard() {
             saldoTotal += cuenta.saldo || 0;
         });
 
-        document.getElementById('saldoTotal').textContent = `$${formatNumber(saldoTotal)}`;
-        document.getElementById('totalCuentas').textContent = cuentasList.length;
+        const saldoTotalEl = document.getElementById('saldoTotal');
+        const totalCuentasEl = document.getElementById('totalCuentas');
+        
+        if (saldoTotalEl) {
+            saldoTotalEl.textContent = `$${formatNumber(saldoTotal)}`;
+        }
+        if (totalCuentasEl) {
+            totalCuentasEl.textContent = cuentasList.length;
+        }
 
         // Calcular ingresos y gastos del mes actual
         const now = new Date();
@@ -215,8 +263,15 @@ async function updateDashboard() {
             }
         });
 
-        document.getElementById('ingresosMes').textContent = `$${formatNumber(ingresosMes)}`;
-        document.getElementById('gastosMes').textContent = `$${formatNumber(gastosMes)}`;
+        const ingresosMesEl = document.getElementById('ingresosMes');
+        const gastosMesEl = document.getElementById('gastosMes');
+        
+        if (ingresosMesEl) {
+            ingresosMesEl.textContent = `$${formatNumber(ingresosMes)}`;
+        }
+        if (gastosMesEl) {
+            gastosMesEl.textContent = `$${formatNumber(gastosMes)}`;
+        }
 
     } catch (error) {
         console.error('Error updating dashboard:', error);
@@ -231,8 +286,19 @@ function openNuevaCuenta() {
     
     // Limpiar el dataset de formateado para permitir reinicialización
     const saldoInput = document.getElementById('saldoInicialForm');
+    const saldoHelpText = document.getElementById('saldoHelpText');
+    
     if (saldoInput) {
         delete saldoInput.dataset.formateado;
+        // Habilitar el campo de saldo para nueva cuenta
+        saldoInput.disabled = false;
+        saldoInput.style.opacity = '1';
+        saldoInput.style.cursor = 'text';
+    }
+    
+    // Ocultar mensaje de ayuda para nueva cuenta
+    if (saldoHelpText) {
+        saldoHelpText.style.display = 'none';
     }
     
     document.getElementById('modalCuenta').classList.add('active');
@@ -264,8 +330,19 @@ async function openEditCuenta(cuentaId) {
         
         // Limpiar el dataset de formateado para permitir reinicialización
         const saldoInput = document.getElementById('saldoInicialForm');
+        const saldoHelpText = document.getElementById('saldoHelpText');
+        
         if (saldoInput) {
             delete saldoInput.dataset.formateado;
+            // Deshabilitar el campo de saldo al editar cuenta existente
+            saldoInput.disabled = true;
+            saldoInput.style.opacity = '0.6';
+            saldoInput.style.cursor = 'not-allowed';
+        }
+        
+        // Mostrar mensaje de ayuda al editar cuenta
+        if (saldoHelpText) {
+            saldoHelpText.style.display = 'block';
         }
         
         document.getElementById('modalCuenta').classList.add('active');
@@ -289,6 +366,15 @@ async function openEditCuenta(cuentaId) {
 function closeModalCuenta() {
     document.getElementById('modalCuenta').classList.remove('active');
     document.getElementById('formCuenta').reset();
+    
+    // Rehabilitar el campo de saldo al cerrar el modal
+    const saldoInput = document.getElementById('saldoInicialForm');
+    if (saldoInput) {
+        saldoInput.disabled = false;
+        saldoInput.style.opacity = '1';
+        saldoInput.style.cursor = 'text';
+    }
+    
     editingCuentaId = null;
 }
 
@@ -299,7 +385,6 @@ async function handleSaveCuenta(e) {
     const nombre = document.getElementById('nombreCuentaForm').value.trim();
     const tipo = document.getElementById('tipoCuentaForm').value;
     const numeroCuenta = document.getElementById('numeroCuentaForm').value.trim();
-    const saldo = obtenerValorNumerico(document.getElementById('saldoInicialForm'));
     const color = document.getElementById('colorCuentaForm').value;
     const notas = document.getElementById('notasCuentaForm').value.trim();
 
@@ -310,23 +395,32 @@ async function handleSaveCuenta(e) {
 
     try {
         const db = getDB();
-        const cuentaData = {
-            nombre,
-            tipo,
-            numeroCuenta,
-            saldo,
-            color,
-            notas,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
+        
         if (editingCuentaId) {
-            // Editar cuenta existente
+            // Editar cuenta existente - NO actualizar el saldo
+            const cuentaData = {
+                nombre,
+                tipo,
+                numeroCuenta,
+                color,
+                notas,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
             await db.collection('cuentas_bancarias').doc(editingCuentaId).update(cuentaData);
             showNotification('success', 'Cuenta Actualizada', 'La cuenta se ha actualizado correctamente');
         } else {
-            // Crear nueva cuenta
-            cuentaData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            // Crear nueva cuenta - incluir el saldo inicial
+            const saldo = obtenerValorNumerico(document.getElementById('saldoInicialForm'));
+            const cuentaData = {
+                nombre,
+                tipo,
+                numeroCuenta,
+                saldo,
+                color,
+                notas,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
             await db.collection('cuentas_bancarias').add(cuentaData);
             showNotification('success', 'Cuenta Creada', 'La cuenta se ha creado correctamente');
         }
@@ -599,13 +693,33 @@ function calcularResumenCategorias(movimientos) {
         resumenGrid.appendChild(gastosSection);
     }
     
-    // Mostrar el resumen
+    // Mostrar el resumen (pero con el contenido colapsado por defecto)
     resumenContainer.style.display = 'block';
     
-    // Setup botón cerrar
-    const btnCerrar = document.getElementById('btnCerrarResumen');
-    btnCerrar.onclick = () => {
-        resumenContainer.style.display = 'none';
+    // Iniciar el grid colapsado
+    resumenGrid.style.display = 'none';
+    
+    // Setup botón toggle (colapsar/expandir)
+    const btnToggle = document.getElementById('btnToggleResumen');
+    
+    // Configurar icono inicial como colapsado
+    btnToggle.querySelector('i').className = 'bi bi-chevron-down';
+    btnToggle.title = 'Expandir resumen';
+    
+    btnToggle.onclick = () => {
+        const isCollapsed = resumenGrid.style.display === 'none';
+        
+        if (isCollapsed) {
+            // Expandir
+            resumenGrid.style.display = 'flex';
+            btnToggle.querySelector('i').className = 'bi bi-chevron-up';
+            btnToggle.title = 'Colapsar resumen';
+        } else {
+            // Colapsar
+            resumenGrid.style.display = 'none';
+            btnToggle.querySelector('i').className = 'bi bi-chevron-down';
+            btnToggle.title = 'Expandir resumen';
+        }
     };
 }
 
@@ -635,17 +749,20 @@ function createMovimientoItem(movimiento) {
             </div>
             <div class="movimiento-detalles">
                 <h4>${movimiento.descripcion}</h4>
-                <p>${movimiento.categoria}</p>
-                <span class="movimiento-fecha">${fechaStr}</span>
-                ${movimiento.notas ? `<p style="margin-top: 0.5rem; font-size: 0.8rem; color: #999;">${movimiento.notas}</p>` : ''}
+                <p><i class="bi bi-tag"></i> ${movimiento.categoria}</p>
+                <span class="movimiento-fecha"><i class="bi bi-calendar3"></i> ${fechaStr}</span>
+                ${movimiento.notas ? `<div class="movimiento-notas">${movimiento.notas.replace(/\n/g, '<br>')}</div>` : ''}
             </div>
         </div>
         <div class="movimiento-monto">
             <div class="movimiento-monto-valor">${signo}$${formatNumber(movimiento.monto)}</div>
-            <div class="movimiento-monto-cuenta">${nombreCuenta}</div>
+            <div class="movimiento-monto-cuenta"><i class="bi bi-wallet2"></i> ${nombreCuenta}</div>
         </div>
         <div class="movimiento-actions">
-            <button class="btn-icon" style="background: #dc3545;" onclick="deleteMovimiento('${movimiento.id}', '${movimiento.tipo}', ${movimiento.monto}, '${movimiento.cuentaId}')" title="Eliminar">
+            <button class="btn-icon edit" onclick="openEditMovimiento('${movimiento.id}')" title="Editar">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn-icon" class="delete" onclick="deleteMovimiento('${movimiento.id}', '${movimiento.tipo}', ${movimiento.monto}, '${movimiento.cuentaId}')" title="Eliminar">
                 <i class="bi bi-trash"></i>
             </button>
         </div>
@@ -1162,8 +1279,8 @@ window.openNuevoGasto = openNuevoGasto;
 window.deleteMovimiento = deleteMovimiento;
 window.loadCuentas = loadCuentas;
 window.loadMovimientos = loadMovimientos;
-window.limpiarFiltrosCuentas = limpiarFiltrosCuentas;
-window.cargarTiposCuentasDisponibles = cargarTiposCuentasDisponibles;
+window.updateDashboard = updateDashboard;
+window.createMovimientoItem = createMovimientoItem;
 window.inicializarFormateoNumerico = inicializarFormateoNumerico;
 window.obtenerValorNumerico = obtenerValorNumerico;
 window.loadCategorias = loadCategorias;
@@ -1834,3 +1951,131 @@ function initLimpiarHistorialEvent() {
 }
 
 window.limpiarHistorialRecompensas = limpiarHistorialRecompensas;
+
+// ========== ACTUALIZACIÓN DE DASHBOARD CON FILTROS ==========
+
+// Sobrescribir función updateDashboard con filtros
+window.updateDashboard = async function() {
+    try {
+        const db = getDB();
+        
+        // Calcular saldo total
+        let saldoTotal = 0;
+        cuentasList.forEach(cuenta => {
+            saldoTotal += cuenta.saldo || 0;
+        });
+
+        const saldoTotalEl = document.getElementById('saldoTotal');
+        if (saldoTotalEl) {
+            saldoTotalEl.textContent = `${formatNumber(saldoTotal)}`;
+        }
+
+        // Obtener filtros seleccionados
+        const filtroAnioEl = document.getElementById('filtroAnioCuentas');
+        const filtroMesEl = document.getElementById('filtroMesCuentas');
+        
+        if (!filtroAnioEl || !filtroMesEl) {
+            console.warn('Filtros no encontrados, usando valores por defecto');
+            return;
+        }
+        
+        const filtroAnio = filtroAnioEl.value;
+        const filtroMes = filtroMesEl.value;
+
+        let startDate, endDate;
+
+        if (filtroAnio && filtroMes) {
+            // Filtrar por año y mes específico
+            const anio = parseInt(filtroAnio);
+            const mes = parseInt(filtroMes) - 1; // Los meses en JS van de 0-11
+            startDate = new Date(anio, mes, 1);
+            endDate = new Date(anio, mes + 1, 0, 23, 59, 59);
+        } else if (filtroAnio) {
+            // Filtrar solo por año
+            const anio = parseInt(filtroAnio);
+            startDate = new Date(anio, 0, 1);
+            endDate = new Date(anio, 11, 31, 23, 59, 59);
+        } else {
+            // Sin filtro, usar mes actual
+            const now = new Date();
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        }
+
+        // Obtener movimientos del periodo
+        const movimientosSnapshot = await db.collection('movimientos')
+            .where('fecha', '>=', firebase.firestore.Timestamp.fromDate(startDate))
+            .where('fecha', '<=', firebase.firestore.Timestamp.fromDate(endDate))
+            .get();
+
+        let ingresosPeriodo = 0;
+        let gastosPeriodo = 0;
+
+        movimientosSnapshot.forEach(doc => {
+            const mov = doc.data();
+            if (mov.tipo === 'ingreso') {
+                ingresosPeriodo += mov.monto || 0;
+            } else if (mov.tipo === 'gasto') {
+                gastosPeriodo += mov.monto || 0;
+            }
+        });
+
+        // Calcular promedio por mes
+        let promedioMes = 0;
+        if (filtroAnio && !filtroMes) {
+            // Si solo hay año seleccionado, calcular promedio de 12 meses
+            const totalNeto = ingresosPeriodo - gastosPeriodo;
+            promedioMes = totalNeto / 12;
+        } else {
+            // Si hay mes específico o ningún filtro, el promedio es el neto del periodo
+            promedioMes = ingresosPeriodo - gastosPeriodo;
+        }
+
+        const promedioMesEl = document.getElementById('promedioMes');
+        const ingresosMesEl = document.getElementById('ingresosMes');
+        const gastosMesEl = document.getElementById('gastosMes');
+        
+        if (promedioMesEl) {
+            promedioMesEl.textContent = `${formatNumber(promedioMes)}`;
+        }
+        if (ingresosMesEl) {
+            ingresosMesEl.textContent = `${formatNumber(ingresosPeriodo)}`;
+        }
+        if (gastosMesEl) {
+            gastosMesEl.textContent = `${formatNumber(gastosPeriodo)}`;
+        }
+
+    } catch (error) {
+        console.error('Error updating dashboard:', error);
+    }
+};
+
+// Inicializar selector de años
+window.inicializarSelectorAnios = function() {
+    const selectAnio = document.getElementById('filtroAnioCuentas');
+    if (!selectAnio) return;
+    
+    const anioActual = new Date().getFullYear();
+    
+    // Limpiar opciones existentes
+    selectAnio.innerHTML = '<option value="">Todos los años</option>';
+    
+    // Agregar años desde 2020 hasta el año actual + 1
+    for (let anio = 2020; anio <= anioActual + 1; anio++) {
+        const option = document.createElement('option');
+        option.value = anio;
+        option.textContent = anio;
+        if (anio === anioActual) {
+            option.selected = true;
+        }
+        selectAnio.appendChild(option);
+    }
+    
+    // Seleccionar mes actual
+    const mesActual = new Date().getMonth() + 1;
+    const selectMes = document.getElementById('filtroMesCuentas');
+    if (selectMes) {
+        selectMes.value = mesActual;
+    }
+};
+

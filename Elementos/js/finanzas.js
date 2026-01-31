@@ -139,10 +139,10 @@ async function seleccionarAulaFinanzas(aulaId) {
     document.getElementById('aulaSelectorContainer').style.display = 'none';
     document.getElementById('finanzasContainer').style.display = 'block';
 
-    // Actualizar info del aula actual
-    document.getElementById('aulaActualNombre').textContent = currentAulaData.nombre;
-    const aulaInfo = document.getElementById('aulaActualInfo');
-    aulaInfo.style.background = `linear-gradient(135deg, ${currentAulaData.color || '#ff0000'}, ${adjustColorFinanzas(currentAulaData.color || '#ff0000', -30)})`;
+    // Actualizar info del aula en el sidebar
+    document.getElementById('sidebarAulaNombreText').textContent = currentAulaData.nombre;
+    const sidebarAulaInfo = document.getElementById('sidebarAulaInfo');
+    sidebarAulaInfo.style.display = 'block';
 
     // Ocultar botones de perfil/web/panel y mostrar menú de navegación
     document.getElementById('sidebarProfileActions').style.display = 'none';
@@ -159,6 +159,9 @@ function volverASelectorAulasFinanzas() {
 
     document.getElementById('finanzasContainer').style.display = 'none';
     document.getElementById('aulaSelectorContainer').style.display = 'block';
+
+    // Ocultar info del aula en sidebar
+    document.getElementById('sidebarAulaInfo').style.display = 'none';
 
     // Mostrar botones de perfil/web/panel y ocultar menú de navegación
     document.getElementById('sidebarProfileActions').style.display = 'flex';
@@ -267,8 +270,12 @@ function updateWeekDisplay() {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Botón cambiar aula
-    document.getElementById('btnCambiarAula').addEventListener('click', volverASelectorAulasFinanzas);
+    // Botón cambiar aula en sidebar
+    document.getElementById('btnCambiarAulaSidebar').addEventListener('click', volverASelectorAulasFinanzas);
+
+    // Filtros de periodo en cuentas
+    document.getElementById('filtroAnioCuentas').addEventListener('change', updateDashboard);
+    document.getElementById('filtroMesCuentas').addEventListener('change', updateDashboard);
 
     // Cuentas bancarias
     document.getElementById('btnNuevaCuenta').addEventListener('click', openNuevaCuenta);
@@ -389,7 +396,7 @@ function switchTab(tab) {
 // Load tarifas (filtrado por profesores del aula)
 async function loadTarifas() {
     const tarifasTableBody = document.getElementById('tarifasTableBody');
-    tarifasTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div></div></td></tr>';
+    tarifasTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div></div></td></tr>';
 
     try {
         // Obtener todos los profesores (usuarios admin con rol profesor)
@@ -422,7 +429,7 @@ async function loadTarifas() {
         if (profesoresDocs.length === 0) {
             tarifasTableBody.innerHTML = `
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 3rem;">
+                    <td colspan="7" style="text-align: center; padding: 3rem;">
                         <div class="empty-state">
                             <i class="bi bi-person-x"></i>
                             <h3>No hay profesores asignados a esta aula</h3>
@@ -445,7 +452,7 @@ async function loadTarifas() {
         console.error('Error loading tarifas:', error);
         tarifasTableBody.innerHTML = `
             <tr>
-                <td colspan="8" style="text-align: center; padding: 3rem;">
+                <td colspan="7" style="text-align: center; padding: 3rem;">
                     <div class="empty-state">
                         <i class="bi bi-exclamation-triangle"></i>
                         <h3>Error al cargar tarifas</h3>
@@ -510,10 +517,10 @@ function createTarifaRow(profesor) {
                 ${avatarHTML}
                 <div>
                     <strong>${profesor.nombre}</strong>
+                    <small class="profesor-email">${emailDisplay}</small>
                 </div>
             </div>
         </td>
-        <td>${emailDisplay}</td>
         <td><span class="badge-rol ${rolClass}">${rolDisplay}</span></td>
         <td class="tarifa-cell">${formatNumber(tarifa)}</td>
         <td>${metodoPagoHTML}</td>
@@ -619,7 +626,7 @@ async function loadPagosSemana() {
     const pagosTableBody = document.getElementById('pagosTableBody');
     
     // Limpiar completamente la tabla antes de empezar
-    pagosTableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div></div></td></tr>';
+    pagosTableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div><p style="color: rgba(255,255,255,0.7); margin-top: 1rem;">Cargando pagos...</p></div></td></tr>';
 
     try {
         // Obtener todos los profesores (usuarios admin con rol profesor)
@@ -654,8 +661,9 @@ async function loadPagosSemana() {
                 <tr>
                     <td colspan="10" style="text-align: center; padding: 3rem;">
                         <div class="empty-state">
-                            <i class="bi bi-person-x"></i>
-                            <h3>No hay profesores asignados a esta aula</h3>
+                            <i class="bi bi-person-x" style="font-size: 4rem; color: rgba(255,255,255,0.3); margin-bottom: 1rem;"></i>
+                            <h3 style="color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;">No hay profesores asignados a esta aula</h3>
+                            <p style="color: rgba(255,255,255,0.6);">Asigna profesores al aula desde la gestión de usuarios</p>
                         </div>
                     </td>
                 </tr>
@@ -673,33 +681,33 @@ async function loadPagosSemana() {
                 verificarPagoSemana(profesor.id)
             ]);
 
-            // Solo retornar si tiene clases pendientes de pago
-            if (clasesData.totalClases > 0 && !pagoExistente) {
-                return { profesor, clasesData };
-            }
-            return null;
+            // Retornar profesor con sus datos de clases y pago
+            return { 
+                profesor, 
+                clasesData, 
+                pagoExistente,
+                tienePagoPendiente: clasesData.totalClases > 0 && !pagoExistente
+            };
         });
 
         // Esperar a que todas las promesas se resuelvan
         const resultados = await Promise.all(profesoresPromises);
 
-        // Filtrar resultados nulos y crear las filas
-        const filasTemporales = resultados
-            .filter(resultado => resultado !== null)
-            .map(({ profesor, clasesData }) => createPagoRow(profesor, clasesData, null));
+        // Filtrar solo los que tienen pagos pendientes
+        const profesoresConPagosPendientes = resultados.filter(r => r.tienePagoPendiente);
 
         // Limpiar la tabla completamente antes de agregar las nuevas filas
         pagosTableBody.innerHTML = '';
 
         // Si no hay profesores con pagos pendientes, mostrar mensaje
-        if (filasTemporales.length === 0) {
+        if (profesoresConPagosPendientes.length === 0) {
             pagosTableBody.innerHTML = `
                 <tr>
                     <td colspan="10" style="text-align: center; padding: 3rem;">
                         <div class="empty-state">
-                            <i class="bi bi-check-circle"></i>
-                            <h3>No hay pagos pendientes</h3>
-                            <p>Todos los profesores con clases en esta semana ya han sido pagados</p>
+                            <i class="bi bi-check-circle" style="font-size: 4rem; color: #28a745; margin-bottom: 1rem;"></i>
+                            <h3 style="color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;">No hay pagos pendientes</h3>
+                            <p style="color: rgba(255,255,255,0.6);">Todos los profesores con clases en esta semana ya han sido pagados</p>
                         </div>
                     </td>
                 </tr>
@@ -707,7 +715,10 @@ async function loadPagosSemana() {
         } else {
             // Agregar todas las filas de una vez usando un fragmento de documento
             const fragment = document.createDocumentFragment();
-            filasTemporales.forEach(fila => fragment.appendChild(fila));
+            profesoresConPagosPendientes.forEach(({ profesor, clasesData }) => {
+                const fila = createPagoRow(profesor, clasesData, null);
+                fragment.appendChild(fila);
+            });
             pagosTableBody.appendChild(fragment);
         }
     } catch (error) {
@@ -716,9 +727,9 @@ async function loadPagosSemana() {
             <tr>
                 <td colspan="10" style="text-align: center; padding: 3rem;">
                     <div class="empty-state">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <h3>Error al cargar pagos</h3>
-                        <p>${error.message}</p>
+                        <i class="bi bi-exclamation-triangle" style="font-size: 4rem; color: #ffc107; margin-bottom: 1rem;"></i>
+                        <h3 style="color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;">Error al cargar pagos</h3>
+                        <p style="color: rgba(255,255,255,0.6);">${error.message}</p>
                     </div>
                 </td>
             </tr>
@@ -862,18 +873,18 @@ function createPagoRow(profesor, clasesData, pagoExistente) {
         : '<span class="text-muted">No especificado</span>';
 
     const numeroCuentaHTML = numeroCuenta 
-        ? `<div class="cuenta-cell">
-            <span class="cuenta-text">${numeroCuenta}</span>
-            <button class="btn-copy" onclick="copiarTexto('${numeroCuenta}', this)" title="Copiar">
+        ? `<div class="cuenta-cell-table">
+            <span class="cuenta-text-table">${numeroCuenta}</span>
+            <button class="btn-copy-table" onclick="copiarTexto('${numeroCuenta}', this)" title="Copiar">
                 <i class="bi bi-clipboard"></i>
             </button>
            </div>`
         : '<span class="text-muted">No especificado</span>';
 
     const nombreCuentaHTML = nombreCuenta 
-        ? `<div class="cuenta-cell">
-            <span class="cuenta-text">${nombreCuenta}</span>
-            <button class="btn-copy" onclick="copiarTexto('${nombreCuenta}', this)" title="Copiar">
+        ? `<div class="cuenta-cell-table">
+            <span class="cuenta-text-table">${nombreCuenta}</span>
+            <button class="btn-copy-table" onclick="copiarTexto('${nombreCuenta}', this)" title="Copiar">
                 <i class="bi bi-clipboard"></i>
             </button>
            </div>`
@@ -888,11 +899,9 @@ function createPagoRow(profesor, clasesData, pagoExistente) {
 
     row.innerHTML = `
         <td>
-            <div class="profesor-cell">
+            <div class="profesor-cell-pagos">
                 ${avatarHTML}
-                <div>
-                    <strong>${profesor.nombre}</strong>
-                </div>
+                <strong class="profesor-nombre-pagos">${profesor.nombre}</strong>
             </div>
         </td>
         <td style="text-align: center;">${clasesData.totalClases}</td>
@@ -1975,13 +1984,15 @@ function filtrarTablaTarifas() {
     
     const rows = document.querySelectorAll('#tarifasTableBody tr');
     let visibleCount = 0;
-    let totalCount = rows.length;
+    let totalCount = 0;
     
     rows.forEach(row => {
         // Ignorar filas de estado vacío o cargando
         if (row.querySelector('.empty-state') || row.querySelector('.loading')) {
             return;
         }
+        
+        totalCount++;
         
         const nombre = row.querySelector('.profesor-cell strong')?.textContent.toLowerCase() || '';
         const email = row.cells[1]?.textContent.toLowerCase() || '';
@@ -1992,11 +2003,13 @@ function filtrarTablaTarifas() {
         if (matches) visibleCount++;
     });
     
-    // Actualizar contador
-    if (searchTerm) {
-        countSpan.innerHTML = `<strong>${visibleCount}</strong> de ${totalCount} profesores`;
+    // Actualizar contador solo si hay búsqueda activa
+    if (searchTerm && totalCount > 0) {
+        countSpan.innerHTML = `<strong>${visibleCount}</strong> de ${totalCount}`;
+        countSpan.style.display = 'inline-block';
     } else {
         countSpan.textContent = '';
+        countSpan.style.display = 'none';
     }
 }
 
@@ -2012,7 +2025,7 @@ function filtrarTablaPagos() {
     
     const rows = document.querySelectorAll('#pagosTableBody tr');
     let visibleCount = 0;
-    let totalCount = rows.length;
+    let totalCount = 0;
     
     rows.forEach(row => {
         // Ignorar filas de estado vacío o cargando
@@ -2020,7 +2033,10 @@ function filtrarTablaPagos() {
             return;
         }
         
-        const nombre = row.querySelector('.profesor-cell strong')?.textContent.toLowerCase() || '';
+        totalCount++;
+        
+        const nombreElement = row.querySelector('.profesor-nombre-pagos');
+        const nombre = nombreElement ? nombreElement.textContent.toLowerCase() : '';
         
         const matches = nombre.includes(searchTerm);
         
@@ -2028,11 +2044,13 @@ function filtrarTablaPagos() {
         if (matches) visibleCount++;
     });
     
-    // Actualizar contador
-    if (searchTerm) {
-        countSpan.innerHTML = `<strong>${visibleCount}</strong> de ${totalCount} profesores`;
+    // Actualizar contador solo si hay búsqueda activa
+    if (searchTerm && totalCount > 0) {
+        countSpan.innerHTML = `<strong>${visibleCount}</strong> de ${totalCount}`;
+        countSpan.style.display = 'inline-block';
     } else {
         countSpan.textContent = '';
+        countSpan.style.display = 'none';
     }
 }
 
