@@ -118,7 +118,14 @@ function createCuentaCard(cuenta) {
 
     const icon = iconMap[cuenta.tipo] || 'bank';
     const color = colorMap[cuenta.tipo] || cuenta.color || '#ff0000';
-    const iconHTML = `<i class="bi bi-${icon}"></i>`;
+    
+    // Determinar si mostrar imagen o icono
+    let iconHTML;
+    if (cuenta.imagen && cuenta.imagen.url) {
+        iconHTML = `<img src="${cuenta.imagen.url}" alt="${cuenta.nombre}" class="cuenta-imagen">`;
+    } else {
+        iconHTML = `<i class="bi bi-${icon}"></i>`;
+    }
     
     // Aplicar color del borde
     card.style.borderColor = color;
@@ -126,12 +133,12 @@ function createCuentaCard(cuenta) {
     card.innerHTML = `
         <div class="cuenta-header">
             <div class="cuenta-tipo">
-                <div class="cuenta-icon" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -20)});">
+                <div class="cuenta-icon ${cuenta.imagen ? 'has-image' : ''}" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -20)});">
                     ${iconHTML}
                 </div>
                 <div class="cuenta-info">
                     <p class="cuenta-info-tipo">${cuenta.tipo}</p>
-                                        <h4>${cuenta.nombre}</h4>
+                    <h4>${cuenta.nombre}</h4>
                 </div>
             </div>
             <div class="cuenta-actions">
@@ -281,6 +288,8 @@ async function updateDashboard() {
 // Abrir modal nueva cuenta
 function openNuevaCuenta() {
     editingCuentaId = null;
+    window.tempCuentaImage = null; // Limpiar imagen temporal
+    
     document.getElementById('modalCuentaTitulo').textContent = 'Nueva Cuenta Bancaria';
     document.getElementById('formCuenta').reset();
     
@@ -299,6 +308,12 @@ function openNuevaCuenta() {
     // Ocultar mensaje de ayuda para nueva cuenta
     if (saldoHelpText) {
         saldoHelpText.style.display = 'none';
+    }
+    
+    // Ocultar preview de imagen
+    const previewContainer = document.getElementById('cuentaImagePreview');
+    if (previewContainer) {
+        previewContainer.style.display = 'none';
     }
     
     document.getElementById('modalCuenta').classList.add('active');
@@ -320,6 +335,18 @@ async function openEditCuenta(cuentaId) {
 
         const cuenta = cuentaDoc.data();
         editingCuentaId = cuentaId;
+        
+        // Cargar imagen existente si la hay
+        if (cuenta.imagen) {
+            window.tempCuentaImage = cuenta.imagen;
+            showImagePreview(cuenta.imagen.url);
+        } else {
+            window.tempCuentaImage = null;
+            const previewContainer = document.getElementById('cuentaImagePreview');
+            if (previewContainer) {
+                previewContainer.style.display = 'none';
+            }
+        }
 
         document.getElementById('modalCuentaTitulo').textContent = 'Editar Cuenta Bancaria';
         document.getElementById('nombreCuentaForm').value = cuenta.nombre || '';
@@ -375,6 +402,13 @@ function closeModalCuenta() {
         saldoInput.style.cursor = 'text';
     }
     
+    // Limpiar imagen temporal y preview
+    window.tempCuentaImage = null;
+    const previewContainer = document.getElementById('cuentaImagePreview');
+    if (previewContainer) {
+        previewContainer.style.display = 'none';
+    }
+    
     editingCuentaId = null;
 }
 
@@ -406,6 +440,15 @@ async function handleSaveCuenta(e) {
                 notas,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
+            
+            // Agregar imagen si existe
+            if (window.tempCuentaImage) {
+                cuentaData.imagen = window.tempCuentaImage;
+            } else {
+                // Si no hay imagen temporal, eliminar la imagen de la cuenta
+                cuentaData.imagen = firebase.firestore.FieldValue.delete();
+            }
+            
             await db.collection('cuentas_bancarias').doc(editingCuentaId).update(cuentaData);
             showNotification('success', 'Cuenta Actualizada', 'La cuenta se ha actualizado correctamente');
         } else {
@@ -421,6 +464,12 @@ async function handleSaveCuenta(e) {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
+            
+            // Agregar imagen si existe
+            if (window.tempCuentaImage) {
+                cuentaData.imagen = window.tempCuentaImage;
+            }
+            
             await db.collection('cuentas_bancarias').add(cuentaData);
             showNotification('success', 'Cuenta Creada', 'La cuenta se ha creado correctamente');
         }
@@ -624,7 +673,7 @@ function calcularResumenCategorias(movimientos) {
         totalCard.className = 'resumen-categoria-card total ingreso';
         totalCard.innerHTML = `
             <div class="resumen-categoria-info">
-                <i class="bi bi-calculator"></i>
+                <i class="bi bi-calculator"></i>    
                 <div>
                     <h5>Total Ingresos</h5>
                 </div>
@@ -2079,3 +2128,154 @@ window.inicializarSelectorAnios = function() {
     }
 };
 
+
+
+// ========== FUNCIONES DE MANEJO DE IMÁGENES PARA CUENTAS ==========
+
+// Upload image to ImgBB
+async function uploadImageToImgBB(file) {
+    try {
+        // Usar las constantes definidas en finanzas.js
+        const IMGBB_KEY = '0d447185d3dc7cba69ee1c6df144f146';
+        const IMGBB_URL = 'https://api.imgbb.com/1/upload';
+        
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('key', IMGBB_KEY);
+
+        const response = await fetch(IMGBB_URL, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            return {
+                url: result.data.url,
+                deleteUrl: result.data.delete_url,
+                filename: result.data.image.filename
+            };
+        } else {
+            throw new Error(result.error?.message || 'Error al subir imagen');
+        }
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;
+    }
+}
+
+// Add image to cuenta
+async function addImageToCuenta() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = false;
+
+    input.onchange = async function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showNotification('error', 'Error', 'La imagen no puede ser mayor a 5MB');
+            return;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            showNotification('error', 'Error', 'Solo se permiten archivos de imagen');
+            return;
+        }
+
+        try {
+            showLoadingOverlay();
+            const imageData = await uploadImageToImgBB(file);
+
+            // Store image data temporarily
+            window.tempCuentaImage = imageData;
+
+            // Show preview
+            showImagePreview(imageData.url);
+            
+            showNotification('success', 'Éxito', 'Imagen cargada correctamente');
+
+        } catch (error) {
+            showNotification('error', 'Error', 'Error al subir imagen: ' + error.message);
+        } finally {
+            hideLoadingOverlay();
+        }
+    };
+
+    input.click();
+}
+
+// Show image preview in modal
+function showImagePreview(imageUrl) {
+    const previewContainer = document.getElementById('cuentaImagePreview');
+    if (!previewContainer) {
+        // Create preview container if it doesn't exist
+        const container = document.createElement('div');
+        container.id = 'cuentaImagePreview';
+        container.className = 'cuenta-image-preview-container';
+        container.innerHTML = `
+            <div class="image-preview-header">
+                <span><i class="bi bi-image"></i> Imagen de la cuenta</span>
+                <button type="button" class="btn-remove-image" onclick="removeImageFromCuenta()">
+                    <i class="bi bi-x-circle"></i> Eliminar
+                </button>
+            </div>
+            <div class="image-preview-content">
+                <img src="${imageUrl}" alt="Preview" class="cuenta-image-preview">
+            </div>
+        `;
+        
+        // Insert before the form actions
+        const formActions = document.querySelector('#formCuenta .form-actions');
+        if (formActions) {
+            formActions.parentNode.insertBefore(container, formActions);
+        }
+    } else {
+        // Update existing preview
+        previewContainer.style.display = 'block';
+        const img = previewContainer.querySelector('.cuenta-image-preview');
+        if (img) {
+            img.src = imageUrl;
+        }
+    }
+}
+
+// Remove image from cuenta
+function removeImageFromCuenta() {
+    window.tempCuentaImage = null;
+    const previewContainer = document.getElementById('cuentaImagePreview');
+    if (previewContainer) {
+        previewContainer.style.display = 'none';
+    }
+    showNotification('info', 'Imagen eliminada', 'La imagen ha sido eliminada');
+}
+
+// Show loading overlay
+function showLoadingOverlay() {
+    let overlay = document.getElementById('loadingOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = '<div class="loading-spinner"></div>';
+        document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+}
+
+// Hide loading overlay
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+// Make functions global
+window.addImageToCuenta = addImageToCuenta;
+window.removeImageFromCuenta = removeImageFromCuenta;

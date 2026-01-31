@@ -3488,6 +3488,71 @@ body::before {
     gap: 1rem;
 }
 
+/* Modal Cuenta (Nueva/Editar Cuenta Bancaria) con Header y Footer Sticky */
+#modalCuenta .modal-content {
+    max-width: 650px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#modalCuenta .modal-header {
+    position: sticky;
+    top: 0;
+    background: rgba(20, 20, 20, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1.5rem 2rem;
+    border-radius: 24px 24px 0 0;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+#modalCuenta .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 2rem;
+    padding-bottom: 0;
+}
+
+#modalCuenta .modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#modalCuenta .modal-body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+#modalCuenta .modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 0, 0, 0.5);
+    border-radius: 10px;
+}
+
+#modalCuenta .modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 0, 0, 0.7);
+}
+
+#modalCuenta .form-actions {
+    position: sticky;
+    bottom: 0;
+    background: rgba(20, 20, 20, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1.5rem 2rem;
+    margin: 1rem -2rem 0 -2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    border-radius: 0 0 24px 24px;
+}
+
 /* Categorías Modal */
 .categorias-tabs {
     display: flex;
@@ -3709,16 +3774,16 @@ body::before {
     max-height: 92vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, rgba(30, 30, 40, 0.98) 0%, rgba(20, 20, 30, 0.98) 100%);
+    background: linear-gradient(180deg, rgba(20, 20, 20, 0.98) 0%, rgba(15, 15, 15, 0.98) 100%);
 }
 
 .modal-pago-grande .modal-header {
     position: sticky;
     top: 0;
-    background: linear-gradient(135deg, rgba(255, 0, 0, 0.95), rgba(200, 0, 0, 0.95));
+    background: rgba(20, 20, 20, 0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    padding: 2rem 2.5rem;
+    padding: 1.5rem 2rem;
     border-radius: 24px 24px 0 0;
     flex-shrink: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -3743,23 +3808,24 @@ body::before {
 }
 
 .modal-pago-grande .close-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
     width: 40px;
     height: 40px;
     font-size: 1.3rem;
 }
 
 .modal-pago-grande .close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
     transform: rotate(90deg);
 }
 
 .modal-pago-grande .modal-body {
     flex: 1;
     overflow-y: auto;
-    padding: 2rem 2.5rem;
+    padding: 1.5rem 2rem;
     padding-bottom: 0;
 }
 
@@ -3784,11 +3850,11 @@ body::before {
 .modal-pago-grande .form-actions {
     position: sticky;
     bottom: 0;
-    background: linear-gradient(180deg, rgba(30, 30, 40, 0.95) 0%, rgba(20, 20, 30, 0.98) 100%);
+    background: rgba(20, 20, 20, 0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    padding: 1.75rem 2.5rem;
-    margin: 1.5rem -2.5rem 0 -2.5rem;
+    padding: 1.5rem 2rem;
+    margin: 1rem -2rem 0 -2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
     z-index: 10;
@@ -3799,14 +3865,14 @@ body::before {
 }
 
 .pago-profesor-card {
-    background: linear-gradient(135deg, rgba(255, 0, 0, 0.15), rgba(200, 0, 0, 0.1));
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    border-radius: 20px;
+    border-radius: 16px;
     padding: 2rem;
     margin-bottom: 2rem;
-    border: 2px solid rgba(255, 0, 0, 0.3);
-    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     position: relative;
     overflow: hidden;
 }
@@ -3818,7 +3884,7 @@ body::before {
     right: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
     animation: pulse 3s ease-in-out infinite;
 }
 
@@ -3834,7 +3900,7 @@ body::before {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 4px solid rgba(255, 255, 255, 0.3);
+    border: 4px solid rgba(255, 255, 255, 0.2);
     object-fit: cover;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
@@ -3851,7 +3917,7 @@ body::before {
     margin: 0.5rem 0 0 0;
     opacity: 0.85;
     font-size: 1rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .pago-seccion {
@@ -6035,6 +6101,31 @@ body::before {
         margin: 0.75rem -1.25rem 0 -1.25rem;
     }
     
+    /* Modal Cuenta Responsive */
+    #modalCuenta .modal-content {
+        max-width: 95%;
+    }
+    
+    #modalCuenta .modal-header {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    #modalCuenta .modal-body {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    #modalCuenta .form-actions {
+        padding: 1.25rem 1.5rem;
+        margin: 0.75rem -1.5rem 0 -1.5rem;
+        flex-direction: column;
+    }
+    
+    #modalCuenta .form-actions .btn-secondary,
+    #modalCuenta .form-actions .btn-primary {
+        width: 100%;
+    }
+    }
+    
     .pago-profesor-card {
         padding: 1.25rem;
     }
@@ -6067,5 +6158,144 @@ body::before {
     .form-actions .btn-primary {
         padding: 0.85rem 1.5rem;
         font-size: 1rem;
+    }
+}
+
+
+/* ========== ESTILOS PARA IMAGEN DE CUENTA ========== */
+
+/* Imagen en el icono de la cuenta */
+.cuenta-icon.has-image {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 12px; /* Cambiar de circular a redondeado */
+}
+
+.cuenta-icon .cuenta-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Cambiar de cover a contain para que se vea completa */
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05); /* Fondo sutil para imágenes con transparencia */
+}
+
+/* Preview de imagen en el modal */
+.cuenta-image-preview-container {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 14px;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+}
+
+.image-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.image-preview-header span {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.image-preview-header span i {
+    color: #ff0000;
+    font-size: 1.1rem;
+}
+
+.btn-remove-image {
+    background: rgba(220, 53, 69, 0.8);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-remove-image:hover {
+    background: rgba(220, 53, 69, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.image-preview-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.cuenta-image-preview {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Loading overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #ff0000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive para preview de imagen */
+@media (max-width: 768px) {
+    .cuenta-image-preview-container {
+        padding: 1rem;
+    }
+    
+    .image-preview-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+    
+    .btn-remove-image {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .cuenta-image-preview {
+        max-height: 200px;
     }
 }
