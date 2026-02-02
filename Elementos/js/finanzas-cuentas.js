@@ -923,6 +923,10 @@ function closeModalMovimiento() {
     document.getElementById('modalMovimiento').classList.remove('active');
     document.getElementById('formMovimiento').reset();
     tipoMovimientoActual = null;
+    // Limpiar archivos seleccionados
+    if (window.clearSelectedFiles) {
+        window.clearSelectedFiles();
+    }
 }
 
 // Guardar movimiento
@@ -1003,6 +1007,22 @@ async function handleSaveMovimiento(e) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
+        // Subir comprobantes si hay archivos seleccionados
+        if (window.selectedFiles && window.selectedFiles.length > 0) {
+            console.log('Subiendo comprobantes:', window.selectedFiles.length, 'archivos');
+            btnSubmit.innerHTML = '<i class="bi bi-hourglass-split"></i> Subiendo comprobantes...';
+            try {
+                const comprobantesUrls = await window.uploadMultipleToImgBB(window.selectedFiles);
+                console.log('Comprobantes subidos exitosamente:', comprobantesUrls);
+                movimientoData.comprobantes = comprobantesUrls;
+            } catch (errorComprobantes) {
+                console.error('Error subiendo comprobantes:', errorComprobantes);
+                showNotification('warning', 'Advertencia', 'El movimiento se guardará pero algunos comprobantes no se pudieron subir');
+            }
+        } else {
+            console.log('No hay archivos seleccionados para subir');
+        }
+
         // Agregar datos de gamificación si es un ingreso con estudiante
         if (tipo === 'ingreso') {
             const estudianteId = document.getElementById('estudianteCompradorForm').value;
@@ -1057,6 +1077,12 @@ async function handleSaveMovimiento(e) {
 
         showNotification('success', 'Movimiento Registrado', 'El movimiento se ha registrado correctamente');
         closeModalMovimiento();
+        
+        // Limpiar archivos seleccionados
+        if (window.clearSelectedFiles) {
+            window.clearSelectedFiles();
+        }
+        
         loadCuentas();
         loadMovimientos();
     } catch (error) {

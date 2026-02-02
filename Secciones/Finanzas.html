@@ -390,24 +390,64 @@
             </div>
 
             <!-- Filtros de Movimientos -->
-            <div class="movimientos-filters">
-                <select id="filtroTipoMovimiento">
-                    <option value="">Todos los movimientos</option>
-                    <option value="ingreso">Ingresos</option>
-                    <option value="gasto">Gastos</option>
-                </select>
-                <select id="filtroCuentaMovimiento">
-                    <option value="">Todas las cuentas</option>
-                </select>
-                <select id="filtroCategoriaMovimiento">
-                    <option value="">Todas las categorías</option>
-                </select>
-                <input type="month" id="filtroMesMovimiento">
+            <div class="movimientos-filters-nuevo">
+                <!-- Botones de tipo de movimiento -->
+                <div class="filtros-tipo-grupo">
+                    <button class="btn-filtro-tipo active" data-tipo="" id="btnTodosTipos">
+                        <i class="bi bi-list-ul"></i>
+                        <span>Todos</span>
+                    </button>
+                    <button class="btn-filtro-tipo btn-filtro-ingreso" data-tipo="ingreso" id="btnFiltroIngresos">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        <span>Ingresos</span>
+                    </button>
+                    <button class="btn-filtro-tipo btn-filtro-gasto" data-tipo="gasto" id="btnFiltroGastos">
+                        <i class="bi bi-arrow-up-circle"></i>
+                        <span>Gastos</span>
+                    </button>
+                </div>
+
+                <!-- Filtro de cuentas con dropdown -->
+                <div class="filtro-cuentas-dropdown">
+                    <button class="btn-filtro-dropdown" id="btnFiltroCuentas">
+                        <i class="bi bi-bank"></i>
+                        <span id="cuentaSeleccionadaTexto">Cuentas</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-cuentas" id="dropdownCuentas">
+                        <div class="dropdown-item" data-cuenta="">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Todas las cuentas</span>
+                        </div>
+                        <!-- Las cuentas se cargarán dinámicamente aquí -->
+                    </div>
+                </div>
+
+                <!-- Selector de fecha tipo calendario -->
+                <!-- Selector de fecha tipo calendario -->
+                <div class="filtro-fecha-calendario">
+                    <input type="month" id="filtroMesMovimiento" class="input-fecha-estilizado">
+                </div>
+
+                <!-- Botón gestionar categorías -->
                 <button class="btn-secondary" id="btnGestionarCategorias">
                     <i class="bi bi-tags"></i>
-                    Gestionar Categorías
+                    Categorías
                 </button>
             </div>
+
+            <!-- Filtros ocultos para compatibilidad -->
+            <select id="filtroTipoMovimiento" style="display: none;">
+                <option value="">Todos los movimientos</option>
+                <option value="ingreso">Ingresos</option>
+                <option value="gasto">Gastos</option>
+            </select>
+            <select id="filtroCuentaMovimiento" style="display: none;">
+                <option value="">Todas las cuentas</option>
+            </select>
+            <select id="filtroCategoriaMovimiento" style="display: none;">
+                <option value="">Todas las categorías</option>
+            </select>
 
             <!-- Resumen por Categorías -->
             <div class="categorias-resumen" id="categoriasResumen" style="display: none;">
@@ -838,6 +878,25 @@
                         <textarea id="notasMovimientoForm" rows="3" placeholder="Detalles adicionales del movimiento (puedes usar saltos de línea)"></textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label for="comprobantesMovimientoForm">
+                            <i class="bi bi-file-earmark-image"></i>
+                            Comprobantes (Opcional)
+                        </label>
+                        <div class="file-upload-multiple">
+                            <input type="file" id="comprobantesMovimientoForm" accept="image/*" multiple>
+                            <label for="comprobantesMovimientoForm" class="file-upload-label-multiple">
+                                <i class="bi bi-cloud-upload"></i>
+                                <span>Seleccionar imágenes</span>
+                                <small>Puedes seleccionar múltiples imágenes</small>
+                            </label>
+                            <div class="files-preview-grid" id="filesPreviewGrid" style="display: none;">
+                                <!-- Las previsualizaciones se generarán aquí -->
+                            </div>
+                        </div>
+                        <small class="form-help">Sube uno o más comprobantes de pago o facturas</small>
+                    </div>
+
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" id="cancelarMovimiento">Cancelar</button>
                         <button type="submit" class="btn-primary">
@@ -1003,6 +1062,33 @@
                         <textarea id="editNotasMovimiento" rows="3" placeholder="Detalles adicionales del movimiento (puedes usar saltos de línea)"></textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label for="editComprobantesMovimiento">
+                            <i class="bi bi-file-earmark-image"></i>
+                            Comprobantes (Opcional)
+                        </label>
+                        <div class="comprobantes-existentes" id="comprobantesExistentes" style="display: none;">
+                            <div class="comprobantes-existentes-header">
+                                <span>Comprobantes actuales:</span>
+                            </div>
+                            <div class="comprobantes-existentes-grid" id="comprobantesExistentesGrid">
+                                <!-- Se generarán aquí -->
+                            </div>
+                        </div>
+                        <div class="file-upload-multiple">
+                            <input type="file" id="editComprobantesMovimiento" accept="image/*" multiple>
+                            <label for="editComprobantesMovimiento" class="file-upload-label-multiple">
+                                <i class="bi bi-cloud-upload"></i>
+                                <span>Agregar más imágenes</span>
+                                <small>Puedes seleccionar múltiples imágenes</small>
+                            </label>
+                            <div class="files-preview-grid" id="editFilesPreviewGrid" style="display: none;">
+                                <!-- Las previsualizaciones se generarán aquí -->
+                            </div>
+                        </div>
+                        <small class="form-help">Sube uno o más comprobantes de pago o facturas</small>
+                    </div>
+
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" id="cancelarEditarMovimiento">Cancelar</button>
                         <button type="submit" class="btn-primary">
@@ -1057,6 +1143,40 @@
                         <i class="bi bi-trash3"></i>
                         Sí, Limpiar Historial
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Descripción -->
+    <div class="modal" id="modalVerDescripcion">
+        <div class="modal-content modal-descripcion">
+            <div class="modal-header">
+                <h3><i class="bi bi-file-text"></i> Descripción del Movimiento</h3>
+                <button class="close-btn" id="closeModalDescripcion">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="descripcion-content" id="descripcionContent">
+                    <!-- El contenido se cargará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Comprobantes -->
+    <div class="modal" id="modalVerComprobantes">
+        <div class="modal-content modal-comprobantes">
+            <div class="modal-header">
+                <h3><i class="bi bi-images"></i> Comprobantes</h3>
+                <button class="close-btn" id="closeModalComprobantes">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="comprobantes-gallery" id="comprobantesGallery">
+                    <!-- Las imágenes se cargarán dinámicamente -->
                 </div>
             </div>
         </div>
