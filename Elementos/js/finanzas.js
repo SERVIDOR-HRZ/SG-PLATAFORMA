@@ -319,11 +319,6 @@ function setupEventListeners() {
         }
     });
     
-    // Gestionar categorías
-    document.getElementById('btnGestionarCategorias').addEventListener('click', openGestionarCategorias);
-    document.getElementById('closeModalCategorias').addEventListener('click', closeGestionarCategorias);
-    document.getElementById('cerrarCategorias').addEventListener('click', closeGestionarCategorias);
-    
     // Ver categorías (resumen)
     document.getElementById('btnVerCategorias').addEventListener('click', toggleResumenCategorias);
     
@@ -331,6 +326,21 @@ function setupEventListeners() {
     document.getElementById('closeModalNuevaCategoria').addEventListener('click', closeModalNuevaCategoria);
     document.getElementById('cancelarNuevaCategoria').addEventListener('click', closeModalNuevaCategoria);
     document.getElementById('formNuevaCategoria').addEventListener('submit', handleCrearCategoria);
+
+    // Nueva categoría desde página
+    document.getElementById('btnNuevaCategoriaDesdePagina').addEventListener('click', () => {
+        const tipoActivo = document.querySelector('.categoria-tab-btn-pagina.active').dataset.tipo;
+        openModalNuevaCategoriaDesdeFormulario(tipoActivo);
+    });
+
+    // Tabs de categorías en página
+    document.querySelectorAll('.categoria-tab-btn-pagina').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.categoria-tab-btn-pagina').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadCategoriasPagina();
+        });
+    });
 
     // Week navigation
     document.getElementById('prevWeekPagos').addEventListener('click', () => {
@@ -424,6 +434,8 @@ function switchTab(tab) {
         loadCategoriasFilterMovimientos();
     } else if (tab === 'recompensas') {
         loadRecompensasTab();
+    } else if (tab === 'categorias') {
+        loadCategoriasPagina();
     }
 }
 
@@ -1494,135 +1506,14 @@ window.openRegistrarPago = async function(profesorId, clasesData, tarifa) {
 let tipoCategoriasActual = 'ingreso';
 let contextoCreacionCategoria = null; // 'modal' o 'formulario'
 
-// Abrir modal gestionar categorías
-async function openGestionarCategorias() {
-    tipoCategoriasActual = 'ingreso';
-    document.getElementById('modalGestionarCategorias').classList.add('active');
-    
-    // Setup tabs
-    document.querySelectorAll('.categoria-tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.categoria-tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            tipoCategoriasActual = btn.dataset.tipo;
-            loadCategoriasModal();
-        });
-    });
-    
-    document.querySelector('.categoria-tab-btn[data-tipo="ingreso"]').classList.add('active');
-    
-    await loadCategoriasModal();
-}
-
-// Cerrar modal gestionar categorías
-function closeGestionarCategorias() {
-    document.getElementById('modalGestionarCategorias').classList.remove('active');
-    // Recargar movimientos para actualizar filtros
-    loadCategoriasFilterMovimientos();
-}
-
-// Cargar categorías en el modal
-async function loadCategoriasModal() {
-    const categoriasListModal = document.getElementById('categoriasListModal');
-    categoriasListModal.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    
-    try {
-        await window.loadCategorias();
-        
-        const categoriasFiltradas = window.categoriasList.filter(cat => cat.tipo === tipoCategoriasActual);
-        
-        categoriasListModal.innerHTML = '';
-        
-        // Botón para agregar nueva categoría
-        const btnNuevaCategoria = document.createElement('div');
-        btnNuevaCategoria.className = 'categoria-item nueva';
-        btnNuevaCategoria.innerHTML = `
-            <div class="categoria-info">
-                <i class="bi bi-plus-circle"></i>
-                <span>Crear nueva categoría</span>
-            </div>
-        `;
-        btnNuevaCategoria.addEventListener('click', () => crearCategoriaDesdModal());
-        categoriasListModal.appendChild(btnNuevaCategoria);
-        
-        if (categoriasFiltradas.length === 0) {
-            const emptyMsg = document.createElement('div');
-            emptyMsg.className = 'empty-state-small';
-            emptyMsg.innerHTML = `
-                <p>No hay categorías de ${tipoCategoriasActual === 'ingreso' ? 'ingresos' : 'gastos'} creadas</p>
-            `;
-            categoriasListModal.appendChild(emptyMsg);
-            return;
-        }
-        
-        // Obtener estadísticas de uso
-        const estadisticas = await window.getEstadisticasPorCategoria(tipoCategoriasActual);
-        
-        categoriasFiltradas.forEach(categoria => {
-            const stats = estadisticas[categoria.nombre] || { total: 0, cantidad: 0 };
-            const categoriaItem = document.createElement('div');
-            categoriaItem.className = 'categoria-item';
-            categoriaItem.innerHTML = `
-                <div class="categoria-info">
-                    <i class="bi bi-tag"></i>
-                    <div>
-                        <strong>${categoria.nombre}</strong>
-                        <small>${stats.cantidad} movimiento${stats.cantidad !== 1 ? 's' : ''} - Total: ${formatNumber(stats.total)}</small>
-                    </div>
-                </div>
-                <div class="categoria-actions">
-                    <button class="btn-icon edit" title="Editar categoría">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="btn-icon delete" title="Eliminar categoría">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            `;
-            
-            const editBtn = categoriaItem.querySelector('.btn-icon.edit');
-            editBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                editarCategoria(categoria.id, categoria.nombre);
-            });
-            
-            const deleteBtn = categoriaItem.querySelector('.btn-icon.delete');
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                deleteCategoria(categoria.id, categoria.nombre, stats.cantidad);
-            });
-            
-            categoriasListModal.appendChild(categoriaItem);
-        });
-        
-    } catch (error) {
-        console.error('Error loading categorias:', error);
-        categoriasListModal.innerHTML = `
-            <div class="empty-state-small">
-                <p>Error al cargar categorías</p>
-            </div>
-        `;
-    }
-}
-
-// Crear categoría desde el modal
-function crearCategoriaDesdModal() {
-    const titulo = tipoCategoriasActual === 'ingreso' ? 'Nueva Categoría de Ingreso' : 'Nueva Categoría de Gasto';
-    document.getElementById('modalNuevaCategoriaTitulo').textContent = titulo;
-    document.getElementById('nombreNuevaCategoria').value = '';
-    document.getElementById('editingCategoriaId').value = '';
-    document.getElementById('btnCategoriaTxt').textContent = 'Crear Categoría';
-    document.getElementById('modalNuevaCategoria').classList.add('active');
-    
-    // Focus en el input
-    setTimeout(() => {
-        document.getElementById('nombreNuevaCategoria').focus();
-    }, 100);
-}
-
-// Editar categoría desde el modal
+// Editar categoría (funciona desde cualquier lugar)
 function editarCategoria(categoriaId, nombreActual) {
+    // Determinar el tipo de categoría
+    const categoria = window.categoriasList.find(cat => cat.id === categoriaId);
+    if (categoria) {
+        tipoCategoriasActual = categoria.tipo;
+    }
+    
     const titulo = tipoCategoriasActual === 'ingreso' ? 'Editar Categoría de Ingreso' : 'Editar Categoría de Gasto';
     document.getElementById('modalNuevaCategoriaTitulo').textContent = titulo;
     document.getElementById('nombreNuevaCategoria').value = nombreActual;
@@ -1719,34 +1610,15 @@ async function handleCrearCategoria(e) {
         
         // Recargar filtros
         loadCategoriasFilterMovimientos();
+        
+        // Si estamos en la vista de página de categorías, recargarla
+        const categoriasTab = document.getElementById('categoriasTab');
+        if (categoriasTab && categoriasTab.classList.contains('active')) {
+            await loadCategoriasPagina();
+        }
     } catch (error) {
         console.error('Error saving categoria:', error);
         showNotification('error', 'Error', 'No se pudo guardar la categoría');
-    }
-}
-
-// Eliminar categoría
-async function deleteCategoria(categoriaId, nombreCategoria, cantidadMovimientos) {
-    if (cantidadMovimientos > 0) {
-        if (!confirm(`Esta categoría tiene ${cantidadMovimientos} movimiento${cantidadMovimientos !== 1 ? 's' : ''} asociado${cantidadMovimientos !== 1 ? 's' : ''}. ¿Estás seguro de que deseas eliminarla? Los movimientos no se eliminarán, pero quedarán sin categoría.`)) {
-            return;
-        }
-    } else {
-        if (!confirm(`¿Estás seguro de que deseas eliminar la categoría "${nombreCategoria}"?`)) {
-            return;
-        }
-    }
-
-    try {
-        const db = getDB();
-        await db.collection('categorias_financieras').doc(categoriaId).delete();
-        
-        showNotification('success', 'Categoría Eliminada', 'La categoría se ha eliminado correctamente');
-        await loadCategoriasModal();
-        loadCategoriasFilterMovimientos();
-    } catch (error) {
-        console.error('Error deleting categoria:', error);
-        showNotification('error', 'Error', 'No se pudo eliminar la categoría');
     }
 }
 
@@ -1789,8 +1661,6 @@ function openModalNuevaCategoriaDesdeFormulario(tipo) {
 }
 
 // Make functions global
-window.openGestionarCategorias = openGestionarCategorias;
-window.closeGestionarCategorias = closeGestionarCategorias;
 window.loadCategoriasFilterMovimientos = loadCategoriasFilterMovimientos;
 window.openModalNuevaCategoriaDesdeFormulario = openModalNuevaCategoriaDesdeFormulario;
 window.editarCategoria = editarCategoria;
@@ -2370,6 +2240,141 @@ function createCategoriaResumenItem(categoria, datos, tipo) {
 // Hacer funciones globales
 window.toggleResumenCategorias = toggleResumenCategorias;
 window.loadResumenCategorias = loadResumenCategorias;
+
+
+// ========== VISTA DE CATEGORÍAS EN PÁGINA COMPLETA ==========
+
+// Cargar categorías en la página completa
+async function loadCategoriasPagina() {
+    const categoriasGrid = document.getElementById('categoriasGridPagina');
+    const tipoActivo = document.querySelector('.categoria-tab-btn-pagina.active').dataset.tipo;
+    
+    categoriasGrid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    try {
+        await window.loadCategorias();
+        
+        const categoriasFiltradas = window.categoriasList.filter(cat => cat.tipo === tipoActivo);
+        
+        // Obtener estadísticas de uso
+        const estadisticas = await window.getEstadisticasPorCategoria(tipoActivo);
+        
+        categoriasGrid.innerHTML = '';
+        
+        if (categoriasFiltradas.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'empty-state';
+            emptyMsg.style.gridColumn = '1 / -1';
+            emptyMsg.innerHTML = `
+                <i class="bi bi-inbox"></i>
+                <h3>No hay categorías de ${tipoActivo === 'ingreso' ? 'ingresos' : 'gastos'}</h3>
+                <p>Crea tu primera categoría usando el botón "Nueva Categoría" arriba</p>
+            `;
+            categoriasGrid.appendChild(emptyMsg);
+            return;
+        }
+        
+        // Renderizar categorías
+        categoriasFiltradas.forEach(categoria => {
+            const stats = estadisticas[categoria.nombre] || { total: 0, cantidad: 0 };
+            const categoriaCard = createCategoriaCardPagina(categoria, stats, tipoActivo);
+            categoriasGrid.appendChild(categoriaCard);
+        });
+        
+    } catch (error) {
+        console.error('Error loading categorias:', error);
+        categoriasGrid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="bi bi-exclamation-triangle"></i>
+                <h3>Error al cargar categorías</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Crear card de categoría para página
+function createCategoriaCardPagina(categoria, stats, tipo) {
+    const card = document.createElement('div');
+    card.className = `categoria-card-pagina ${tipo}`;
+    
+    const iconClass = tipo === 'ingreso' ? 'bi-arrow-down-circle' : 'bi-arrow-up-circle';
+    
+    card.innerHTML = `
+        <div class="categoria-card-header">
+            <div class="categoria-card-icon">
+                <i class="bi ${iconClass}"></i>
+            </div>
+            <div class="categoria-card-info">
+                <h4>${categoria.nombre}</h4>
+                <p>${stats.cantidad} movimiento${stats.cantidad !== 1 ? 's' : ''}</p>
+            </div>
+        </div>
+        
+        <div class="categoria-card-stats">
+            <div class="categoria-stat-row">
+                <span class="categoria-stat-label">Movimientos:</span>
+                <span class="categoria-stat-value">${stats.cantidad}</span>
+            </div>
+            <div class="categoria-stat-row">
+                <span class="categoria-stat-label">Total:</span>
+                <span class="categoria-stat-value total">$${formatNumber(stats.total)}</span>
+            </div>
+        </div>
+        
+        <div class="categoria-card-actions">
+            <button class="btn-icon edit" title="Editar categoría">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn-icon delete" title="Eliminar categoría">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    `;
+    
+    const editBtn = card.querySelector('.btn-icon.edit');
+    editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        editarCategoria(categoria.id, categoria.nombre);
+    });
+    
+    const deleteBtn = card.querySelector('.btn-icon.delete');
+    deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteCategoriaPagina(categoria.id, categoria.nombre, stats.cantidad);
+    });
+    
+    return card;
+}
+
+// Eliminar categoría desde página
+async function deleteCategoriaPagina(categoriaId, nombreCategoria, cantidadMovimientos) {
+    if (cantidadMovimientos > 0) {
+        if (!confirm(`Esta categoría tiene ${cantidadMovimientos} movimiento${cantidadMovimientos !== 1 ? 's' : ''} asociado${cantidadMovimientos !== 1 ? 's' : ''}. ¿Estás seguro de que deseas eliminarla? Los movimientos no se eliminarán, pero quedarán sin categoría.`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`¿Estás seguro de que deseas eliminar la categoría "${nombreCategoria}"?`)) {
+            return;
+        }
+    }
+
+    try {
+        const db = getDB();
+        await db.collection('categorias_financieras').doc(categoriaId).delete();
+        
+        showNotification('success', 'Categoría Eliminada', 'La categoría se ha eliminado correctamente');
+        await loadCategoriasPagina();
+        loadCategoriasFilterMovimientos();
+    } catch (error) {
+        console.error('Error deleting categoria:', error);
+        showNotification('error', 'Error', 'No se pudo eliminar la categoría');
+    }
+}
+
+// Hacer funciones globales
+window.loadCategoriasPagina = loadCategoriasPagina;
+window.deleteCategoriaPagina = deleteCategoriaPagina;
 
 
 // ========== SIDEBAR LISTENERS ==========
