@@ -274,6 +274,12 @@ function setupEventListeners() {
     document.getElementById('btnCambiarAulaSidebar').addEventListener('click', volverASelectorAulasFinanzas);
 
     // Filtros de periodo en cuentas
+    document.getElementById('filtroCuentaDashboard').addEventListener('change', () => {
+        // Guardar filtro en localStorage
+        const cuentaSeleccionada = document.getElementById('filtroCuentaDashboard').value;
+        localStorage.setItem('filtroCuentaDashboard', cuentaSeleccionada);
+        updateDashboard();
+    });
     document.getElementById('filtroAnioCuentas').addEventListener('change', updateDashboard);
     document.getElementById('filtroMesCuentas').addEventListener('change', updateDashboard);
 

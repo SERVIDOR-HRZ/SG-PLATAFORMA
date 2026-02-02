@@ -43,6 +43,19 @@ async function loadCuentas() {
 
         // Renderizar todas las cuentas
         renderizarCuentas(cuentasList);
+        
+        // Cargar selector de cuentas en dashboard
+        loadCuentasDashboardFilter();
+        
+        // Restaurar filtro guardado
+        const filtroGuardado = localStorage.getItem('filtroCuentaDashboard');
+        if (filtroGuardado) {
+            const selectCuenta = document.getElementById('filtroCuentaDashboard');
+            if (selectCuenta) {
+                selectCuenta.value = filtroGuardado;
+            }
+        }
+        
         updateDashboard();
     } catch (error) {
         console.error('Error loading cuentas:', error);
@@ -2003,14 +2016,38 @@ window.limpiarHistorialRecompensas = limpiarHistorialRecompensas;
 
 // ========== ACTUALIZACIÓN DE DASHBOARD CON FILTROS ==========
 
+// Cargar cuentas en el filtro del dashboard
+function loadCuentasDashboardFilter() {
+    const select = document.getElementById('filtroCuentaDashboard');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Todas las cuentas</option>';
+    
+    cuentasList.forEach(cuenta => {
+        const option = document.createElement('option');
+        option.value = cuenta.id;
+        option.textContent = cuenta.nombre;
+        select.appendChild(option);
+    });
+}
+
 // Sobrescribir función updateDashboard con filtros
 window.updateDashboard = async function() {
     try {
         const db = getDB();
         
-        // Calcular saldo total
+        // Obtener filtro de cuenta seleccionada
+        const filtroCuentaId = document.getElementById('filtroCuentaDashboard')?.value || '';
+        
+        // Calcular saldo total (filtrado por cuenta si aplica)
         let saldoTotal = 0;
-        cuentasList.forEach(cuenta => {
+        let cuentasFiltradas = cuentasList;
+        
+        if (filtroCuentaId) {
+            cuentasFiltradas = cuentasList.filter(c => c.id === filtroCuentaId);
+        }
+        
+        cuentasFiltradas.forEach(cuenta => {
             saldoTotal += cuenta.saldo || 0;
         });
 
@@ -2062,6 +2099,12 @@ window.updateDashboard = async function() {
 
         movimientosSnapshot.forEach(doc => {
             const mov = doc.data();
+            
+            // Filtrar por cuenta si aplica
+            if (filtroCuentaId && mov.cuentaId !== filtroCuentaId) {
+                return;
+            }
+            
             if (mov.tipo === 'ingreso') {
                 ingresosPeriodo += mov.monto || 0;
             } else if (mov.tipo === 'gasto') {
@@ -2098,6 +2141,9 @@ window.updateDashboard = async function() {
         console.error('Error updating dashboard:', error);
     }
 };
+
+// Exponer función globalmente
+window.loadCuentasDashboardFilter = loadCuentasDashboardFilter;
 
 // Inicializar selector de años
 window.inicializarSelectorAnios = function() {
