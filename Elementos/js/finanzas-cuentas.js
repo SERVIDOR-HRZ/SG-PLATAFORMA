@@ -588,8 +588,8 @@ async function loadMovimientos() {
             return;
         }
 
-        // Calcular resumen por categorías
-        calcularResumenCategorias(movimientos);
+        // Ya no calculamos el resumen aquí, se hace desde el botón "Ver Categorías"
+        // calcularResumenCategorias(movimientos);
 
         movimientosList.innerHTML = '';
 
@@ -755,34 +755,8 @@ function calcularResumenCategorias(movimientos) {
         resumenGrid.appendChild(gastosSection);
     }
     
-    // Mostrar el resumen (pero con el contenido colapsado por defecto)
-    resumenContainer.style.display = 'block';
-    
-    // Iniciar el grid colapsado
-    resumenGrid.style.display = 'none';
-    
-    // Setup botón toggle (colapsar/expandir)
-    const btnToggle = document.getElementById('btnToggleResumen');
-    
-    // Configurar icono inicial como colapsado
-    btnToggle.querySelector('i').className = 'bi bi-chevron-down';
-    btnToggle.title = 'Expandir resumen';
-    
-    btnToggle.onclick = () => {
-        const isCollapsed = resumenGrid.style.display === 'none';
-        
-        if (isCollapsed) {
-            // Expandir
-            resumenGrid.style.display = 'flex';
-            btnToggle.querySelector('i').className = 'bi bi-chevron-up';
-            btnToggle.title = 'Colapsar resumen';
-        } else {
-            // Colapsar
-            resumenGrid.style.display = 'none';
-            btnToggle.querySelector('i').className = 'bi bi-chevron-down';
-            btnToggle.title = 'Expandir resumen';
-        }
-    };
+    // No mostrar automáticamente el resumen (se controla desde el botón "Ver Categorías")
+    // resumenContainer.style.display = 'none';
 }
 
 // Crear item de movimiento
@@ -1374,7 +1348,7 @@ window.obtenerValorNumerico = obtenerValorNumerico;
 window.loadCategorias = loadCategorias;
 window.loadCategoriasSelect = loadCategoriasSelect;
 window.getEstadisticasPorCategoria = getEstadisticasPorCategoria;
-window.calcularResumenCategorias = calcularResumenCategorias;
+// window.calcularResumenCategorias = calcularResumenCategorias; // Ya no se usa, se maneja desde finanzas.js
 
 // ========== SISTEMA DE GAMIFICACIÓN ==========
 

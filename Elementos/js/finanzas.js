@@ -301,14 +301,31 @@ function setupEventListeners() {
         loadCategoriasFilterMovimientos();
         loadMovimientos();
     });
-    document.getElementById('filtroCuentaMovimiento').addEventListener('change', loadMovimientos);
+    document.getElementById('filtroCuentaMovimiento').addEventListener('change', () => {
+        loadMovimientos();
+        // Si el resumen está visible, recargarlo
+        const resumenContainer = document.getElementById('categoriasResumen');
+        if (resumenContainer && resumenContainer.style.display !== 'none') {
+            loadResumenCategorias();
+        }
+    });
     document.getElementById('filtroCategoriaMovimiento').addEventListener('change', loadMovimientos);
-    document.getElementById('filtroMesMovimiento').addEventListener('change', loadMovimientos);
+    document.getElementById('filtroMesMovimiento').addEventListener('change', () => {
+        loadMovimientos();
+        // Si el resumen está visible, recargarlo
+        const resumenContainer = document.getElementById('categoriasResumen');
+        if (resumenContainer && resumenContainer.style.display !== 'none') {
+            loadResumenCategorias();
+        }
+    });
     
     // Gestionar categorías
     document.getElementById('btnGestionarCategorias').addEventListener('click', openGestionarCategorias);
     document.getElementById('closeModalCategorias').addEventListener('click', closeGestionarCategorias);
     document.getElementById('cerrarCategorias').addEventListener('click', closeGestionarCategorias);
+    
+    // Ver categorías (resumen)
+    document.getElementById('btnVerCategorias').addEventListener('click', toggleResumenCategorias);
     
     // Modal nueva categoría
     document.getElementById('closeModalNuevaCategoria').addEventListener('click', closeModalNuevaCategoria);
@@ -391,6 +408,17 @@ function switchTab(tab) {
     } else if (tab === 'historial') {
         loadHistorial();
     } else if (tab === 'movimientos') {
+        // Resetear vista de movimientos
+        const resumenContainer = document.getElementById('categoriasResumen');
+        const btnVerCategorias = document.getElementById('btnVerCategorias');
+        const movimientosList = document.getElementById('movimientosList');
+        
+        resumenContainer.style.display = 'none';
+        movimientosList.style.display = 'grid';
+        btnVerCategorias.innerHTML = '<i class="bi bi-pie-chart-fill"></i> Ver Categorías';
+        btnVerCategorias.style.background = 'linear-gradient(135deg, rgba(138, 43, 226, 0.9), rgba(75, 0, 130, 0.9))';
+        btnVerCategorias.style.borderColor = 'rgba(138, 43, 226, 0.5)';
+        
         loadMovimientos();
         loadCuentasFilterMovimientos();
         loadCategoriasFilterMovimientos();
@@ -2086,6 +2114,262 @@ window.filtrarTablaTarifas = filtrarTablaTarifas;
 window.filtrarTablaPagos = filtrarTablaPagos;
 window.limpiarBusquedaTarifas = limpiarBusquedaTarifas;
 window.limpiarBusquedaPagos = limpiarBusquedaPagos;
+
+
+// ========== TOGGLE RESUMEN DE CATEGORÍAS ==========
+
+// Mostrar/Ocultar resumen de categorías
+function toggleResumenCategorias() {
+    const resumenContainer = document.getElementById('categoriasResumen');
+    const btnVerCategorias = document.getElementById('btnVerCategorias');
+    const movimientosList = document.getElementById('movimientosList');
+    
+    if (resumenContainer.style.display === 'none' || !resumenContainer.style.display) {
+        // Mostrar resumen
+        resumenContainer.style.display = 'block';
+        movimientosList.style.display = 'none';
+        btnVerCategorias.innerHTML = '<i class="bi bi-list-ul"></i> Ver Movimientos';
+        btnVerCategorias.style.background = 'linear-gradient(135deg, rgba(138, 43, 226, 0.9), rgba(75, 0, 130, 0.9))';
+        btnVerCategorias.style.borderColor = 'rgba(138, 43, 226, 0.5)';
+        
+        // Cargar resumen si no está cargado
+        loadResumenCategorias();
+    } else {
+        // Mostrar movimientos
+        resumenContainer.style.display = 'none';
+        movimientosList.style.display = 'grid';
+        btnVerCategorias.innerHTML = '<i class="bi bi-pie-chart-fill"></i> Ver Categorías';
+        btnVerCategorias.style.background = 'linear-gradient(135deg, rgba(138, 43, 226, 0.9), rgba(75, 0, 130, 0.9))';
+        btnVerCategorias.style.borderColor = 'rgba(138, 43, 226, 0.5)';
+    }
+}
+
+// Cargar resumen de categorías
+async function loadResumenCategorias() {
+    const resumenGrid = document.getElementById('resumenCategoriasGrid');
+    resumenGrid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    try {
+        const filtroTipo = document.getElementById('filtroTipoMovimiento').value;
+        const filtroCuenta = document.getElementById('filtroCuentaMovimiento').value;
+        const filtroMes = document.getElementById('filtroMesMovimiento').value;
+        
+        // Obtener movimientos con los filtros aplicados
+        let query = getDB().collection('movimientos');
+        
+        if (filtroTipo) {
+            query = query.where('tipo', '==', filtroTipo);
+        }
+        
+        if (filtroCuenta) {
+            query = query.where('cuentaId', '==', filtroCuenta);
+        }
+        
+        if (filtroMes) {
+            const [year, month] = filtroMes.split('-');
+            const startDate = new Date(year, month - 1, 1);
+            const endDate = new Date(year, month, 0, 23, 59, 59);
+            
+            query = query.where('fecha', '>=', firebase.firestore.Timestamp.fromDate(startDate))
+                         .where('fecha', '<=', firebase.firestore.Timestamp.fromDate(endDate));
+        }
+        
+        const movimientosSnapshot = await query.get();
+        
+        // Agrupar por categoría y tipo
+        const resumenIngresos = {};
+        const resumenGastos = {};
+        
+        movimientosSnapshot.forEach(doc => {
+            const mov = doc.data();
+            const categoria = mov.categoria || 'Sin categoría';
+            const monto = mov.monto || 0;
+            
+            if (mov.tipo === 'ingreso') {
+                if (!resumenIngresos[categoria]) {
+                    resumenIngresos[categoria] = { total: 0, cantidad: 0 };
+                }
+                resumenIngresos[categoria].total += monto;
+                resumenIngresos[categoria].cantidad++;
+            } else if (mov.tipo === 'gasto') {
+                if (!resumenGastos[categoria]) {
+                    resumenGastos[categoria] = { total: 0, cantidad: 0 };
+                }
+                resumenGastos[categoria].total += monto;
+                resumenGastos[categoria].cantidad++;
+            }
+        });
+        
+        // Renderizar resumen
+        resumenGrid.innerHTML = '';
+        
+        // Sección de Ingresos
+        if (Object.keys(resumenIngresos).length > 0) {
+            const seccionIngresos = document.createElement('div');
+            seccionIngresos.className = 'resumen-tipo-section';
+            
+            const tituloIngresos = document.createElement('h4');
+            tituloIngresos.className = 'resumen-tipo-titulo';
+            tituloIngresos.innerHTML = '<i class="bi bi-arrow-down-circle"></i> Ingresos por Categoría';
+            tituloIngresos.style.color = '#00ff88';
+            tituloIngresos.style.borderColor = 'rgba(0, 255, 136, 0.3)';
+            seccionIngresos.appendChild(tituloIngresos);
+            
+            const categoriasIngresos = document.createElement('div');
+            categoriasIngresos.className = 'categorias-resumen-items';
+            categoriasIngresos.style.display = 'grid';
+            categoriasIngresos.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+            categoriasIngresos.style.gap = '1rem';
+            
+            Object.entries(resumenIngresos).sort((a, b) => b[1].total - a[1].total).forEach(([categoria, datos]) => {
+                const item = createCategoriaResumenItem(categoria, datos, 'ingreso');
+                categoriasIngresos.appendChild(item);
+            });
+            
+            seccionIngresos.appendChild(categoriasIngresos);
+            resumenGrid.appendChild(seccionIngresos);
+        }
+        
+        // Sección de Gastos
+        if (Object.keys(resumenGastos).length > 0) {
+            const seccionGastos = document.createElement('div');
+            seccionGastos.className = 'resumen-tipo-section';
+            
+            const tituloGastos = document.createElement('h4');
+            tituloGastos.className = 'resumen-tipo-titulo';
+            tituloGastos.innerHTML = '<i class="bi bi-arrow-up-circle"></i> Gastos por Categoría';
+            tituloGastos.style.color = '#ff0055';
+            tituloGastos.style.borderColor = 'rgba(255, 0, 85, 0.3)';
+            seccionGastos.appendChild(tituloGastos);
+            
+            const categoriasGastos = document.createElement('div');
+            categoriasGastos.className = 'categorias-resumen-items';
+            categoriasGastos.style.display = 'grid';
+            categoriasGastos.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+            categoriasGastos.style.gap = '1rem';
+            
+            Object.entries(resumenGastos).sort((a, b) => b[1].total - a[1].total).forEach(([categoria, datos]) => {
+                const item = createCategoriaResumenItem(categoria, datos, 'gasto');
+                categoriasGastos.appendChild(item);
+            });
+            
+            seccionGastos.appendChild(categoriasGastos);
+            resumenGrid.appendChild(seccionGastos);
+        }
+        
+        if (Object.keys(resumenIngresos).length === 0 && Object.keys(resumenGastos).length === 0) {
+            resumenGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <h3>No hay movimientos</h3>
+                    <p>No se encontraron movimientos con los filtros aplicados</p>
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Error loading resumen categorias:', error);
+        resumenGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-exclamation-triangle"></i>
+                <h3>Error al cargar resumen</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Crear item de categoría en resumen
+function createCategoriaResumenItem(categoria, datos, tipo) {
+    const item = document.createElement('div');
+    item.className = `categoria-resumen-item ${tipo}`;
+    item.style.cssText = `
+        background: ${tipo === 'ingreso' ? 'linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(0, 255, 136, 0.03))' : 'linear-gradient(135deg, rgba(255, 0, 85, 0.08), rgba(255, 0, 85, 0.03))'};
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid ${tipo === 'ingreso' ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 0, 85, 0.2)'};
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    `;
+    
+    item.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <div style="
+                width: 50px;
+                height: 50px;
+                border-radius: 14px;
+                background: ${tipo === 'ingreso' ? 'linear-gradient(135deg, #28a745, #20c997)' : 'linear-gradient(135deg, #dc3545, #c82333)'};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+                box-shadow: 0 6px 20px ${tipo === 'ingreso' ? 'rgba(40, 167, 69, 0.4)' : 'rgba(220, 53, 69, 0.4)'};
+            ">
+                <i class="bi ${tipo === 'ingreso' ? 'bi-arrow-down-circle' : 'bi-arrow-up-circle'}"></i>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+                <h5 style="
+                    margin: 0 0 0.25rem 0;
+                    color: rgba(255, 255, 255, 0.95);
+                    font-size: 1rem;
+                    font-weight: 600;
+                    word-wrap: break-word;
+                ">${categoria}</h5>
+                <p style="
+                    margin: 0;
+                    color: rgba(255, 255, 255, 0.6);
+                    font-size: 0.85rem;
+                ">${datos.cantidad} movimiento${datos.cantidad !== 1 ? 's' : ''}</p>
+            </div>
+        </div>
+        <div style="
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        ">
+            <div style="
+                font-size: 0.7rem;
+                color: rgba(255, 255, 255, 0.6);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            ">Total</div>
+            <div style="
+                font-size: 1.75rem;
+                font-weight: 800;
+                color: ${tipo === 'ingreso' ? '#00ff88' : '#ff0055'};
+                letter-spacing: -0.5px;
+                text-shadow: 0 0 30px ${tipo === 'ingreso' ? 'rgba(0, 255, 136, 0.6)' : 'rgba(255, 0, 85, 0.6)'};
+            ">$${formatNumber(datos.total)}</div>
+        </div>
+    `;
+    
+    item.addEventListener('mouseenter', () => {
+        item.style.transform = 'translateY(-5px)';
+        item.style.boxShadow = `0 8px 32px ${tipo === 'ingreso' ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255, 0, 85, 0.3)'}`;
+        item.style.borderColor = tipo === 'ingreso' ? 'rgba(0, 255, 136, 0.4)' : 'rgba(255, 0, 85, 0.4)';
+    });
+    
+    item.addEventListener('mouseleave', () => {
+        item.style.transform = 'translateY(0)';
+        item.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
+        item.style.borderColor = tipo === 'ingreso' ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 0, 85, 0.2)';
+    });
+    
+    return item;
+}
+
+// Hacer funciones globales
+window.toggleResumenCategorias = toggleResumenCategorias;
+window.loadResumenCategorias = loadResumenCategorias;
 
 
 // ========== SIDEBAR LISTENERS ==========

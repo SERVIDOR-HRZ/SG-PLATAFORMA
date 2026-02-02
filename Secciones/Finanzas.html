@@ -407,27 +407,23 @@
                     </button>
                 </div>
 
-                <!-- Filtro de cuentas con dropdown -->
-                <div class="filtro-cuentas-dropdown">
-                    <button class="btn-filtro-dropdown" id="btnFiltroCuentas">
-                        <i class="bi bi-bank"></i>
-                        <span id="cuentaSeleccionadaTexto">Cuentas</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </button>
-                    <div class="dropdown-cuentas" id="dropdownCuentas">
-                        <div class="dropdown-item" data-cuenta="">
-                            <i class="bi bi-check-circle"></i>
-                            <span>Todas las cuentas</span>
-                        </div>
-                        <!-- Las cuentas se cargarán dinámicamente aquí -->
-                    </div>
-                </div>
+                <!-- Filtro de cuentas -->
+                <select id="filtroCuentaMovimiento" class="filtro-periodo">
+                    <option value="">Todas las cuentas</option>
+                    <!-- Las cuentas se cargarán dinámicamente aquí -->
+                </select>
 
                 <!-- Selector de fecha tipo calendario -->
                 <!-- Selector de fecha tipo calendario -->
                 <div class="filtro-fecha-calendario">
                     <input type="month" id="filtroMesMovimiento" class="input-fecha-estilizado">
                 </div>
+
+                <!-- Botón Ver Categorías -->
+                <button class="btn-ver-categorias" id="btnVerCategorias">
+                    <i class="bi bi-pie-chart-fill"></i>
+                    Ver Categorías
+                </button>
 
                 <!-- Botón gestionar categorías -->
                 <button class="btn-secondary" id="btnGestionarCategorias">
@@ -442,9 +438,6 @@
                 <option value="ingreso">Ingresos</option>
                 <option value="gasto">Gastos</option>
             </select>
-            <select id="filtroCuentaMovimiento" style="display: none;">
-                <option value="">Todas las cuentas</option>
-            </select>
             <select id="filtroCategoriaMovimiento" style="display: none;">
                 <option value="">Todas las categorías</option>
             </select>
@@ -452,10 +445,7 @@
             <!-- Resumen por Categorías -->
             <div class="categorias-resumen" id="categoriasResumen" style="display: none;">
                 <div class="resumen-header">
-                    <h3>Resumen por Categorías</h3>
-                    <button class="btn-icon-small btn-toggle-resumen" id="btnToggleResumen" title="Colapsar resumen">
-                        <i class="bi bi-chevron-up"></i>
-                    </button>
+                    <h3><i class="bi bi-pie-chart-fill"></i> Resumen por Categorías</h3>
                 </div>
                 <div class="resumen-categorias-grid" id="resumenCategoriasGrid">
                     <!-- Se generará dinámicamente -->

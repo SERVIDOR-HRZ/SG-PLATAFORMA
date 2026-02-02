@@ -1111,32 +1111,20 @@ window.uploadToImgBB = uploadToImgBB;
                     filtroTipoSelect.value = tipo;
                     // Disparar evento change
                     filtroTipoSelect.dispatchEvent(new Event('change'));
+                    
+                    // Si el resumen de categorías está visible, recargarlo
+                    const resumenContainer = document.getElementById('categoriasResumen');
+                    if (resumenContainer && resumenContainer.style.display !== 'none') {
+                        if (typeof window.loadResumenCategorias === 'function') {
+                            window.loadResumenCategorias();
+                        }
+                    }
                 });
             });
         }
         
-        // Dropdown de cuentas
-        const btnFiltroCuentas = document.getElementById('btnFiltroCuentas');
-        const dropdownCuentas = document.getElementById('dropdownCuentas');
-        const filtroCuentaSelect = document.getElementById('filtroCuentaMovimiento');
-        
-        if (btnFiltroCuentas && dropdownCuentas && filtroCuentaSelect) {
-            // Toggle dropdown
-            btnFiltroCuentas.addEventListener('click', function(e) {
-                e.stopPropagation();
-                dropdownCuentas.classList.toggle('active');
-            });
-            
-            // Cerrar dropdown al hacer clic fuera
-            document.addEventListener('click', function(e) {
-                if (!btnFiltroCuentas.contains(e.target) && !dropdownCuentas.contains(e.target)) {
-                    dropdownCuentas.classList.remove('active');
-                }
-            });
-            
-            // Cargar cuentas en el dropdown
-            cargarCuentasEnDropdown();
-        }
+        // Cargar cuentas en el select
+        loadCuentasFilterMovimientos();
         
         // El input de fecha ya no necesita JavaScript adicional
         // Se maneja automáticamente con el input type="month"
@@ -1149,79 +1137,21 @@ window.uploadToImgBB = uploadToImgBB;
     }
 })();
 
-// Cargar cuentas en el dropdown
-async function cargarCuentasEnDropdown() {
+// Cargar cuentas en el select de filtro
+async function loadCuentasFilterMovimientos() {
     try {
         const db = getDB();
         const cuentasSnapshot = await db.collection('cuentas_bancarias').orderBy('nombre').get();
-        const dropdownCuentas = document.getElementById('dropdownCuentas');
         const filtroCuentaSelect = document.getElementById('filtroCuentaMovimiento');
-        const btnFiltroCuentas = document.getElementById('btnFiltroCuentas');
-        const cuentaTexto = document.getElementById('cuentaSeleccionadaTexto');
         
-        if (!dropdownCuentas) return;
+        if (!filtroCuentaSelect) return;
         
-        // Limpiar dropdown excepto el primer item (Todas las cuentas)
-        const primerItem = dropdownCuentas.querySelector('.dropdown-item');
-        dropdownCuentas.innerHTML = '';
-        if (primerItem) {
-            dropdownCuentas.appendChild(primerItem);
-        }
-        
-        // Agregar event listener al primer item
-        const todasItem = dropdownCuentas.querySelector('.dropdown-item');
-        if (todasItem) {
-            todasItem.addEventListener('click', function() {
-                // Remover selected de todos
-                dropdownCuentas.querySelectorAll('.dropdown-item').forEach(item => {
-                    item.classList.remove('selected');
-                });
-                // Marcar como seleccionado
-                this.classList.add('selected');
-                // Actualizar select oculto
-                filtroCuentaSelect.value = '';
-                // Actualizar texto del botón
-                cuentaTexto.textContent = 'Cuentas';
-                btnFiltroCuentas.classList.remove('active');
-                // Cerrar dropdown
-                dropdownCuentas.classList.remove('active');
-                // Disparar evento change
-                filtroCuentaSelect.dispatchEvent(new Event('change'));
-            });
-        }
+        // Limpiar select excepto la primera opción
+        filtroCuentaSelect.innerHTML = '<option value="">Todas las cuentas</option>';
         
         // Agregar cuentas
         cuentasSnapshot.forEach(doc => {
             const cuenta = { id: doc.id, ...doc.data() };
-            const item = document.createElement('div');
-            item.className = 'dropdown-item';
-            item.dataset.cuenta = cuenta.id;
-            item.innerHTML = `
-                <i class="bi bi-check-circle"></i>
-                <span>${cuenta.nombre}</span>
-            `;
-            
-            item.addEventListener('click', function() {
-                // Remover selected de todos
-                dropdownCuentas.querySelectorAll('.dropdown-item').forEach(item => {
-                    item.classList.remove('selected');
-                });
-                // Marcar como seleccionado
-                this.classList.add('selected');
-                // Actualizar select oculto
-                filtroCuentaSelect.value = cuenta.id;
-                // Actualizar texto del botón
-                cuentaTexto.textContent = cuenta.nombre;
-                btnFiltroCuentas.classList.add('active');
-                // Cerrar dropdown
-                dropdownCuentas.classList.remove('active');
-                // Disparar evento change
-                filtroCuentaSelect.dispatchEvent(new Event('change'));
-            });
-            
-            dropdownCuentas.appendChild(item);
-            
-            // También agregar al select oculto para compatibilidad
             const option = document.createElement('option');
             option.value = cuenta.id;
             option.textContent = cuenta.nombre;
@@ -1229,9 +1159,10 @@ async function cargarCuentasEnDropdown() {
         });
         
     } catch (error) {
-        console.error('Error cargando cuentas en dropdown:', error);
+        console.error('Error cargando cuentas:', error);
     }
 }
 
 // Exportar función para que pueda ser llamada desde otros archivos
+window.loadCuentasFilterMovimientos = loadCuentasFilterMovimientos;
 window.cargarCuentasEnDropdown = cargarCuentasEnDropdown;
