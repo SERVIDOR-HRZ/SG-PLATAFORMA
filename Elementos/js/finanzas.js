@@ -295,6 +295,14 @@ function setupEventListeners() {
     document.getElementById('closeModalMovimiento').addEventListener('click', closeModalMovimiento);
     document.getElementById('cancelarMovimiento').addEventListener('click', closeModalMovimiento);
     document.getElementById('formMovimiento').addEventListener('submit', handleSaveMovimiento);
+    
+    // Botón Gestionar Inscripciones
+    const btnGestionInscripciones = document.getElementById('btnGestionInscripciones');
+    if (btnGestionInscripciones) {
+        btnGestionInscripciones.addEventListener('click', () => {
+            window.location.href = 'Gestion-Inscripciones.html';
+        });
+    }
 
     // Filtros de movimientos
     document.getElementById('filtroTipoMovimiento').addEventListener('change', () => {
