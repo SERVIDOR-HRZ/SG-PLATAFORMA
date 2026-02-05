@@ -1165,4 +1165,3 @@ async function loadCuentasFilterMovimientos() {
 
 // Exportar función para que pueda ser llamada desde otros archivos
 window.loadCuentasFilterMovimientos = loadCuentasFilterMovimientos;
-window.cargarCuentasEnDropdown = cargarCuentasEnDropdown;

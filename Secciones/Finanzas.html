@@ -584,7 +584,7 @@
     <div class="modal" id="modalRegistrarPago">
         <div class="modal-content modal-pago-grande">
             <div class="modal-header">
-                <h3>Registrar Pago Semanal</h3>
+                <h3><i class="bi bi-cash-coin"></i> Registrar Pago Semanal</h3>
                 <button class="close-btn" id="closeModalPago">
                     <i class="bi bi-x-lg"></i>
                 </button>
@@ -602,68 +602,89 @@
                         </div>
                     </div>
 
-                    <!-- Resumen de Clases -->
-                    <div class="pago-seccion">
-                        <h5 class="seccion-titulo">
-                            <i class="bi bi-calendar-check"></i>
-                            Resumen de Clases
-                        </h5>
-                        <div class="pago-resumen">
-                            <div class="resumen-item">
-                                <span>Clases dictadas:</span>
-                                <strong id="resumenClases">0</strong>
-                            </div>
-                            <div class="resumen-item">
-                                <span>Horas totales:</span>
-                                <strong id="resumenHoras">0</strong>
-                            </div>
-                            <div class="resumen-item">
-                                <span>Tarifa por hora:</span>
-                                <strong id="resumenTarifa">$0</strong>
-                            </div>
-                            <div class="resumen-item total">
-                                <span>Total a pagar:</span>
-                                <strong id="resumenTotal">$0</strong>
-                            </div>
-                        </div>
-                        
-                        <!-- Detalle de Clases -->
-                        <div class="clases-detalle-container" id="clasesDetalleContainer" style="display: none;">
-                            <div class="clases-detalle-header">
-                                <i class="bi bi-list-check"></i>
-                                <span>Detalle de Clases</span>
-                            </div>
-                            <!-- Los detalles se generarán dinámicamente -->
-                        </div>
-                    </div>
-
-                    <!-- Información de Pago del Profesor -->
-                    <div class="pago-seccion">
-                        <h5 class="seccion-titulo">
-                            <i class="bi bi-credit-card"></i>
-                            Datos de Pago del Profesor
-                        </h5>
-                        <div class="datos-pago-profesor">
-                            <div class="dato-pago-item">
-                                <span class="dato-label">Método de Pago:</span>
-                                <strong id="profesorMetodoPago" class="dato-valor">No especificado</strong>
-                            </div>
-                            <div class="dato-pago-item">
-                                <span class="dato-label">Número de Cuenta:</span>
-                                <div class="dato-valor-copy">
-                                    <strong id="profesorNumeroCuenta" class="dato-valor">No especificado</strong>
-                                    <button type="button" class="btn-copy-small" id="btnCopyNumeroCuenta" style="display: none;" title="Copiar">
-                                        <i class="bi bi-clipboard"></i>
-                                    </button>
+                    <!-- Grid de 2 columnas: Resumen y Datos de Pago -->
+                    <div class="pago-grid-dos-columnas">
+                        <!-- Columna Izquierda: Resumen de Clases -->
+                        <div class="pago-seccion">
+                            <h5 class="seccion-titulo">
+                                <i class="bi bi-calendar-check"></i>
+                                Resumen de Clases
+                            </h5>
+                            <div class="pago-resumen-vertical">
+                                <div class="resumen-item-vertical">
+                                    <span class="resumen-label">Clases dictadas:</span>
+                                    <strong class="resumen-valor" id="resumenClases">0</strong>
+                                </div>
+                                <div class="resumen-item-vertical">
+                                    <span class="resumen-label">Horas totales:</span>
+                                    <strong class="resumen-valor" id="resumenHoras">0</strong>
+                                </div>
+                                <div class="resumen-item-vertical">
+                                    <span class="resumen-label">Tarifa por hora:</span>
+                                    <strong class="resumen-valor" id="resumenTarifa">$0</strong>
+                                </div>
+                                <div class="resumen-item-vertical total">
+                                    <span class="resumen-label">Total a pagar:</span>
+                                    <strong class="resumen-valor-total" id="resumenTotal">$0</strong>
                                 </div>
                             </div>
-                            <div class="dato-pago-item">
-                                <span class="dato-label">Nombre de Cuenta:</span>
-                                <div class="dato-valor-copy">
-                                    <strong id="profesorNombreCuenta" class="dato-valor">No especificado</strong>
-                                    <button type="button" class="btn-copy-small" id="btnCopyNombreCuenta" style="display: none;" title="Copiar">
-                                        <i class="bi bi-clipboard"></i>
-                                    </button>
+                            
+                            <!-- Detalle de Clases -->
+                            <div class="clases-detalle-container" id="clasesDetalleContainer" style="display: none;">
+                                <div class="clases-detalle-header">
+                                    <i class="bi bi-list-check"></i>
+                                    <span>Detalle de Clases</span>
+                                </div>
+                                <!-- Los detalles se generarán dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Columna Derecha: Datos de Pago y QR -->
+                        <div class="pago-seccion">
+                            <h5 class="seccion-titulo">
+                                <i class="bi bi-credit-card"></i>
+                                Datos de Pago del Profesor
+                            </h5>
+                            
+                            <!-- Código QR -->
+                            <div class="qr-pago-container" id="qrPagoContainer" style="display: none;">
+                                <div class="qr-pago-wrapper">
+                                    <img id="qrPagoImage" src="" alt="Código QR" class="qr-pago-image" title="Haz clic para ver en tamaño completo">
+                                    <p class="qr-pago-label">Escanea el código QR para realizar el pago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="datos-pago-profesor-vertical">
+                                <div class="dato-pago-item-vertical">
+                                    <span class="dato-label-vertical">
+                                        <i class="bi bi-wallet2"></i>
+                                        Método de Pago
+                                    </span>
+                                    <strong id="profesorMetodoPago" class="dato-valor-vertical">No especificado</strong>
+                                </div>
+                                <div class="dato-pago-item-vertical">
+                                    <span class="dato-label-vertical">
+                                        <i class="bi bi-credit-card-2-front"></i>
+                                        Número de Cuenta
+                                    </span>
+                                    <div class="dato-valor-copy-vertical">
+                                        <strong id="profesorNumeroCuenta" class="dato-valor-vertical">No especificado</strong>
+                                        <button type="button" class="btn-copy-small" id="btnCopyNumeroCuenta" style="display: none;" title="Copiar">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="dato-pago-item-vertical">
+                                    <span class="dato-label-vertical">
+                                        <i class="bi bi-person-badge"></i>
+                                        Nombre de Cuenta
+                                    </span>
+                                    <div class="dato-valor-copy-vertical">
+                                        <strong id="profesorNombreCuenta" class="dato-valor-vertical">No especificado</strong>
+                                        <button type="button" class="btn-copy-small" id="btnCopyNombreCuenta" style="display: none;" title="Copiar">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

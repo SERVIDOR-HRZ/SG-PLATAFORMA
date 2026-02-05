@@ -1832,6 +1832,20 @@ window.openRegistrarPago = async function(profesorId, clasesData, tarifa) {
             btnCopyNombre.style.display = 'none';
         }
 
+        // Mostrar código QR si existe
+        const qrPagoContainer = document.getElementById('qrPagoContainer');
+        const qrPagoImage = document.getElementById('qrPagoImage');
+        
+        if (profesor.codigoQR) {
+            qrPagoImage.src = profesor.codigoQR;
+            qrPagoContainer.style.display = 'block';
+            
+            // Agregar evento click para ver QR en tamaño completo
+            qrPagoImage.onclick = () => verCodigoQR(profesorId);
+        } else {
+            qrPagoContainer.style.display = 'none';
+        }
+
         // Generar descripción predeterminada con detalles de clases
         generarDescripcionPago(clasesDataCompleto);
 

@@ -4170,7 +4170,7 @@ body::before {
 
 /* Modal de Pago Mejorado */
 .modal-pago-grande {
-    max-width: 850px;
+    max-width: 1000px;
     max-height: 92vh;
     display: flex;
     flex-direction: column;
@@ -4200,11 +4200,6 @@ body::before {
     align-items: center;
     gap: 0.75rem;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.modal-pago-grande .modal-header h3::before {
-    content: '💰';
-    font-size: 1.8rem;
 }
 
 .modal-pago-grande .close-btn {
@@ -4442,6 +4437,199 @@ body::before {
     margin-bottom: 1rem;
 }
 
+/* Grid de 2 columnas para el modal de pago */
+.pago-grid-dos-columnas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Resumen vertical */
+.pago-resumen-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.resumen-item-vertical {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.resumen-item-vertical:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(4px);
+}
+
+.resumen-item-vertical.total {
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.25), rgba(200, 0, 0, 0.2));
+    border: 2px solid rgba(255, 0, 0, 0.5);
+    padding: 1.25rem 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.resumen-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+}
+
+.resumen-valor {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 700;
+}
+
+.resumen-valor-total {
+    font-size: 1.75rem;
+    color: white;
+    font-weight: 800;
+    text-shadow: 0 2px 10px rgba(255, 0, 0, 0.5);
+}
+
+/* Datos de pago vertical */
+.datos-pago-profesor-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.dato-pago-item-vertical {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    border-left: 4px solid rgba(255, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.dato-pago-item-vertical:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-left-color: rgba(255, 0, 0, 0.8);
+    transform: translateX(4px);
+}
+
+.dato-label-vertical {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.dato-label-vertical i {
+    color: #ff0000;
+    font-size: 1rem;
+}
+
+.dato-valor-vertical {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+}
+
+.dato-valor-copy-vertical {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+
+/* Contenedor del QR en el modal de pago */
+.qr-pago-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.2);
+    animation: fadeInScale 0.4s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.qr-pago-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.qr-pago-image {
+    width: 100%;
+    max-width: 250px;
+    height: auto;
+    border-radius: 12px;
+    border: 3px solid rgba(255, 0, 0, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    background: white;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.qr-pago-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgba(255, 0, 0, 0.4);
+    border-color: rgba(255, 0, 0, 0.6);
+}
+
+.qr-pago-label {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    text-align: center;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.qr-pago-label::before {
+    content: '📱';
+    font-size: 1.2rem;
+}
+
+.qr-pago-label::after {
+    content: '🔍';
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.pago-resumen {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
 .pago-resumen .resumen-item {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05));
     backdrop-filter: blur(10px);
@@ -4623,13 +4811,60 @@ body::before {
     font-style: italic;
 }
 
-/* Responsive */
+/* Responsive para modal de pago */
 @media (max-width: 768px) {
     .modal-pago-grande {
         max-width: 95%;
+        max-height: 95vh;
+    }
+    
+    .modal-pago-grande .modal-header {
+        padding: 1.5rem;
+    }
+    
+    .modal-pago-grande .modal-header h3 {
+        font-size: 1.3rem;
+    }
+    
+    .modal-pago-grande .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-pago-grande .form-actions {
+        padding: 1.25rem 1.5rem;
+        margin: 1rem -1.5rem 0 -1.5rem;
+        flex-direction: column;
+    }
+    
+    .form-actions .btn-secondary,
+    .form-actions .btn-primary {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .pago-profesor-card {
+        padding: 1.5rem;
+    }
+    
+    .profesor-info-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profesor-info-header img {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .pago-seccion {
+        padding: 1.25rem;
     }
     
     .pago-resumen {
+        grid-template-columns: 1fr;
+    }
+    
+    .pago-grid-dos-columnas {
         grid-template-columns: 1fr;
     }
     
@@ -4637,6 +4872,23 @@ body::before {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
+    }
+    
+    .dato-valor-copy {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .file-upload-label {
+        padding: 2rem 1.5rem;
+    }
+    
+    .file-upload-label i {
+        font-size: 2.5rem;
+    }
+    
+    .qr-pago-image {
+        max-width: 200px;
     }
 }
 
