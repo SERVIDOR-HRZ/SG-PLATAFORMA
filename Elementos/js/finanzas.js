@@ -658,6 +658,19 @@ function closeModalTarifa() {
     document.getElementById('modalEditarTarifa').classList.remove('active');
     document.getElementById('formEditarTarifa').reset();
     selectedProfesorId = null;
+    
+    // Restaurar el botón de submit a su estado original
+    const btnSubmit = document.querySelector('#formEditarTarifa button[type="submit"]');
+    if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '<i class="bi bi-save"></i> Guardar Cambios';
+    }
+    
+    // Limpiar preview del QR
+    const qrPreview = document.getElementById('qrPreview');
+    const codigoQRInput = document.getElementById('codigoQRInput');
+    if (qrPreview) qrPreview.style.display = 'none';
+    if (codigoQRInput) codigoQRInput.value = '';
 }
 
 // Handle save tarifa
@@ -705,13 +718,18 @@ async function handleSaveTarifa(e) {
         await getDB().collection('usuarios').doc(selectedProfesorId).update(updateData);
 
         showNotification('success', 'Información Actualizada', 'La información de pago se ha actualizado correctamente');
+        
+        // Restaurar botón antes de cerrar el modal
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = originalBtnText;
+        
         closeModalTarifa();
         loadTarifas();
     } catch (error) {
         console.error('Error saving tarifa:', error);
         showNotification('error', 'Error', 'No se pudo actualizar la información: ' + error.message);
         
-        // Restaurar botón
+        // Restaurar botón en caso de error
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = originalBtnText;
     }
