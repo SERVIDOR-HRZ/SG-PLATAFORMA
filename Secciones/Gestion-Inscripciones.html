@@ -36,25 +36,29 @@
             </div>
             <div class="sidebar-user-name" id="userName">USUARIO</div>
             <div class="sidebar-user-role">Gestión de Inscripciones</div>
-            
-            <!-- Botones de Perfil y Web -->
-            <div class="sidebar-profile-actions">
-                <button class="sidebar-btn btn-profile" id="btnProfile">
-                    <i class="bi bi-person-gear"></i>
-                    <span>Mi Perfil</span>
-                </button>
-                <button class="sidebar-btn btn-home" id="btnHome">
-                    <i class="bi bi-house-door-fill"></i>
-                    <span>Web Principal</span>
-                </button>
-                <button class="sidebar-btn btn-back-finanzas" id="btnBackFinanzas">
-                    <i class="bi bi-arrow-left-circle"></i>
-                    <span>Volver a Finanzas</span>
-                </button>
-            </div>
         </div>
 
-        <!-- Botones de Acción Sidebar -->
+        <!-- Botón Volver a Finanzas -->
+        <div class="sidebar-back-section">
+            <button class="sidebar-btn btn-back-finanzas" id="btnBackFinanzas">
+                <i class="bi bi-arrow-left-circle"></i>
+                <span>Volver a Finanzas</span>
+            </button>
+        </div>
+
+        <!-- Menú de Navegación -->
+        <div class="sidebar-menu">
+            <button class="sidebar-menu-item active" id="btnMetodosPago" data-view="metodos-pago">
+                <i class="bi bi-credit-card-fill"></i>
+                <span>Métodos de Pago</span>
+            </button>
+            <button class="sidebar-menu-item" id="btnInscritos" data-view="inscritos">
+                <i class="bi bi-people-fill"></i>
+                <span>Inscritos</span>
+            </button>
+        </div>
+
+        <!-- Botón Cerrar Sesión -->
         <div class="sidebar-actions">
             <button class="sidebar-btn btn-logout" id="btnLogout">
                 <i class="bi bi-box-arrow-right"></i>
@@ -65,23 +69,150 @@
 
     <!-- Main Content -->
     <main class="main-panel-content">
-        <div class="section-header">
-            <h2><i class="bi bi-person-plus-fill"></i> Gestión de Inscripciones</h2>
-            <button class="btn-primary" id="btnNuevaInscripcion">
-                <i class="bi bi-plus-circle"></i>
-                Nueva Inscripción
-            </button>
+        <!-- Sección Métodos de Pago -->
+        <div class="content-section active" id="seccionMetodosPago">
+            <div class="section-header">
+                <h2><i class="bi bi-credit-card-fill"></i> Métodos de Pago</h2>
+                <button class="btn-primary" id="btnNuevoMetodo">
+                    <i class="bi bi-plus-circle"></i>
+                    Nuevo Método de Pago
+                </button>
+            </div>
+
+            <!-- Contenido principal -->
+            <div class="inscripciones-container">
+                <!-- Métodos de Pago Grid -->
+                <div class="metodos-pago-grid" id="metodosPagoGrid">
+                    <!-- Los métodos de pago se cargarán aquí -->
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+                    <i class="bi bi-arrow-clockwise spin"></i>
+                    <p>Cargando métodos de pago...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <i class="bi bi-credit-card"></i>
+                    <h3>No hay métodos de pago</h3>
+                    <p>Crea tu primer método de pago para comenzar</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Contenido principal -->
-        <div class="inscripciones-container">
-            <div class="empty-state">
-                <i class="bi bi-inbox"></i>
-                <h3>Próximamente</h3>
-                <p>El sistema de gestión de inscripciones estará disponible pronto</p>
+        <!-- Sección Inscritos -->
+        <div class="content-section" id="seccionInscritos">
+            <div class="section-header">
+                <h2><i class="bi bi-people-fill"></i> Inscritos</h2>
+            </div>
+
+            <!-- Contenido de inscritos -->
+            <div class="inscripciones-container">
+                <div class="empty-state">
+                    <i class="bi bi-people"></i>
+                    <h3>Próximamente</h3>
+                    <p>La gestión de inscritos estará disponible pronto</p>
+                </div>
             </div>
         </div>
     </main>
+
+    <!-- Modal para Crear/Editar Método de Pago -->
+    <div class="modal" id="metodoPagoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nuevo Método de Pago</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="metodoPagoForm">
+                    <input type="hidden" id="metodoPagoId">
+                    
+                    <div class="form-group">
+                        <label for="nombreMetodo">Nombre del Método *</label>
+                        <input type="text" id="nombreMetodo" required placeholder="Ej: Nequi, Bancolombia, Daviplata">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numeroCuenta">Número de Cuenta *</label>
+                        <input type="text" id="numeroCuenta" required placeholder="Ej: 3001234567">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imagenMetodo">Imagen/Logo *</label>
+                        <div class="image-upload-container">
+                            <input type="file" id="imagenMetodo" accept="image/*" style="display: none;">
+                            <button type="button" class="btn-upload" id="btnUploadImage">
+                                <i class="bi bi-cloud-upload"></i>
+                                Seleccionar Imagen
+                            </button>
+                            <div class="image-preview" id="imagePreview" style="display: none;">
+                                <button type="button" class="btn-remove-image" id="btnRemoveImage">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                                <img id="previewImg" src="" alt="Preview">
+                            </div>
+                        </div>
+                        <small class="form-hint">Formatos: JPG, PNG. Tamaño recomendado: 200x200px</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="activoMetodo" checked>
+                            Método activo
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btnCancelar">Cancelar</button>
+                <button type="submit" form="metodoPagoForm" class="btn-primary" id="btnGuardar">
+                    <i class="bi bi-save"></i>
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Eliminar -->
+    <div class="modal" id="confirmDeleteModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Confirmar Eliminación</h3>
+                <button class="close-btn" id="closeConfirmModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <p>¿Estás seguro de que deseas eliminar este método de pago?</p>
+                    <p class="confirm-name" id="confirmMetodoNombre"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btnCancelarDelete">Cancelar</button>
+                <button type="button" class="btn-danger" id="btnConfirmarDelete">
+                    <i class="bi bi-trash"></i>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="notification-toast" id="notificationToast">
+        <div class="notification-content">
+            <i class="notification-icon" id="notificationIcon"></i>
+            <span class="notification-message" id="notificationMessage"></span>
+        </div>
+        <button class="notification-close" id="notificationClose">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
 
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
