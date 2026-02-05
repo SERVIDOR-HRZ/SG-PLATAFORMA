@@ -5026,6 +5026,9 @@ function openCreateAulaModal() {
     // Load estudiantes for assignment
     loadEstudiantesForAulaModal([]);
 
+    // Load métodos de pago
+    loadMetodosPagoForAulaModal([]);
+
     if (modal) modal.classList.add('show');
 }
 
@@ -5100,6 +5103,10 @@ async function openEditAulaModal(aulaId) {
     // Load estudiantes and get those assigned to this aula
     await loadEstudiantesForAulaModal([], aulaId);
 
+    // Load métodos de pago with selected ones
+    const metodosPagoSeleccionados = aula.metodosPago || [];
+    loadMetodosPagoForAulaModal(metodosPagoSeleccionados);
+
     if (modal) modal.classList.add('show');
 }
 
@@ -5144,6 +5151,12 @@ async function handleSaveAula(e) {
     const estudiantesSeleccionados = [];
     document.querySelectorAll('input[name="estudianteAula"]:checked').forEach(cb => {
         estudiantesSeleccionados.push(cb.value);
+    });
+
+    // Get selected métodos de pago
+    const metodosPagoSeleccionados = [];
+    document.querySelectorAll('input[name="metodoPagoAula"]:checked').forEach(cb => {
+        metodosPagoSeleccionados.push(cb.value);
     });
 
     // Validation
@@ -5243,6 +5256,8 @@ async function handleSaveAula(e) {
             frecuenciaPago,
             fechaPrimeraCuota: fechaPrimeraCuota || null,
             cuotas,
+            // Métodos de pago
+            metodosPago: metodosPagoSeleccionados,
             updatedAt: new Date().toISOString()
         };
 
@@ -6593,3 +6608,99 @@ window.loadResetProgressStats = loadResetProgressStats;
 window.openResetProgressModal = openResetProgressModal;
 window.closeResetProgressModalFn = closeResetProgressModalFn;
 window.handleResetAllProgress = handleResetAllProgress;
+
+
+// ==========================================
+// MÉTODOS DE PAGO FUNCTIONS
+// ==========================================
+
+// Load métodos de pago for aula modal
+async function loadMetodosPagoForAulaModal(selectedMetodos = []) {
+    const grid = document.getElementById('metodosPagoAulaGrid');
+    const noMetodosMsg = document.getElementById('noMetodosPagoMsg');
+
+    if (!grid) return;
+
+    // Show loading
+    grid.innerHTML = `
+        <div class="loading-metodos-msg">
+            <i class="bi bi-arrow-clockwise spin"></i>
+            <span>Cargando métodos de pago...</span>
+        </div>
+    `;
+    if (noMetodosMsg) noMetodosMsg.style.display = 'none';
+
+    try {
+        await waitForFirebase();
+
+        // Get all metodos de pago and filter on client side to avoid index requirement
+        const snapshot = await window.firebaseDB
+            .collection('metodosPago')
+            .get();
+
+        const metodos = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Only include active methods
+            if (data.activo === true) {
+                metodos.push({
+                    id: doc.id,
+                    ...data
+                });
+            }
+        });
+
+        // Sort by name on client side
+        metodos.sort((a, b) => {
+            const nameA = (a.nombre || '').toLowerCase();
+            const nameB = (b.nombre || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        if (metodos.length === 0) {
+            grid.innerHTML = '';
+            if (noMetodosMsg) noMetodosMsg.style.display = 'flex';
+            return;
+        }
+
+        // Render métodos de pago
+        grid.innerHTML = '';
+        metodos.forEach(metodo => {
+            const isSelected = selectedMetodos.includes(metodo.id);
+            
+            const metodoCard = document.createElement('label');
+            metodoCard.className = 'metodo-pago-checkbox';
+            metodoCard.innerHTML = `
+                <input type="checkbox" name="metodoPagoAula" value="${metodo.id}" ${isSelected ? 'checked' : ''}>
+                <div class="checkbox-content">
+                    <img src="${metodo.imagen}" alt="${metodo.nombre}" class="metodo-pago-logo-small">
+                    <div class="metodo-pago-info">
+                        <div class="metodo-pago-nombre-small">${metodo.nombre}</div>
+                        <div class="metodo-pago-cuenta-small">
+                            <i class="bi bi-credit-card"></i>
+                            ${metodo.numeroCuenta}
+                        </div>
+                    </div>
+                    <span class="metodo-pago-status-small ${metodo.activo ? 'active' : 'inactive'}">
+                        ${metodo.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                </div>
+            `;
+            grid.appendChild(metodoCard);
+        });
+
+        if (noMetodosMsg) noMetodosMsg.style.display = 'none';
+
+    } catch (error) {
+        console.error('Error loading métodos de pago:', error);
+        grid.innerHTML = `
+            <div class="no-metodos-msg">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span>Error al cargar métodos de pago: ${error.message}</span>
+            </div>
+        `;
+    }
+}
+
+// Make functions globally available
+window.loadMetodosPagoForAulaModal = loadMetodosPagoForAulaModal;
