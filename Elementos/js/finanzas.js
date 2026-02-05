@@ -450,7 +450,7 @@ function switchTab(tab) {
 // Load tarifas (filtrado por profesores del aula)
 async function loadTarifas() {
     const tarifasTableBody = document.getElementById('tarifasTableBody');
-    tarifasTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div></div></td></tr>';
+    tarifasTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;"><div class="loading"><div class="spinner"></div></div></td></tr>';
 
     try {
         // Obtener todos los profesores (usuarios admin con rol profesor)
@@ -483,7 +483,7 @@ async function loadTarifas() {
         if (profesoresDocs.length === 0) {
             tarifasTableBody.innerHTML = `
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 3rem;">
+                    <td colspan="8" style="text-align: center; padding: 3rem;">
                         <div class="empty-state">
                             <i class="bi bi-person-x"></i>
                             <h3>No hay profesores asignados a esta aula</h3>
@@ -538,6 +538,7 @@ function createTarifaRow(profesor) {
     const metodoPago = profesor.metodoPago || '';
     const numeroCuenta = profesor.numeroCuenta || '';
     const nombreCuenta = profesor.nombreCuenta || '';
+    const codigoQR = profesor.codigoQR || '';
 
     const avatarHTML = avatarUrl 
         ? `<img src="${avatarUrl}" alt="${profesor.nombre}" class="table-avatar">`
@@ -565,6 +566,12 @@ function createTarifaRow(profesor) {
            </div>`
         : '<span class="text-muted">No especificado</span>';
 
+    const codigoQRHTML = codigoQR 
+        ? `<button class="btn-icon view" onclick="verCodigoQR('${profesor.id}')" title="Ver código QR">
+            <i class="bi bi-qr-code"></i>
+           </button>`
+        : '<span class="text-muted">Sin QR</span>';
+
     row.innerHTML = `
         <td>
             <div class="profesor-cell">
@@ -580,6 +587,7 @@ function createTarifaRow(profesor) {
         <td>${metodoPagoHTML}</td>
         <td>${numeroCuentaHTML}</td>
         <td>${nombreCuentaHTML}</td>
+        <td>${codigoQRHTML}</td>
         <td>
             <button class="btn-icon edit" onclick="openEditTarifa('${profesor.id}')" title="Editar tarifa">
                 <i class="bi bi-pencil"></i>
@@ -625,6 +633,16 @@ async function openEditTarifa(profesorId) {
         document.getElementById('numeroCuenta').value = profesor.numeroCuenta || '';
         document.getElementById('nombreCuenta').value = profesor.nombreCuenta || '';
         
+        // Cargar código QR si existe
+        const qrPreview = document.getElementById('qrPreview');
+        const qrPreviewImage = document.getElementById('qrPreviewImage');
+        if (profesor.codigoQR) {
+            qrPreviewImage.src = profesor.codigoQR;
+            qrPreview.style.display = 'block';
+        } else {
+            qrPreview.style.display = 'none';
+        }
+        
         // Inicializar formateo numérico
         setTimeout(() => inicializarFormateoNumerico(), 100);
 
@@ -656,22 +674,46 @@ async function handleSaveTarifa(e) {
         return;
     }
 
+    const btnSubmit = e.target.querySelector('button[type="submit"]');
+    const originalBtnText = btnSubmit.innerHTML;
+
     try {
-        await getDB().collection('usuarios').doc(selectedProfesorId).update({
+        const updateData = {
             tarifaPorHora: tarifa,
             metodoPago: metodoPago,
             numeroCuenta: numeroCuenta,
             nombreCuenta: nombreCuenta,
             tarifaActualizadaEn: firebase.firestore.FieldValue.serverTimestamp(),
             tarifaActualizadaPor: currentUser.id
-        });
+        };
+
+        // Si hay un nuevo QR cargado, subirlo
+        const qrInput = document.getElementById('codigoQRInput');
+        if (qrInput.files && qrInput.files[0]) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Subiendo QR...';
+            
+            const qrUrl = await subirImagenImgBB(qrInput.files[0]);
+            updateData.codigoQR = qrUrl.url;
+            updateData.codigoQRData = {
+                url: qrUrl.url,
+                deleteUrl: qrUrl.deleteUrl,
+                filename: qrUrl.filename
+            };
+        }
+
+        await getDB().collection('usuarios').doc(selectedProfesorId).update(updateData);
 
         showNotification('success', 'Información Actualizada', 'La información de pago se ha actualizado correctamente');
         closeModalTarifa();
         loadTarifas();
     } catch (error) {
         console.error('Error saving tarifa:', error);
-        showNotification('error', 'Error', 'No se pudo actualizar la información');
+        showNotification('error', 'Error', 'No se pudo actualizar la información: ' + error.message);
+        
+        // Restaurar botón
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = originalBtnText;
     }
 }
 
@@ -2664,3 +2706,179 @@ function closeModal(overlay) {
         }
     }, 300);
 }
+
+
+// ========== FUNCIONES DE CÓDIGO QR ==========
+
+// Subir imagen a ImgBB
+async function subirImagenImgBB(archivo) {
+    try {
+        const formData = new FormData();
+        formData.append('image', archivo);
+        formData.append('key', IMGBB_API_KEY);
+
+        const respuesta = await fetch(IMGBB_API_URL, {
+            method: 'POST',
+            body: formData
+        });
+
+        const resultado = await respuesta.json();
+        
+        if (resultado.success) {
+            return {
+                url: resultado.data.url,
+                deleteUrl: resultado.data.delete_url,
+                filename: resultado.data.image.filename
+            };
+        } else {
+            throw new Error(resultado.error?.message || 'Error al subir imagen');
+        }
+    } catch (error) {
+        console.error('Error subiendo imagen:', error);
+        throw error;
+    }
+}
+
+// Event listeners para el código QR
+document.addEventListener('DOMContentLoaded', () => {
+    // Botón subir QR
+    const btnSubirQR = document.getElementById('btnSubirQR');
+    const codigoQRInput = document.getElementById('codigoQRInput');
+    
+    if (btnSubirQR && codigoQRInput) {
+        btnSubirQR.addEventListener('click', () => {
+            codigoQRInput.click();
+        });
+        
+        codigoQRInput.addEventListener('change', handleQRUpload);
+    }
+    
+    // Botón eliminar QR
+    const btnEliminarQR = document.getElementById('btnEliminarQR');
+    if (btnEliminarQR) {
+        btnEliminarQR.addEventListener('click', handleEliminarQR);
+    }
+    
+    // Cerrar modal QR
+    const closeModalQR = document.getElementById('closeModalQR');
+    if (closeModalQR) {
+        closeModalQR.addEventListener('click', () => {
+            document.getElementById('modalVerQR').classList.remove('active');
+        });
+    }
+});
+
+// Manejar subida de QR
+async function handleQRUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validar tamaño (5MB máximo)
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('error', 'Error', 'La imagen es demasiado grande. El tamaño máximo es 5MB.');
+        return;
+    }
+    
+    // Validar tipo
+    if (!file.type.startsWith('image/')) {
+        showNotification('error', 'Error', 'Por favor selecciona un archivo de imagen válido.');
+        return;
+    }
+    
+    try {
+        // Mostrar preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const qrPreviewImage = document.getElementById('qrPreviewImage');
+            const qrPreview = document.getElementById('qrPreview');
+            qrPreviewImage.src = e.target.result;
+            qrPreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+        
+        showNotification('success', 'Imagen Cargada', 'La imagen se subirá al guardar la tarifa');
+    } catch (error) {
+        console.error('Error al cargar QR:', error);
+        showNotification('error', 'Error', 'No se pudo cargar la imagen');
+    }
+}
+
+// Eliminar QR
+async function handleEliminarQR() {
+    if (!confirm('¿Estás seguro de que deseas eliminar el código QR?')) {
+        return;
+    }
+    
+    try {
+        if (!selectedProfesorId) {
+            showNotification('error', 'Error', 'No se ha seleccionado un profesor');
+            return;
+        }
+        
+        await getDB().collection('usuarios').doc(selectedProfesorId).update({
+            codigoQR: firebase.firestore.FieldValue.delete(),
+            codigoQRData: firebase.firestore.FieldValue.delete()
+        });
+        
+        // Limpiar preview
+        const qrPreview = document.getElementById('qrPreview');
+        const codigoQRInput = document.getElementById('codigoQRInput');
+        qrPreview.style.display = 'none';
+        codigoQRInput.value = '';
+        
+        showNotification('success', 'QR Eliminado', 'El código QR se ha eliminado correctamente');
+        loadTarifas();
+    } catch (error) {
+        console.error('Error al eliminar QR:', error);
+        showNotification('error', 'Error', 'No se pudo eliminar el código QR');
+    }
+}
+
+// Ver código QR
+async function verCodigoQR(profesorId) {
+    try {
+        const profesorDoc = await getDB().collection('usuarios').doc(profesorId).get();
+        if (!profesorDoc.exists) return;
+        
+        const profesor = profesorDoc.data();
+        
+        if (!profesor.codigoQR) {
+            showNotification('error', 'Sin Código QR', 'Este profesor no tiene un código QR registrado');
+            return;
+        }
+        
+        // Llenar modal
+        const qrImage = document.getElementById('qrImage');
+        const qrProfesorInfo = document.getElementById('qrProfesorInfo');
+        
+        qrImage.src = profesor.codigoQR;
+        
+        // Información del profesor
+        const avatarUrl = profesor.fotoPerfil || '';
+        const avatarHTML = avatarUrl 
+            ? `<img src="${avatarUrl}" alt="${profesor.nombre}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">`
+            : `<div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #ff0000, #cc0000); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold;">${profesor.nombre.charAt(0).toUpperCase()}</div>`;
+        
+        qrProfesorInfo.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                ${avatarHTML}
+                <div>
+                    <h4 style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">${profesor.nombre}</h4>
+                    <p style="margin: 0; color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">${profesor.email || 'Sin email'}</p>
+                    ${profesor.metodoPago ? `<p style="margin: 0.25rem 0 0 0; color: rgba(255, 255, 255, 0.7); font-size: 0.85rem;"><i class="bi bi-credit-card"></i> ${profesor.metodoPago}</p>` : ''}
+                </div>
+            </div>
+        `;
+        
+        // Mostrar modal
+        document.getElementById('modalVerQR').classList.add('active');
+    } catch (error) {
+        console.error('Error al ver QR:', error);
+        showNotification('error', 'Error', 'No se pudo cargar el código QR');
+    }
+}
+
+// Hacer funciones globales
+window.verCodigoQR = verCodigoQR;
+window.handleQRUpload = handleQRUpload;
+window.handleEliminarQR = handleEliminarQR;

@@ -241,6 +241,7 @@
                             <th>Método de Pago</th>
                             <th>Número de Cuenta</th>
                             <th>Nombre de Cuenta</th>
+                            <th>Código QR</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -541,6 +542,30 @@
                     <div class="form-group">
                         <label for="nombreCuenta">Nombre de Cuenta</label>
                         <input type="text" id="nombreCuenta" placeholder="Nombre del titular">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="codigoQR">
+                            <i class="bi bi-qr-code"></i>
+                            Código QR de Pago
+                        </label>
+                        <div class="qr-upload-container">
+                            <input type="file" id="codigoQRInput" accept="image/*" style="display: none;">
+                            <button type="button" class="btn-secondary" id="btnSubirQR" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <i class="bi bi-cloud-upload"></i>
+                                Subir Código QR
+                            </button>
+                            <div class="qr-preview" id="qrPreview" style="display: none; margin-top: 1rem; text-align: center;">
+                                <img id="qrPreviewImage" src="" alt="QR Preview" style="max-width: 200px; border-radius: 8px; border: 2px solid rgba(255, 0, 0, 0.3);">
+                                <button type="button" class="btn-danger" id="btnEliminarQR" style="margin-top: 0.5rem; width: 100%;">
+                                    <i class="bi bi-trash"></i>
+                                    Eliminar QR
+                                </button>
+                            </div>
+                        </div>
+                        <small class="form-help">
+                            <i class="bi bi-info-circle"></i> Sube el código QR de pago del profesor (máx. 5MB)
+                        </small>
                     </div>
 
                     <div class="form-actions">
@@ -1166,6 +1191,26 @@
             <div class="modal-body">
                 <div class="comprobantes-gallery" id="comprobantesGallery">
                     <!-- Las imágenes se cargarán dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Código QR -->
+    <div class="modal" id="modalVerQR">
+        <div class="modal-content modal-qr">
+            <div class="modal-header">
+                <h3><i class="bi bi-qr-code"></i> Código QR de Pago</h3>
+                <button class="close-btn" id="closeModalQR">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-display">
+                    <div class="qr-profesor-info" id="qrProfesorInfo">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                    <img id="qrImage" src="" alt="Código QR">
                 </div>
             </div>
         </div>
