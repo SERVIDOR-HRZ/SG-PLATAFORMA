@@ -105,14 +105,48 @@
         <div class="content-section" id="seccionInscritos">
             <div class="section-header">
                 <h2><i class="bi bi-people-fill"></i> Inscritos</h2>
+                <div class="filters-container-inline">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="pendiente" id="btnFilterPendiente">
+                            <i class="bi bi-clock-history"></i> Pendientes
+                        </button>
+                        <button class="filter-btn" data-filter="aprobado" id="btnFilterAprobado">
+                            <i class="bi bi-check-circle"></i> Aprobados
+                        </button>
+                        <button class="filter-btn" data-filter="rechazado" id="btnFilterRechazado">
+                            <i class="bi bi-x-circle"></i> Rechazados
+                        </button>
+                    </div>
+                    <div class="aula-filter">
+                        <label for="aulaFilter">
+                            <i class="bi bi-calendar-event"></i>
+                            Calendario:
+                        </label>
+                        <select id="aulaFilter" class="aula-select">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- Contenido de inscritos -->
             <div class="inscripciones-container">
-                <div class="empty-state">
+                <!-- Inscritos Grid -->
+                <div class="inscritos-grid" id="inscritosGrid">
+                    <!-- Los inscritos se cargarán aquí -->
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="loadingInscritosSpinner" style="display: none;">
+                    <i class="bi bi-arrow-clockwise spin"></i>
+                    <p>Cargando inscritos...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyInscritos" style="display: none;">
                     <i class="bi bi-people"></i>
-                    <h3>Próximamente</h3>
-                    <p>La gestión de inscritos estará disponible pronto</p>
+                    <h3>No hay inscritos</h3>
+                    <p>No se encontraron estudiantes inscritos</p>
                 </div>
             </div>
         </div>
@@ -212,6 +246,29 @@
         <button class="notification-close" id="notificationClose">
             <i class="bi bi-x"></i>
         </button>
+    </div>
+
+    <!-- Modal para Ver Comprobante -->
+    <div class="modal" id="comprobanteModal">
+        <div class="modal-content modal-comprobante">
+            <div class="modal-header">
+                <h3><i class="bi bi-file-earmark-image"></i> Comprobante de Pago</h3>
+                <button class="close-btn" id="closeComprobanteModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body modal-body-comprobante">
+                <div class="comprobante-viewer-full">
+                    <img id="comprobanteImg" src="" alt="Comprobante de pago">
+                </div>
+                <div class="comprobante-actions">
+                    <button class="btn-download-full" id="btnDescargarComprobante">
+                        <i class="bi bi-download"></i>
+                        Descargar Comprobante
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase CDN -->

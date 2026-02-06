@@ -1204,3 +1204,549 @@ body::before {
         padding: 0.75rem;
     }
 }
+
+
+/* ========== SECCIÓN INSCRITOS ========== */
+
+/* Contenedor de filtros en línea */
+.filters-container-inline {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* Contenedor de filtros */
+.filters-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Botones de filtro */
+.filter-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.6rem 1.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 152, 0, 0.3);
+    color: white;
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    border-color: #ff9800;
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+}
+
+/* Filtro de aula */
+.aula-filter {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.aula-filter label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.aula-filter label i {
+    color: #ff9800;
+    font-size: 1.1rem;
+}
+
+.aula-select {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.aula-select:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 152, 0, 0.4);
+}
+
+.aula-select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+}
+
+.aula-select option {
+    background: #1a1a1a;
+    color: white;
+    padding: 0.5rem;
+}
+
+/* Grid de inscritos */
+.inscritos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Tarjeta de inscrito */
+.inscrito-card {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid rgba(255, 152, 0, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.inscrito-card.status-pendiente {
+    border-color: rgba(255, 152, 0, 0.4);
+}
+
+.inscrito-card.status-aprobado {
+    border-color: rgba(76, 175, 80, 0.4);
+}
+
+.inscrito-card.status-rechazado {
+    border-color: rgba(244, 67, 54, 0.4);
+}
+
+.inscrito-card:hover {
+    background: rgba(0, 0, 0, 0.75);
+    border-width: 3px;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.inscrito-card.status-pendiente:hover {
+    border-color: rgba(255, 152, 0, 0.6);
+    box-shadow: 0 8px 25px rgba(255, 152, 0, 0.2);
+}
+
+.inscrito-card.status-aprobado:hover {
+    border-color: rgba(76, 175, 80, 0.6);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+}
+
+.inscrito-card.status-rechazado:hover {
+    border-color: rgba(244, 67, 54, 0.6);
+    box-shadow: 0 8px 25px rgba(244, 67, 54, 0.2);
+}
+
+/* Header del inscrito */
+.inscrito-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.inscrito-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.inscrito-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.inscrito-avatar i {
+    font-size: 2rem;
+    color: white;
+}
+
+.inscrito-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.inscrito-nombre {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inscrito-email {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Estado del inscrito */
+.inscrito-status {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+.inscrito-status.pendiente {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.inscrito-status.aprobado {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.inscrito-status.rechazado {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Body del inscrito */
+.inscrito-body {
+    margin-bottom: 1rem;
+}
+
+.inscrito-detalle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.inscrito-detalle i {
+    color: #ff9800;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* Mensaje de sin comprobante en acciones */
+.sin-comprobante-mensaje {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem;
+    background: rgba(244, 67, 54, 0.15);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    border-radius: 8px;
+    color: #f44336;
+    font-size: 0.85rem;
+    font-weight: 500;
+    width: 100%;
+}
+
+.sin-comprobante-mensaje i {
+    font-size: 1.1rem;
+}
+
+/* Acciones del inscrito */
+.inscrito-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.action-buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.inscrito-actions button {
+    padding: 0.8rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-view {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    color: white;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.btn-view:hover {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.5);
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+    color: white;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-approve:hover {
+    background: linear-gradient(135deg, #388e3c, #2e7d32);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.5);
+}
+
+.btn-reject {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: white;
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.btn-reject:hover {
+    background: linear-gradient(135deg, #d32f2f, #c62828);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.5);
+}
+
+/* ========== MODAL DE COMPROBANTE ========== */
+
+.modal-comprobante {
+    max-width: 700px;
+    max-height: 90vh;
+    width: 90%;
+}
+
+.modal-comprobante .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-comprobante .modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.modal-body-comprobante {
+    padding: 1.5rem;
+    max-height: calc(90vh - 100px);
+    overflow-y: auto;
+    background: transparent;
+}
+
+.comprobante-viewer-full {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    background: transparent;
+}
+
+.comprobante-viewer-full img {
+    width: 400px;
+    height: auto;
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+    border: none;
+}
+
+.comprobante-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+}
+
+.btn-download-full {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.btn-download-full:hover {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
+}
+
+.btn-download-full i {
+    font-size: 1.2rem;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #388e3c, #2e7d32);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* Scrollbar para el viewer del comprobante */
+.modal-body-comprobante::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.modal-body-comprobante::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.modal-body-comprobante::-webkit-scrollbar-thumb {
+    background: rgba(255, 152, 0, 0.5);
+    border-radius: 5px;
+}
+
+.modal-body-comprobante::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 152, 0, 0.7);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filters-container-inline {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .filters-container {
+        gap: 1rem;
+    }
+
+    .inscritos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-buttons {
+        flex-direction: column;
+    }
+
+    .filter-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .aula-filter {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    .aula-filter label {
+        justify-content: center;
+    }
+
+    .aula-select {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .inscrito-actions {
+        gap: 0.75rem;
+    }
+
+    .action-buttons-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .inscrito-actions button {
+        font-size: 0.85rem;
+        padding: 0.7rem 0.8rem;
+    }
+
+    .modal-comprobante {
+        max-width: 95vw;
+        width: 95%;
+    }
+
+    .comprobante-viewer-full img {
+        width: 100%;
+    }
+
+    .btn-download-full {
+        width: 100%;
+        justify-content: center;
+        padding: 0.9rem 1.5rem;
+        font-size: 0.95rem;
+    }
+}

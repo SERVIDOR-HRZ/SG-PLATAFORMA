@@ -1,4 +1,8 @@
 // Registration functionality - Only Students, Firestore only
+// ImgBB API Configuration
+const IMGBB_API_KEY = '0d447185d3dc7cba69ee1c6df144f146';
+const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
+
 document.addEventListener('DOMContentLoaded', function () {
     const registerForm = document.getElementById('registerForm');
     const registerBtn = document.querySelector('.register-btn');
@@ -20,7 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
         grado: document.getElementById('grado'),
         tipoDocumento: document.getElementById('tipoDocumento'),
         numeroDocumento: document.getElementById('numeroDocumento'),
-        departamento: document.getElementById('departamento')
+        departamento: document.getElementById('departamento'),
+        aula: document.getElementById('aula')
     };
 
     // Update email field when username changes
@@ -186,6 +191,13 @@ document.addEventListener('DOMContentLoaded', function () {
     inputs.grado.addEventListener('change', () => validateSelect('grado'));
     inputs.tipoDocumento.addEventListener('change', () => validateSelect('tipoDocumento'));
     inputs.departamento.addEventListener('change', () => validateSelect('departamento'));
+    inputs.aula.addEventListener('change', () => validateSelect('aula'));
+
+    // Validación para método de pago
+    const metodoPagoInput = document.getElementById('metodoPagoEstudiante');
+    if (metodoPagoInput) {
+        // No necesitamos evento change porque se maneja con clicks en las tarjetas
+    }
 
     function showMessage(message, type) {
         messageDiv.textContent = message;
@@ -437,7 +449,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function validateSelect(fieldName) {
+        // Para método de pago, validar el input oculto
+        if (fieldName === 'metodoPagoEstudiante') {
+            const metodoPagoInput = document.getElementById('metodoPagoEstudiante');
+            if (!metodoPagoInput || !metodoPagoInput.value) {
+                return false;
+            }
+            return true;
+        }
+
         const select = inputs[fieldName];
+        if (!select) return false;
+        
         const value = select.value;
 
         // Para departamento, validar el selector personalizado
@@ -534,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function () {
     registerForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // Validate all fields
+        // Validate all fields including payment method
         const validations = [
             validateUsername(),
             validateRecoveryEmail(),
@@ -549,7 +572,9 @@ document.addEventListener('DOMContentLoaded', function () {
             validateDocumentNumber(),
             validateSelect('grado'),
             validateSelect('tipoDocumento'),
-            validateSelect('departamento')
+            validateSelect('departamento'),
+            validateSelect('aula'),
+            validateSelect('metodoPagoEstudiante')
         ];
 
         if (validations.includes(false)) {
@@ -557,14 +582,33 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Validar que haya un comprobante seleccionado
+        if (!selectedComprobanteFile) {
+            showMessage('Por favor selecciona un comprobante de pago', 'error');
+            return;
+        }
+
         // Add loading state
         registerBtn.classList.add('loading');
         registerBtn.disabled = true;
-        showMessage('Creando cuenta...', 'info');
+        showMessage('Subiendo comprobante y creando cuenta...', 'info');
 
         try {
             // Wait for Firebase to be ready
             await waitForFirebase();
+
+            // SUBIR COMPROBANTE A IMGBB PRIMERO
+            let comprobanteUrl = null;
+            try {
+                showMessage('Subiendo comprobante de pago...', 'info');
+                comprobanteUrl = await uploadImageToImgBB(selectedComprobanteFile);
+                console.log('Comprobante subido exitosamente:', comprobanteUrl);
+            } catch (uploadError) {
+                console.error('Error al subir comprobante:', uploadError);
+                throw new Error('Error al subir el comprobante de pago. Por favor intenta de nuevo.');
+            }
+
+            showMessage('Creando cuenta...', 'info');
 
             // Obtener teléfono completo con código de país
             const telefonoCompletoInput = document.getElementById('telefonoCompleto');
@@ -592,7 +636,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 grado: inputs.grado.value,
                 tipoDocumento: inputs.tipoDocumento.value,
                 numeroDocumento: inputs.numeroDocumento.value.trim(),
-                departamento: inputs.departamento.value
+                departamento: inputs.departamento.value,
+                aula: inputs.aula.value
             };
 
             // Check if email already exists
@@ -627,10 +672,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 tipoDocumento: formData.tipoDocumento,
                 numeroDocumento: formData.numeroDocumento,
                 departamento: formData.departamento,
+                aulasAsignadas: [formData.aula], // Guardar aula como array
                 tipoUsuario: 'estudiante', // Solo estudiantes
                 codigoRecuperacion: recoveryCode, // CÓDIGO DE RECUPERACIÓN
                 fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
-                activo: false // CUENTA INACTIVA POR DEFECTO
+                activo: false, // CUENTA INACTIVA POR DEFECTO
+                // Información de pago
+                metodoPago: document.getElementById('metodoPagoEstudiante').value,
+                metodoPagoId: document.getElementById('metodoPagoId').value,
+                pagoInicial: aulaSeleccionadaData ? (aulaSeleccionadaData.cuotaInicial || aulaSeleccionadaData.pagoInicial || 0) : 0,
+                valorTotal: aulaSeleccionadaData ? (aulaSeleccionadaData.precioTotal || aulaSeleccionadaData.valorTotal || aulaSeleccionadaData.precio || 0) : 0,
+                numeroCuotas: aulaSeleccionadaData ? (aulaSeleccionadaData.numeroCuotas || 0) : 0,
+                estadoPago: 'pendiente', // Estado inicial del pago
+                comprobanteUrl: comprobanteUrl // URL del comprobante subido a ImgBB
             };
 
             await window.firebaseDB.collection('usuarios').add(userData);
@@ -656,6 +710,404 @@ document.addEventListener('DOMContentLoaded', function () {
             registerBtn.disabled = false;
         }
     });
+
+    // ========== GESTIÓN DE SECCIONES DE REGISTRO ==========
+
+    // Variables globales para la información del aula
+    let aulaSeleccionadaData = null;
+
+    // Botón continuar a pago
+    const btnContinuarPago = document.getElementById('btnContinuarPago');
+    if (btnContinuarPago) {
+        btnContinuarPago.addEventListener('click', function() {
+            // Validar todos los campos de la sección de datos
+            const validations = [
+                validateUsername(),
+                validateRecoveryEmail(),
+                validatePassword(),
+                validateConfirmPassword(),
+                validatePrimerNombre(),
+                validateSegundoNombre(),
+                validatePrimerApellido(),
+                validateSegundoApellido(),
+                validatePhone(),
+                validateInstitution(),
+                validateDocumentNumber(),
+                validateSelect('grado'),
+                validateSelect('tipoDocumento'),
+                validateSelect('departamento'),
+                validateSelect('aula')
+            ];
+
+            if (validations.includes(false)) {
+                showMessage('Por favor corrige los errores en el formulario', 'error');
+                return;
+            }
+
+            // Obtener el aula seleccionada
+            const aulaId = inputs.aula.value;
+            if (!aulaId) {
+                showMessage('Por favor selecciona un calendario', 'error');
+                return;
+            }
+
+            // Cargar información del aula
+            cargarInformacionAula(aulaId);
+        });
+    }
+
+    // Botón volver a datos
+    const btnVolverDatos = document.getElementById('btnVolverDatos');
+    if (btnVolverDatos) {
+        btnVolverDatos.addEventListener('click', function() {
+            const seccionDatos = document.getElementById('seccionDatos');
+            const seccionPago = document.getElementById('seccionPago');
+            
+            if (seccionPago) seccionPago.style.display = 'none';
+            if (seccionDatos) seccionDatos.style.display = 'block';
+            
+            // Scroll to top para ver la sección de datos
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    // Botón continuar a comprobante
+    const btnContinuarComprobante = document.getElementById('btnContinuarComprobante');
+    if (btnContinuarComprobante) {
+        btnContinuarComprobante.addEventListener('click', function() {
+            // Validar que se haya seleccionado un método de pago
+            const metodoPagoInput = document.getElementById('metodoPagoEstudiante');
+            if (!metodoPagoInput || !metodoPagoInput.value) {
+                showMessage('Por favor selecciona un método de pago', 'error');
+                return;
+            }
+
+            // Cargar información en la sección de comprobante
+            mostrarSeccionComprobante();
+        });
+    }
+
+    // Botón volver a método de pago
+    const btnVolverMetodo = document.getElementById('btnVolverMetodo');
+    if (btnVolverMetodo) {
+        btnVolverMetodo.addEventListener('click', function() {
+            const seccionPago = document.getElementById('seccionPago');
+            const seccionComprobante = document.getElementById('seccionComprobante');
+            
+            if (seccionComprobante) seccionComprobante.style.display = 'none';
+            if (seccionPago) seccionPago.style.display = 'block';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    // Manejo de subida de comprobante
+    const uploadArea = document.getElementById('uploadArea');
+    const comprobanteInput = document.getElementById('comprobanteInput');
+    const btnRemoveComprobante = document.getElementById('btnRemoveComprobante');
+    let selectedComprobanteFile = null;
+
+    if (uploadArea && comprobanteInput) {
+        // Click en el área de subida
+        uploadArea.addEventListener('click', () => comprobanteInput.click());
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleComprobanteSelect(file);
+        });
+
+        // Selección de archivo
+        comprobanteInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleComprobanteSelect(file);
+        });
+    }
+
+    if (btnRemoveComprobante) {
+        btnRemoveComprobante.addEventListener('click', removeComprobante);
+    }
+
+    // Función para manejar selección de comprobante
+    function handleComprobanteSelect(file) {
+        // Validar tipo de archivo
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+        if (!validTypes.includes(file.type)) {
+            showMessage('Por favor selecciona un archivo PNG, JPG o PDF', 'error');
+            return;
+        }
+
+        // Validar tamaño (máximo 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showMessage('El archivo no debe superar los 5MB', 'error');
+            return;
+        }
+
+        selectedComprobanteFile = file;
+
+        // Mostrar preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const comprobantePreview = document.getElementById('comprobantePreview');
+            const comprobanteImg = document.getElementById('comprobanteImg');
+            const uploadArea = document.getElementById('uploadArea');
+            
+            if (comprobanteImg && comprobantePreview && uploadArea) {
+                comprobanteImg.src = e.target.result;
+                comprobantePreview.style.display = 'block';
+                uploadArea.style.display = 'none';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Función para remover comprobante
+    function removeComprobante() {
+        selectedComprobanteFile = null;
+        const comprobantePreview = document.getElementById('comprobantePreview');
+        const uploadArea = document.getElementById('uploadArea');
+        const comprobanteInput = document.getElementById('comprobanteInput');
+        
+        if (comprobantePreview) comprobantePreview.style.display = 'none';
+        if (uploadArea) uploadArea.style.display = 'flex';
+        if (comprobanteInput) comprobanteInput.value = '';
+    }
+
+    // Función para mostrar sección de comprobante
+    async function mostrarSeccionComprobante() {
+        try {
+            // Obtener datos del método de pago seleccionado
+            const metodoPagoId = document.getElementById('metodoPagoId').value;
+            
+            if (!metodoPagoId) {
+                showMessage('Error: No se encontró el método de pago seleccionado', 'error');
+                return;
+            }
+
+            await waitForFirebase();
+
+            // Obtener datos completos del método de pago desde Firebase
+            const metodoDoc = await window.firebaseDB.collection('metodosPago').doc(metodoPagoId).get();
+            
+            if (!metodoDoc.exists) {
+                showMessage('Error al cargar información del método de pago', 'error');
+                return;
+            }
+
+            const metodoData = metodoDoc.data();
+
+            // Mostrar información en la sección de comprobante
+            document.getElementById('pagoInicialComprobante').textContent = document.getElementById('pagoInicial').textContent;
+            document.getElementById('aulaComprobante').textContent = document.getElementById('aulaSeleccionadaNombre').textContent;
+            document.getElementById('metodoPagoImagen').src = metodoData.imagen;
+            document.getElementById('metodoPagoNombre').textContent = metodoData.nombre;
+            document.getElementById('metodoPagoCuenta').textContent = metodoData.numeroCuenta || 'No disponible';
+
+            // Cambiar a la sección de comprobante
+            const seccionPago = document.getElementById('seccionPago');
+            const seccionComprobante = document.getElementById('seccionComprobante');
+            
+            if (seccionPago) seccionPago.style.display = 'none';
+            if (seccionComprobante) seccionComprobante.style.display = 'block';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        } catch (error) {
+            console.error('Error loading payment method info:', error);
+            showMessage('Error al cargar información del método de pago', 'error');
+        }
+    }
+
+    // Cargar información del aula seleccionada
+    async function cargarInformacionAula(aulaId) {
+        try {
+            await waitForFirebase();
+
+            // Buscar el aula en el array de aulas cargadas
+            const aulaData = aulas.find(a => a.id === aulaId);
+            
+            if (!aulaData) {
+                showMessage('No se pudo cargar la información del calendario', 'error');
+                return;
+            }
+
+            // Obtener datos completos del aula desde Firebase
+            const aulaDoc = await window.firebaseDB.collection('aulas').doc(aulaId).get();
+            
+            if (!aulaDoc.exists) {
+                showMessage('El calendario seleccionado no existe', 'error');
+                return;
+            }
+
+            const aulaCompleta = aulaDoc.data();
+            aulaSeleccionadaData = {
+                id: aulaId,
+                ...aulaCompleta
+            };
+
+            console.log('Datos del aula cargada:', aulaSeleccionadaData);
+
+            // Mostrar información en la sección de pago
+            document.getElementById('aulaSeleccionadaNombre').textContent = aulaCompleta.nombre || 'Sin nombre';
+            
+            // Obtener valores con diferentes nombres de campo posibles
+            const valorTotal = aulaCompleta.precioTotal || aulaCompleta.valorTotal || aulaCompleta.precio || aulaCompleta.valor || 0;
+            const pagoInicial = aulaCompleta.cuotaInicial || aulaCompleta.pagoInicial || aulaCompleta.inicial || 0;
+            const numeroCuotas = aulaCompleta.numeroCuotas || aulaCompleta.cuotas || 0;
+            const valorCuota = numeroCuotas > 0 ? Math.ceil((valorTotal - pagoInicial) / numeroCuotas) : 0;
+
+            console.log('Datos del aula completa:', aulaCompleta);
+            console.log('Valores calculados:', { valorTotal, pagoInicial, numeroCuotas, valorCuota });
+
+            document.getElementById('valorTotal').textContent = formatCurrency(valorTotal);
+            document.getElementById('pagoInicial').textContent = formatCurrency(pagoInicial);
+            document.getElementById('numeroCuotas').textContent = numeroCuotas;
+            document.getElementById('valorCuota').textContent = formatCurrency(valorCuota);
+
+            // Cargar métodos de pago disponibles
+            await cargarMetodosPago();
+
+            // Cambiar a la sección de pago - OCULTAR datos y MOSTRAR pago
+            const seccionDatos = document.getElementById('seccionDatos');
+            const seccionPago = document.getElementById('seccionPago');
+            
+            if (seccionDatos) seccionDatos.style.display = 'none';
+            if (seccionPago) seccionPago.style.display = 'block';
+
+            // Scroll to top para ver la sección de pago
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        } catch (error) {
+            console.error('Error loading aula information:', error);
+            showMessage('Error al cargar la información del calendario', 'error');
+        }
+    }
+
+    // Cargar métodos de pago desde Firebase
+    async function cargarMetodosPago() {
+        try {
+            await waitForFirebase();
+
+            const metodosPagoGrid = document.getElementById('metodosPagoGrid');
+            if (!metodosPagoGrid) return;
+
+            // Mostrar loading
+            metodosPagoGrid.innerHTML = '<div class="metodos-loading"><i class="bi bi-arrow-clockwise"></i><br>Cargando métodos de pago...</div>';
+
+            // Obtener TODOS los métodos de pago desde Firebase (sin orderBy para evitar necesitar índice)
+            const snapshot = await window.firebaseDB
+                .collection('metodosPago')
+                .get();
+
+            if (snapshot.empty) {
+                metodosPagoGrid.innerHTML = '<p style="color: rgba(255,255,255,0.7); text-align: center;">No hay métodos de pago disponibles</p>';
+                return;
+            }
+
+            // Limpiar el grid
+            metodosPagoGrid.innerHTML = '';
+
+            // Filtrar y renderizar solo los métodos activos
+            let metodosCargados = 0;
+            snapshot.forEach(doc => {
+                const metodo = doc.data();
+                
+                // Solo mostrar métodos activos
+                if (metodo.activo !== true) return;
+                
+                metodosCargados++;
+                
+                const metodoItem = document.createElement('div');
+                metodoItem.className = 'metodo-pago-item';
+                metodoItem.setAttribute('data-metodo-id', doc.id);
+                metodoItem.setAttribute('data-metodo-nombre', metodo.nombre);
+                metodoItem.setAttribute('data-metodo-cuenta', metodo.numeroCuenta || '');
+                metodoItem.setAttribute('data-metodo-imagen', metodo.imagen || '');
+
+                metodoItem.innerHTML = `
+                    <img src="${metodo.imagen}" alt="${metodo.nombre}" class="metodo-pago-logo" onerror="this.src='../Elementos/img/logo1.png'">
+                    <div class="metodo-pago-nombre">${metodo.nombre}</div>
+                `;
+
+                // Agregar evento de clic
+                metodoItem.addEventListener('click', function() {
+                    seleccionarMetodoPago(this);
+                });
+
+                metodosPagoGrid.appendChild(metodoItem);
+            });
+
+            // Si no hay métodos activos
+            if (metodosCargados === 0) {
+                metodosPagoGrid.innerHTML = '<p style="color: rgba(255,255,255,0.7); text-align: center;">No hay métodos de pago activos disponibles</p>';
+            }
+
+        } catch (error) {
+            console.error('Error loading payment methods:', error);
+            const metodosPagoGrid = document.getElementById('metodosPagoGrid');
+            if (metodosPagoGrid) {
+                metodosPagoGrid.innerHTML = '<p style="color: #ff4444; text-align: center;">Error al cargar métodos de pago: ' + error.message + '</p>';
+            }
+        }
+    }
+
+    // Seleccionar método de pago
+    let metodoPagoSeleccionadoData = null;
+
+    function seleccionarMetodoPago(elemento) {
+        // Remover selección de todos los métodos
+        document.querySelectorAll('.metodo-pago-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+
+        // Marcar el método seleccionado
+        elemento.classList.add('selected');
+
+        // Guardar el método seleccionado en el input oculto
+        const metodoPagoInput = document.getElementById('metodoPagoEstudiante');
+        const metodoPagoIdInput = document.getElementById('metodoPagoId');
+        const metodoNombre = elemento.getAttribute('data-metodo-nombre');
+        const metodoId = elemento.getAttribute('data-metodo-id');
+        
+        if (metodoPagoInput) {
+            metodoPagoInput.value = metodoNombre;
+        }
+        
+        if (metodoPagoIdInput) {
+            metodoPagoIdInput.value = metodoId;
+        }
+
+        // Guardar datos completos del método para la siguiente sección
+        metodoPagoSeleccionadoData = {
+            id: metodoId,
+            nombre: metodoNombre,
+            imagen: elemento.querySelector('.metodo-pago-logo').src,
+            cuenta: elemento.querySelector('.metodo-pago-cuenta') ? elemento.querySelector('.metodo-pago-cuenta').textContent : ''
+        };
+    }
+
+    // Función para formatear moneda
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    }
 });
 
 
@@ -1119,6 +1571,77 @@ if (document.readyState === 'loading') {
 }
 
 
+// Aula selector functionality
+let aulas = [];
+
+// Load aulas from Firebase
+async function loadAulasFromFirebase() {
+    try {
+        // Wait for Firebase to be ready
+        const checkFirebase = () => {
+            return new Promise((resolve) => {
+                const check = () => {
+                    if (window.firebaseDB) {
+                        resolve();
+                    } else {
+                        setTimeout(check, 100);
+                    }
+                };
+                check();
+            });
+        };
+
+        await checkFirebase();
+
+        const snapshot = await window.firebaseDB.collection('aulas').orderBy('nombre').get();
+        aulas = [];
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            aulas.push({
+                id: doc.id,
+                nombre: data.nombre
+            });
+        });
+
+        // Populate aula select
+        populateAulaSelect();
+
+    } catch (error) {
+        console.error('Error loading aulas from Firebase:', error);
+        aulas = [];
+        populateAulaSelect();
+    }
+}
+
+// Populate aula select
+function populateAulaSelect() {
+    const aulaSelect = document.getElementById('aula');
+    if (!aulaSelect) return;
+
+    aulaSelect.innerHTML = '<option value="">Seleccione Calendario</option>';
+    
+    aulas.forEach(aula => {
+        const option = document.createElement('option');
+        option.value = aula.id;
+        option.textContent = aula.nombre;
+        aulaSelect.appendChild(option);
+    });
+}
+
+// Initialize aula selector
+function initAulaSelector() {
+    loadAulasFromFirebase();
+}
+
+// Inicializar selector de aula cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAulaSelector);
+} else {
+    initAulaSelector();
+}
+
+
 // Función para generar imagen con credenciales
 async function generateCredentialsImage(email, password, recoveryCode, nombre) {
     return new Promise((resolve) => {
@@ -1203,4 +1726,30 @@ async function generateCredentialsImage(email, password, recoveryCode, nombre) {
             resolve();
         });
     });
+}
+
+
+
+// Función para subir imagen a ImgBB
+async function uploadImageToImgBB(file) {
+    try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch(`${IMGBB_API_URL}?key=${IMGBB_API_KEY}`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            return data.data.url;
+        } else {
+            throw new Error('Error al subir imagen a ImgBB');
+        }
+    } catch (error) {
+        console.error('Error al subir imagen:', error);
+        throw error;
+    }
 }

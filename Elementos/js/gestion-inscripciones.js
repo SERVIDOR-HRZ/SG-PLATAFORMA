@@ -4,10 +4,15 @@ const IMGBB_API_KEY = '0d447185d3dc7cba69ee1c6df144f146';
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
 
 let metodosPago = [];
+let inscritos = [];
+let aulas = [];
 let currentMetodoId = null;
+let currentEstudianteId = null;
 let selectedImageFile = null;
 let selectedImageUrl = null;
 let currentView = 'metodos-pago'; // Vista actual
+let currentFilter = 'pendiente'; // Filtro actual para inscritos (default: pendiente)
+let currentAulaFilter = ''; // Filtro de aula
 
 // Función para mostrar notificaciones
 function showNotification(message, type = 'info') {
@@ -64,6 +69,8 @@ function switchView(view) {
         document.getElementById('seccionMetodosPago').classList.add('active');
     } else if (view === 'inscritos') {
         document.getElementById('seccionInscritos').classList.add('active');
+        // Cargar inscritos cuando se cambia a esta vista
+        loadInscritos();
     }
 }
 
@@ -107,6 +114,30 @@ function initializeEvents() {
 
     if (btnInscritos) {
         btnInscritos.addEventListener('click', () => switchView('inscritos'));
+    }
+
+    // Botones de filtro de inscritos
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remover active de todos
+            filterButtons.forEach(b => b.classList.remove('active'));
+            // Agregar active al clickeado
+            this.classList.add('active');
+            // Actualizar filtro
+            currentFilter = this.getAttribute('data-filter');
+            // Re-renderizar inscritos
+            renderInscritos();
+        });
+    });
+
+    // Filtro de aula
+    const aulaFilter = document.getElementById('aulaFilter');
+    if (aulaFilter) {
+        aulaFilter.addEventListener('change', function() {
+            currentAulaFilter = this.value;
+            renderInscritos();
+        });
     }
 
     // Mobile menu toggle
@@ -232,6 +263,25 @@ function initializeEvents() {
     if (confirmDeleteModal) {
         confirmDeleteModal.addEventListener('click', function(e) {
             if (e.target === this) closeConfirmDeleteModal();
+        });
+    }
+
+    // Modal de comprobante events
+    const closeComprobanteModal = document.getElementById('closeComprobanteModal');
+    const btnDescargarComprobante = document.getElementById('btnDescargarComprobante');
+
+    if (closeComprobanteModal) {
+        closeComprobanteModal.addEventListener('click', closeComprobanteModalFn);
+    }
+    if (btnDescargarComprobante) {
+        btnDescargarComprobante.addEventListener('click', descargarComprobante);
+    }
+
+    // Close comprobante modal on outside click
+    const comprobanteModal = document.getElementById('comprobanteModal');
+    if (comprobanteModal) {
+        comprobanteModal.addEventListener('click', function(e) {
+            if (e.target === this) closeComprobanteModalFn();
         });
     }
 
@@ -634,4 +684,407 @@ function closeConfirmDeleteModal() {
     if (modal) modal.classList.remove('show');
     
     currentMetodoId = null;
+}
+
+
+// ========== GESTIÓN DE INSCRITOS ==========
+
+// Cargar inscritos desde Firebase
+async function loadInscritos() {
+    try {
+        await esperarFirebase();
+
+        const loadingSpinner = document.getElementById('loadingInscritosSpinner');
+        const emptyInscritos = document.getElementById('emptyInscritos');
+        const inscritosGrid = document.getElementById('inscritosGrid');
+
+        if (loadingSpinner) loadingSpinner.style.display = 'block';
+        if (emptyInscritos) emptyInscritos.style.display = 'none';
+        if (inscritosGrid) inscritosGrid.innerHTML = '';
+
+        // Cargar aulas primero
+        await loadAulas();
+
+        // Obtener SOLO los estudiantes INACTIVOS (pendientes de aprobación)
+        const snapshot = await window.firebaseDB
+            .collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .where('activo', '==', false)
+            .get();
+
+        inscritos = [];
+        
+        // Procesar cada estudiante
+        for (const doc of snapshot.docs) {
+            const estudiante = {
+                id: doc.id,
+                ...doc.data()
+            };
+
+            // Obtener nombre del aula si existe
+            if (estudiante.aulasAsignadas && estudiante.aulasAsignadas.length > 0) {
+                try {
+                    const aulaDoc = await window.firebaseDB
+                        .collection('aulas')
+                        .doc(estudiante.aulasAsignadas[0])
+                        .get();
+                    
+                    if (aulaDoc.exists) {
+                        estudiante.aulaNombre = aulaDoc.data().nombre;
+                        estudiante.aulaId = estudiante.aulasAsignadas[0];
+                    }
+                } catch (error) {
+                    console.error('Error al cargar aula:', error);
+                }
+            }
+
+            inscritos.push(estudiante);
+        }
+
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+
+        if (inscritos.length === 0) {
+            if (emptyInscritos) emptyInscritos.style.display = 'block';
+        } else {
+            renderInscritos();
+        }
+
+    } catch (error) {
+        console.error('Error al cargar inscritos:', error);
+        const loadingSpinner = document.getElementById('loadingInscritosSpinner');
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        showNotification('Error al cargar los inscritos', 'error');
+    }
+}
+
+// Cargar aulas para el filtro
+async function loadAulas() {
+    try {
+        await esperarFirebase();
+
+        const snapshot = await window.firebaseDB
+            .collection('aulas')
+            .orderBy('nombre')
+            .get();
+
+        aulas = [];
+        snapshot.forEach(doc => {
+            aulas.push({
+                id: doc.id,
+                nombre: doc.data().nombre
+            });
+        });
+
+        // Poblar el select de aulas
+        const aulaFilter = document.getElementById('aulaFilter');
+        if (aulaFilter) {
+            aulaFilter.innerHTML = '<option value="">Todos los calendarios</option>';
+            aulas.forEach(aula => {
+                const option = document.createElement('option');
+                option.value = aula.id;
+                option.textContent = aula.nombre;
+                aulaFilter.appendChild(option);
+            });
+        }
+
+    } catch (error) {
+        console.error('Error al cargar aulas:', error);
+    }
+}
+
+// Renderizar inscritos
+function renderInscritos() {
+    const inscritosGrid = document.getElementById('inscritosGrid');
+    const emptyInscritos = document.getElementById('emptyInscritos');
+    
+    if (!inscritosGrid) return;
+
+    // Filtrar inscritos según el filtro de estado
+    let inscritosFiltrados = inscritos.filter(inscrito => {
+        const estadoPago = inscrito.estadoPago || 'pendiente';
+        return estadoPago === currentFilter;
+    });
+
+    // Filtrar por aula si hay un filtro seleccionado
+    if (currentAulaFilter) {
+        inscritosFiltrados = inscritosFiltrados.filter(inscrito => {
+            return inscrito.aulaId === currentAulaFilter;
+        });
+    }
+
+    // Mostrar empty state si no hay resultados
+    if (inscritosFiltrados.length === 0) {
+        inscritosGrid.innerHTML = '';
+        if (emptyInscritos) {
+            emptyInscritos.style.display = 'block';
+            emptyInscritos.querySelector('h3').textContent = 'No hay inscritos';
+            
+            let mensaje = 'No se encontraron estudiantes';
+            if (currentFilter !== 'todos') {
+                mensaje += ` con estado: ${currentFilter}`;
+            }
+            if (currentAulaFilter) {
+                const aulaSeleccionada = aulas.find(a => a.id === currentAulaFilter);
+                if (aulaSeleccionada) {
+                    mensaje += ` en el calendario: ${aulaSeleccionada.nombre}`;
+                }
+            }
+            
+            emptyInscritos.querySelector('p').textContent = mensaje;
+        }
+        return;
+    }
+
+    if (emptyInscritos) emptyInscritos.style.display = 'none';
+    inscritosGrid.innerHTML = '';
+
+    inscritosFiltrados.forEach(inscrito => {
+        const estadoPago = inscrito.estadoPago || 'pendiente';
+        const card = document.createElement('div');
+        card.className = `inscrito-card status-${estadoPago}`;
+        
+        // Determinar icono y texto del estado
+        let estadoIcon = 'bi-clock-history';
+        let estadoTexto = 'Pendiente';
+        let estadoClass = 'pendiente';
+        
+        if (estadoPago === 'aprobado') {
+            estadoIcon = 'bi-check-circle-fill';
+            estadoTexto = 'Aprobado';
+            estadoClass = 'aprobado';
+        } else if (estadoPago === 'rechazado') {
+            estadoIcon = 'bi-x-circle-fill';
+            estadoTexto = 'Rechazado';
+            estadoClass = 'rechazado';
+        }
+
+        // Formatear valores monetarios
+        const pagoInicial = inscrito.pagoInicial || 0;
+        const valorTotal = inscrito.valorTotal || 0;
+
+        card.innerHTML = `
+            <div class="inscrito-header">
+                <div class="inscrito-avatar">
+                    ${inscrito.fotoPerfil 
+                        ? `<img src="${inscrito.fotoPerfil}" alt="${inscrito.nombre}">` 
+                        : `<i class="bi bi-person-fill"></i>`
+                    }
+                </div>
+                <div class="inscrito-info">
+                    <div class="inscrito-nombre">${inscrito.nombre || 'Sin nombre'}</div>
+                    <div class="inscrito-email">${inscrito.email || inscrito.usuario || ''}</div>
+                </div>
+                <span class="inscrito-status ${estadoClass}">
+                    <i class="${estadoIcon}"></i>
+                    ${estadoTexto}
+                </span>
+            </div>
+            <div class="inscrito-body">
+                <div class="inscrito-detalle">
+                    <i class="bi bi-calendar-event"></i>
+                    <span>${inscrito.aulaNombre || 'Sin calendario'}</span>
+                </div>
+                <div class="inscrito-detalle">
+                    <i class="bi bi-credit-card"></i>
+                    <span>${inscrito.metodoPago || 'Sin método'}</span>
+                </div>
+                <div class="inscrito-detalle">
+                    <i class="bi bi-cash-coin"></i>
+                    <span>Pago Inicial: ${formatCurrency(pagoInicial)}</span>
+                </div>
+                <div class="inscrito-detalle">
+                    <i class="bi bi-wallet2"></i>
+                    <span>Total: ${formatCurrency(valorTotal)}</span>
+                </div>
+            </div>
+            <div class="inscrito-actions">
+                ${inscrito.comprobanteUrl ? `
+                    <button class="btn-view" onclick="verComprobante('${inscrito.id}')">
+                        <i class="bi bi-eye"></i>
+                        Ver Comprobante
+                    </button>
+                ` : ''}
+                ${!inscrito.comprobanteUrl ? `
+                    <div class="sin-comprobante-mensaje">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>Sin comprobante de pago</span>
+                    </div>
+                ` : ''}
+                ${estadoPago === 'pendiente' ? `
+                    <div class="action-buttons-row">
+                        <button class="btn-approve" onclick="aprobarEstudiante('${inscrito.id}')">
+                            <i class="bi bi-check-circle"></i>
+                            Aprobar
+                        </button>
+                        <button class="btn-reject" onclick="rechazarEstudiante('${inscrito.id}')">
+                            <i class="bi bi-x-circle"></i>
+                            Rechazar
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        inscritosGrid.appendChild(card);
+    });
+}
+
+// Ver comprobante de pago
+window.verComprobante = async function(estudianteId) {
+    try {
+        const estudiante = inscritos.find(e => e.id === estudianteId);
+        if (!estudiante) {
+            showNotification('Estudiante no encontrado', 'error');
+            return;
+        }
+
+        if (!estudiante.comprobanteUrl) {
+            showNotification('Este estudiante no tiene comprobante', 'warning');
+            return;
+        }
+
+        currentEstudianteId = estudianteId;
+
+        // Solo mostrar la imagen del comprobante
+        document.getElementById('comprobanteImg').src = estudiante.comprobanteUrl;
+
+        // Mostrar modal
+        const modal = document.getElementById('comprobanteModal');
+        if (modal) modal.classList.add('show');
+
+    } catch (error) {
+        console.error('Error al ver comprobante:', error);
+        showNotification('Error al cargar el comprobante', 'error');
+    }
+};
+
+// Descargar comprobante
+async function descargarComprobante() {
+    const estudiante = inscritos.find(e => e.id === currentEstudianteId);
+    if (!estudiante || !estudiante.comprobanteUrl) {
+        showNotification('No se puede descargar el comprobante', 'error');
+        return;
+    }
+
+    try {
+        showNotification('Descargando comprobante...', 'info');
+
+        // Descargar la imagen usando fetch
+        const response = await fetch(estudiante.comprobanteUrl);
+        const blob = await response.blob();
+        
+        // Crear URL temporal del blob
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        // Crear enlace de descarga
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        
+        // Generar nombre de archivo
+        const nombreArchivo = `comprobante_${estudiante.nombre || estudiante.email || 'estudiante'}_${Date.now()}.jpg`;
+        link.download = nombreArchivo.replace(/\s+/g, '_');
+        
+        // Agregar al DOM, hacer clic y remover
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Liberar el blob URL
+        window.URL.revokeObjectURL(blobUrl);
+        
+        showNotification('Comprobante descargado exitosamente', 'success');
+    } catch (error) {
+        console.error('Error al descargar:', error);
+        showNotification('Error al descargar el comprobante. Intenta de nuevo.', 'error');
+    }
+}
+
+// Aprobar estudiante
+window.aprobarEstudiante = async function(estudianteId) {
+    if (!confirm('¿Estás seguro de que deseas aprobar este estudiante?')) {
+        return;
+    }
+
+    try {
+        await esperarFirebase();
+
+        await window.firebaseDB
+            .collection('usuarios')
+            .doc(estudianteId)
+            .update({
+                estadoPago: 'aprobado',
+                activo: true,
+                fechaAprobacion: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+        showNotification('Estudiante aprobado exitosamente', 'success');
+        
+        // Cerrar modal si está abierto
+        closeComprobanteModalFn();
+        
+        // Recargar inscritos
+        await loadInscritos();
+
+    } catch (error) {
+        console.error('Error al aprobar estudiante:', error);
+        showNotification('Error al aprobar el estudiante', 'error');
+    }
+};
+
+// Rechazar estudiante
+window.rechazarEstudiante = async function(estudianteId) {
+    const motivo = prompt('Ingresa el motivo del rechazo (opcional):');
+    
+    if (motivo === null) {
+        return; // Usuario canceló
+    }
+
+    try {
+        await esperarFirebase();
+
+        const updateData = {
+            estadoPago: 'rechazado',
+            activo: false,
+            fechaRechazo: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (motivo && motivo.trim()) {
+            updateData.motivoRechazo = motivo.trim();
+        }
+
+        await window.firebaseDB
+            .collection('usuarios')
+            .doc(estudianteId)
+            .update(updateData);
+
+        showNotification('Estudiante rechazado', 'info');
+        
+        // Cerrar modal si está abierto
+        closeComprobanteModalFn();
+        
+        // Recargar inscritos
+        await loadInscritos();
+
+    } catch (error) {
+        console.error('Error al rechazar estudiante:', error);
+        showNotification('Error al rechazar el estudiante', 'error');
+    }
+};
+
+// Cerrar modal de comprobante
+function closeComprobanteModalFn() {
+    const modal = document.getElementById('comprobanteModal');
+    if (modal) modal.classList.remove('show');
+    
+    currentEstudianteId = null;
+}
+
+// Función para formatear moneda
+function formatCurrency(value) {
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(value);
 }
