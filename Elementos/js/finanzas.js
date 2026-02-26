@@ -398,6 +398,7 @@ function setupEventListeners() {
     document.getElementById('closeModalEditarPago').addEventListener('click', closeModalEditarPago);
     document.getElementById('cancelarEditarPago').addEventListener('click', closeModalEditarPago);
     document.getElementById('formEditarPago').addEventListener('submit', handleEditarPago);
+    document.getElementById('btnEliminarComprobanteActual').addEventListener('click', handleEliminarComprobante);
 
     // File upload
     document.getElementById('comprobantePago').addEventListener('change', handleFileSelect);
@@ -1697,6 +1698,77 @@ function removeFileEditar() {
     document.querySelector('.file-upload-label-editar').style.display = 'flex';
 }
 
+// Handle eliminar comprobante
+async function handleEliminarComprobante() {
+    if (!window.editingPagoData) {
+        showNotification('error', 'Error', 'No hay datos de pago para eliminar');
+        return;
+    }
+
+    // Confirmar acción
+    if (!confirm('¿Estás seguro de eliminar el comprobante? El pago volverá a estado pendiente y se revertirá el movimiento en la cuenta bancaria.')) {
+        return;
+    }
+
+    const btnEliminar = document.getElementById('btnEliminarComprobanteActual');
+    btnEliminar.disabled = true;
+    btnEliminar.innerHTML = '<i class="bi bi-hourglass-split"></i> Eliminando...';
+
+    try {
+        const pago = window.editingPagoData.pago;
+        const db = getDB();
+
+        // 1. Revertir el saldo en la cuenta bancaria (devolver el dinero)
+        if (pago.cuentaId) {
+            const cuentaDoc = await db.collection('cuentas_bancarias').doc(pago.cuentaId).get();
+            if (cuentaDoc.exists) {
+                const cuentaData = cuentaDoc.data();
+                const nuevoSaldo = cuentaData.saldo + pago.totalPagado;
+                
+                await db.collection('cuentas_bancarias').doc(pago.cuentaId).update({
+                    saldo: nuevoSaldo,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        }
+
+        // 2. Buscar y eliminar el movimiento de gasto asociado
+        const movimientosSnapshot = await db.collection('movimientos')
+            .where('tipo', '==', 'gasto')
+            .where('cuentaId', '==', pago.cuentaId)
+            .where('monto', '==', pago.totalPagado)
+            .where('categoria', '==', 'Pago a Profesores')
+            .get();
+
+        // Eliminar movimientos que coincidan con la fecha aproximada del pago
+        const pagoFecha = pago.fechaPago ? pago.fechaPago.toDate() : null;
+        movimientosSnapshot.forEach(async (doc) => {
+            const movimiento = doc.data();
+            const movimientoFecha = movimiento.fecha ? movimiento.fecha.toDate() : null;
+            
+            // Si las fechas coinciden (mismo día), eliminar el movimiento
+            if (pagoFecha && movimientoFecha) {
+                const mismoDia = pagoFecha.toDateString() === movimientoFecha.toDateString();
+                if (mismoDia && movimiento.descripcion && movimiento.descripcion.includes(pago.profesorNombre)) {
+                    await db.collection('movimientos').doc(doc.id).delete();
+                }
+            }
+        });
+
+        // 3. Eliminar el registro de pago
+        await db.collection('pagos').doc(window.editingPagoData.pagoId).delete();
+
+        showNotification('success', 'Comprobante Eliminado', 'El comprobante se ha eliminado, el pago volvió a estado pendiente y se revirtió el movimiento en la cuenta bancaria');
+        closeModalEditarPago();
+        loadPagosSemana();
+    } catch (error) {
+        console.error('Error eliminando comprobante:', error);
+        showNotification('error', 'Error', 'No se pudo eliminar el comprobante: ' + error.message);
+        btnEliminar.disabled = false;
+        btnEliminar.innerHTML = '<i class="bi bi-trash"></i> Eliminar y Marcar Pendiente';
+    }
+}
+
 // Handle editar pago
 async function handleEditarPago(e) {
     e.preventDefault();
@@ -1754,6 +1826,7 @@ window.openRegistrarPago = openRegistrarPago;
 window.openEditarPago = openEditarPago;
 window.verComprobante = verComprobante;
 window.copiarTexto = copiarTexto;
+window.handleEliminarComprobante = handleEliminarComprobante;
 
 
 // ========== INTEGRACIÓN CON CUENTAS BANCARIAS ==========
