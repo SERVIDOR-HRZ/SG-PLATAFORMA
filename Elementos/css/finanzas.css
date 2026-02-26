@@ -3164,6 +3164,22 @@ body::before {
     z-index: 5;
 }
 
+/* Contenedor de botones en acciones - horizontal */
+.tarifas-table td.acciones-fija {
+    padding: 0.75rem !important;
+}
+
+.tarifas-table td.acciones-fija > * {
+    display: inline-flex !important;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.tarifas-table td.acciones-fija .btn-icon {
+    margin: 0 !important;
+}
+
 .tarifas-table tbody tr:hover td.acciones-fija {
     background: rgba(0, 0, 0, 0.9) !important;
 }

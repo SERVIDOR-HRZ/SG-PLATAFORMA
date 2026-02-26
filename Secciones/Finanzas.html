@@ -750,6 +750,170 @@
         </div>
     </div>
 
+    <!-- Modal Editar Pago -->
+    <div class="modal" id="modalEditarPago">
+        <div class="modal-content modal-pago-grande">
+            <div class="modal-header">
+                <h3><i class="bi bi-pencil-square"></i> Editar Pago Semanal</h3>
+                <button class="close-btn" id="closeModalEditarPago">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarPago">
+                    <!-- Información del Profesor -->
+                    <div class="pago-profesor-card">
+                        <div class="profesor-info-header">
+                            <img id="modalEditarPagoProfesorAvatar" src="" alt="Avatar">
+                            <div class="profesor-datos">
+                                <h4 id="modalEditarPagoProfesorNombre"></h4>
+                                <p id="modalEditarPagoProfesorEmail"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid de 2 columnas: Resumen y Datos de Pago -->
+                    <div class="pago-grid-dos-columnas">
+                        <!-- Columna Izquierda: Resumen de Clases -->
+                        <div class="pago-seccion">
+                            <h5 class="seccion-titulo">
+                                <i class="bi bi-calendar-check"></i>
+                                Resumen de Clases
+                            </h5>
+                            <div class="pago-resumen-vertical">
+                                <div class="resumen-item-vertical">
+                                    <span class="resumen-label">Clases dictadas:</span>
+                                    <strong class="resumen-valor" id="resumenClasesEditar">0</strong>
+                                </div>
+                                <div class="resumen-item-vertical">
+                                    <span class="resumen-label">Horas totales:</span>
+                                    <strong class="resumen-valor" id="resumenHorasEditar">0</strong>
+                                </div>
+                                <div class="resumen-item-vertical">
+                                    <span class="resumen-label">Tarifa por hora:</span>
+                                    <strong class="resumen-valor" id="resumenTarifaEditar">$0</strong>
+                                </div>
+                                <div class="resumen-item-vertical total">
+                                    <span class="resumen-label">Total pagado:</span>
+                                    <strong class="resumen-valor-total" id="resumenTotalEditar">$0</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna Derecha: Datos de Pago -->
+                        <div class="pago-seccion">
+                            <h5 class="seccion-titulo">
+                                <i class="bi bi-credit-card"></i>
+                                Datos de Pago del Profesor
+                            </h5>
+                            
+                            <div class="datos-pago-profesor-vertical">
+                                <div class="dato-pago-item-vertical">
+                                    <span class="dato-label-vertical">
+                                        <i class="bi bi-wallet2"></i>
+                                        Método de Pago
+                                    </span>
+                                    <strong id="profesorMetodoPagoEditar" class="dato-valor-vertical">No especificado</strong>
+                                </div>
+                                <div class="dato-pago-item-vertical">
+                                    <span class="dato-label-vertical">
+                                        <i class="bi bi-credit-card-2-front"></i>
+                                        Número de Cuenta
+                                    </span>
+                                    <div class="dato-valor-copy-vertical">
+                                        <strong id="profesorNumeroCuentaEditar" class="dato-valor-vertical">No especificado</strong>
+                                        <button type="button" class="btn-copy-small" id="btnCopyNumeroCuentaEditar" style="display: none;" title="Copiar">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="dato-pago-item-vertical">
+                                    <span class="dato-label-vertical">
+                                        <i class="bi bi-person-badge"></i>
+                                        Nombre de Cuenta
+                                    </span>
+                                    <div class="dato-valor-copy-vertical">
+                                        <strong id="profesorNombreCuentaEditar" class="dato-valor-vertical">No especificado</strong>
+                                        <button type="button" class="btn-copy-small" id="btnCopyNombreCuentaEditar" style="display: none;" title="Copiar">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cuenta usada -->
+                    <div class="pago-seccion">
+                        <h5 class="seccion-titulo">
+                            <i class="bi bi-wallet2"></i>
+                            Cuenta Utilizada
+                        </h5>
+                        <div class="form-group">
+                            <label>Cuenta desde donde se realizó el pago</label>
+                            <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                <strong id="cuentaUsadaEditar" style="color: rgba(255,255,255,0.9);">-</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comprobante Actual -->
+                    <div class="pago-seccion" id="comprobanteActualContainer">
+                        <h5 class="seccion-titulo">
+                            <i class="bi bi-file-earmark-check"></i>
+                            Comprobante Actual
+                        </h5>
+                        <div class="comprobante-actual-preview">
+                            <img id="comprobanteActualImage" src="" alt="Comprobante actual" style="max-width: 300px; border-radius: 8px; cursor: pointer; border: 2px solid rgba(255,255,255,0.2);">
+                            <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 0.5rem;">Haz clic en la imagen para verla en tamaño completo</p>
+                        </div>
+                    </div>
+
+                    <!-- Nuevo Comprobante (opcional) -->
+                    <div class="pago-seccion">
+                        <h5 class="seccion-titulo">
+                            <i class="bi bi-file-earmark-image"></i>
+                            Cambiar Comprobante (opcional)
+                        </h5>
+                        <div class="form-group">
+                            <label for="comprobanteEditarPago">Sube un nuevo comprobante si deseas reemplazar el actual</label>
+                            <div class="file-upload">
+                                <input type="file" id="comprobanteEditarPago" accept="image/*">
+                                <label for="comprobanteEditarPago" class="file-upload-label file-upload-label-editar">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <span>Seleccionar nueva imagen</span>
+                                </label>
+                                <div class="file-preview" id="filePreviewEditar" style="display: none;">
+                                    <img id="previewImageEditar" src="" alt="Preview">
+                                    <button type="button" class="remove-file" id="removeFileEditar">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notas -->
+                    <div class="form-group">
+                        <label for="notasEditarPago">
+                            <i class="bi bi-sticky"></i>
+                            Notas adicionales
+                        </label>
+                        <textarea id="notasEditarPago" rows="3" placeholder="Agregar o modificar notas sobre el pago"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelarEditarPago">Cancelar</button>
+                        <button type="submit" class="btn-primary" id="btnConfirmarEditarPago">
+                            <i class="bi bi-check-circle"></i>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Ver Comprobante -->
     <div class="modal" id="modalVerComprobante">
         <div class="modal-content modal-comprobante">

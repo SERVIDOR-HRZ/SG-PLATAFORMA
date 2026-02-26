@@ -393,10 +393,17 @@ function setupEventListeners() {
     document.getElementById('closeModalPago').addEventListener('click', closeModalPago);
     document.getElementById('cancelarPago').addEventListener('click', closeModalPago);
     document.getElementById('formRegistrarPago').addEventListener('submit', handleRegistrarPago);
+    
+    // Modal editar pago
+    document.getElementById('closeModalEditarPago').addEventListener('click', closeModalEditarPago);
+    document.getElementById('cancelarEditarPago').addEventListener('click', closeModalEditarPago);
+    document.getElementById('formEditarPago').addEventListener('submit', handleEditarPago);
 
     // File upload
     document.getElementById('comprobantePago').addEventListener('change', handleFileSelect);
     document.getElementById('removeFile').addEventListener('click', removeFile);
+    document.getElementById('comprobanteEditarPago').addEventListener('change', handleFileSelectEditar);
+    document.getElementById('removeFileEditar').addEventListener('click', removeFileEditar);
 
     // Modal comprobante
     document.getElementById('closeModalComprobante').addEventListener('click', closeModalComprobante);
@@ -800,37 +807,44 @@ async function loadPagosSemana() {
                 profesor, 
                 clasesData, 
                 pagoExistente,
-                tienePagoPendiente: clasesData.totalClases > 0 && !pagoExistente
+                tieneClases: clasesData.totalClases > 0
             };
         });
 
         // Esperar a que todas las promesas se resuelvan
         const resultados = await Promise.all(profesoresPromises);
 
-        // Filtrar solo los que tienen pagos pendientes
-        const profesoresConPagosPendientes = resultados.filter(r => r.tienePagoPendiente);
+        // Filtrar solo los que tienen clases en esta semana
+        const profesoresConClases = resultados.filter(r => r.tieneClases);
 
         // Limpiar la tabla completamente antes de agregar las nuevas filas
         pagosTableBody.innerHTML = '';
 
-        // Si no hay profesores con pagos pendientes, mostrar mensaje
-        if (profesoresConPagosPendientes.length === 0) {
+        // Si no hay profesores con clases, mostrar mensaje
+        if (profesoresConClases.length === 0) {
             pagosTableBody.innerHTML = `
                 <tr>
                     <td colspan="10" style="text-align: center; padding: 3rem;">
                         <div class="empty-state">
-                            <i class="bi bi-check-circle" style="font-size: 4rem; color: #28a745; margin-bottom: 1rem;"></i>
-                            <h3 style="color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;">No hay pagos pendientes</h3>
-                            <p style="color: rgba(255,255,255,0.6);">Todos los profesores con clases en esta semana ya han sido pagados</p>
+                            <i class="bi bi-calendar-x" style="font-size: 4rem; color: rgba(255,255,255,0.3); margin-bottom: 1rem;"></i>
+                            <h3 style="color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;">No hay clases en esta semana</h3>
+                            <p style="color: rgba(255,255,255,0.6);">No se encontraron clases confirmadas para esta semana</p>
                         </div>
                     </td>
                 </tr>
             `;
         } else {
+            // Ordenar: primero pendientes, luego pagados
+            profesoresConClases.sort((a, b) => {
+                if (!a.pagoExistente && b.pagoExistente) return -1;
+                if (a.pagoExistente && !b.pagoExistente) return 1;
+                return 0;
+            });
+
             // Agregar todas las filas de una vez usando un fragmento de documento
             const fragment = document.createDocumentFragment();
-            profesoresConPagosPendientes.forEach(({ profesor, clasesData }) => {
-                const fila = createPagoRow(profesor, clasesData, null);
+            profesoresConClases.forEach(({ profesor, clasesData, pagoExistente }) => {
+                const fila = createPagoRow(profesor, clasesData, pagoExistente);
                 fragment.appendChild(fila);
             });
             pagosTableBody.appendChild(fragment);
@@ -973,10 +987,37 @@ function createPagoRow(profesor, clasesData, pagoExistente) {
     const numeroCuenta = profesor.numeroCuenta || '';
     const nombreCuenta = profesor.nombreCuenta || '';
 
-    // Solo mostramos profesores pendientes, así que siempre será pendiente
-    const status = 'pendiente';
-    const statusText = 'Pendiente';
-    row.classList.add('row-pendiente');
+    // Determinar estado del pago
+    let status, statusText, accionesHTML;
+    
+    if (pagoExistente) {
+        status = 'pagado';
+        statusText = 'Pagado';
+        row.classList.add('row-pagado');
+        
+        // Botones para ver y editar comprobante
+        accionesHTML = `
+            <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
+                <button class="btn-icon view" onclick="verComprobante('${pagoExistente.comprobanteUrl}')" title="Ver comprobante">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn-icon edit" onclick="openEditarPago('${pagoExistente.id}')" title="Editar pago">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            </div>
+        `;
+    } else {
+        status = 'pendiente';
+        statusText = 'Pendiente';
+        row.classList.add('row-pendiente');
+        
+        // Botón para registrar pago
+        accionesHTML = `
+            <button class="btn-icon edit" onclick="openRegistrarPago('${profesor.id}', ${JSON.stringify(clasesData).replace(/"/g, '&quot;')}, ${tarifa})" title="Registrar pago">
+                <i class="bi bi-check-circle"></i>
+            </button>
+        `;
+    }
 
     const avatarHTML = avatarUrl 
         ? `<img src="${avatarUrl}" alt="${profesor.nombre}" class="table-avatar">`
@@ -1003,13 +1044,6 @@ function createPagoRow(profesor, clasesData, pagoExistente) {
             </button>
            </div>`
         : '<span class="text-muted">No especificado</span>';
-
-    // Botón de acción para registrar pago
-    const accionesHTML = `
-        <button class="btn-icon edit" onclick="openRegistrarPago('${profesor.id}', ${JSON.stringify(clasesData).replace(/"/g, '&quot;')}, ${tarifa})" title="Registrar pago">
-            <i class="bi bi-check-circle"></i>
-        </button>
-    `;
 
     row.innerHTML = `
         <td>
@@ -1507,9 +1541,217 @@ function copiarTexto(texto, boton) {
     });
 }
 
+// Open editar pago modal
+async function openEditarPago(pagoId) {
+    try {
+        const pagoDoc = await getDB().collection('pagos').doc(pagoId).get();
+        if (!pagoDoc.exists) {
+            showNotification('error', 'Error', 'Pago no encontrado');
+            return;
+        }
+
+        const pago = { id: pagoDoc.id, ...pagoDoc.data() };
+        
+        // Obtener datos del profesor
+        const profesorDoc = await getDB().collection('usuarios').doc(pago.profesorId).get();
+        if (!profesorDoc.exists) {
+            showNotification('error', 'Error', 'Profesor no encontrado');
+            return;
+        }
+        
+        const profesor = { id: profesorDoc.id, ...profesorDoc.data() };
+        
+        // Guardar datos en variable global
+        window.editingPagoData = {
+            pagoId: pagoId,
+            pago: pago,
+            profesor: profesor
+        };
+
+        // Llenar información del profesor
+        const avatarUrl = profesor.fotoPerfil || '';
+        const avatarContainer = document.getElementById('modalEditarPagoProfesorAvatar');
+        
+        if (avatarUrl) {
+            avatarContainer.src = avatarUrl;
+            avatarContainer.style.display = 'block';
+        } else {
+            avatarContainer.style.display = 'none';
+            const avatarParent = avatarContainer.parentElement;
+            const existingInitial = avatarParent.querySelector('.avatar-initial');
+            if (existingInitial) existingInitial.remove();
+            
+            const initialDiv = document.createElement('div');
+            initialDiv.className = 'avatar-initial';
+            initialDiv.style.cssText = 'width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold;';
+            initialDiv.textContent = profesor.nombre.charAt(0).toUpperCase();
+            avatarParent.insertBefore(initialDiv, avatarContainer);
+        }
+        
+        document.getElementById('modalEditarPagoProfesorNombre').textContent = profesor.nombre;
+        document.getElementById('modalEditarPagoProfesorEmail').textContent = profesor.email;
+
+        // Llenar resumen
+        document.getElementById('resumenClasesEditar').textContent = pago.clasesTotales || 0;
+        document.getElementById('resumenHorasEditar').textContent = `${pago.horasTotales || 0}h`;
+        document.getElementById('resumenTarifaEditar').textContent = `${formatNumber(pago.tarifaPorHora || 0)}`;
+        document.getElementById('resumenTotalEditar').textContent = `${formatNumber(pago.totalPagado || 0)}`;
+
+        // Llenar datos de pago
+        const metodoPago = pago.cuentaTipo || pago.metodoPago || '';
+        const numeroCuenta = profesor.numeroCuenta || '';
+        const nombreCuenta = profesor.nombreCuenta || '';
+
+        const metodoPagoEl = document.getElementById('profesorMetodoPagoEditar');
+        const numeroCuentaEl = document.getElementById('profesorNumeroCuentaEditar');
+        const nombreCuentaEl = document.getElementById('profesorNombreCuentaEditar');
+        const btnCopyNumero = document.getElementById('btnCopyNumeroCuentaEditar');
+        const btnCopyNombre = document.getElementById('btnCopyNombreCuentaEditar');
+
+        if (metodoPago) {
+            metodoPagoEl.textContent = metodoPago;
+            metodoPagoEl.classList.remove('no-especificado');
+        } else {
+            metodoPagoEl.textContent = 'No especificado';
+            metodoPagoEl.classList.add('no-especificado');
+        }
+
+        if (numeroCuenta) {
+            numeroCuentaEl.textContent = numeroCuenta;
+            numeroCuentaEl.classList.remove('no-especificado');
+            btnCopyNumero.style.display = 'flex';
+            btnCopyNumero.onclick = () => copiarAlPortapapeles(numeroCuenta, 'Número de cuenta copiado');
+        } else {
+            numeroCuentaEl.textContent = 'No especificado';
+            numeroCuentaEl.classList.add('no-especificado');
+            btnCopyNumero.style.display = 'none';
+        }
+
+        if (nombreCuenta) {
+            nombreCuentaEl.textContent = nombreCuenta;
+            nombreCuentaEl.classList.remove('no-especificado');
+            btnCopyNombre.style.display = 'flex';
+            btnCopyNombre.onclick = () => copiarAlPortapapeles(nombreCuenta, 'Nombre de cuenta copiado');
+        } else {
+            nombreCuentaEl.textContent = 'No especificado';
+            nombreCuentaEl.classList.add('no-especificado');
+            btnCopyNombre.style.display = 'none';
+        }
+
+        // Mostrar comprobante actual
+        const comprobanteActualContainer = document.getElementById('comprobanteActualContainer');
+        const comprobanteActualImage = document.getElementById('comprobanteActualImage');
+        
+        if (pago.comprobanteUrl) {
+            comprobanteActualImage.src = pago.comprobanteUrl;
+            comprobanteActualImage.onclick = () => verComprobante(pago.comprobanteUrl);
+            comprobanteActualContainer.style.display = 'block';
+        } else {
+            comprobanteActualContainer.style.display = 'none';
+        }
+
+        // Llenar notas
+        document.getElementById('notasEditarPago').value = pago.notas || '';
+
+        // Mostrar cuenta usada
+        document.getElementById('cuentaUsadaEditar').textContent = pago.cuentaNombre || 'No especificada';
+
+        document.getElementById('modalEditarPago').classList.add('active');
+    } catch (error) {
+        console.error('Error opening editar pago:', error);
+        showNotification('error', 'Error', 'No se pudo cargar la información del pago');
+    }
+}
+
+// Close modal editar pago
+function closeModalEditarPago() {
+    document.getElementById('modalEditarPago').classList.remove('active');
+    document.getElementById('formEditarPago').reset();
+    removeFileEditar();
+    window.editingPagoData = null;
+}
+
+// Handle file select editar
+function handleFileSelectEditar(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        showNotification('error', 'Error', 'Por favor selecciona una imagen válida');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        document.getElementById('previewImageEditar').src = e.target.result;
+        document.getElementById('filePreviewEditar').style.display = 'block';
+        document.querySelector('.file-upload-label-editar').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+// Remove file editar
+function removeFileEditar() {
+    document.getElementById('comprobanteEditarPago').value = '';
+    document.getElementById('filePreviewEditar').style.display = 'none';
+    document.querySelector('.file-upload-label-editar').style.display = 'flex';
+}
+
+// Handle editar pago
+async function handleEditarPago(e) {
+    e.preventDefault();
+
+    if (!window.editingPagoData) {
+        showNotification('error', 'Error', 'No hay datos de pago para editar');
+        return;
+    }
+
+    const fileInput = document.getElementById('comprobanteEditarPago');
+    const notas = document.getElementById('notasEditarPago').value;
+
+    const btnConfirmar = document.getElementById('btnConfirmarEditarPago');
+    btnConfirmar.disabled = true;
+    btnConfirmar.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+
+    try {
+        const updateData = {
+            notas: notas || '',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedBy: currentUser.id,
+            updatedByNombre: currentUser.nombre || ''
+        };
+
+        // Si hay un nuevo comprobante, subirlo
+        if (fileInput.files[0]) {
+            btnConfirmar.innerHTML = '<i class="bi bi-hourglass-split"></i> Subiendo comprobante...';
+            const comprobanteUrl = await uploadToImgBB(fileInput.files[0]);
+            
+            if (!comprobanteUrl) {
+                throw new Error('No se pudo subir el comprobante');
+            }
+            
+            updateData.comprobanteUrl = comprobanteUrl;
+        }
+
+        // Actualizar pago en Firestore
+        await getDB().collection('pagos').doc(window.editingPagoData.pagoId).update(updateData);
+
+        showNotification('success', 'Pago Actualizado', 'El pago se ha actualizado correctamente');
+        closeModalEditarPago();
+        loadPagosSemana();
+    } catch (error) {
+        console.error('Error editando pago:', error);
+        showNotification('error', 'Error', 'No se pudo actualizar el pago: ' + error.message);
+    } finally {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = '<i class="bi bi-check-circle"></i> Guardar Cambios';
+    }
+}
+
 // Make functions global
 window.openEditTarifa = openEditTarifa;
 window.openRegistrarPago = openRegistrarPago;
+window.openEditarPago = openEditarPago;
 window.verComprobante = verComprobante;
 window.copiarTexto = copiarTexto;
 
