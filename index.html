@@ -4,297 +4,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seamos Genios - Plataforma Educativa</title>
+    <title>Seamos Genios - Mantenimiento</title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description"
-        content="Plataforma educativa Seamos Genios - Descubre nuestros cursos, pre-ICFES y únete a nuestra comunidad de aprendizaje">
-    <meta name="keywords"
-        content="educación, plataforma educativa, aprendizaje, Seamos Genios, estudiantes, cursos, pre-ICFES">
+    <meta name="description" content="Plataforma educativa Seamos Genios - Actualmente en mantenimiento">
+    <meta name="keywords" content="educación, plataforma educativa, aprendizaje, Seamos Genios">
     <meta name="author" content="Seamos Genios">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, nofollow">
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Seamos Genios - Plataforma Educativa">
-    <meta property="og:description"
-        content="Únete a nuestra plataforma educativa y descubre una nueva forma de aprender.">
+    <meta property="og:title" content="Seamos Genios - En Mantenimiento">
+    <meta property="og:description" content="Estamos mejorando nuestra plataforma. Volveremos pronto.">
     <meta property="og:image" content="https://seamosgenios.org/Elementos/img/logo1.png">
     <meta property="og:url" content="https://seamosgenios.org/">
     <meta property="og:type" content="website">
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="Elementos/css/landing.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="shortcut icon" href="Elementos/img/logo1.png" type="image/x-icon">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(255, 0, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 70%);
+        }
+
+        .maintenance-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .maintenance-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .maintenance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff0000, #cc0000, #ff0000);
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .logo-container h1 {
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-container p {
+            color: #ff0000;
+            font-size: 16px;
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+        }
+
+        .maintenance-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .maintenance-title {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .maintenance-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .countdown-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+        }
+
+        .countdown-title {
+            color: #ff0000;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px 20px;
+            min-width: 80px;
+        }
+
+        .countdown-value {
+            color: #ff0000;
+            font-size: 36px;
+            font-weight: 700;
+            display: block;
+            text-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+        }
+
+        .countdown-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .info-message {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .info-message strong {
+            color: #ff0000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .maintenance-container {
+                padding: 15px;
+            }
+
+            .maintenance-card {
+                padding: 40px 25px;
+            }
+
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+
+            .logo-container h1 {
+                font-size: 24px;
+            }
+
+            .maintenance-title {
+                font-size: 22px;
+            }
+
+            .countdown {
+                gap: 10px;
+            }
+
+            .countdown-item {
+                min-width: 70px;
+                padding: 12px 15px;
+            }
+
+            .countdown-value {
+                font-size: 28px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Header/Navigation -->
-    <header class="header">
-        <nav class="navbar">
-            <div class="nav-container">
-                <div class="logo-section">
-                    <img src="Elementos/img/logo1.png" alt="Seamos Genios Logo" class="nav-logo">
-                    <span class="brand-name">Seamos<span class="brand-highlight">Genios</span></span>
-                </div>
-                <ul class="nav-menu" id="navMenu">
-                    <li><a href="#inicio">Inicio</a></li>
-                    <li><a href="#beneficios">Beneficios</a></li>
-                    <li><a href="#plataforma">Plataforma</a></li>
-                    <li><a href="#simulacro">Simulacro</a></li>
-                    <li><a href="#ranking">Ranking</a></li>
-                    <li><a href="#testimonios">Testimonios</a></li>
-                    <li class="mobile-login-btn">
-                        <a href="Secciones/login.html" class="btn-login" id="btnLoginMobile">Iniciar Sesión</a>
-                    </li>
-                </ul>
-                <div class="nav-actions">
-                    <a href="Secciones/login.html" class="btn-login" id="btnLogin">Iniciar Sesión</a>
-                    <button class="menu-toggle" id="menuToggle">
-                        <span class="hamburger-line"></span>
-                        <span class="hamburger-line"></span>
-                        <span class="hamburger-line"></span>
-                    </button>
-                </div>
+    <div class="maintenance-container">
+        <div class="maintenance-card">
+            <div class="logo-container">
+                <img src="Elementos/img/logo1.png" alt="Seamos Genios Logo" class="logo">
+                <h1>Seamos Genios</h1>
+                <p>Plataforma Educativa</p>
             </div>
-        </nav>
-    </header>
 
-    <!-- Mobile Menu Overlay -->
-    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+            <h2 class="maintenance-title">Estamos en Mantenimiento</h2>
+            <p class="maintenance-description">
+                Estamos mejorando nuestra plataforma para ofrecerte una mejor experiencia de aprendizaje.
+                Volveremos pronto con nuevas funcionalidades.
+            </p>
 
-    <!-- Hero Carousel -->
-    <section id="inicio" class="carousel-section">
-        <div class="carousel">
-            <div class="carousel-inner">
-                <!-- Slides will be loaded dynamically from Firebase -->
-            </div>
-            <button class="carousel-control prev" id="prevBtn">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-            <button class="carousel-control next" id="nextBtn">
-                <i class="bi bi-chevron-right"></i>
-            </button>
-            <div class="carousel-indicators" id="carouselIndicators"></div>
-        </div>
-    </section>
-
-    <!-- Posts Section -->
-    <section class="posts-section">
-        <div class="container">
-            <h2 class="section-title">Últimas Publicaciones</h2>
-            <div class="posts-grid" id="postsGrid">
-                <!-- Posts will be loaded dynamically -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Beneficios Section -->
-    <section id="beneficios" class="benefits-section">
-        <div class="container">
-            <h2 class="section-title">Beneficios de Nuestra Plataforma</h2>
-            <div class="benefits-grid">
-                <div class="benefit-card">
-                    <div class="benefit-icon"><i class="bi bi-clipboard-check"></i></div>
-                    <h3>Simulacros Ilimitados</h3>
-                    <p>Acceso a más de 200 simulacros tipo ICFES para practicar sin límites</p>
-                </div>
-                <div class="benefit-card">
-                    <div class="benefit-icon"><i class="bi bi-graph-up-arrow"></i></div>
-                    <h3>Seguimiento Personalizado</h3>
-                    <p>Análisis detallado de tu progreso y áreas de mejora</p>
-                </div>
-                <div class="benefit-card">
-                    <div class="benefit-icon"><i class="bi bi-trophy"></i></div>
-                    <h3>Ranking Competitivo</h3>
-                    <p>Compite con otros estudiantes y mide tu nivel</p>
-                </div>
-                <div class="benefit-card">
-                    <div class="benefit-icon"><i class="bi bi-clock-history"></i></div>
-                    <h3>Disponible 24/7</h3>
-                    <p>Estudia a tu ritmo, cuando y donde quieras</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Plataforma Section -->
-    <section id="plataforma" class="platform-section">
-        <div class="container">
-            <h2 class="section-title">Nuestra Plataforma</h2>
-            <div class="platform-content">
-                <div class="platform-text">
-                    <h3>Tecnología de Última Generación</h3>
-                    <p>Nuestra plataforma está diseñada para brindarte la mejor experiencia de aprendizaje con
-                        herramientas innovadoras y fáciles de usar.</p>
-                    <ul class="platform-features">
-                        <li><i class="bi bi-check-circle-fill"></i> Interfaz intuitiva y moderna</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Simulacros cronometrados</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Retroalimentación instantánea</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Estadísticas detalladas</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Compatible con todos los dispositivos</li>
-                    </ul>
-                </div>
-                <div class="platform-image">
-                    <img src="Elementos/img/logo1.png" alt="Plataforma Seamos Genios">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Simulacro Section -->
-    <section id="simulacro" class="simulacro-section">
-        <div class="container">
-            <h2 class="section-title">Simulacros Pre-ICFES</h2>
-            <div class="simulacro-grid">
-                <!-- Simulacros will be loaded dynamically from Firebase -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Ranking Section -->
-    <section id="ranking" class="ranking-section">
-        <div class="container">
-            <h2 class="section-title">Ranking de Estudiantes ICFES</h2>
-            <div class="ranking-table-container">
-                <table class="ranking-table">
-                    <thead>
-                        <tr>
-                            <th>Posición</th>
-                            <th>Estudiante</th>
-                            <th>Municipio</th>
-                            <th>Matemáticas</th>
-                            <th>Lectura Crítica</th>
-                            <th>Sociales</th>
-                            <th>Ciencias</th>
-                            <th>Inglés</th>
-                            <th class="total-score">Puntaje Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rankingTableBody">
-                        <!-- Rows will be loaded dynamically -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="ranking-pagination">
-                <button class="pagination-btn" id="prevPage" disabled>
-                    <i class="bi bi-chevron-left"></i> Anterior
-                </button>
-                <span class="pagination-info" id="paginationInfo">Página 1</span>
-                <button class="pagination-btn" id="nextPage">
-                    Siguiente <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonios Section -->
-    <section id="testimonios" class="testimonials-section">
-        <div class="container">
-            <h2 class="section-title">Lo Que Dicen Nuestros Estudiantes</h2>
-            <div class="testimonials-grid">
-                <!-- Testimonials will be loaded dynamically from Firebase -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Videos Section -->
-    <section class="videos-section">
-        <div class="container">
-            <h2 class="section-title">Videos Educativos</h2>
-            <div class="videos-grid">
-                <!-- Videos will be loaded dynamically from Firebase -->
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="nosotros" class="about-section">
-        <div class="container">
-            <h2 class="section-title">Acerca de Nosotros</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <h3>¿Quiénes Somos?</h3>
-                    <p>Seamos Genios es una plataforma educativa innovadora dedicada a transformar la forma en que los
-                        estudiantes se preparan para el ICFES.</p>
-                    <p>Con años de experiencia en educación, hemos ayudado a miles de estudiantes a alcanzar sus metas
-                        académicas y obtener los mejores resultados en sus exámenes.</p>
-                    <div class="about-stats">
-                        <div class="stat-item">
-                            <h4>5000+</h4>
-                            <p>Estudiantes</p>
-                        </div>
-                        <div class="stat-item">
-                            <h4>95%</h4>
-                            <p>Satisfacción</p>
-                        </div>
-                        <div class="stat-item">
-                            <h4>200+</h4>
-                            <p>Simulacros</p>
-                        </div>
+            <div class="countdown-container">
+                <div class="countdown-title">Tiempo estimado de regreso</div>
+                <div class="countdown">
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="hours">00</span>
+                        <span class="countdown-label">Horas</span>
                     </div>
-                </div>
-                <div class="about-image">
-                    <img src="Elementos/img/logo1.png" alt="Seamos Genios">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Seamos Genios</h4>
-                    <p>Tu plataforma educativa de confianza</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Enlaces</h4>
-                    <ul>
-                        <li><a href="#beneficios">Beneficios</a></li>
-                        <li><a href="#simulacro">Simulacros</a></li>
-                        <li><a href="#ranking">Ranking</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Síguenos</h4>
-                    <div class="social-links">
-                        <a href="#"><i class="bi bi-facebook"></i></a>
-                        <a href="#"><i class="bi bi-instagram"></i></a>
-                        <a href="#"><i class="bi bi-youtube"></i></a>
-                        <a href="#"><i class="bi bi-tiktok"></i></a>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="minutes">00</span>
+                        <span class="countdown-label">Minutos</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="seconds">00</span>
+                        <span class="countdown-label">Segundos</span>
                     </div>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 Seamos Genios. Todos los derechos reservados.</p>
+
+            <div class="info-message">
+                <strong>Nota:</strong> Si necesitas asistencia urgente, por favor contacta a nuestro equipo de soporte.
             </div>
         </div>
-    </footer>
-
-    <!-- Post Modal -->
-    <div id="postModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <div id="modalPostContent"></div>
-        </div>
     </div>
 
-    <!-- Image Lightbox -->
-    <div id="imageLightbox" class="image-lightbox">
-        <span class="lightbox-close">&times;</span>
-        <img class="lightbox-content" id="lightboxImage">
-        <div class="lightbox-caption" id="lightboxCaption"></div>
-    </div>
+    <script>
+        // Configurar el tiempo de mantenimiento (12 horas desde ahora)
+        const maintenanceHours = 12;
+        
+        // Obtener o establecer el tiempo de finalización
+        let endTime = localStorage.getItem('maintenanceEndTime');
+        
+        if (!endTime) {
+            // Si no existe, crear uno nuevo (12 horas desde ahora)
+            endTime = new Date().getTime() + (maintenanceHours * 60 * 60 * 1000);
+            localStorage.setItem('maintenanceEndTime', endTime);
+        } else {
+            endTime = parseInt(endTime);
+        }
 
-    <!-- Firebase CDN -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
 
-    <script src="Elementos/js/config.js"></script>
-    <script src="Elementos/js/landing.js"></script>
+            if (distance < 0) {
+                // El mantenimiento ha terminado
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                
+                // Opcional: redirigir al login después de que termine
+                setTimeout(() => {
+                    localStorage.removeItem('maintenanceEndTime');
+                    window.location.href = 'Secciones/login.html';
+                }, 2000);
+                
+                return;
+            }
+
+            // Calcular horas, minutos y segundos
+            const hours = Math.floor(distance / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Actualizar el DOM
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        // Actualizar cada segundo
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // Opcional: Tecla de acceso rápido para saltar el mantenimiento (Alt + Shift + M)
+        let keysPressed = {};
+        document.addEventListener('keydown', function(event) {
+            keysPressed[event.key.toLowerCase()] = true;
+            
+            if (event.altKey && event.shiftKey && keysPressed['m']) {
+                event.preventDefault();
+                localStorage.removeItem('maintenanceEndTime');
+                window.location.href = 'Secciones/login.html';
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            delete keysPressed[event.key.toLowerCase()];
+        });
+    </script>
 </body>
 
 </html>
