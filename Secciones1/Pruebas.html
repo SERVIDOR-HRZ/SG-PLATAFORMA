@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pruebas - Seamos Genios</title>
+
+    <!-- Security headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/panel.css">
+    <link rel="stylesheet" href="../Elementos/css/pruebas.css">
+    <link rel="stylesheet" href="../Elementos/css/time-picker.css">
+    <link rel="shortcut icon" href="../Elementos/img/logo1.png" type="image/x-icon">
+
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" id="backBtn">
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <img src="../Elementos/img/logo1.png" alt="Seamos Genios Logo" class="header-logo">
+            <h1 id="pageTitle">Gestión de Pruebas</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info" id="userInfoContainer">
+                <span class="user-name" id="userName">USUARIO</span>
+                <div class="user-avatar" id="userAvatarContainer">
+                    <div class="user-avatar-default" id="userAvatarDefault">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <img class="user-avatar-image" id="userAvatarImage" style="display: none;" src=""
+                        alt="Foto de perfil">
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-menu-btn" id="userMenuBtn">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown-menu" id="userDropdownMenu">
+                        <a href="panelUsuario.html" class="dropdown-item">
+                            <i class="bi bi-person-gear"></i>
+                            Configuración
+                        </a>
+                        <hr class="dropdown-divider">
+                        <button class="dropdown-item" id="logoutBtnDropdown">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Admin View -->
+        <div id="adminView" class="admin-view">
+            <!-- Menu de Tabs -->
+            <div class="type-tabs" id="typeTabs">
+                <button class="type-tab active" data-type="prueba">
+                    <i class="bi bi-clipboard-check"></i>
+                    Pruebas
+                </button>
+                <button class="type-tab" data-type="minisimulacro">
+                    <i class="bi bi-lightning"></i>
+                    Minisimulacros
+                </button>
+                <button class="type-tab" data-type="reto">
+                    <i class="bi bi-trophy"></i>
+                    Desafíos
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="createTestBtn">
+                    <i class="bi bi-plus-circle"></i>
+                    <span id="createBtnText">Crear Nueva Prueba</span>
+                </button>
+            </div>
+
+            <!-- Tests List -->
+            <div class="tests-container" id="testsContainer">
+                <h2><i class="bi bi-clipboard-check"></i> Pruebas Creadas</h2>
+                
+                <!-- Search and Filter -->
+                <div class="search-filter-container">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="searchTestsInput" placeholder="Buscar por nombre de prueba...">
+                        <button class="clear-search" id="clearSearchBtn" style="display: none;">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                    </div>
+                    <div class="filter-status-container">
+                        <label><i class="bi bi-funnel"></i> Estado:</label>
+                        <select id="filterStatusSelect" class="filter-status-select">
+                            <option value="all">Todas</option>
+                            <option value="active">Activas</option>
+                            <option value="upcoming">Próximas</option>
+                            <option value="expired">Vencidas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tests-list" id="testsList">
+                    <!-- Tests will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Desafios Admin View -->
+            <div class="desafios-admin-container" id="desafiosAdminView" style="display: none;">
+                <!-- Menú de Materias -->
+                <div class="materias-menu" id="materiasMenu">
+                    <button class="materia-btn active" data-materia="matematicas">
+                        <i class="bi bi-calculator"></i>
+                        <span>Matemáticas</span>
+                    </button>
+                    <button class="materia-btn" data-materia="lectura">
+                        <i class="bi bi-book"></i>
+                        <span>Lectura Crítica</span>
+                    </button>
+                    <button class="materia-btn" data-materia="sociales">
+                        <i class="bi bi-globe"></i>
+                        <span>Ciencias Sociales</span>
+                    </button>
+                    <button class="materia-btn" data-materia="naturales">
+                        <i class="bi bi-tree"></i>
+                        <span>Ciencias Naturales</span>
+                    </button>
+                    <button class="materia-btn" data-materia="ingles">
+                        <i class="bi bi-translate"></i>
+                        <span>Inglés</span>
+                    </button>
+                </div>
+                
+                <div class="desafios-admin-header">
+                    <div class="desafios-header-left">
+                        <h2><i class="bi bi-trophy-fill"></i> <span id="materiaTitle">Matemáticas</span></h2>
+                        <p>Crea niveles con preguntas para que los estudiantes practiquen</p>
+                    </div>
+                    <div class="desafios-header-right">
+                        <button class="btn btn-primary" id="createNivelBtn">
+                            <i class="bi bi-plus-circle"></i>
+                            Crear Nivel
+                        </button>
+                    </div>
+                </div>
+                <div class="desafios-niveles-grid" id="desafiosNivelesList">
+                    <!-- Niveles will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Student View -->
+        <div id="studentView" class="student-view" style="display: none;">
+            <div class="assigned-tests">
+                <h2><i class="bi bi-journal-check"></i> Mis Pruebas Asignadas</h2>
+                <div class="student-tests-list" id="studentTestsList">
+                    <!-- Student tests will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Test Modal -->
+    <div class="modal-overlay" id="createTestModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="bi bi-plus-square"></i> Crear Nueva Prueba</h3>
+                <button class="close-btn" id="closeCreateModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createTestForm">
+                    <!-- Tipo de Evaluación -->
+                    <div class="form-group" id="testTypeGroup">
+                        <label>Tipo de Evaluación</label>
+                        <div class="type-toggle-buttons">
+                            <button type="button" class="type-toggle-btn active" data-value="prueba">
+                                <i class="bi bi-clipboard-check"></i>
+                                Prueba
+                            </button>
+                            <button type="button" class="type-toggle-btn" data-value="minisimulacro">
+                                <i class="bi bi-lightning"></i>
+                                Minisimulacro
+                            </button>
+                        </div>
+                        <input type="hidden" id="testType" name="testType" value="prueba">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="testName">Nombre de la Prueba</label>
+                        <input type="text" id="testName" name="testName" placeholder="Ej: Evaluación Matemáticas" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="testStartDate"><i class="bi bi-calendar-event"></i> Fecha de Inicio</label>
+                            <input type="date" id="testStartDate" name="testStartDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="testEndDate"><i class="bi bi-calendar-check"></i> Fecha de Fin</label>
+                            <input type="date" id="testEndDate" name="testEndDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estudiantes Asignados</label>
+                        
+                        <!-- Institution Filter -->
+                        <div class="institution-filter">
+                            <label><i class="bi bi-building"></i> Filtrar por Institución</label>
+                            <div class="institution-quick-select" id="institutionQuickSelect">
+                                <!-- Institution buttons will be loaded here -->
+                            </div>
+                            <select id="institutionFilter">
+                                <option value="">Todas las instituciones</option>
+                                <!-- Options will be loaded dynamically -->
+                            </select>
+                        </div>
+                        
+                        <div class="selector-divider">
+                            <span>o selecciona individualmente</span>
+                        </div>
+                        
+                        <div class="students-selector" id="studentsSelector">
+                            <div class="students-selector-header">
+                                <div class="select-all-container">
+                                    <input type="checkbox" id="selectAllStudents">
+                                    <label for="selectAllStudents">Seleccionar Todos (filtrados)</label>
+                                </div>
+                                <div class="students-search">
+                                    <i class="bi bi-search"></i>
+                                    <input type="text" id="searchStudents" placeholder="Buscar estudiante...">
+                                </div>
+                            </div>
+                            <div class="students-counter" id="studentsCounter">
+                                <i class="bi bi-people-fill"></i> 0 estudiantes seleccionados
+                            </div>
+                            <div class="students-list" id="studentsList">
+                                <!-- Students will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="blocks-container">
+                        <h4><i class="bi bi-clock-history"></i> Configuración de Bloques <span style="color: #ff6b6b; font-size: 0.85rem; font-weight: 500;">(Al menos 1 bloque requerido)</span></h4>
+
+                        <!-- Bloque 1 -->
+                        <div class="block-config">
+                            <div class="block-header-with-toggle">
+                                <h5><i class="bi bi-1-circle"></i> Bloque 1</h5>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="enableBlock1" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Habilitar</span>
+                                </label>
+                            </div>
+                            <div class="form-row" id="block1Fields">
+                                <div class="form-group">
+                                    <label>Hora de Inicio</label>
+                                    <div class="time-input-display empty" id="block1StartTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Hora de Fin</label>
+                                    <div class="time-input-display empty" id="block1EndTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bloque 2 -->
+                        <div class="block-config">
+                            <div class="block-header-with-toggle">
+                                <h5><i class="bi bi-2-circle"></i> Bloque 2</h5>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="enableBlock2">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Habilitar</span>
+                                </label>
+                            </div>
+                            <div class="form-row" id="block2Fields" style="display: none;">
+                                <div class="form-group">
+                                    <label>Hora de Inicio</label>
+                                    <div class="time-input-display empty" id="block2StartTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Hora de Fin</label>
+                                    <div class="time-input-display empty" id="block2EndTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelCreateTest">Cancelar</button>
+                <button type="submit" form="createTestForm" class="btn btn-primary"><i class="bi bi-check-lg"></i> Crear Prueba</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Test Modal -->
+    <div class="modal-overlay" id="editTestModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="bi bi-pencil-square"></i> Editar Prueba</h3>
+                <button class="close-btn" id="closeEditModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editTestForm">
+                    <input type="hidden" id="editTestId" name="editTestId">
+
+                    <!-- Tipo de Evaluación -->
+                    <div class="form-group" id="editTestTypeGroup">
+                        <label>Tipo de Evaluación</label>
+                        <div class="type-toggle-buttons">
+                            <button type="button" class="type-toggle-btn active" data-value="prueba">
+                                <i class="bi bi-clipboard-check"></i>
+                                Prueba
+                            </button>
+                            <button type="button" class="type-toggle-btn" data-value="minisimulacro">
+                                <i class="bi bi-lightning"></i>
+                                Minisimulacro
+                            </button>
+                        </div>
+                        <input type="hidden" id="editTestType" name="editTestType" value="prueba">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTestName">Nombre de la Prueba</label>
+                        <input type="text" id="editTestName" name="editTestName" placeholder="Ej: Evaluación Matemáticas" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editTestStartDate"><i class="bi bi-calendar-event"></i> Fecha de Inicio</label>
+                            <input type="date" id="editTestStartDate" name="editTestStartDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editTestEndDate"><i class="bi bi-calendar-check"></i> Fecha de Fin</label>
+                            <input type="date" id="editTestEndDate" name="editTestEndDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estudiantes Asignados</label>
+                        
+                        <!-- Institution Filter -->
+                        <div class="institution-filter">
+                            <label><i class="bi bi-building"></i> Filtrar por Institución</label>
+                            <div class="institution-quick-select" id="editInstitutionQuickSelect">
+                                <!-- Institution buttons will be loaded here -->
+                            </div>
+                            <select id="editInstitutionFilter">
+                                <option value="">Todas las instituciones</option>
+                                <!-- Options will be loaded dynamically -->
+                            </select>
+                        </div>
+                        
+                        <div class="selector-divider">
+                            <span>o selecciona individualmente</span>
+                        </div>
+                        
+                        <div class="students-selector" id="editStudentsSelector">
+                            <div class="students-selector-header">
+                                <div class="select-all-container">
+                                    <input type="checkbox" id="editSelectAllStudents">
+                                    <label for="editSelectAllStudents">Seleccionar Todos (filtrados)</label>
+                                </div>
+                                <div class="students-search">
+                                    <i class="bi bi-search"></i>
+                                    <input type="text" id="editSearchStudents" placeholder="Buscar estudiante...">
+                                </div>
+                            </div>
+                            <div class="students-counter" id="editStudentsCounter">
+                                <i class="bi bi-people-fill"></i> 0 estudiantes seleccionados
+                            </div>
+                            <div class="students-list" id="editStudentsList">
+                                <!-- Students will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="blocks-container">
+                        <h4><i class="bi bi-clock-history"></i> Configuración de Bloques <span style="color: #ff6b6b; font-size: 0.85rem; font-weight: 500;">(Al menos 1 bloque requerido)</span></h4>
+
+                        <!-- Bloque 1 -->
+                        <div class="block-config">
+                            <div class="block-header-with-toggle">
+                                <h5><i class="bi bi-1-circle"></i> Bloque 1</h5>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="editEnableBlock1" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Habilitar</span>
+                                </label>
+                            </div>
+                            <div class="form-row" id="editBlock1Fields">
+                                <div class="form-group">
+                                    <label>Hora de Inicio</label>
+                                    <div class="time-input-display empty" id="editBlock1StartTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Hora de Fin</label>
+                                    <div class="time-input-display empty" id="editBlock1EndTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bloque 2 -->
+                        <div class="block-config">
+                            <div class="block-header-with-toggle">
+                                <h5><i class="bi bi-2-circle"></i> Bloque 2</h5>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="editEnableBlock2">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">Habilitar</span>
+                                </label>
+                            </div>
+                            <div class="form-row" id="editBlock2Fields" style="display: none;">
+                                <div class="form-group">
+                                    <label>Hora de Inicio</label>
+                                    <div class="time-input-display empty" id="editBlock2StartTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Hora de Fin</label>
+                                    <div class="time-input-display empty" id="editBlock2EndTime" data-time-value="">
+                                        <i class="bi bi-clock"></i>
+                                        <span>Seleccionar hora</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelEditTest">Cancelar</button>
+                <button type="submit" form="editTestForm" class="btn btn-primary"><i class="bi bi-check-lg"></i> Actualizar Prueba</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Nivel Modal -->
+    <div class="modal-overlay" id="nivelModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 id="nivelModalTitle"><i class="bi bi-trophy"></i> Crear Nuevo Nivel</h3>
+                <button class="close-btn" id="closeNivelModal">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            
+            <!-- Tabs Navigation -->
+            <div class="nivel-tabs">
+                <button type="button" class="nivel-tab active" data-tab="general">
+                    <i class="bi bi-gear-fill"></i>
+                    General
+                </button>
+                <button type="button" class="nivel-tab" data-tab="preguntas">
+                    <i class="bi bi-question-circle-fill"></i>
+                    Preguntas
+                    <span class="tab-badge" id="preguntasCount">0</span>
+                </button>
+                <button type="button" class="nivel-tab" data-tab="preview">
+                    <i class="bi bi-play-circle-fill"></i>
+                    Vista Previa
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="nivelForm">
+                    <input type="hidden" id="nivelId">
+                    
+                    <!-- Tab: General -->
+                    <div class="nivel-tab-content active" id="tabGeneral">
+                        <div class="tab-section">
+                            <div class="section-header">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <h4>Información del Nivel</h4>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nivelNumero"><i class="bi bi-hash"></i> Número *</label>
+                                    <div class="input-with-validation">
+                                        <input type="number" id="nivelNumero" min="1" max="1000" required placeholder="1-1000">
+                                        <span class="validation-icon" id="numeroValidation"></span>
+                                    </div>
+                                    <span class="input-hint">Único</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nivelTema"><i class="bi bi-bookmark-fill"></i> Tema *</label>
+                                    <input type="text" id="nivelTema" placeholder="Ej: Introducción a Fracciones" required>
+                                    <span class="input-hint">Tema del nivel</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nivelRecompensaMonedas"><i class="bi bi-coin"></i> Recompensa Monedas</label>
+                                    <input type="number" id="nivelRecompensaMonedas" min="1" max="1000" value="10">
+                                    <span class="input-hint">Monedas al completar</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nivelRecompensaXP"><i class="bi bi-star-fill"></i> Recompensa XP</label>
+                                    <input type="number" id="nivelRecompensaXP" min="1" max="1000" value="20">
+                                    <span class="input-hint">Puntos de experiencia</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="nivelDescripcion">
+                                    <i class="bi bi-text-paragraph"></i> Descripción
+                                    <span class="char-counter" id="descripcionCounter">0/500</span>
+                                </label>
+                                <textarea id="nivelDescripcion" rows="3" maxlength="500" placeholder="Descripción del nivel y objetivos de aprendizaje..."></textarea>
+                                <span class="input-hint">Descripción opcional del nivel</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab: Preguntas -->
+                    <div class="nivel-tab-content" id="tabPreguntas">
+                        <div class="preguntas-container" id="preguntasContainer">
+                            <!-- Las preguntas se generan dinámicamente por JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Tab: Vista Previa -->
+                    <div class="nivel-tab-content" id="tabPreview">
+                        <div class="preview-container">
+                            <div class="preview-header">
+                                <i class="bi bi-phone"></i>
+                                <span>Así verán los estudiantes este nivel</span>
+                            </div>
+                            <div class="preview-device">
+                                <div class="preview-screen" id="previewScreen">
+                                    <!-- Preview content generated dynamically -->
+                                </div>
+                            </div>
+                            <div class="preview-navigation">
+                                <button type="button" class="preview-nav-btn" id="prevPreviewBtn" disabled>
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <span class="preview-indicator" id="previewIndicator">Pregunta 1 de 5</span>
+                                <button type="button" class="preview-nav-btn" id="nextPreviewBtn">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelNivel">Cancelar</button>
+                <button type="submit" form="nivelForm" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i>
+                    <span id="nivelButtonText">Crear Nivel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="../Elementos/js/config.js"></script>
+    <script src="../Elementos/js/perfil-compartido.js"></script>
+    <script src="../Elementos/js/time-picker.js"></script>
+    <script src="../Elementos/js/pruebas-menu.js"></script>
+    <script src="../Elementos/js/pruebas-admin.js"></script>
+    <script src="../Elementos/js/pruebas-institution-filter.js"></script>
+    <script src="../Elementos/js/desafios-admin.js"></script>
+
+</body>
+
+</html>
