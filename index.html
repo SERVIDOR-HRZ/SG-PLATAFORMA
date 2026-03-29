@@ -283,19 +283,8 @@
     </div>
 
     <script>
-        // Configurar el tiempo de mantenimiento (12 horas desde ahora)
-        const maintenanceHours = 12;
-        
-        // Obtener o establecer el tiempo de finalización
-        let endTime = localStorage.getItem('maintenanceEndTime');
-        
-        if (!endTime) {
-            // Si no existe, crear uno nuevo (12 horas desde ahora)
-            endTime = new Date().getTime() + (maintenanceHours * 60 * 60 * 1000);
-            localStorage.setItem('maintenanceEndTime', endTime);
-        } else {
-            endTime = parseInt(endTime);
-        }
+        // Fecha y hora fija de finalización: 30 de marzo de 2026 a las 5:00 AM
+        const endTime = new Date('2026-03-30T05:00:00').getTime();
 
         function updateCountdown() {
             const now = new Date().getTime();
@@ -309,7 +298,6 @@
                 
                 // Opcional: redirigir al login después de que termine
                 setTimeout(() => {
-                    localStorage.removeItem('maintenanceEndTime');
                     window.location.href = 'Secciones/login.html';
                 }, 2000);
                 
@@ -338,7 +326,6 @@
             
             if (event.altKey && event.shiftKey && keysPressed['m']) {
                 event.preventDefault();
-                localStorage.removeItem('maintenanceEndTime');
                 window.location.href = 'Secciones/login.html';
             }
         });
