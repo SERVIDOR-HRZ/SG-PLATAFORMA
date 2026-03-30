@@ -4,17 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seamos Genios - Mantenimiento</title>
+    <title>Seamos Genios - Landing en Desarrollo</title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Plataforma educativa Seamos Genios - Actualmente en mantenimiento">
+    <meta name="description" content="Plataforma educativa Seamos Genios - Landing page en desarrollo">
     <meta name="keywords" content="educación, plataforma educativa, aprendizaje, Seamos Genios">
     <meta name="author" content="Seamos Genios">
     <meta name="robots" content="noindex, nofollow">
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Seamos Genios - En Mantenimiento">
-    <meta property="og:description" content="Estamos mejorando nuestra plataforma. Volveremos pronto.">
+    <meta property="og:title" content="Seamos Genios - Landing en Desarrollo">
+    <meta property="og:description" content="Nuestra landing page está en desarrollo. Accede directamente a la plataforma.">
     <meta property="og:image" content="https://seamosgenios.org/Elementos/img/logo1.png">
     <meta property="og:url" content="https://seamosgenios.org/">
     <meta property="og:type" content="website">
@@ -141,53 +141,28 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .countdown-container {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 30px 20px;
-            margin-bottom: 30px;
-        }
-
-        .countdown-title {
-            color: #ff0000;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-
-        .countdown {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .countdown-item {
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid rgba(255, 0, 0, 0.3);
+        .login-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: #ffffff;
+            padding: 15px 40px;
             border-radius: 10px;
-            padding: 15px 20px;
-            min-width: 80px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
         }
 
-        .countdown-value {
-            color: #ff0000;
-            font-size: 36px;
-            font-weight: 700;
-            display: block;
-            text-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
+            background: linear-gradient(135deg, #cc0000, #ff0000);
         }
 
-        .countdown-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 5px;
-            display: block;
+        .login-button:active {
+            transform: translateY(0);
         }
 
         .info-message {
@@ -252,79 +227,29 @@
                 <p>Plataforma Educativa</p>
             </div>
 
-            <h2 class="maintenance-title">Estamos en Mantenimiento</h2>
+            <h2 class="maintenance-title">Página Principal en Desarrollo</h2>
             <p class="maintenance-description">
-                Estamos mejorando nuestra plataforma para ofrecerte una mejor experiencia de aprendizaje.
-                Volveremos pronto con nuevas funcionalidades.
+                Estamos trabajando en nuestra nueva landing page para ofrecerte una mejor experiencia.
+                Mientras tanto, puedes acceder directamente a la plataforma.
             </p>
 
-            <div class="countdown-container">
-                <div class="countdown-title">Tiempo estimado de regreso</div>
-                <div class="countdown">
-                    <div class="countdown-item">
-                        <span class="countdown-value" id="hours">00</span>
-                        <span class="countdown-label">Horas</span>
-                    </div>
-                    <div class="countdown-item">
-                        <span class="countdown-value" id="minutes">00</span>
-                        <span class="countdown-label">Minutos</span>
-                    </div>
-                    <div class="countdown-item">
-                        <span class="countdown-value" id="seconds">00</span>
-                        <span class="countdown-label">Segundos</span>
-                    </div>
-                </div>
-            </div>
+            <a href="Secciones/login.html" class="login-button">
+                Iniciar Sesión
+            </a>
 
             <div class="info-message">
-                <strong>Nota:</strong> Si necesitas asistencia urgente, por favor contacta a nuestro equipo de soporte.
+                <strong>Nota:</strong> Si necesitas asistencia, por favor contacta a nuestro equipo de soporte.
             </div>
         </div>
     </div>
 
     <script>
-        // Fecha y hora fija de finalización: 31 de marzo de 2026 a las 5:00 AM
-        const endTime = new Date('2026-03-31T05:00:00').getTime();
-
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = endTime - now;
-
-            if (distance < 0) {
-                // El mantenimiento ha terminado
-                document.getElementById('hours').textContent = '00';
-                document.getElementById('minutes').textContent = '00';
-                document.getElementById('seconds').textContent = '00';
-                
-                // Opcional: redirigir al login después de que termine
-                setTimeout(() => {
-                    window.location.href = 'Secciones/login.html';
-                }, 2000);
-                
-                return;
-            }
-
-            // Calcular horas, minutos y segundos
-            const hours = Math.floor(distance / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            // Actualizar el DOM
-            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-        }
-
-        // Actualizar cada segundo
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-
-        // Opcional: Tecla de acceso rápido para saltar el mantenimiento (Alt + Shift + M)
+        // Atajo de teclado opcional (Alt + Shift + L para ir al login)
         let keysPressed = {};
         document.addEventListener('keydown', function(event) {
             keysPressed[event.key.toLowerCase()] = true;
             
-            if (event.altKey && event.shiftKey && keysPressed['m']) {
+            if (event.altKey && event.shiftKey && keysPressed['l']) {
                 event.preventDefault();
                 window.location.href = 'Secciones/login.html';
             }

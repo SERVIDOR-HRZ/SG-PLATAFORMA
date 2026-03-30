@@ -262,33 +262,14 @@ class ProteccionWeb {
     }
 
     crearModal() {
-        // Crear el modal si no existe
-        if (!document.getElementById('proteccion-modal')) {
-            const modal = document.createElement('div');
-            modal.id = 'proteccion-modal';
-            modal.className = 'proteccion-modal';
-            
-            modal.innerHTML = `
-                <div class="proteccion-contenido">
-                    <div class="proteccion-icono">
-                        <i class="bi bi-shield-exclamation" style="font-size: 56px; color: #dc3545;"></i>
-                    </div>
-                    <div class="proteccion-titulo">${this.config.titulo}</div>
-                    <div class="proteccion-subtitulo">${this.config.subtitulo}</div>
-                    <button class="proteccion-boton" onclick="proteccionWeb.cerrarModal()">Continuar</button>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
+        // Modal deshabilitado - no se crea el elemento
+        // La protección sigue activa pero sin ventanas emergentes
     }
 
     mostrarModal() {
-        const modal = document.getElementById('proteccion-modal');
-        if (modal) {
-            modal.style.display = 'block';
-            this.mostrarMensajesConsola();
-        }
+        // Modal deshabilitado - no se muestra ventana emergente
+        // Solo se registran los eventos en consola
+        this.mostrarMensajesConsola();
     }
 
     cerrarModal() {
@@ -325,7 +306,7 @@ class ProteccionWeb {
                     (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) ||
                     (e.ctrlKey && e.key === 'U')) {
                     e.preventDefault();
-                    this.mostrarModal();
+                    // Modal deshabilitado - solo prevenir acción
                     return false;
                 }
             });
@@ -335,7 +316,7 @@ class ProteccionWeb {
         if (this.config.bloquearClicDerecho) {
             document.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
-                this.mostrarModal();
+                // Modal deshabilitado - solo prevenir acción
                 return false;
             });
         }
@@ -367,7 +348,7 @@ class ProteccionWeb {
             document.addEventListener('keydown', (e) => {
                 if (e.ctrlKey && e.key === 'a') {
                     e.preventDefault();
-                    this.mostrarModal();
+                    // Modal deshabilitado - solo prevenir acción
                     return false;
                 }
             });
@@ -380,7 +361,7 @@ class ProteccionWeb {
                     window.outerWidth - window.innerWidth > this.threshold) {
                     if (!this.devtools.abierto) {
                         this.devtools.abierto = true;
-                        this.mostrarModal();
+                        // Modal deshabilitado - solo registrar
                     }
                 } else {
                     this.devtools.abierto = false;
@@ -399,7 +380,7 @@ class ProteccionWeb {
         debugger;
         const fin = performance.now();
         if (fin - inicio > 100) {
-            this.mostrarModal();
+            // Modal deshabilitado - solo registrar
         }
     }
 

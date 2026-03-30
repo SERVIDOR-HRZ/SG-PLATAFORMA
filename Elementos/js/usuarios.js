@@ -233,7 +233,11 @@ function initializePage() {
         manageInsigniasBtn.addEventListener('click', openInsigniasManagement);
     }
 
-    // Logout button manejado por perfil-compartido.js
+    // Logout button
+    const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
+    if (logoutBtnDropdown) {
+        logoutBtnDropdown.addEventListener('click', handleLogout);
+    }
 
     // Export dropdown events
     elements.exportBtn.addEventListener('click', toggleExportMenu);
@@ -2137,14 +2141,6 @@ function showMessage(message, type) {
     console.log(`[${type}] ${message}`);
 }
 
-// Handle logout
-function handleLogout() {
-    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-        sessionStorage.removeItem('currentUser');
-        window.location.href = '../index.html';
-    }
-}
-
 // Export dropdown functions
 function toggleExportMenu(e) {
     e.stopPropagation();
@@ -2382,21 +2378,90 @@ async function exportInsigniasData() {
     }
 }
 
-// Handle logout - Modal de confirmación
+// Show logout confirmation modal
+function showLogoutModal() {
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="panel-modal-overlay" id="panelModalOverlay">
+                <div class="panel-modal">
+                    <div class="panel-modal-body">
+                        <i class="bi bi-exclamation-triangle panel-modal-icon"></i>
+                        <p class="panel-modal-message">¿Estás seguro de que deseas cerrar sesión?</p>
+                        <div class="panel-modal-footer">
+                            <button class="panel-modal-btn panel-btn-cancel" id="panelModalCancel">
+                                <i class="bi bi-x-lg"></i>
+                                No
+                            </button>
+                            <button class="panel-modal-btn panel-btn-confirm" id="panelModalConfirm">
+                                <i class="bi bi-check-lg"></i>
+                                Sí
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const overlay = document.getElementById('panelModalOverlay');
+        const confirmBtn = document.getElementById('panelModalConfirm');
+        const cancelBtn = document.getElementById('panelModalCancel');
+        
+        // Show modal with animation
+        setTimeout(() => {
+            overlay.classList.add('active');
+        }, 10);
+
+        // Handle confirm
+        confirmBtn.addEventListener('click', () => {
+            closeLogoutModal(overlay);
+            resolve(true);
+        });
+
+        // Handle cancel
+        cancelBtn.addEventListener('click', () => {
+            closeLogoutModal(overlay);
+            resolve(false);
+        });
+
+        // Handle overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeLogoutModal(overlay);
+                resolve(false);
+            }
+        });
+
+        // Handle ESC key
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeLogoutModal(overlay);
+                resolve(false);
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+    });
+}
+
+// Close logout modal
+function closeLogoutModal(overlay) {
+    overlay.classList.remove('active');
+    setTimeout(() => {
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+        }
+    }, 300);
+}
+
+// Handle logout
 async function handleLogout() {
-    // Usar la función compartida si existe, si no usar confirm nativo
-    if (typeof showLogoutModal === 'function') {
-        const confirmed = await showLogoutModal();
-        if (confirmed) {
-            sessionStorage.removeItem('currentUser');
-            window.location.href = '../index.html';
-        }
-    } else {
-        const confirmed = confirm('¿Estás seguro de que deseas cerrar sesión?');
-        if (confirmed) {
-            sessionStorage.removeItem('currentUser');
-            window.location.href = '../index.html';
-        }
+    const confirmed = await showLogoutModal();
+    
+    if (confirmed) {
+        sessionStorage.removeItem('currentUser');
+        window.location.href = '../index.html';
     }
 }
 
