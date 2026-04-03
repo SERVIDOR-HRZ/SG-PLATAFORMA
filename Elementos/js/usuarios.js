@@ -4693,6 +4693,28 @@ function initializeAulasManagement() {
     const frecuenciaPago = document.getElementById('aulaFrecuenciaPago');
     const fechaPrimeraCuota = document.getElementById('aulaFechaPrimeraCuota');
 
+    // Mostrar/ocultar campos según número de cuotas
+    function actualizarVisibilidadCuotas() {
+        const n = parseInt(document.getElementById('aulaNumeroCuotas').value) || 1;
+        const grupoCuotaInicial = document.getElementById('grupoCuotaInicial');
+        const grupoFrecuencia = document.getElementById('grupoFrecuenciaPago');
+        const labelFecha = document.getElementById('labelFechaPrimeraCuota');
+        const hintFecha = document.getElementById('hintFechaPrimeraCuota');
+
+        if (n <= 1) {
+            if (grupoCuotaInicial) grupoCuotaInicial.style.display = 'none';
+            if (grupoFrecuencia) grupoFrecuencia.style.display = 'none';
+            if (labelFecha) labelFecha.textContent = 'Fecha Límite de Pago *';
+            if (hintFecha) hintFecha.textContent = 'Fecha límite del pago único';
+        } else {
+            if (grupoCuotaInicial) grupoCuotaInicial.style.display = '';
+            if (grupoFrecuencia) grupoFrecuencia.style.display = '';
+            if (labelFecha) labelFecha.textContent = 'Fecha Límite Primera Cuota *';
+            if (hintFecha) hintFecha.textContent = 'Fecha límite de pago de la primera cuota';
+        }
+        calcularResumenCuotas();
+    }
+
     if (precioTotal) {
         precioTotal.addEventListener('input', function(e) {
             formatearInputMoneda(e.target);
@@ -4718,7 +4740,7 @@ function initializeAulasManagement() {
         });
     }
     if (numeroCuotas) {
-        numeroCuotas.addEventListener('input', calcularResumenCuotas);
+        numeroCuotas.addEventListener('input', actualizarVisibilidadCuotas);
     }
     if (frecuenciaPago) {
         frecuenciaPago.addEventListener('change', calcularResumenCuotas);
@@ -4778,29 +4800,27 @@ function formatearInputMoneda(input) {
 function calcularResumenCuotas() {
     const precioTotalInput = document.getElementById('aulaPrecioTotal');
     const cuotaInicialInput = document.getElementById('aulaCuotaInicial');
-    
     const precioTotal = limpiarFormatoMoneda(precioTotalInput.value);
-    const cuotaInicial = limpiarFormatoMoneda(cuotaInicialInput.value);
     const numeroCuotas = parseInt(document.getElementById('aulaNumeroCuotas').value) || 1;
+    const cuotaInicial = (numeroCuotas > 1 && cuotaInicialInput) ? limpiarFormatoMoneda(cuotaInicialInput.value) : 0;
     const frecuenciaPago = document.getElementById('aulaFrecuenciaPago').value;
     const fechaPrimeraCuota = document.getElementById('aulaFechaPrimeraCuota').value;
-
     const resumenDiv = document.getElementById('cuotasResumen');
     const cuotasDetalleSection = document.getElementById('cuotasDetalleSection');
-    
+    if (numeroCuotas <= 1) {
+        resumenDiv.style.display = 'none';
+        if (cuotasDetalleSection) cuotasDetalleSection.style.display = 'none';
+        return;
+    }
     if (precioTotal > 0) {
-        resumenDiv.style.display = 'block';
-        
         const saldoRestante = precioTotal - cuotaInicial;
         const valorCuota = saldoRestante / numeroCuotas;
-
-        document.getElementById('resumenPrecioTotal').textContent = `$${formatearMoneda(precioTotal)}`;
-        document.getElementById('resumenCuotaInicial').textContent = `$${formatearMoneda(cuotaInicial)}`;
-        document.getElementById('resumenSaldoRestante').textContent = `$${formatearMoneda(saldoRestante)}`;
-        document.getElementById('resumenValorCuota').textContent = `$${formatearMoneda(valorCuota)}`;
+        resumenDiv.style.display = 'block';
+        document.getElementById('resumenPrecioTotal').textContent = formatearMoneda(precioTotal);
+        document.getElementById('resumenCuotaInicial').textContent = formatearMoneda(cuotaInicial);
+        document.getElementById('resumenSaldoRestante').textContent = formatearMoneda(saldoRestante);
+        document.getElementById('resumenValorCuota').textContent = formatearMoneda(valorCuota);
         document.getElementById('resumenNumeroCuotas').textContent = numeroCuotas;
-
-        // Generar detalle de cuotas si hay fecha
         if (fechaPrimeraCuota && numeroCuotas > 0) {
             cuotasDetalleSection.style.display = 'block';
             generarDetalleCuotas(numeroCuotas, valorCuota, fechaPrimeraCuota, frecuenciaPago);
@@ -4809,7 +4829,7 @@ function calcularResumenCuotas() {
         }
     } else {
         resumenDiv.style.display = 'none';
-        cuotasDetalleSection.style.display = 'none';
+        if (cuotasDetalleSection) cuotasDetalleSection.style.display = 'none';
     }
 }
 
@@ -5084,7 +5104,9 @@ function openCreateAulaModal() {
     document.getElementById('aulaFrecuenciaPago').value = 'mensual';
     document.getElementById('aulaFechaPrimeraCuota').value = '';
     document.getElementById('cuotasResumen').style.display = 'none';
-
+    // Ocultar frecuencia por defecto (solo se muestra si hay más de 1 cuota)
+    // Reset visibility based on cuotas count
+    actualizarVisibilidadCuotas();
     // Refresh institucion selector
     populateAulaInstitucionSelector();
 
@@ -5098,6 +5120,27 @@ function openCreateAulaModal() {
 }
 
 // Open Edit Aula Modal
+// Global wrapper so it can be called from openEditAulaModal
+function actualizarVisibilidadCuotas() {
+    const n = parseInt(document.getElementById('aulaNumeroCuotas').value) || 1;
+    const grupoCuotaInicial = document.getElementById('grupoCuotaInicial');
+    const grupoFrecuencia = document.getElementById('grupoFrecuenciaPago');
+    const labelFecha = document.getElementById('labelFechaPrimeraCuota');
+    const hintFecha = document.getElementById('hintFechaPrimeraCuota');
+    if (n <= 1) {
+        if (grupoCuotaInicial) grupoCuotaInicial.style.display = 'none';
+        if (grupoFrecuencia) grupoFrecuencia.style.display = 'none';
+        if (labelFecha) labelFecha.textContent = 'Fecha Limite de Pago *';
+        if (hintFecha) hintFecha.textContent = 'Fecha limite del pago unico';
+    } else {
+        if (grupoCuotaInicial) grupoCuotaInicial.style.display = '';
+        if (grupoFrecuencia) grupoFrecuencia.style.display = '';
+        if (labelFecha) labelFecha.textContent = 'Fecha Limite Primera Cuota *';
+        if (hintFecha) hintFecha.textContent = 'Fecha limite de pago de la primera cuota';
+    }
+    calcularResumenCuotas();
+}
+
 async function openEditAulaModal(aulaId) {
     const aula = allAulas.find(a => a.id === aulaId);
     if (!aula) {
@@ -5134,6 +5177,8 @@ async function openEditAulaModal(aulaId) {
     document.getElementById('aulaFrecuenciaPago').value = aula.frecuenciaPago || 'mensual';
     document.getElementById('aulaFechaPrimeraCuota').value = aula.fechaPrimeraCuota || '';
     
+    // Update field visibility based on cuotas count
+    actualizarVisibilidadCuotas();
     // Calculate and show resumen if there's pricing data
     if (aula.precioTotal) {
         calcularResumenCuotas();

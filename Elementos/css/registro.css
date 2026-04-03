@@ -1047,6 +1047,30 @@
     }
 }
 
+/* Aula Badge (small, inline) */
+.aula-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    background: rgba(255, 193, 7, 0.15);
+    border: 1px solid rgba(255, 193, 7, 0.5);
+    border-radius: 20px;
+    color: #ffc107;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.aula-badge i { font-size: 0.8rem; }
+
+.aula-badge-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 0.25rem;
+}
+
 /* Aula Info Banner */
 .aula-info-banner {
     display: flex;
@@ -1058,6 +1082,7 @@
     border-radius: 12px;
     margin-bottom: 1.5rem;
     backdrop-filter: blur(10px);
+    transition: background 0.3s, border-color 0.3s;
 }
 
 .aula-icon {
@@ -1071,6 +1096,7 @@
     font-size: 1.5rem;
     color: white;
     flex-shrink: 0;
+    transition: background 0.3s;
 }
 
 .aula-details {

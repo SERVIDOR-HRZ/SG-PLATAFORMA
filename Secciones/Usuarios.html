@@ -1654,37 +1654,45 @@
                         <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Define el precio del aula y configura el plan de pagos</p>
                         
                         <div class="form-grid">
+                            <!-- Fila 1: siempre visible -->
                             <div class="input-group">
                                 <label for="aulaPrecioTotal">Precio Total del Aula *</label>
                                 <div class="input-with-icon">
                                     <span class="input-icon">$</span>
-                                    <input type="text" id="aulaPrecioTotal" 
-                                           placeholder="0" required>
+                                    <input type="text" id="aulaPrecioTotal" placeholder="0" required>
                                 </div>
                             </div>
 
                             <div class="input-group">
-                                <label for="aulaCuotaInicial">Cuota Inicial</label>
+                                <label for="aulaNumeroCuotas">Número de Cuotas</label>
+                                <input type="number" id="aulaNumeroCuotas" min="1" max="24" placeholder="1" value="1">
+                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    1 = pago único al registrarse
+                                </small>
+                            </div>
+
+                            <!-- Fecha límite: siempre visible -->
+                            <div class="input-group">
+                                <label for="aulaFechaPrimeraCuota" id="labelFechaPrimeraCuota">Fecha Límite de Pago *</label>
+                                <input type="date" id="aulaFechaPrimeraCuota" required>
+                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;" id="hintFechaPrimeraCuota">
+                                    Fecha límite del pago único
+                                </small>
+                            </div>
+
+                            <!-- Solo visible si cuotas > 1 -->
+                            <div class="input-group" id="grupoCuotaInicial" style="display:none;">
+                                <label for="aulaCuotaInicial">Cuota Inicial (al registrarse)</label>
                                 <div class="input-with-icon">
                                     <span class="input-icon">$</span>
-                                    <input type="text" id="aulaCuotaInicial" 
-                                           placeholder="0">
+                                    <input type="text" id="aulaCuotaInicial" placeholder="0">
                                 </div>
                                 <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">
-                                    Monto que se paga al inscribirse (opcional)
+                                    Dejar en 0 si no hay pago inicial
                                 </small>
                             </div>
 
-                            <div class="input-group">
-                                <label for="aulaNumeroCuotas">Número de Cuotas Restantes</label>
-                                <input type="number" id="aulaNumeroCuotas" min="1" max="24" 
-                                       placeholder="1" value="1">
-                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">
-                                    Cuotas para pagar el saldo restante
-                                </small>
-                            </div>
-
-                            <div class="input-group">
+                            <div class="input-group" id="grupoFrecuenciaPago" style="display:none;">
                                 <label for="aulaFrecuenciaPago">Frecuencia de Pago</label>
                                 <select id="aulaFrecuenciaPago">
                                     <option value="mensual">Mensual</option>
@@ -1693,14 +1701,6 @@
                                     <option value="bimestral">Bimestral</option>
                                     <option value="trimestral">Trimestral</option>
                                 </select>
-                            </div>
-
-                            <div class="input-group">
-                                <label for="aulaFechaPrimeraCuota">Fecha Límite Primera Cuota *</label>
-                                <input type="date" id="aulaFechaPrimeraCuota" required>
-                                <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem;">
-                                    Fecha límite de pago de la primera cuota
-                                </small>
                             </div>
                         </div>
 

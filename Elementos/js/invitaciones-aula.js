@@ -44,7 +44,7 @@ async function openInvitationLinkModal(aulaId, aulaNombre) {
         }
 
         // Generate invitation link
-        const baseUrl = 'https://seamosgenios.org';
+        const baseUrl = window.location.origin;
         const invitationLink = `${baseUrl}/Secciones/registro-aula.html?aula=${aulaId}&codigo=${codigoInvitacion}`;
         invitationLinkText.textContent = invitationLink;
 
