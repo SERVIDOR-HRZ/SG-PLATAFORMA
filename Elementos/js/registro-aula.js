@@ -194,21 +194,53 @@ document.addEventListener('DOMContentLoaded', function () {
     async function verifyInvitationCode() {
         if (!aulaIdParam || !codigoInvitacionParam) {
             showMessage('Enlace de invitación inválido. Redirigiendo...', 'error');
-            setTimeout(() => { window.location.href = 'registro.html'; }, 3000);
+            setTimeout(() => { window.location.href = 'login.html'; }, 3000);
             return false;
         }
         try {
             await waitForFirebase();
+
+            // Buscar el código en la subcolección de links
+            const linksSnap = await window.firebaseDB
+                .collection('aulas').doc(aulaIdParam)
+                .collection('links')
+                .where('codigo', '==', codigoInvitacionParam)
+                .limit(1)
+                .get();
+
+            if (linksSnap.empty) throw new Error('Este enlace de invitación no es válido o fue eliminado');
+
+            const linkDoc = linksSnap.docs[0];
+            const linkData = linkDoc.data();
+
+            if (!linkData.activo) throw new Error('Este enlace ha sido desactivado');
+
+            // Verificar expiración
+            if (linkData.linkExpiracion) {
+                const expMs = linkData.linkExpiracion.toMillis ? linkData.linkExpiracion.toMillis() : new Date(linkData.linkExpiracion).getTime();
+                if (Date.now() > expMs) {
+                    // Marcar como inactivo
+                    await window.firebaseDB.collection('aulas').doc(aulaIdParam).collection('links').doc(linkDoc.id).update({ activo: false });
+                    throw new Error('Este enlace de registro ha expirado');
+                }
+                startLinkCountdown(expMs);
+            }
+
+            // Cargar datos del aula
             const aulaDoc = await window.firebaseDB.collection('aulas').doc(aulaIdParam).get();
             if (!aulaDoc.exists) throw new Error('El aula no existe');
             const aulaData = aulaDoc.data();
-            if (aulaData.codigoInvitacion !== codigoInvitacionParam) throw new Error('Código de invitación inválido');
-            if (!aulaData.invitacionActiva) throw new Error('Este enlace de invitación ha sido desactivado');
 
-            // Store aula data globally
             aulaSeleccionadaData = { id: aulaIdParam, ...aulaData };
 
-            // Show small badge next to document number
+            // Cambiar botón si es link gratis
+            const btnContinuar = document.getElementById('btnContinuarPago');
+            if (linkData.linkGratis && btnContinuar) {
+                btnContinuar.textContent = 'Registrarse';
+                btnContinuar.dataset.modoGratis = 'true';
+            }
+
+            // Badge del aula
             const badge = document.getElementById('aulaBadge');
             const badgeGroup = document.getElementById('aulaBadgeGroup');
             const badgeNombre = document.getElementById('aulaBadgeNombre');
@@ -222,16 +254,53 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (badgeGroup) badgeGroup.style.display = 'block';
             }
 
-            // Set hidden fields
             inputs.aulaId.value = aulaIdParam;
             inputs.codigoInvitacion.value = codigoInvitacionParam;
             return true;
         } catch (error) {
             showMessage(error.message || 'Error al verificar el enlace', 'error');
-            setTimeout(() => { window.location.href = 'registro.html'; }, 3000);
+            setTimeout(() => { window.location.href = 'login.html'; }, 3000);
             return false;
         }
     }
+
+    // Countdown del tiempo restante del link
+    function startLinkCountdown(expMs) {
+        const container = document.getElementById('linkCountdownContainer');
+        const display = document.getElementById('linkCountdownDisplay');
+        if (!container || !display) return;
+        container.style.display = 'flex';
+
+        function update() {
+            const diff = expMs - Date.now();
+            if (diff <= 0) {
+                display.textContent = 'Enlace expirado';
+                container.style.background = 'rgba(255,0,0,0.2)';
+                container.style.borderColor = 'rgba(255,0,0,0.5)';
+                showMessage('Este enlace ha expirado', 'error');
+                setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+                return;
+            }
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            if (h >= 24) {
+                const d = Math.floor(h / 24);
+                display.textContent = `${d}d ${h % 24}h ${m}m`;
+            } else if (h > 0) {
+                display.textContent = `${h}h ${m}m ${s}s`;
+            } else {
+                display.textContent = `${m}m ${s}s`;
+                if (diff < 300000) { // menos de 5 min: rojo
+                    container.style.background = 'rgba(255,0,0,0.2)';
+                    container.style.borderColor = 'rgba(255,0,0,0.5)';
+                }
+            }
+            setTimeout(update, 1000);
+        }
+        update();
+    }
+
     // Store verification promise so btnContinuarPago can await it
     const verificationPromise = verifyInvitationCode();
 
@@ -329,9 +398,15 @@ document.addEventListener('DOMContentLoaded', function () {
             validateSelect('grado'), validateSelect('tipoDocumento'), validateSelect('departamento')
         ];
         if (validations.includes(false)) { showMessage('Por favor corrige los errores en el formulario', 'error'); return; }
-        // Wait for verification to complete if still pending
         await verificationPromise;
         if (!inputs.aulaId.value) { showMessage('Error: No se pudo verificar el aula asignada', 'error'); return; }
+
+        // Si es link gratis, registrar directamente sin pago
+        if (this.dataset.modoGratis === 'true') {
+            await registrarEstudianteGratis();
+            return;
+        }
+
         cargarInformacionAula();
     });
 
@@ -405,6 +480,75 @@ document.addEventListener('DOMContentLoaded', function () {
         const data = await response.json();
         if (!data.success) throw new Error('Error en ImgBB: ' + (data.error?.message || 'desconocido'));
         return data.data.url;
+    }
+
+    // ===== REGISTRO GRATIS (sin pago) =====
+    async function registrarEstudianteGratis() {
+        const btn = document.getElementById('btnContinuarPago');
+        btn.disabled = true;
+        btn.textContent = 'Registrando...';
+        showMessage('Creando cuenta...', 'info');
+
+        try {
+            await waitForFirebase();
+
+            const telefonoCompleto = document.getElementById('telefonoCompleto')?.value || inputs.telefono.value.trim();
+            const nombreCompleto = [
+                inputs.primerNombre.value.trim().toUpperCase(),
+                inputs.segundoNombre.value.trim().toUpperCase(),
+                inputs.primerApellido.value.trim().toUpperCase(),
+                inputs.segundoApellido.value.trim().toUpperCase()
+            ].filter(p => p.length > 0).join(' ');
+
+            const emailVal = inputs.email.value.trim();
+
+            const emailExists = await checkEmailExists(emailVal);
+            if (emailExists) throw new Error('El correo electrónico ya está registrado');
+
+            const documentExists = await checkDocumentExists(inputs.tipoDocumento.value, inputs.numeroDocumento.value.trim());
+            if (documentExists) throw new Error('El documento ya está registrado');
+
+            const recoveryCode = generateRecoveryCode();
+
+            const userData = {
+                email: emailVal,
+                usuario: emailVal,
+                emailRecuperacion: inputs.emailRecuperacion.value.trim(),
+                password: inputs.password.value,
+                primerNombre: inputs.primerNombre.value.trim().toUpperCase(),
+                segundoNombre: inputs.segundoNombre.value.trim().toUpperCase(),
+                primerApellido: inputs.primerApellido.value.trim().toUpperCase(),
+                segundoApellido: inputs.segundoApellido.value.trim().toUpperCase(),
+                nombre: nombreCompleto,
+                telefono: telefonoCompleto,
+                institucion: inputs.institucion.value.trim(),
+                grado: inputs.grado.value,
+                tipoDocumento: inputs.tipoDocumento.value,
+                numeroDocumento: inputs.numeroDocumento.value.trim(),
+                departamento: inputs.departamento.value,
+                aulasAsignadas: [inputs.aulaId.value],
+                tipoUsuario: 'estudiante',
+                codigoRecuperacion: recoveryCode,
+                fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
+                activo: false,
+                estadoPago: 'gratis',
+                metodoPago: null,
+                pagoInicial: 0,
+                valorTotal: 0,
+                numeroCuotas: 0
+            };
+
+            await window.firebaseDB.collection('usuarios').add(userData);
+            await generateCredentialsImage(emailVal, inputs.password.value, recoveryCode, nombreCompleto);
+
+            showMessage('¡Cuenta creada exitosamente! Se descargó una imagen con tus credenciales. Redirigiendo...', 'success');
+            setTimeout(() => { window.location.href = 'login.html'; }, 4000);
+        } catch (error) {
+            console.error('Error creating account:', error);
+            showMessage(error.message || 'Error al crear la cuenta', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Registrarse';
+        }
     }
 
     // ===== FORM SUBMISSION =====

@@ -27,6 +27,13 @@
                 <span id="aulaDescripcionBanner"></span>
             </div>
 
+            <!-- Countdown del link (solo para links con expiración) -->
+            <div id="linkCountdownContainer" style="display:none; align-items:center; gap:10px; padding:10px 16px; background:rgba(255,193,7,0.15); border:1px solid rgba(255,193,7,0.4); border-radius:10px; margin-bottom:16px;">
+                <i class="bi bi-clock" style="color:#ffc107; font-size:1.2rem;"></i>
+                <span style="color:rgba(255,255,255,0.9); font-size:0.9rem;">Tiempo restante del enlace:</span>
+                <span id="linkCountdownDisplay" style="color:#ffc107; font-weight:700; font-size:1rem; font-variant-numeric:tabular-nums;"></span>
+            </div>
+
             <form id="registerForm" class="form">
                 <!-- Sección 1: Datos del estudiante -->
                 <div id="seccionDatos" class="seccion-registro">

@@ -52,10 +52,6 @@
         margin-bottom: 0;
     }
     
-    .seccion-registro {
-        display: block;
-    }
-    
     .input-group {
         margin-bottom: 20px;
     }
@@ -505,10 +501,6 @@
     .register-form {
         max-width: 100%;
         padding: 30px 20px;
-    }
-    
-    .seccion-registro {
-        display: block !important;
     }
     
     .input-group {

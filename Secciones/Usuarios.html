@@ -2018,7 +2018,48 @@
                 </button>
             </div>
             <div class="modal-body invitation-link-content">
-                <div class="invitation-link-box">
+
+                <!-- Tipo de enlace -->
+                <div class="link-type-selector">
+                    <label style="font-weight:600; color:#333; margin-bottom:8px; display:block;">Tipo de Enlace</label>
+                    <div class="link-type-options">
+                        <label class="link-type-option" id="optionConPago">
+                            <input type="radio" name="tipoEnlace" value="pago" checked>
+                            <div class="link-type-content">
+                                <i class="bi bi-credit-card-fill"></i>
+                                <span>Con Pago</span>
+                                <small>Requiere comprobante</small>
+                            </div>
+                        </label>
+                        <label class="link-type-option" id="optionGratis">
+                            <input type="radio" name="tipoEnlace" value="gratis">
+                            <div class="link-type-content">
+                                <i class="bi bi-gift-fill"></i>
+                                <span>Gratis</span>
+                                <small>Sin pago, con expiración</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Configuración de expiración (solo para gratis) -->
+                <div class="expiracion-config" id="expiracionConfig" style="display:none;">
+                    <label style="font-weight:600; color:#333; margin-bottom:8px; display:block;"><i class="bi bi-clock"></i> Tiempo de Expiración</label>
+                    <div class="expiracion-controls">
+                        <input type="number" id="expiracionValor" min="1" value="24" style="width:80px; padding:8px; border:1px solid #ddd; border-radius:8px; font-size:1rem;">
+                        <select id="expiracionUnidad" style="padding:8px 12px; border:1px solid #ddd; border-radius:8px; font-size:1rem;">
+                            <option value="minutos">Minutos</option>
+                            <option value="horas" selected>Horas</option>
+                            <option value="dias">Días</option>
+                            <option value="indefinido">Indefinido</option>
+                        </select>
+                    </div>
+                    <div class="expiracion-info" id="expiracionInfoActual" style="display:none; margin-top:8px; padding:8px 12px; background:#fff3cd; border-radius:8px; font-size:0.85rem; color:#856404;">
+                        <i class="bi bi-clock-history"></i> <span id="expiracionTextoActual"></span>
+                    </div>
+                </div>
+
+                <div class="invitation-link-box" id="invitationLinkBox" style="display:none;">
                     <label class="invitation-link-label">Enlace de Registro para: <strong id="invitationAulaName"></strong></label>
                     <div class="invitation-link-display">
                         <span class="invitation-link-text" id="invitationLinkText">Generando enlace...</span>
@@ -2027,33 +2068,31 @@
                             Copiar
                         </button>
                     </div>
-                    <div class="invitation-status active" id="invitationStatus">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <span>Enlace Activo</span>
-                    </div>
-                </div>
-
-                <div class="invitation-qr-section">
-                    <h4 style="margin-bottom: 1rem; color: #333;">Código QR</h4>
-                    <div class="invitation-qr-code" id="invitationQRCode">
-                        <!-- QR code will be generated here -->
-                    </div>
                 </div>
 
                 <div class="invitation-info">
                     <p><i class="bi bi-info-circle-fill"></i> Comparte este enlace con los estudiantes para que se registren directamente en esta aula. Los estudiantes registrados con este enlace serán activados automáticamente.</p>
                 </div>
 
-                <div class="invitation-actions">
-                    <button class="download-qr-btn" id="downloadQRBtn">
-                        <i class="bi bi-download"></i>
-                        Descargar QR
-                    </button>
-                    <button class="toggle-invitation-btn active" id="toggleInvitationBtn">
-                        <i class="bi bi-toggle-on"></i>
-                        <span id="toggleInvitationText">Desactivar Enlace</span>
-                    </button>
+                <!-- Lista de links activos -->
+                <div class="links-activos-section">
+                    <label style="font-weight:600; color:#333; font-size:0.9rem; margin-bottom:6px; display:block;"><i class="bi bi-list-check"></i> Links Activos</label>
+                    <div id="linksActivosList"></div>
                 </div>
+
+                <!-- QR oculto solo para descarga -->
+                <div id="hiddenQRContainer" style="display:none;"></div>
+
+            </div>
+            <div class="modal-footer invitation-footer">
+                <button class="download-qr-btn" id="downloadQRBtn">
+                    <i class="bi bi-download"></i>
+                    Descargar QR
+                </button>
+                <button class="generate-link-btn" id="generateLinkBtn">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Generar Enlace
+                </button>
             </div>
         </div>
     </div>

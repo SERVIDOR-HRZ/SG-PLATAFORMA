@@ -9231,11 +9231,48 @@ sure forms don't interfere with modal layout */
 /* Invitation Link Modal */
 .invitation-link-modal {
     max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.invitation-link-modal .modal-header {
+    flex-shrink: 0;
 }
 
 .invitation-link-content {
     padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
 }
+
+.invitation-footer {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: flex-end;
+    padding: 0.75rem 1.5rem;
+    border-top: 1px solid #e0e0e0;
+    background: #fff;
+    flex-shrink: 0;
+    border-radius: 0 0 12px 12px;
+}
+
+.generate-link-btn {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #fff;
+    border: none;
+    padding: 0.65rem 1.4rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: opacity 0.2s;
+}
+
+.generate-link-btn:hover { opacity: 0.85; }
 
 .invitation-link-box {
     background: #f8f9fa;
@@ -9258,39 +9295,43 @@ sure forms don't interfere with modal layout */
     align-items: center;
     gap: 0.75rem;
     background: white;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     border-radius: 6px;
     border: 1px solid #dee2e6;
     margin-bottom: 1rem;
+    overflow: hidden;
 }
 
 .invitation-link-text {
     flex: 1;
     font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #333;
-    word-break: break-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     user-select: all;
+    min-width: 0;
 }
 
 .copy-link-btn {
-    padding: 0.5rem 1rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 0.4rem 0.85rem;
+    background: #1a1a2e;
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
     flex-shrink: 0;
+    font-weight: 600;
 }
 
 .copy-link-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    background: #cc0000;
 }
 
 .copy-link-btn.copied {
@@ -9304,25 +9345,21 @@ sure forms don't interfere with modal layout */
 
 .invitation-qr-code {
     display: inline-block;
-    padding: 1rem;
+    padding: 0.6rem;
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.invitation-qr-code canvas {
+.invitation-qr-code canvas,
+.invitation-qr-code img {
     display: block;
-}
-
-.invitation-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
+    width: 120px !important;
+    height: 120px !important;
 }
 
 .download-qr-btn {
-    flex: 1;
-    padding: 0.75rem;
+    padding: 0.65rem 1.4rem;
     background: linear-gradient(135deg, #28a745, #20c997);
     color: white;
     border: none;
@@ -9331,30 +9368,28 @@ sure forms don't interfere with modal layout */
     font-size: 0.95rem;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+    font-weight: 600;
 }
 
 .download-qr-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    opacity: 0.88;
 }
 
 .toggle-invitation-btn {
-    flex: 1;
-    padding: 0.75rem;
+    padding: 0.45rem 0.9rem;
     background: linear-gradient(135deg, #dc3545, #c82333);
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+    font-weight: 600;
 }
 
 .toggle-invitation-btn.active {
@@ -9362,8 +9397,7 @@ sure forms don't interfere with modal layout */
 }
 
 .toggle-invitation-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    opacity: 0.88;
 }
 
 .invitation-info {
@@ -9520,3 +9554,167 @@ sure forms don't interfere with modal layout */
     background: #cc0000;
     transform: translateY(-2px);
 }
+
+/* Link type selector */
+.link-type-selector {
+    margin-bottom: 16px;
+}
+
+.link-type-options {
+    display: flex;
+    gap: 12px;
+}
+
+.link-type-option {
+    flex: 1;
+    cursor: pointer;
+}
+
+.link-type-option input[type="radio"] {
+    display: none;
+}
+
+.link-type-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 10px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.link-type-content i {
+    font-size: 1.4rem;
+    color: #666;
+}
+
+.link-type-content span {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.link-type-content small {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.link-type-option input[type="radio"]:checked + .link-type-content {
+    border-color: #1a1a2e;
+    background: #1a1a2e;
+}
+
+.link-type-option input[type="radio"]:checked + .link-type-content i,
+.link-type-option input[type="radio"]:checked + .link-type-content span,
+.link-type-option input[type="radio"]:checked + .link-type-content small {
+    color: #fff;
+}
+
+/* Expiracion config */
+.expiracion-config {
+    margin-bottom: 16px;
+    padding: 14px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+}
+
+.expiracion-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+/* Generate link button */
+.generate-link-btn:hover {
+    opacity: 0.85;
+}
+
+/* Links activos section */
+.links-activos-section {
+    margin-top: 1rem;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.link-activo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #e8e8e8;
+    margin-bottom: 6px;
+    gap: 8px;
+}
+
+.link-activo-row:last-child { margin-bottom: 0; }
+
+.link-activo-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.link-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.link-badge.gratis { background: #d4edda; color: #155724; }
+.link-badge.pago   { background: #cce5ff; color: #004085; }
+
+.link-activo-exp {
+    font-size: 0.78rem;
+    color: #666;
+    white-space: nowrap;
+}
+
+.link-activo-codigo {
+    font-family: monospace;
+    font-size: 0.78rem;
+    color: #999;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100px;
+}
+
+.link-activo-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.btn-copy-link-row,
+.btn-dl-qr-row,
+.btn-del-link-row {
+    border: none;
+    border-radius: 5px;
+    padding: 4px 7px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: opacity 0.2s;
+}
+
+.btn-copy-link-row { background: #1a1a2e; color: #fff; }
+.btn-dl-qr-row     { background: #28a745; color: #fff; }
+.btn-del-link-row  { background: #dc3545; color: #fff; }
+
+.btn-copy-link-row:hover,
+.btn-dl-qr-row:hover,
+.btn-del-link-row:hover { opacity: 0.8; }

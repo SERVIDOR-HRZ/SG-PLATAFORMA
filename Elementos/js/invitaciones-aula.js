@@ -1,216 +1,283 @@
-// Invitation Link Management for Classrooms
+// Invitation Link Management — múltiples links por aula via subcolección
+// Estructura Firebase: aulas/{aulaId}/links/{linkId}
+// Campos: codigo, linkGratis, linkExpiracion (null=indefinido), activo, creadoEn
+
 let currentInvitationAulaId = null;
 let currentQRCode = null;
+let currentLinkId = null; // ID del último link generado (para descarga QR)
 
-// Generate unique invitation code
 function generateInvitationCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
-    for (let i = 0; i < 12; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    for (let i = 0; i < 12; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
     return result;
 }
 
-// Open invitation link modal
+function getExpiracionMs() {
+    const valor = parseInt(document.getElementById('expiracionValor').value) || 24;
+    const unidad = document.getElementById('expiracionUnidad').value;
+    if (unidad === 'indefinido') return null;
+    const map = { minutos: 60 * 1000, horas: 60 * 60 * 1000, dias: 24 * 60 * 60 * 1000 };
+    return valor * (map[unidad] || map.horas);
+}
+
+function formatExpiracion(timestamp) {
+    if (!timestamp) return 'Indefinido';
+    const exp = timestamp.toMillis ? timestamp.toMillis() : new Date(timestamp).getTime();
+    const diff = exp - Date.now();
+    if (diff <= 0) return 'Expirado';
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    if (h >= 24) return `Expira en ${Math.floor(h / 24)}d ${h % 24}h`;
+    if (h > 0) return `Expira en ${h}h ${m}m`;
+    return `Expira en ${m}m`;
+}
+
+function buildLink(aulaId, codigo) {
+    return `${window.location.origin}/Secciones/registro-aula.html?aula=${aulaId}&codigo=${codigo}`;
+}
+
+// ── Abrir modal ──────────────────────────────────────────────────────────────
 async function openInvitationLinkModal(aulaId, aulaNombre) {
     const modal = document.getElementById('invitationLinkModal');
-    const invitationAulaName = document.getElementById('invitationAulaName');
-    const invitationLinkText = document.getElementById('invitationLinkText');
-    const invitationStatus = document.getElementById('invitationStatus');
-    const toggleInvitationBtn = document.getElementById('toggleInvitationBtn');
-    const toggleInvitationText = document.getElementById('toggleInvitationText');
-    const qrCodeContainer = document.getElementById('invitationQRCode');
-
     currentInvitationAulaId = aulaId;
-    invitationAulaName.textContent = aulaNombre;
-
-    try {
-        // Get or create invitation code
-        const aulaDoc = await window.firebaseDB.collection('aulas').doc(aulaId).get();
-        const aulaData = aulaDoc.data();
-
-        let codigoInvitacion = aulaData.codigoInvitacion;
-        let invitacionActiva = aulaData.invitacionActiva !== false; // Default true
-
-        // If no invitation code exists, create one
-        if (!codigoInvitacion) {
-            codigoInvitacion = generateInvitationCode();
-            await window.firebaseDB.collection('aulas').doc(aulaId).update({
-                codigoInvitacion: codigoInvitacion,
-                invitacionActiva: true
-            });
-            invitacionActiva = true;
-        }
-
-        // Generate invitation link
-        const baseUrl = window.location.origin;
-        const invitationLink = `${baseUrl}/Secciones/registro-aula.html?aula=${aulaId}&codigo=${codigoInvitacion}`;
-        invitationLinkText.textContent = invitationLink;
-
-        // Update status
-        if (invitacionActiva) {
-            invitationStatus.className = 'invitation-status active';
-            invitationStatus.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>Enlace Activo</span>';
-            toggleInvitationBtn.className = 'toggle-invitation-btn active';
-            toggleInvitationBtn.innerHTML = '<i class="bi bi-toggle-on"></i><span id="toggleInvitationText">Desactivar Enlace</span>';
-        } else {
-            invitationStatus.className = 'invitation-status inactive';
-            invitationStatus.innerHTML = '<i class="bi bi-x-circle-fill"></i><span>Enlace Inactivo</span>';
-            toggleInvitationBtn.className = 'toggle-invitation-btn';
-            toggleInvitationBtn.innerHTML = '<i class="bi bi-toggle-off"></i><span id="toggleInvitationText">Activar Enlace</span>';
-        }
-
-        // Generate QR Code
-        qrCodeContainer.innerHTML = '';
-        currentQRCode = new QRCode(qrCodeContainer, {
-            text: invitationLink,
-            width: 200,
-            height: 200,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-
-        modal.style.display = 'flex';
-    } catch (error) {
-        console.error('Error opening invitation modal:', error);
-        showMessage('Error al generar el enlace de invitación', 'error');
-    }
-}
-
-// Close invitation link modal
-function closeInvitationLinkModal() {
-    const modal = document.getElementById('invitationLinkModal');
-    modal.style.display = 'none';
-    currentInvitationAulaId = null;
+    currentLinkId = null;
     currentQRCode = null;
+
+    document.getElementById('invitationAulaName').textContent = aulaNombre;
+    document.getElementById('invitationLinkBox').style.display = 'none';
+    document.getElementById('invitationLinkText').textContent = '';
+    document.getElementById('hiddenQRContainer').innerHTML = '';
+    document.getElementById('expiracionInfoActual').style.display = 'none';
+    document.getElementById('linksActivosList').innerHTML = '';
+
+    // Reset tipo a "pago" por defecto
+    document.querySelector('input[name="tipoEnlace"][value="pago"]').checked = true;
+    document.getElementById('expiracionConfig').style.display = 'none';
+
+    modal.style.display = 'flex';
+
+    // Cargar links activos existentes
+    await loadLinksActivos(aulaId);
 }
 
-// Copy invitation link to clipboard
-async function copyInvitationLink() {
-    const invitationLinkText = document.getElementById('invitationLinkText');
-    const copyBtn = document.getElementById('copyInvitationLinkBtn');
-    const link = invitationLinkText.textContent;
+// ── Cargar lista de links activos ────────────────────────────────────────────
+async function loadLinksActivos(aulaId) {
+    const container = document.getElementById('linksActivosList');
+    container.innerHTML = '<p style="color:#888;font-size:0.85rem;">Cargando links...</p>';
 
     try {
-        await navigator.clipboard.writeText(link);
-        
-        // Update button
-        copyBtn.classList.add('copied');
-        copyBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i>Copiado';
-        
-        showMessage('Enlace copiado al portapapeles', 'success');
+        const snap = await window.firebaseDB
+            .collection('aulas').doc(aulaId)
+            .collection('links')
+            .where('activo', '==', true)
+            .get();
 
-        setTimeout(() => {
-            copyBtn.classList.remove('copied');
-            copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>Copiar';
-        }, 2000);
-    } catch (error) {
-        console.error('Error copying link:', error);
-        showMessage('Error al copiar el enlace', 'error');
-    }
-}
+        const now = Date.now();
+        const validos = [];
+        const expirados = [];
 
-// Toggle invitation link active/inactive
-async function toggleInvitationLink() {
-    if (!currentInvitationAulaId) return;
-
-    try {
-        const aulaDoc = await window.firebaseDB.collection('aulas').doc(currentInvitationAulaId).get();
-        const aulaData = aulaDoc.data();
-        const currentStatus = aulaData.invitacionActiva !== false;
-        const newStatus = !currentStatus;
-
-        await window.firebaseDB.collection('aulas').doc(currentInvitationAulaId).update({
-            invitacionActiva: newStatus
+        snap.forEach(doc => {
+            const d = doc.data();
+            const expMs = d.linkExpiracion ? (d.linkExpiracion.toMillis ? d.linkExpiracion.toMillis() : new Date(d.linkExpiracion).getTime()) : null;
+            if (expMs && expMs < now) {
+                expirados.push(doc.id);
+            } else {
+                validos.push({ id: doc.id, ...d, expMs });
+            }
         });
 
-        const invitationStatus = document.getElementById('invitationStatus');
-        const toggleInvitationBtn = document.getElementById('toggleInvitationBtn');
+        // Desactivar expirados en Firebase silenciosamente
+        expirados.forEach(id => {
+            window.firebaseDB.collection('aulas').doc(aulaId).collection('links').doc(id).update({ activo: false });
+        });
 
-        if (newStatus) {
-            invitationStatus.className = 'invitation-status active';
-            invitationStatus.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>Enlace Activo</span>';
-            toggleInvitationBtn.className = 'toggle-invitation-btn active';
-            toggleInvitationBtn.innerHTML = '<i class="bi bi-toggle-on"></i><span>Desactivar Enlace</span>';
-            showMessage('Enlace de invitación activado', 'success');
-        } else {
-            invitationStatus.className = 'invitation-status inactive';
-            invitationStatus.innerHTML = '<i class="bi bi-x-circle-fill"></i><span>Enlace Inactivo</span>';
-            toggleInvitationBtn.className = 'toggle-invitation-btn';
-            toggleInvitationBtn.innerHTML = '<i class="bi bi-toggle-off"></i><span>Activar Enlace</span>';
-            showMessage('Enlace de invitación desactivado', 'success');
-        }
-    } catch (error) {
-        console.error('Error toggling invitation:', error);
-        showMessage('Error al cambiar el estado del enlace', 'error');
-    }
-}
-
-// Download QR code
-function downloadQRCode() {
-    if (!currentQRCode) return;
-
-    try {
-        const qrCodeContainer = document.getElementById('invitationQRCode');
-        const canvas = qrCodeContainer.querySelector('canvas');
-        
-        if (!canvas) {
-            showMessage('Error: No se pudo encontrar el código QR', 'error');
+        if (validos.length === 0) {
+            container.innerHTML = '<p style="color:#aaa;font-size:0.82rem;text-align:center;">No hay links activos</p>';
             return;
         }
 
-        // Create download link
-        const link = document.createElement('a');
-        link.download = `qr-invitacion-aula-${currentInvitationAulaId}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-
-        showMessage('Código QR descargado', 'success');
+        container.innerHTML = '';
+        validos.forEach(link => {
+            const row = document.createElement('div');
+            row.className = 'link-activo-row';
+            const expText = link.expMs ? formatExpiracion(link.linkExpiracion) : 'Indefinido';
+            const tipo = link.linkGratis ? '<span class="link-badge gratis">Gratis</span>' : '<span class="link-badge pago">Con Pago</span>';
+            const url = buildLink(aulaId, link.codigo);
+            row.innerHTML = `
+                <div class="link-activo-info">
+                    ${tipo}
+                    <span class="link-activo-exp"><i class="bi bi-clock"></i> ${expText}</span>
+                    <span class="link-activo-codigo" title="${url}">${link.codigo}</span>
+                </div>
+                <div class="link-activo-actions">
+                    <button class="btn-copy-link-row" title="Copiar" onclick="copyLinkRow('${url}')"><i class="bi bi-clipboard"></i></button>
+                    <button class="btn-dl-qr-row" title="Descargar QR" onclick="downloadQRRow('${url}', '${link.id}')"><i class="bi bi-qr-code"></i></button>
+                    <button class="btn-del-link-row" title="Eliminar" onclick="deleteLinkRow('${aulaId}', '${link.id}')"><i class="bi bi-trash"></i></button>
+                </div>`;
+            container.appendChild(row);
+        });
     } catch (error) {
-        console.error('Error downloading QR:', error);
-        showMessage('Error al descargar el código QR', 'error');
+        console.error('Error loading links:', error);
+        container.innerHTML = '<p style="color:#e74c3c;font-size:0.82rem;">Error al cargar links</p>';
     }
 }
 
-// Initialize event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Close modal button
-    const closeInvitationBtn = document.getElementById('closeInvitationLinkModal');
-    if (closeInvitationBtn) {
-        closeInvitationBtn.addEventListener('click', closeInvitationLinkModal);
-    }
+// ── Acciones de fila ─────────────────────────────────────────────────────────
+async function copyLinkRow(url) {
+    try {
+        await navigator.clipboard.writeText(url);
+        showMessage('Enlace copiado', 'success');
+    } catch { showMessage('Error al copiar', 'error'); }
+}
 
-    // Copy link button
-    const copyLinkBtn = document.getElementById('copyInvitationLinkBtn');
-    if (copyLinkBtn) {
-        copyLinkBtn.addEventListener('click', copyInvitationLink);
-    }
+function downloadQRRow(url, linkId) {
+    const tmp = document.createElement('div');
+    tmp.style.display = 'none';
+    document.body.appendChild(tmp);
+    const qr = new QRCode(tmp, { text: url, width: 200, height: 200, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.H });
+    setTimeout(() => {
+        const canvas = tmp.querySelector('canvas');
+        if (canvas) {
+            const a = document.createElement('a');
+            a.download = `qr-link-${linkId}.png`;
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        }
+        document.body.removeChild(tmp);
+        showMessage('QR descargado', 'success');
+    }, 300);
+}
 
-    // Toggle invitation button
-    const toggleBtn = document.getElementById('toggleInvitationBtn');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', toggleInvitationLink);
-    }
+async function deleteLinkRow(aulaId, linkId) {
+    try {
+        await window.firebaseDB.collection('aulas').doc(aulaId).collection('links').doc(linkId).update({ activo: false });
+        showMessage('Link eliminado', 'success');
+        await loadLinksActivos(aulaId);
+    } catch { showMessage('Error al eliminar', 'error'); }
+}
 
-    // Download QR button
-    const downloadQRBtn = document.getElementById('downloadQRBtn');
-    if (downloadQRBtn) {
-        downloadQRBtn.addEventListener('click', downloadQRCode);
-    }
+// ── Generar nuevo link ───────────────────────────────────────────────────────
+async function generateNewLink() {
+    if (!currentInvitationAulaId) return;
 
-    // Close modal on outside click
-    const modal = document.getElementById('invitationLinkModal');
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeInvitationLinkModal();
-            }
+    const esGratis = document.querySelector('input[name="tipoEnlace"]:checked').value === 'gratis';
+    const expMs = esGratis ? getExpiracionMs() : null;
+    const codigo = generateInvitationCode();
+
+    const linkData = {
+        codigo,
+        linkGratis: esGratis,
+        linkExpiracion: expMs ? new Date(Date.now() + expMs) : null,
+        activo: true,
+        creadoEn: new Date()
+    };
+
+    try {
+        const ref = await window.firebaseDB
+            .collection('aulas').doc(currentInvitationAulaId)
+            .collection('links').add(linkData);
+
+        currentLinkId = ref.id;
+        const url = buildLink(currentInvitationAulaId, codigo);
+
+        // Mostrar el link generado
+        document.getElementById('invitationLinkText').textContent = url;
+        document.getElementById('invitationLinkBox').style.display = 'block';
+
+        // QR oculto para descarga
+        const hiddenQR = document.getElementById('hiddenQRContainer');
+        hiddenQR.innerHTML = '';
+        currentQRCode = new QRCode(hiddenQR, { text: url, width: 200, height: 200, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.H });
+
+        // Info expiración
+        const infoEl = document.getElementById('expiracionInfoActual');
+        const textoEl = document.getElementById('expiracionTextoActual');
+        if (esGratis) {
+            infoEl.style.display = 'block';
+            textoEl.textContent = expMs ? formatExpiracion({ toMillis: () => Date.now() + expMs }) : 'Sin expiración (indefinido)';
+        } else {
+            infoEl.style.display = 'none';
+        }
+
+        showMessage('Enlace generado correctamente', 'success');
+        await loadLinksActivos(currentInvitationAulaId);
+    } catch (error) {
+        console.error('Error generating link:', error);
+        showMessage('Error al generar el enlace', 'error');
+    }
+}
+
+// ── Copiar link actual ───────────────────────────────────────────────────────
+async function copyInvitationLink() {
+    const link = document.getElementById('invitationLinkText').textContent;
+    if (!link) return;
+    const copyBtn = document.getElementById('copyInvitationLinkBtn');
+    try {
+        await navigator.clipboard.writeText(link);
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i>Copiado';
+        showMessage('Enlace copiado', 'success');
+        setTimeout(() => { copyBtn.classList.remove('copied'); copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>Copiar'; }, 2000);
+    } catch { showMessage('Error al copiar', 'error'); }
+}
+
+// ── Descargar QR del link actual ─────────────────────────────────────────────
+function downloadQRCode() {
+    if (!currentQRCode) { showMessage('Primero genera un enlace', 'error'); return; }
+    const canvas = document.getElementById('hiddenQRContainer').querySelector('canvas');
+    if (!canvas) { showMessage('Genera el enlace primero', 'error'); return; }
+    const a = document.createElement('a');
+    a.download = `qr-${currentLinkId || 'link'}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    showMessage('QR descargado', 'success');
+}
+
+// ── Cerrar modal ─────────────────────────────────────────────────────────────
+function closeInvitationLinkModal() {
+    document.getElementById('invitationLinkModal').style.display = 'none';
+    document.getElementById('invitationLinkBox').style.display = 'none';
+    document.getElementById('hiddenQRContainer').innerHTML = '';
+    currentInvitationAulaId = null;
+    currentQRCode = null;
+    currentLinkId = null;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    const closeBtn = document.getElementById('closeInvitationLinkModal');
+    if (closeBtn) closeBtn.addEventListener('click', closeInvitationLinkModal);
+
+    const copyBtn = document.getElementById('copyInvitationLinkBtn');
+    if (copyBtn) copyBtn.addEventListener('click', copyInvitationLink);
+
+    const downloadBtn = document.getElementById('downloadQRBtn');
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadQRCode);
+
+    const generateBtn = document.getElementById('generateLinkBtn');
+    if (generateBtn) generateBtn.addEventListener('click', generateNewLink);
+
+    document.querySelectorAll('input[name="tipoEnlace"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            document.getElementById('expiracionConfig').style.display = this.value === 'gratis' ? 'block' : 'none';
+        });
+    });
+
+    const expUnidad = document.getElementById('expiracionUnidad');
+    const expValor = document.getElementById('expiracionValor');
+    if (expUnidad && expValor) {
+        expUnidad.addEventListener('change', function () {
+            expValor.style.display = this.value === 'indefinido' ? 'none' : 'inline-block';
         });
     }
+
+    const modal = document.getElementById('invitationLinkModal');
+    if (modal) modal.addEventListener('click', e => { if (e.target === modal) closeInvitationLinkModal(); });
 });
 
-// Export functions for use in usuarios.js
 window.openInvitationLinkModal = openInvitationLinkModal;
 window.closeInvitationLinkModal = closeInvitationLinkModal;
+window.copyLinkRow = copyLinkRow;
+window.downloadQRRow = downloadQRRow;
+window.deleteLinkRow = deleteLinkRow;
