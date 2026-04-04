@@ -2192,10 +2192,12 @@ async function loadNotas() {
         // Obtener color de la materia
         const materiaColor = window.currentMateriaColor || '#2196F3';
 
-        // Obtener todas las tareas de la materia actual
-        const tareasSnapshot = await db.collection('tareas')
-            .where('materia', '==', currentMateria)
-            .get();
+        // Obtener todas las tareas de la materia actual (filtrando por aula si aplica)
+        let tareasQuery = db.collection('tareas').where('materia', '==', currentMateria);
+        if (currentAulaId) {
+            tareasQuery = tareasQuery.where('aulaId', '==', currentAulaId);
+        }
+        const tareasSnapshot = await tareasQuery.get();
 
         if (tareasSnapshot.empty) {
             notasContainer.innerHTML = `
