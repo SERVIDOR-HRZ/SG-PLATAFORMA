@@ -9403,6 +9403,88 @@ function abrirModalImportarAsistencia(claseId) {
     document.getElementById('importarAsistenciaNombreArchivo').textContent = '';
 
     modal.classList.add('active');
+
+    // Inicializar drag & drop en el dropzone
+    inicializarDragDropImportacion();
+}
+
+/**
+ * Inicializa los eventos drag & drop en el dropzone del modal de importación.
+ */
+function inicializarDragDropImportacion() {
+    const dropzone = document.getElementById('importarDropzone');
+    if (!dropzone) return;
+
+    // Clonar y reemplazar para quitar listeners anteriores
+    const nuevoDropzone = dropzone.cloneNode(true);
+    dropzone.parentNode.replaceChild(nuevoDropzone, dropzone);
+
+    // Prevenir comportamiento por defecto en toda la ventana al estar el modal abierto
+    const preventDefaults = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    nuevoDropzone.addEventListener('dragenter', (e) => {
+        preventDefaults(e);
+        nuevoDropzone.classList.add('drag-active');
+    });
+
+    nuevoDropzone.addEventListener('dragover', (e) => {
+        preventDefaults(e);
+        nuevoDropzone.classList.add('drag-active');
+        e.dataTransfer.dropEffect = 'copy';
+    });
+
+    nuevoDropzone.addEventListener('dragleave', (e) => {
+        preventDefaults(e);
+        // Solo quitar la clase si el cursor salió completamente del dropzone
+        if (!nuevoDropzone.contains(e.relatedTarget)) {
+            nuevoDropzone.classList.remove('drag-active');
+        }
+    });
+
+    nuevoDropzone.addEventListener('drop', (e) => {
+        preventDefaults(e);
+        nuevoDropzone.classList.remove('drag-active');
+
+        const archivos = e.dataTransfer.files;
+        if (!archivos || archivos.length === 0) return;
+
+        const archivo = archivos[0];
+        const ext = archivo.name.toLowerCase();
+
+        // Validar extensión
+        if (!ext.endsWith('.xlsx') && !ext.endsWith('.xls') && !ext.endsWith('.csv')) {
+            const statusEl = document.getElementById('importarAsistenciaStatus');
+            if (statusEl) {
+                statusEl.textContent = '⚠️ Formato no válido. Solo se aceptan archivos .xlsx, .xls o .csv';
+                statusEl.className = 'importar-status error';
+            }
+            return;
+        }
+
+        // Asignar el archivo al input y procesar
+        const fileInput = document.getElementById('importarAsistenciaFileInput');
+        if (fileInput) {
+            // Crear un DataTransfer para asignar el archivo al input
+            try {
+                const dt = new DataTransfer();
+                dt.items.add(archivo);
+                fileInput.files = dt.files;
+            } catch (err) {
+                console.warn('DataTransfer no soportado, procesando directamente:', err);
+            }
+        }
+
+        // Procesar el archivo directamente
+        procesarArchivoDesdeBlob(archivo);
+    });
+
+    // El click abre el selector de archivos (reemplazamos el onclick del HTML original)
+    nuevoDropzone.addEventListener('click', () => {
+        document.getElementById('importarAsistenciaFileInput').click();
+    });
 }
 
 /**
@@ -9430,6 +9512,148 @@ function cargarSheetJS() {
         script.onerror = () => reject(new Error('No se pudo cargar SheetJS'));
         document.head.appendChild(script);
     });
+}
+
+/**
+ * Procesa un archivo recibido directamente (por drag & drop) sin el input element.
+ */
+async function procesarArchivoDesdeBlob(archivo) {
+    const statusEl = document.getElementById('importarAsistenciaStatus');
+    const previewEl = document.getElementById('importarAsistenciaPreview');
+    const btnConfirmar = document.getElementById('btnConfirmarImportacion');
+    const nombreArchivoEl = document.getElementById('importarAsistenciaNombreArchivo');
+
+    nombreArchivoEl.textContent = archivo.name;
+    statusEl.textContent = 'Cargando archivo...';
+    statusEl.className = 'importar-status loading';
+    previewEl.style.display = 'none';
+    btnConfirmar.style.display = 'none';
+
+    try {
+        await cargarSheetJS();
+        const filas = await leerArchivoAsistencia(archivo);
+        if (!filas || filas.length === 0) {
+            statusEl.textContent = 'El archivo está vacío o no tiene datos válidos.';
+            statusEl.className = 'importar-status error';
+            return;
+        }
+
+        const { colNombre, colApellido, colDuracion } = detectarColumnas(filas[0]);
+
+        if (!colNombre || !colDuracion) {
+            statusEl.textContent = 'No se encontraron las columnas "Nombre" y "Duración" en el archivo.';
+            statusEl.className = 'importar-status error';
+            return;
+        }
+
+        await esperarFirebase();
+        const db = window.firebaseDB;
+        const estudiantesSnapshot = await db.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        const estudiantesDelAula = [];
+        estudiantesSnapshot.forEach(doc => {
+            const est = { id: doc.id, ...doc.data() };
+            const aulas = est.aulasAsignadas || est.aulas || [];
+            let pertenece = false;
+            if (Array.isArray(aulas)) {
+                pertenece = aulas.some(a => {
+                    if (typeof a === 'object' && a.aulaId) return a.aulaId === currentAulaId;
+                    return a === currentAulaId;
+                });
+            }
+            if (pertenece) estudiantesDelAula.push(est);
+        });
+
+        const resultados = [];
+        const MIN_MINUTOS = 60;
+
+        for (const fila of filas) {
+            const nombreExcel = String(fila[colNombre] || '').trim();
+            const apellidoExcel = colApellido ? String(fila[colApellido] || '').trim() : '';
+            const duracionStr = String(fila[colDuracion] || '').trim();
+
+            if (!nombreExcel && !apellidoExcel) continue;
+
+            const minutos = parsearDuracionAMinutos(duracionStr);
+            const asistio = minutos >= MIN_MINUTOS;
+            const matchResult = encontrarEstudiante(nombreExcel, apellidoExcel, estudiantesDelAula);
+
+            resultados.push({
+                nombreExcel: [nombreExcel, apellidoExcel].filter(Boolean).join(' '),
+                duracionStr,
+                minutos,
+                asistio,
+                estudianteId: matchResult ? matchResult.estudiante.id : null,
+                estudianteNombre: matchResult ? matchResult.estudiante.nombre : null,
+                score: matchResult ? matchResult.score : 0,
+                matchFound: !!matchResult
+            });
+        }
+
+        if (resultados.length === 0) {
+            statusEl.textContent = 'No se encontraron datos de asistencia en el archivo.';
+            statusEl.className = 'importar-status error';
+            return;
+        }
+
+        importarAsistenciaPreviewData = { resultados, estudiantesDelAula };
+
+        const conMatch = resultados.filter(r => r.matchFound).length;
+        const sinMatch = resultados.filter(r => !r.matchFound).length;
+        const asistidos = resultados.filter(r => r.matchFound && r.asistio).length;
+        const ausentes = resultados.filter(r => r.matchFound && !r.asistio).length;
+
+        statusEl.textContent = `✓ Archivo procesado: ${conMatch} estudiantes identificados, ${sinMatch} sin coincidencia.`;
+        statusEl.className = 'importar-status success';
+
+        let previewHTML = `
+            <div class="importar-resumen-stats">
+                <span class="imp-stat asistidos"><i class="bi bi-check-circle-fill"></i> ${asistidos} asistirán</span>
+                <span class="imp-stat ausentes"><i class="bi bi-x-circle-fill"></i> ${ausentes} ausentes</span>
+                <span class="imp-stat sin-match"><i class="bi bi-question-circle-fill"></i> ${sinMatch} sin identificar</span>
+            </div>
+            <div class="importar-tabla-container">
+            <table class="importar-tabla">
+                <thead>
+                    <tr>
+                        <th>Nombre en archivo</th>
+                        <th>Duración</th>
+                        <th>Estado</th>
+                        <th>Estudiante en plataforma</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        for (const r of resultados) {
+            const estadoClass = !r.matchFound ? 'sin-match' : (r.asistio ? 'asistido' : 'ausente-imp');
+            const estadoIcon = !r.matchFound ? '<i class="bi bi-question-circle-fill"></i>' : (r.asistio ? '<i class="bi bi-check-circle-fill"></i>' : '<i class="bi bi-x-circle-fill"></i>');
+            const estadoTexto = !r.matchFound ? 'Sin identificar' : (r.asistio ? `Asistió (${r.minutos} min)` : `Ausente (${r.minutos} min)`);
+            const estudianteTexto = r.matchFound ? r.estudianteNombre : '<span class="no-match">— no encontrado —</span>';
+
+            previewHTML += `
+                <tr class="imp-fila ${estadoClass}">
+                    <td class="nombre-excel">${r.nombreExcel}</td>
+                    <td class="duracion">${r.duracionStr}</td>
+                    <td class="estado-imp">${estadoIcon} ${estadoTexto}</td>
+                    <td class="estudiante-plataforma">${estudianteTexto}</td>
+                </tr>`;
+        }
+
+        previewHTML += `</tbody></table></div>`;
+        previewEl.innerHTML = previewHTML;
+        previewEl.style.display = 'block';
+
+        if (conMatch > 0) {
+            btnConfirmar.style.display = 'block';
+        }
+
+    } catch (err) {
+        console.error('Error procesando archivo de asistencia (drag & drop):', err);
+        statusEl.textContent = `Error: ${err.message}`;
+        statusEl.className = 'importar-status error';
+    }
 }
 
 /**
