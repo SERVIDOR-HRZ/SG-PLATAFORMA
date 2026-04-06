@@ -1349,6 +1349,88 @@
         </div>
     </div>
 
+    <!-- Modal Importar Asistencia desde Archivo -->
+    <div class="modal importar-asistencia-modal" id="importarAsistenciaModal">
+        <div class="modal-content modal-content-large importar-asistencia-content">
+            <div class="modal-header importar-asistencia-header">
+                <div class="importar-header-icon">
+                    <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                </div>
+                <div>
+                    <h3>Importar Asistencia desde Archivo</h3>
+                    <p class="importar-subtitle">Sube el reporte de asistencia de Google Meet, Teams, Zoom u otro sistema.</p>
+                </div>
+                <button class="close-btn" onclick="cerrarModalImportarAsistencia()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body importar-asistencia-body">
+
+                <!-- Zona de carga -->
+                <div class="importar-dropzone" id="importarDropzone" onclick="document.getElementById('importarAsistenciaFileInput').click()">
+                    <div class="importar-dropzone-icon">
+                        <i class="bi bi-cloud-upload-fill"></i>
+                    </div>
+                    <p class="importar-dropzone-title">Haz clic o arrastra tu archivo aquí</p>
+                    <p class="importar-dropzone-subtitle">Formatos: Excel (.xlsx, .xls), CSV (.csv)</p>
+                    <p class="importar-dropzone-regla">
+                        <i class="bi bi-info-circle"></i>
+                        Regla: se marca como <strong>Asistió</strong> si la duración es
+                        <strong>mayor a 59 minutos</strong>
+                    </p>
+                    <input type="file"
+                           id="importarAsistenciaFileInput"
+                           accept=".xlsx,.xls,.csv"
+                           style="display:none"
+                           onchange="procesarArchivoImportacion(this)">
+                </div>
+
+                <!-- Nombre del archivo seleccionado -->
+                <div class="importar-archivo-nombre" id="importarAsistenciaNombreArchivo"></div>
+
+                <!-- Status / mensajes -->
+                <div class="importar-status" id="importarAsistenciaStatus"></div>
+
+                <!-- Instrucciones de columnas -->
+                <div class="importar-instrucciones">
+                    <h4><i class="bi bi-table"></i> Columnas reconocidas automáticamente</h4>
+                    <div class="importar-cols-grid">
+                        <div class="importar-col-item">
+                            <i class="bi bi-person"></i>
+                            <span><strong>Nombre</strong> — primera columna del participante</span>
+                        </div>
+                        <div class="importar-col-item">
+                            <i class="bi bi-person-badge"></i>
+                            <span><strong>Apellido</strong> — columna apellido (si existe separada)</span>
+                        </div>
+                        <div class="importar-col-item">
+                            <i class="bi bi-clock-history"></i>
+                            <span><strong>Duración</strong> — tiempo en clase (ej: "1 h 47 min", "57 min")</span>
+                        </div>
+                    </div>
+                    <p class="importar-match-nota">
+                        <i class="bi bi-link-45deg"></i>
+                        La coincidencia se hace comparando <strong>apellidos y nombres</strong> sin importar mayúsculas, minúsculas ni tildes.
+                    </p>
+                </div>
+
+                <!-- Preview de resultados -->
+                <div class="importar-preview" id="importarAsistenciaPreview" style="display:none"></div>
+
+                <!-- Botones de acción -->
+                <div class="importar-acciones">
+                    <button class="cancel-btn" onclick="cerrarModalImportarAsistencia()">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button class="btn-confirmar-importacion submit-btn" id="btnConfirmarImportacion"
+                            style="display:none" onclick="confirmarImportacionAsistencia()">
+                        <i class="bi bi-check-circle-fill"></i> Confirmar e Importar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>

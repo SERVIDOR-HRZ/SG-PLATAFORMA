@@ -8598,6 +8598,14 @@ function renderClaseAsistencia(clase, estudiantesDelAula, asistenciaMap, esAdmin
                             <i class="bi bi-x-lg"></i>
                             Todos ausentes
                         </button>
+                        <button class="btn-importar-asistencia" onclick="abrirModalImportarAsistencia('${clase.id}')" title="Importar asistencia desde archivo Excel/CSV de Google Meet o Teams" ${!claseEnCurso && !claseYaPaso ? 'disabled' : ''}>
+                            <i class="bi bi-file-earmark-spreadsheet"></i>
+                            Importar desde archivo
+                        </button>
+                        <button class="btn-limpiar-asistencia" onclick="limpiarAsistenciaClase('${clase.id}')" title="Elimina todos los registros de asistencia de esta clase">
+                            <i class="bi bi-trash3"></i>
+                            Limpiar asistencia
+                        </button>
                     </div>
                 </div>
                 <div class="estudiantes-asistencia-list" data-clase-id="${clase.id}">
@@ -9086,3 +9094,595 @@ function actualizarEstiloEstudiante(claseId, estudianteId, presente) {
         }
     }
 }
+
+
+// ============ LIMPIAR ASISTENCIA ============
+
+/**
+ * Elimina TODOS los registros de asistencia de una clase específica.
+ * Pide confirmación antes de proceder.
+ */
+function limpiarAsistenciaClase(claseId) {
+    // Confirmación con el modal interno del sistema
+    showConfirmModal(
+        'Limpiar asistencia',
+        '¿Estás seguro? Esto eliminará TODOS los registros de asistencia de esta clase. Esta acción no se puede deshacer.',
+        () => _ejecutarLimpiezaAsistencia(claseId)
+    );
+}
+
+async function _ejecutarLimpiezaAsistencia(claseId) {
+    // Deshabilitar botón para evitar doble clic
+    const btnLimpiar = document.querySelector(
+        `.clase-asistencia-card[data-clase-id="${claseId}"] .btn-limpiar-asistencia`
+    );
+    if (btnLimpiar) {
+        btnLimpiar.disabled = true;
+        btnLimpiar.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Limpiando...';
+    }
+
+    // Efecto visual en la card
+    const card = document.querySelector(`.clase-asistencia-card[data-clase-id="${claseId}"]`);
+    if (card) {
+        card.style.opacity = '0.6';
+        card.style.pointerEvents = 'none';
+    }
+
+    try {
+        const db = window.firebaseDB;
+
+        // Obtener todos los registros de asistencia de esta clase
+        const snapshot = await db.collection('asistencia')
+            .where('claseId', '==', claseId)
+            .where('aulaId', '==', currentAulaId)
+            .where('materia', '==', currentMateria)
+            .get();
+
+        if (snapshot.empty) {
+            showAlertModal('Sin registros', 'Esta clase no tiene registros de asistencia para limpiar.');
+            return;
+        }
+
+        // Eliminar en batch
+        const batch = db.batch();
+        snapshot.forEach(doc => {
+            batch.delete(db.collection('asistencia').doc(doc.id));
+        });
+        await batch.commit();
+
+        // Actualizar la UI: poner todos los estudiantes en "pendiente"
+        const lista = document.querySelector(`.estudiantes-asistencia-list[data-clase-id="${claseId}"]`);
+        if (lista) {
+            const items = lista.querySelectorAll('.estudiante-asistencia-item');
+            items.forEach(item => {
+                item.classList.remove('presente', 'ausente');
+                item.classList.add('pendiente');
+
+                // Resetear botones
+                const btnPres = item.querySelector('.btn-asistencia.presente');
+                const btnAus = item.querySelector('.btn-asistencia.ausente');
+                if (btnPres) {
+                    btnPres.classList.remove('active');
+                    const iconP = btnPres.querySelector('i');
+                    if (iconP) iconP.className = 'bi bi-check-circle';
+                }
+                if (btnAus) {
+                    btnAus.classList.remove('active');
+                    const iconA = btnAus.querySelector('i');
+                    if (iconA) iconA.className = 'bi bi-x-circle';
+                }
+
+                // Limpiar el data-asistencia-id del contenedor de acciones
+                const actions = item.querySelector('.asistencia-actions');
+                if (actions) actions.setAttribute('data-asistencia-id', '');
+            });
+        }
+
+        // Actualizar contadores
+        actualizarContadoresClase(claseId);
+
+        // Notificar éxito con el modal del sistema
+        showAlertModal('Asistencia limpiada', `Se eliminaron ${snapshot.size} registros. La clase quedó sin datos de asistencia.`);
+
+    } catch (error) {
+        console.error('Error al limpiar asistencia:', error);
+        showAlertModal('Error', 'No se pudo limpiar la asistencia. Intenta nuevamente.');
+    } finally {
+        // Restaurar UI
+        if (card) {
+            card.style.opacity = '1';
+            card.style.pointerEvents = 'all';
+        }
+        if (btnLimpiar) {
+            btnLimpiar.disabled = false;
+            btnLimpiar.innerHTML = '<i class="bi bi-trash3"></i> Limpiar asistencia';
+        }
+    }
+}
+
+
+// ============ IMPORTACIÓN AUTOMÁTICA DE ASISTENCIA POR ARCHIVO ============
+
+/**
+ * Parsea la cadena de duración de Google Meet/Teams a minutos totales.
+ * Formatos: "1 h 47 min", "57 min", "51 s", "2 h", "2 h 9 min"
+ */
+function parsearDuracionAMinutos(duracionStr) {
+    if (!duracionStr || typeof duracionStr !== 'string') return 0;
+    const str = duracionStr.trim().toLowerCase();
+    let totalMinutos = 0;
+
+    // Horas
+    const horasMatch = str.match(/(\d+)\s*h/);
+    if (horasMatch) totalMinutos += parseInt(horasMatch[1]) * 60;
+
+    // Minutos
+    const minMatch = str.match(/(\d+)\s*min/);
+    if (minMatch) totalMinutos += parseInt(minMatch[1]);
+
+    // Solo segundos (si no hay horas ni minutos)
+    if (!horasMatch && !minMatch) {
+        const segMatch = str.match(/(\d+)\s*s/);
+        if (segMatch) totalMinutos = 0; // segundos → 0 minutos (menos de 1 min)
+    }
+
+    return totalMinutos;
+}
+
+/**
+ * Normaliza un texto: quita tildes, espacios extras, y pasa a minúsculas.
+ */
+function normalizarTexto(texto) {
+    if (!texto) return '';
+    return texto
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // quitar tildes
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+/**
+ * Extrae tokens de búsqueda de un nombre completo del Excel.
+ * Maneja prefijos como "SG -", "SG-", etc.
+ */
+function extraerTokensNombre(nombreExcel, apellidoExcel) {
+    let texto = '';
+    if (apellidoExcel) {
+        texto += ' ' + apellidoExcel;
+    }
+    if (nombreExcel) {
+        // Quitar prefijos de plataforma como "SG -", "SG-", "PREINTENSIVO"
+        const nombreLimpio = nombreExcel.replace(/^(sg\s*[-–]?\s*|preintensivo\s*)/i, '').trim();
+        texto += ' ' + nombreLimpio;
+    }
+    return normalizarTexto(texto).split(' ').filter(t => t.length > 1);
+}
+
+/**
+ * Calcula un score de coincidencia entre tokens del Excel y del estudiante de plataforma.
+ * Retorna un número entre 0 y 1 (1 = coincidencia perfecta).
+ */
+function calcularScoreCoincidencia(tokensExcel, estudiante) {
+    const nombreCompleto = normalizarTexto((estudiante.nombre || '') + ' ' + (estudiante.apellido || ''));
+    const tokensEstudiante = nombreCompleto.split(' ').filter(t => t.length > 1);
+
+    if (tokensExcel.length === 0 || tokensEstudiante.length === 0) return 0;
+
+    let coincidencias = 0;
+    for (const te of tokensExcel) {
+        for (const ts of tokensEstudiante) {
+            if (te === ts) {
+                coincidencias++;
+                break;
+            }
+            // Coincidencia parcial: uno contiene al otro (al menos 4 chars)
+            if (te.length >= 4 && ts.length >= 4 && (te.includes(ts) || ts.includes(te))) {
+                coincidencias += 0.7;
+                break;
+            }
+        }
+    }
+
+    const total = Math.max(tokensExcel.length, tokensEstudiante.length);
+    return coincidencias / total;
+}
+
+/**
+ * Hace el matching entre una fila del Excel y la lista de estudiantes del aula.
+ * Retorna el estudiante más probable (score >= 0.4) o null.
+ */
+function encontrarEstudiante(nombreExcel, apellidoExcel, estudiantesDelAula) {
+    const tokens = extraerTokensNombre(nombreExcel, apellidoExcel);
+    if (tokens.length === 0) return null;
+
+    let mejorMatch = null;
+    let mejorScore = 0;
+
+    for (const estudiante of estudiantesDelAula) {
+        const score = calcularScoreCoincidencia(tokens, estudiante);
+        if (score > mejorScore) {
+            mejorScore = score;
+            mejorMatch = estudiante;
+        }
+    }
+
+    // Requiere al menos 40% de coincidencia
+    return mejorScore >= 0.4 ? { estudiante: mejorMatch, score: mejorScore } : null;
+}
+
+/**
+ * Lee el archivo Excel o CSV y retorna un array de filas como objetos.
+ */
+async function leerArchivoAsistencia(archivo) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        const esCSV = archivo.name.toLowerCase().endsWith('.csv');
+
+        reader.onload = (e) => {
+            try {
+                const datos = e.target.result;
+
+                if (!window.XLSX) {
+                    reject(new Error('Librería XLSX no disponible'));
+                    return;
+                }
+
+                const workbook = window.XLSX.read(datos, { type: esCSV ? 'string' : 'array' });
+                const primerHoja = workbook.Sheets[workbook.SheetNames[0]];
+                const filas = window.XLSX.utils.sheet_to_json(primerHoja, { defval: '' });
+
+                // Normalizar claves (quitar espacios, tildes)
+                const filasNormalizadas = filas.map(fila => {
+                    const obj = {};
+                    for (const key of Object.keys(fila)) {
+                        const keyNorm = normalizarTexto(key);
+                        obj[keyNorm] = fila[key];
+                    }
+                    return obj;
+                });
+
+                resolve(filasNormalizadas);
+            } catch (err) {
+                reject(err);
+            }
+        };
+
+        reader.onerror = () => reject(new Error('Error leyendo el archivo'));
+
+        if (esCSV) {
+            reader.readAsText(archivo, 'UTF-8');
+        } else {
+            reader.readAsArrayBuffer(archivo);
+        }
+    });
+}
+
+/**
+ * Detecta en qué columna están los datos necesarios.
+ * El Excel de Google Meet tiene: Nombre, Apellido, Correo, Duración, Hora a la que se unió, Hora a la que abandonó
+ */
+function detectarColumnas(fila) {
+    const keys = Object.keys(fila);
+    let colNombre = null, colApellido = null, colDuracion = null;
+
+    for (const key of keys) {
+        const k = key.toLowerCase();
+        if (k.includes('nombre') && !k.includes('apellido')) colNombre = key;
+        if (k.includes('apellido') || k.includes('last')) colApellido = key;
+        if (k.includes('duracion') || k.includes('duration') || k.includes('duree')) colDuracion = key;
+    }
+
+    // Fallback: si no hay apellido separado, intentar con la primera columna de nombre
+    if (!colNombre && keys.length > 0) colNombre = keys[0];
+    if (!colDuracion && keys.length > 3) colDuracion = keys[3];
+
+    return { colNombre, colApellido, colDuracion };
+}
+
+// Variable global para el import
+let importarAsistenciaClaseId = null;
+let importarAsistenciaPreviewData = null;
+
+/**
+ * Abre el modal de importación de asistencia para una clase.
+ */
+function abrirModalImportarAsistencia(claseId) {
+    importarAsistenciaClaseId = claseId;
+    importarAsistenciaPreviewData = null;
+
+    const modal = document.getElementById('importarAsistenciaModal');
+    if (!modal) return;
+
+    // Limpiar estado
+    document.getElementById('importarAsistenciaFileInput').value = '';
+    document.getElementById('importarAsistenciaPreview').innerHTML = '';
+    document.getElementById('importarAsistenciaPreview').style.display = 'none';
+    document.getElementById('btnConfirmarImportacion').style.display = 'none';
+    document.getElementById('importarAsistenciaStatus').textContent = '';
+    document.getElementById('importarAsistenciaNombreArchivo').textContent = '';
+
+    modal.classList.add('active');
+}
+
+/**
+ * Cierra el modal de importación.
+ */
+function cerrarModalImportarAsistencia() {
+    const modal = document.getElementById('importarAsistenciaModal');
+    if (modal) modal.classList.remove('active');
+    importarAsistenciaClaseId = null;
+    importarAsistenciaPreviewData = null;
+}
+
+/**
+ * Carga la librería SheetJS si no está disponible.
+ */
+function cargarSheetJS() {
+    return new Promise((resolve, reject) => {
+        if (window.XLSX) {
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js';
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('No se pudo cargar SheetJS'));
+        document.head.appendChild(script);
+    });
+}
+
+/**
+ * Procesa el archivo seleccionado y muestra el preview.
+ */
+async function procesarArchivoImportacion(inputElement) {
+    const archivo = inputElement.files[0];
+    if (!archivo) return;
+
+    const statusEl = document.getElementById('importarAsistenciaStatus');
+    const previewEl = document.getElementById('importarAsistenciaPreview');
+    const btnConfirmar = document.getElementById('btnConfirmarImportacion');
+    const nombreArchivoEl = document.getElementById('importarAsistenciaNombreArchivo');
+
+    nombreArchivoEl.textContent = archivo.name;
+    statusEl.textContent = 'Cargando archivo...';
+    statusEl.className = 'importar-status loading';
+    previewEl.style.display = 'none';
+    btnConfirmar.style.display = 'none';
+
+    try {
+        // Cargar SheetJS
+        await cargarSheetJS();
+
+        // Leer archivo
+        const filas = await leerArchivoAsistencia(archivo);
+        if (!filas || filas.length === 0) {
+            statusEl.textContent = 'El archivo está vacío o no tiene datos válidos.';
+            statusEl.className = 'importar-status error';
+            return;
+        }
+
+        // Detectar columnas
+        const { colNombre, colApellido, colDuracion } = detectarColumnas(filas[0]);
+
+        if (!colNombre || !colDuracion) {
+            statusEl.textContent = 'No se encontraron las columnas "Nombre" y "Duración" en el archivo.';
+            statusEl.className = 'importar-status error';
+            return;
+        }
+
+        // Obtener estudiantes del aula
+        await esperarFirebase();
+        const db = window.firebaseDB;
+        const estudiantesSnapshot = await db.collection('usuarios')
+            .where('tipoUsuario', '==', 'estudiante')
+            .get();
+
+        const estudiantesDelAula = [];
+        estudiantesSnapshot.forEach(doc => {
+            const est = { id: doc.id, ...doc.data() };
+            const aulas = est.aulasAsignadas || est.aulas || [];
+            let pertenece = false;
+            if (Array.isArray(aulas)) {
+                pertenece = aulas.some(a => {
+                    if (typeof a === 'object' && a.aulaId) return a.aulaId === currentAulaId;
+                    return a === currentAulaId;
+                });
+            }
+            if (pertenece) estudiantesDelAula.push(est);
+        });
+
+        // Procesar cada fila del Excel
+        const resultados = [];
+        const MIN_MINUTOS = 60; // más de 59 minutos = asistido
+
+        for (const fila of filas) {
+            const nombreExcel = String(fila[colNombre] || '').trim();
+            const apellidoExcel = colApellido ? String(fila[colApellido] || '').trim() : '';
+            const duracionStr = String(fila[colDuracion] || '').trim();
+
+            if (!nombreExcel && !apellidoExcel) continue;
+
+            const minutos = parsearDuracionAMinutos(duracionStr);
+            const asistio = minutos >= MIN_MINUTOS;
+
+            const matchResult = encontrarEstudiante(nombreExcel, apellidoExcel, estudiantesDelAula);
+
+            resultados.push({
+                nombreExcel: [nombreExcel, apellidoExcel].filter(Boolean).join(' '),
+                duracionStr,
+                minutos,
+                asistio,
+                estudianteId: matchResult ? matchResult.estudiante.id : null,
+                estudianteNombre: matchResult ? matchResult.estudiante.nombre : null,
+                score: matchResult ? matchResult.score : 0,
+                matchFound: !!matchResult
+            });
+        }
+
+        if (resultados.length === 0) {
+            statusEl.textContent = 'No se encontraron datos de asistencia en el archivo.';
+            statusEl.className = 'importar-status error';
+            return;
+        }
+
+        // Guardar para confirmar
+        importarAsistenciaPreviewData = { resultados, estudiantesDelAula };
+
+        // Calcular resumen
+        const conMatch = resultados.filter(r => r.matchFound).length;
+        const sinMatch = resultados.filter(r => !r.matchFound).length;
+        const asistidos = resultados.filter(r => r.matchFound && r.asistio).length;
+        const ausentes = resultados.filter(r => r.matchFound && !r.asistio).length;
+
+        statusEl.textContent = `✓ Archivo procesado: ${conMatch} estudiantes identificados, ${sinMatch} sin coincidencia.`;
+        statusEl.className = 'importar-status success';
+
+        // Renderizar preview
+        let previewHTML = `
+            <div class="importar-resumen-stats">
+                <span class="imp-stat asistidos"><i class="bi bi-check-circle-fill"></i> ${asistidos} asistirán</span>
+                <span class="imp-stat ausentes"><i class="bi bi-x-circle-fill"></i> ${ausentes} ausentes</span>
+                <span class="imp-stat sin-match"><i class="bi bi-question-circle-fill"></i> ${sinMatch} sin identificar</span>
+            </div>
+            <div class="importar-tabla-container">
+            <table class="importar-tabla">
+                <thead>
+                    <tr>
+                        <th>Nombre en archivo</th>
+                        <th>Duración</th>
+                        <th>Estado</th>
+                        <th>Estudiante en plataforma</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        for (const r of resultados) {
+            const estadoClass = !r.matchFound ? 'sin-match' : (r.asistio ? 'asistido' : 'ausente-imp');
+            const estadoIcon = !r.matchFound ? '<i class="bi bi-question-circle-fill"></i>' : (r.asistio ? '<i class="bi bi-check-circle-fill"></i>' : '<i class="bi bi-x-circle-fill"></i>');
+            const estadoTexto = !r.matchFound ? 'Sin identificar' : (r.asistio ? `Asistió (${r.minutos} min)` : `Ausente (${r.minutos} min)`);
+            const estudianteTexto = r.matchFound ? r.estudianteNombre : '<span class="no-match">— no encontrado —</span>';
+
+            previewHTML += `
+                <tr class="imp-fila ${estadoClass}">
+                    <td class="nombre-excel">${r.nombreExcel}</td>
+                    <td class="duracion">${r.duracionStr}</td>
+                    <td class="estado-imp">${estadoIcon} ${estadoTexto}</td>
+                    <td class="estudiante-plataforma">${estudianteTexto}</td>
+                </tr>`;
+        }
+
+        previewHTML += `</tbody></table></div>`;
+
+        previewEl.innerHTML = previewHTML;
+        previewEl.style.display = 'block';
+
+        if (conMatch > 0) {
+            btnConfirmar.style.display = 'block';
+        }
+
+    } catch (err) {
+        console.error('Error procesando archivo de asistencia:', err);
+        statusEl.textContent = `Error: ${err.message}`;
+        statusEl.className = 'importar-status error';
+    }
+}
+
+/**
+ * Confirma y guarda la asistencia importada en Firestore.
+ */
+async function confirmarImportacionAsistencia() {
+    if (!importarAsistenciaPreviewData || !importarAsistenciaClaseId) return;
+
+    const btnConfirmar = document.getElementById('btnConfirmarImportacion');
+    const statusEl = document.getElementById('importarAsistenciaStatus');
+
+    btnConfirmar.disabled = true;
+    btnConfirmar.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Guardando...';
+    statusEl.textContent = 'Guardando asistencia en Firebase...';
+    statusEl.className = 'importar-status loading';
+
+    try {
+        const db = window.firebaseDB;
+        const { resultados } = importarAsistenciaPreviewData;
+
+        // Solo procesar los que tienen match
+        const conMatch = resultados.filter(r => r.matchFound);
+
+        if (conMatch.length === 0) {
+            statusEl.textContent = 'No hay estudiantes identificados para guardar.';
+            statusEl.className = 'importar-status error';
+            btnConfirmar.disabled = false;
+            btnConfirmar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Confirmar e Importar';
+            return;
+        }
+
+        // Verificar si ya hay registros de asistencia para esta clase
+        const existentesSnap = await db.collection('asistencia')
+            .where('claseId', '==', importarAsistenciaClaseId)
+            .where('aulaId', '==', currentAulaId)
+            .where('materia', '==', currentMateria)
+            .get();
+
+        const existentesMap = new Map();
+        existentesSnap.forEach(doc => {
+            existentesMap.set(doc.data().estudianteId, { id: doc.id, ...doc.data() });
+        });
+
+        // Usar batch para eficiencia
+        const batch = db.batch();
+        let guardados = 0;
+
+        for (const r of conMatch) {
+            const existente = existentesMap.get(r.estudianteId);
+            const data = {
+                claseId: importarAsistenciaClaseId,
+                estudianteId: r.estudianteId,
+                aulaId: currentAulaId,
+                materia: currentMateria,
+                presente: r.asistio,
+                fechaRegistro: firebase.firestore.Timestamp.now(),
+                registradoPor: currentUser.id,
+                importadoDeArchivo: true,
+                duracionMinutos: r.minutos
+            };
+
+            if (existente) {
+                // Actualizar existente
+                const ref = db.collection('asistencia').doc(existente.id);
+                batch.update(ref, {
+                    presente: r.asistio,
+                    fechaRegistro: data.fechaRegistro,
+                    registradoPor: data.registradoPor,
+                    importadoDeArchivo: true,
+                    duracionMinutos: r.minutos
+                });
+            } else {
+                // Crear nuevo
+                const ref = db.collection('asistencia').doc();
+                batch.set(ref, data);
+            }
+            guardados++;
+        }
+
+        await batch.commit();
+
+        statusEl.textContent = `✓ Asistencia guardada exitosamente para ${guardados} estudiantes.`;
+        statusEl.className = 'importar-status success';
+        btnConfirmar.style.display = 'none';
+
+        // Recargar asistencia después de 1.5 segundos y cerrar modal
+        setTimeout(() => {
+            cerrarModalImportarAsistencia();
+            loadAsistencia();
+        }, 1800);
+
+    } catch (err) {
+        console.error('Error guardando asistencia importada:', err);
+        statusEl.textContent = `Error al guardar: ${err.message}`;
+        statusEl.className = 'importar-status error';
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Confirmar e Importar';
+    }
+}
+
