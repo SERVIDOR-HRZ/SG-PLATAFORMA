@@ -481,7 +481,16 @@ function renderStudentTests() {
         filteredTests = filteredTests.filter(test => {
             const [year, month, day] = test.fechaDisponible.split('-').map(Number);
             const testDate = new Date(year, month - 1, day);
-            const isToday = testDate.toDateString() === now.toDateString();
+            testDate.setHours(0, 0, 0, 0);
+
+            const endDateStr = test.fechaFin || test.fechaDisponible;
+            const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+            const testEndDate = new Date(endYear, endMonth - 1, endDay);
+            testEndDate.setHours(23, 59, 59, 999);
+
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            // isToday: hoy está dentro del rango de disponibilidad
+            const isToday = todayStart >= testDate && now <= testEndDate;
             const currentTime = now.getHours() * 60 + now.getMinutes();
             
             // Verificar si tiene bloques completados
@@ -495,7 +504,8 @@ function renderStudentTests() {
                 return allBlocksCompleted;
             } else if (statusFilter === 'available') {
                 if (allBlocksCompleted) return false;
-                if (testDate > now) return false;
+                if (todayStart < testDate) return false; // aún no empieza
+                if (now > testEndDate) return false; // ya venció
                 
                 // Verificar si hay algún bloque disponible ahora
                 if (isToday) {
@@ -526,12 +536,12 @@ function renderStudentTests() {
                 return false;
             } else if (statusFilter === 'pending') {
                 if (allBlocksCompleted) return false;
-                return testDate > now || (isToday && !hasCompletedBlocks);
+                return todayStart < testDate || (isToday && !hasCompletedBlocks);
             } else if (statusFilter === 'expired') {
                 if (allBlocksCompleted) return false;
                 
-                // Verificar si todos los bloques han expirado
-                if (testDate < now && !isToday) return true;
+                // Fuera del rango de fechas → vencida
+                if (now > testEndDate) return true;
                 
                 if (isToday) {
                     let allExpired = true;
@@ -599,27 +609,40 @@ function createStudentTestCard(test) {
     const now = new Date();
     const [year, month, day] = test.fechaDisponible.split('-').map(Number);
     const testDate = new Date(year, month - 1, day);
+    testDate.setHours(0, 0, 0, 0);
+
+    // Fecha de fin: usar fechaFin si existe, sino usar fechaDisponible como único día
+    const endDateStr = test.fechaFin || test.fechaDisponible;
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    const testEndDate = new Date(endYear, endMonth - 1, endDay);
+    testEndDate.setHours(23, 59, 59, 999); // Incluir todo el día de fin
+
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
     let status = 'available';
     let statusText = 'Disponible';
     let statusClass = 'status-available';
 
-    if (testDate > now) {
+    if (todayStart < testDate) {
         status = 'pending';
         statusText = 'Próximamente';
         statusClass = 'status-pending';
+    } else if (now > testEndDate) {
+        status = 'expired';
+        statusText = 'Vencida';
+        statusClass = 'status-expired';
     }
 
-    // Format date
-    const formattedDate = testDate.toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    // Format date — mostrar rango si hay fecha de fin diferente
+    const formatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = test.fechaFin && test.fechaFin !== test.fechaDisponible
+        ? `Del ${testDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} al ${testEndDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`
+        : testDate.toLocaleDateString('es-ES', formatOptions);
 
     // Check block availability and completion status
     const currentTime = now.getHours() * 60 + now.getMinutes();
-    const isToday = testDate.toDateString() === now.toDateString();
+    // isToday: hoy está dentro del rango de disponibilidad [fechaDisponible, fechaFin]
+    const isToday = todayStart >= testDate && now <= testEndDate;
     
     // Block 1 status
     let block1Status = 'unavailable';
@@ -780,12 +803,20 @@ function startTest(testId) {
         return;
     }
 
-    // Check if test is available today
+    // Check if test is available today (dentro del rango fechaDisponible - fechaFin)
     const now = new Date();
     const [year, month, day] = test.fechaDisponible.split('-').map(Number);
     const testDate = new Date(year, month - 1, day);
-    
-    if (testDate.toDateString() !== now.toDateString()) {
+    testDate.setHours(0, 0, 0, 0);
+
+    const endDateStr = test.fechaFin || test.fechaDisponible;
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    const testEndDate = new Date(endYear, endMonth - 1, endDay);
+    testEndDate.setHours(23, 59, 59, 999);
+
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (todayStart < testDate || now > testEndDate) {
         showNotification('La prueba no está disponible hoy', 'warning');
         return;
     }
