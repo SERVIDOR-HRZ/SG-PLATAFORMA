@@ -9493,6 +9493,36 @@ function inicializarDragDropImportacion() {
 function cerrarModalImportarAsistencia() {
     const modal = document.getElementById('importarAsistenciaModal');
     if (modal) modal.classList.remove('active');
+    
+    // Limpiar completamente el estado del modal
+    const fileInput = document.getElementById('importarAsistenciaFileInput');
+    if (fileInput) fileInput.value = '';
+    
+    const preview = document.getElementById('importarAsistenciaPreview');
+    if (preview) {
+        preview.innerHTML = '';
+        preview.style.display = 'none';
+    }
+    
+    const btnConfirmar = document.getElementById('btnConfirmarImportacion');
+    if (btnConfirmar) {
+        btnConfirmar.style.display = 'none';
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Confirmar e Importar';
+    }
+    
+    const statusEl = document.getElementById('importarAsistenciaStatus');
+    if (statusEl) {
+        statusEl.textContent = '';
+        statusEl.className = 'importar-status';
+    }
+    
+    const nombreArchivoEl = document.getElementById('importarAsistenciaNombreArchivo');
+    if (nombreArchivoEl) {
+        nombreArchivoEl.textContent = '';
+    }
+    
+    // Limpiar variables globales
     importarAsistenciaClaseId = null;
     importarAsistenciaPreviewData = null;
 }
@@ -9668,11 +9698,16 @@ async function procesarArchivoImportacion(inputElement) {
     const btnConfirmar = document.getElementById('btnConfirmarImportacion');
     const nombreArchivoEl = document.getElementById('importarAsistenciaNombreArchivo');
 
+    // Limpiar estado previo
+    previewEl.innerHTML = '';
+    previewEl.style.display = 'none';
+    btnConfirmar.style.display = 'none';
+    btnConfirmar.disabled = false;
+    btnConfirmar.innerHTML = '<i class="bi bi-check-circle-fill"></i> Confirmar e Importar';
+
     nombreArchivoEl.textContent = archivo.name;
     statusEl.textContent = 'Cargando archivo...';
     statusEl.className = 'importar-status loading';
-    previewEl.style.display = 'none';
-    btnConfirmar.style.display = 'none';
 
     try {
         // Cargar SheetJS
@@ -9893,6 +9928,8 @@ async function confirmarImportacionAsistencia() {
 
         statusEl.textContent = `✓ Asistencia guardada exitosamente para ${guardados} estudiantes.`;
         statusEl.className = 'importar-status success';
+        
+        // Ocultar botón de confirmar
         btnConfirmar.style.display = 'none';
 
         // Recargar asistencia después de 1.5 segundos y cerrar modal
