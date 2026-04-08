@@ -968,12 +968,20 @@ function startBlock(testId, blockNumber) {
         return;
     }
 
-    // Check if test is available today
+    // Check if test is available today (dentro del rango fechaDisponible - fechaFin)
     const now = new Date();
     const [year, month, day] = test.fechaDisponible.split('-').map(Number);
     const testDate = new Date(year, month - 1, day);
-    
-    if (testDate.toDateString() !== now.toDateString()) {
+    testDate.setHours(0, 0, 0, 0);
+
+    const endDateStr = test.fechaFin || test.fechaDisponible;
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    const testEndDate = new Date(endYear, endMonth - 1, endDay);
+    testEndDate.setHours(23, 59, 59, 999);
+
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (todayStart < testDate || now > testEndDate) {
         showNotification('La prueba no está disponible hoy', 'warning');
         return;
     }
