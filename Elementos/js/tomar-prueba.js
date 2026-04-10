@@ -663,14 +663,13 @@ function initializeTest() {
     if (blockInfo) {
         document.getElementById('blockTime').textContent = `${blockInfo.horaInicio} - ${blockInfo.horaFin}`;
 
-        // Set block times for timer
+        // Set block times for timer — use TODAY's date, not fechaDisponible
         const now = new Date();
-        const [year, month, day] = currentTest.fechaDisponible.split('-').map(Number);
         const [startHour, startMin] = blockInfo.horaInicio.split(':').map(Number);
         const [endHour, endMin] = blockInfo.horaFin.split(':').map(Number);
 
-        blockStartTime = new Date(year, month - 1, day, startHour, startMin);
-        blockEndTime = new Date(year, month - 1, day, endHour, endMin);
+        blockStartTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, startMin);
+        blockEndTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHour, endMin);
     }
 
     // Load questions for current block
@@ -1591,14 +1590,13 @@ function continueToBlock2() {
     document.getElementById('currentBlock').textContent = 'Bloque 2';
     document.getElementById('blockTime').textContent = `${currentTest.bloque2.horaInicio} - ${currentTest.bloque2.horaFin}`;
 
-    // Update block times
+    // Update block times — use TODAY's date, not fechaDisponible
     const now = new Date();
-    const [year, month, day] = currentTest.fechaDisponible.split('-').map(Number);
     const [startHour, startMin] = currentTest.bloque2.horaInicio.split(':').map(Number);
     const [endHour, endMin] = currentTest.bloque2.horaFin.split(':').map(Number);
 
-    blockStartTime = new Date(year, month - 1, day, startHour, startMin);
-    blockEndTime = new Date(year, month - 1, day, endHour, endMin);
+    blockStartTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, startMin);
+    blockEndTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHour, endMin);
 
     // Load block 2 questions
     loadBlockQuestions();
