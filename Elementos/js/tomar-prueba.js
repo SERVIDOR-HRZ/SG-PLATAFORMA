@@ -621,9 +621,18 @@ function isBlockAvailable(blockNumber) {
     const now = new Date();
     const [year, month, day] = currentTest.fechaDisponible.split('-').map(Number);
     const testDate = new Date(year, month - 1, day);
+    testDate.setHours(0, 0, 0, 0);
 
-    // Check if it's the correct date
-    if (testDate.toDateString() !== now.toDateString()) {
+    // Support date range: fechaDisponible to fechaFin
+    const endDateStr = currentTest.fechaFin || currentTest.fechaDisponible;
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    const testEndDate = new Date(endYear, endMonth - 1, endDay);
+    testEndDate.setHours(23, 59, 59, 999);
+
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Check if today is within the valid date range
+    if (todayStart < testDate || now > testEndDate) {
         return false;
     }
 
