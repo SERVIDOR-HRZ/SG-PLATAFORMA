@@ -847,9 +847,7 @@ function handleCardClick(event) {
             case 'chat':
                 window.location.href = 'Chat.html';
                 break;
-            case 'contenido':
-                window.location.href = 'Gestion-Contenido.html';
-                break;
+
             case 'seguridad':
                 window.location.href = 'Seguridad-Admin.html';
                 break;
