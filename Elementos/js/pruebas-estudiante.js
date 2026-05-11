@@ -1,4 +1,4 @@
-// Pruebas Student JavaScript
+﻿// Pruebas Student JavaScript
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize
     checkAuthentication();
@@ -19,7 +19,7 @@ let currentTestType = 'prueba'; // Default to 'prueba'
 
 // Check authentication and determine view
 function checkAuthentication() {
-    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (!currentUser.id) {
         window.location.href = '../index.html';
@@ -331,7 +331,7 @@ async function handleLogout() {
     const confirmed = await showLogoutModal();
     
     if (confirmed) {
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         window.location.href = '../index.html';
     }
 }
@@ -357,15 +357,15 @@ async function loadStudentTests() {
 
         const db = window.firebaseDB;
 
-        // Try to get student ID from sessionStorage first (if login was fixed)
+        // Try to get student ID from localStorage first (if login was fixed)
         let studentId = currentUser.numeroDocumento || currentUser.numeroIdentidad;
         
-        console.log('Current user from sessionStorage:', currentUser);
-        console.log('Student ID from sessionStorage:', studentId);
+        console.log('Current user from localStorage:', currentUser);
+        console.log('Student ID from localStorage:', studentId);
 
-        // If no student ID in sessionStorage, get it from Firebase (fallback)
+        // If no student ID in localStorage, get it from Firebase (fallback)
         if (!studentId) {
-            console.log('No student ID in sessionStorage, fetching from Firebase...');
+            console.log('No student ID in localStorage, fetching from Firebase...');
             
             const userSnapshot = await db.collection('usuarios')
                 .where('usuario', '==', currentUser.email || currentUser.usuario)
@@ -854,8 +854,8 @@ function startTest(testId) {
         return;
     }
 
-    // Store test ID in sessionStorage for the test interface
-    sessionStorage.setItem('takingTestId', testId);
+    // Store test ID in localStorage for the test interface
+    localStorage.setItem('takingTestId', testId);
     
     // Navigate to test interface
     window.location.href = 'Tomar-Prueba.html';
@@ -1011,9 +1011,9 @@ function startBlock(testId, blockNumber) {
         return;
     }
 
-    // Store test ID and block number in sessionStorage
-    sessionStorage.setItem('takingTestId', testId);
-    sessionStorage.setItem('takingBlockNumber', blockNumber.toString());
+    // Store test ID and block number in localStorage
+    localStorage.setItem('takingTestId', testId);
+    localStorage.setItem('takingBlockNumber', blockNumber.toString());
     
     // Navigate to test interface
     window.location.href = 'Tomar-Prueba.html';

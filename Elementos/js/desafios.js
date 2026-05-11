@@ -1,4 +1,4 @@
-// Desafios.js - Sistema de desafíos con niveles dinámicos desde Firebase
+﻿// Desafios.js - Sistema de desafíos con niveles dinámicos desde Firebase
 
 let currentUser = null;
 let currentMateria = '';
@@ -86,7 +86,7 @@ function debounce(func, wait) {
 }
 
 async function initDesafios() {
-    const userStr = sessionStorage.getItem('currentUser');
+    const userStr = localStorage.getItem('currentUser');
     if (!userStr) {
         window.location.href = '../index.html';
         return;

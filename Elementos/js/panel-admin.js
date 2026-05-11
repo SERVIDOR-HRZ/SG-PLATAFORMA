@@ -1,4 +1,4 @@
-// Admin Panel JavaScript
+﻿// Admin Panel JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize panel modal styles
     initializePanelModal();
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Check if user is authenticated and is admin
 function checkAuthentication() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!currentUser.id || currentUser.tipoUsuario !== 'admin') {
         // Redirect to login if not authenticated or not admin
@@ -33,7 +33,7 @@ function checkAuthentication() {
 
 // Load user information
 async function loadUserInfo() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (currentUser.nombre) {
         document.getElementById('adminName').textContent = currentUser.nombre.toUpperCase();
@@ -808,7 +808,7 @@ async function handleLogout() {
     
     if (confirmed) {
         // Clear session storage
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         
         // Redirect to login
         window.location.href = '../index.html';
@@ -885,7 +885,7 @@ async function checkUnreadMessages() {
     try {
         await esperarFirebase();
         const db = window.firebaseDB;
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         
         if (!currentUser.id) return;
         

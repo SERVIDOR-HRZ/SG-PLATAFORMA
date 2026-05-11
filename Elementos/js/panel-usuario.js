@@ -1,4 +1,4 @@
-// Panel de Usuario JavaScript
+﻿// Panel de Usuario JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar
     inicializarPanelModal();
@@ -19,7 +19,7 @@ let modoEdicion = false;
 
 // Verificar autenticación
 function verificarAutenticacion() {
-    usuarioActual = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    usuarioActual = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!usuarioActual.id) {
         window.location.href = '../index.html';
@@ -266,7 +266,7 @@ function cambiarFotoPerfil() {
 
             // Actualizar sesión
             usuarioActual.fotoPerfil = datosImagen.url;
-            sessionStorage.setItem('currentUser', JSON.stringify(usuarioActual));
+            localStorage.setItem('currentUser', JSON.stringify(usuarioActual));
 
             // Mostrar foto
             mostrarFotoPerfil(datosImagen.url);
@@ -336,7 +336,7 @@ async function eliminarFotoPerfil() {
 
         // Actualizar sesión
         delete usuarioActual.fotoPerfil;
-        sessionStorage.setItem('currentUser', JSON.stringify(usuarioActual));
+        localStorage.setItem('currentUser', JSON.stringify(usuarioActual));
 
         // Mostrar avatar por defecto
         mostrarAvatarPorDefecto();
@@ -401,7 +401,7 @@ async function guardarInformacion(event) {
         usuarioActual.emailRecuperacion = emailRecuperacion;
         usuarioActual.tipoDocumento = tipoDocumento;
         usuarioActual.numeroDocumento = numeroDocumento;
-        sessionStorage.setItem('currentUser', JSON.stringify(usuarioActual));
+        localStorage.setItem('currentUser', JSON.stringify(usuarioActual));
 
         // Actualizar header con el nuevo nombre
         actualizarHeaderUsuario(nombre, usuarioActual.fotoPerfil);
@@ -554,7 +554,7 @@ async function manejarCerrarSesion() {
     const confirmado = await mostrarModalLogout();
     
     if (confirmado) {
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         window.location.href = '../index.html';
     }
 }
@@ -1654,8 +1654,8 @@ function reproducirPlaylist(id, playlist) {
         return;
     }
     
-    // Guardar la playlist en sessionStorage para que el reproductor pueda acceder
-    sessionStorage.setItem('playlistActiva', JSON.stringify({
+    // Guardar la playlist en localStorage para que el reproductor pueda acceder
+    localStorage.setItem('playlistActiva', JSON.stringify({
         id: id,
         nombre: playlist.nombre,
         canciones: playlist.canciones

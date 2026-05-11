@@ -1,4 +1,4 @@
-// Calendario JavaScript - Sistema por Aulas
+﻿// Calendario JavaScript - Sistema por Aulas
 let currentWeekStart = null;
 let currentUser = null;
 let userAsignaturas = [];
@@ -96,7 +96,7 @@ function showConfirm(title, message) {
 
 // Check authentication
 function checkAuthentication() {
-    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (!currentUser.id || currentUser.tipoUsuario !== 'admin') {
         window.location.href = '../index.html';

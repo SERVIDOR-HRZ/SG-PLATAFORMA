@@ -1,4 +1,4 @@
-// Bloques Editor JavaScript
+﻿// Bloques Editor JavaScript
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize
     checkAuthentication();
@@ -66,7 +66,7 @@ const subjectConfig = {
 
 // Check authentication
 function checkAuthentication() {
-    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (!currentUser.id || currentUser.tipoUsuario !== 'admin') {
         window.location.href = '../index.html';
@@ -531,8 +531,8 @@ async function handleLogout() {
     const confirmed = await showLogoutModal();
 
     if (confirmed) {
-        sessionStorage.removeItem('currentUser');
-        sessionStorage.removeItem('editingTestId');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('editingTestId');
         window.location.href = '../index.html';
     }
 }
@@ -543,11 +543,11 @@ async function loadTestData() {
         console.log('loadTestData called');
         showLoadingOverlay();
 
-        const testId = sessionStorage.getItem('editingTestId');
-        console.log('Retrieved testId from sessionStorage:', testId);
+        const testId = localStorage.getItem('editingTestId');
+        console.log('Retrieved testId from localStorage:', testId);
 
         if (!testId) {
-            console.error('No testId found in sessionStorage');
+            console.error('No testId found in localStorage');
             throw new Error('No se encontró el ID de la prueba');
         }
 

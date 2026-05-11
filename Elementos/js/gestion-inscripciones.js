@@ -1,4 +1,4 @@
-// Gestión de Inscripciones - JavaScript
+﻿// Gestión de Inscripciones - JavaScript
 // ImgBB API Configuration
 const IMGBB_API_KEY = '0d447185d3dc7cba69ee1c6df144f146';
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
@@ -76,7 +76,7 @@ function switchView(view) {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar autenticación
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!currentUser.id || currentUser.tipoUsuario !== 'admin') {
         window.location.href = '../index.html';
@@ -205,7 +205,7 @@ function initializeEvents() {
     if (btnLogout) {
         btnLogout.addEventListener('click', function() {
             if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-                sessionStorage.removeItem('currentUser');
+                localStorage.removeItem('currentUser');
                 window.location.href = '../index.html';
             }
         });
@@ -311,7 +311,7 @@ function esperarFirebase() {
 
 // Función para cargar el avatar del usuario
 async function loadUserAvatar() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (!currentUser || !currentUser.id) return;
 
     try {

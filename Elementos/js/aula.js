@@ -1,4 +1,4 @@
-// Aula JavaScript
+﻿// Aula JavaScript
 let currentMateria = '';
 let currentAulaId = '';
 let currentAulaData = null;
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Check authentication
 function checkAuthentication() {
-    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (!currentUser.id) {
         window.location.href = '../index.html';
@@ -86,16 +86,16 @@ async function getCurrentMateriaOrAula() {
     loadAnuncios();
 }
 
-// Load aula data from Firebase or sessionStorage
+// Load aula data from Firebase or localStorage
 async function loadAulaData() {
     try {
-        // Intentar obtener del sessionStorage primero
-        const storedAula = sessionStorage.getItem('selectedAula');
+        // Intentar obtener del localStorage primero
+        const storedAula = localStorage.getItem('selectedAula');
         if (storedAula) {
             currentAulaData = JSON.parse(storedAula);
         }
 
-        // Si no hay datos en sessionStorage o el ID no coincide, cargar de Firebase
+        // Si no hay datos en localStorage o el ID no coincide, cargar de Firebase
         if (!currentAulaData || currentAulaData.id !== currentAulaId) {
             await esperarFirebase();
             const aulaDoc = await window.firebaseDB.collection('aulas').doc(currentAulaId).get();
@@ -4641,7 +4641,7 @@ function setupEventListeners() {
     const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
     if (logoutBtnDropdown) {
         logoutBtnDropdown.addEventListener('click', () => {
-            sessionStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUser');
             window.location.href = '../index.html';
         });
     }

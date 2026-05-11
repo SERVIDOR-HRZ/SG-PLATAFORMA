@@ -1,4 +1,4 @@
-// Seguridad Admin JavaScript - Versión Profesional
+﻿// Seguridad Admin JavaScript - Versión Profesional
 document.addEventListener('DOMContentLoaded', function() {
     checkAuthentication();
     loadUserInfo();
@@ -63,7 +63,7 @@ function setupTabNavigation() {
 
 // Verificar autenticación
 function checkAuthentication() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (!currentUser.id || (currentUser.tipoUsuario !== 'admin' && currentUser.tipoUsuario !== 'coordinador')) {
         window.location.href = '../index.html';
         return;
@@ -72,7 +72,7 @@ function checkAuthentication() {
 
 // Cargar info del usuario
 async function loadUserInfo() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (currentUser.nombre) {
         document.getElementById('userName').textContent = currentUser.nombre.toUpperCase();
     }
@@ -122,14 +122,14 @@ function setupEventListeners() {
     });
     
     document.getElementById('btnProfile').addEventListener('click', () => {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         if (currentUser.tipoUsuario === 'coordinador') {
             window.location.href = 'Perfil-Coordinador.html';
         }
     });
     
     document.getElementById('btnLogout').addEventListener('click', () => {
-        sessionStorage.clear();
+        localStorage.clear();
         window.location.href = '../index.html';
     });
     

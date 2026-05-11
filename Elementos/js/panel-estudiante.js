@@ -1,4 +1,4 @@
-// Student Panel JavaScript
+﻿// Student Panel JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize panel modal styles
     initializePanelModal();
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Check if user is authenticated and is student
 function checkAuthentication() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!currentUser.id || currentUser.tipoUsuario !== 'estudiante') {
         // Redirect to login if not authenticated or not student
@@ -33,7 +33,7 @@ function checkAuthentication() {
 
 // Load user information
 async function loadUserInfo() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (currentUser.nombre) {
         document.getElementById('studentName').textContent = currentUser.nombre.toUpperCase();
@@ -206,7 +206,7 @@ function showCustomAlert(titulo, mensaje, icono = 'bi-exclamation-triangle-fill'
 // Handle Desafios button click
 async function handleDesafiosClick() {
     try {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         
         // Esperar a que Firebase esté listo
         if (!window.firebaseDB) {
@@ -879,7 +879,7 @@ async function handleLogout() {
     
     if (confirmed) {
         // Clear session storage
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         
         // Redirect to login
         window.location.href = '../index.html';
@@ -943,7 +943,7 @@ async function checkUnreadMessages() {
     try {
         await esperarFirebase();
         const db = window.firebaseDB;
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         
         if (!currentUser.id) return;
         

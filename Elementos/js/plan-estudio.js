@@ -1,4 +1,4 @@
-// Plan de Estudio - JavaScript
+﻿// Plan de Estudio - JavaScript
 // Funcionalidad para el plan de estudio personalizado
 
 // Variables globales
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Verificar autenticación
 function verificarAutenticacion() {
-    const usuarioActual = sessionStorage.getItem('currentUser');
+    const usuarioActual = localStorage.getItem('currentUser');
     if (!usuarioActual) {
         window.location.href = '../index.html';
         return;
@@ -79,7 +79,7 @@ function verificarAutenticacion() {
 
 // Cargar datos del usuario
 async function cargarDatosUsuario() {
-    const usuarioActual = sessionStorage.getItem('currentUser');
+    const usuarioActual = localStorage.getItem('currentUser');
     if (usuarioActual) {
         try {
             const usuario = JSON.parse(usuarioActual);
@@ -227,7 +227,7 @@ function inicializarSidebar() {
             });
             
             if (result.isConfirmed) {
-                sessionStorage.removeItem('currentUser');
+                localStorage.removeItem('currentUser');
                 window.location.href = '../index.html';
             }
         }
@@ -498,7 +498,7 @@ async function cargarDatosDesdeURL() {
             estudianteId = estudianteIdParam;
         } else {
             // Usuario viendo su propio plan
-            const usuario = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            const usuario = JSON.parse(localStorage.getItem('currentUser') || '{}');
             estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;
         }
         
@@ -2212,7 +2212,7 @@ async function guardarSesionesLocalmente() {
 // Guardar plan de estudio en Firebase
 async function guardarPlanEnFirebase(pruebaId) {
     try {
-        const usuarioActual = sessionStorage.getItem('currentUser');
+        const usuarioActual = localStorage.getItem('currentUser');
         if (!usuarioActual) return;
         
         const usuario = JSON.parse(usuarioActual);
@@ -2277,7 +2277,7 @@ async function cargarSesionesGuardadas(pruebaId) {
     
     // Primero intentar cargar desde Firebase
     try {
-        const usuarioActual = sessionStorage.getItem('currentUser');
+        const usuarioActual = localStorage.getItem('currentUser');
         if (usuarioActual && window.firebaseDB) {
             const usuario = JSON.parse(usuarioActual);
             const estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;
@@ -2418,7 +2418,7 @@ async function eliminarPlanCompleto() {
         
         // Eliminar de Firebase
         try {
-            const usuarioActual = sessionStorage.getItem('currentUser');
+            const usuarioActual = localStorage.getItem('currentUser');
             if (usuarioActual && window.firebaseDB) {
                 const usuario = JSON.parse(usuarioActual);
                 const estudianteId = usuario.numeroDocumento || usuario.numeroIdentidad || usuario.id;

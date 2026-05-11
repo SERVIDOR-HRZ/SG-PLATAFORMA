@@ -1,4 +1,4 @@
-// Calendario Estudiante - Solo Lectura
+﻿// Calendario Estudiante - Solo Lectura
 let calendarioEstCurrentMonth = new Date();
 let calendarioEstCurrentWeek = new Date();
 let calendarioEstAulaSeleccionada = null;
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Verificar autenticación
 function checkAuthenticationEst() {
-    currentUserEst = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    currentUserEst = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!currentUserEst.id) {
         window.location.href = '../index.html';
@@ -104,7 +104,7 @@ async function cargarAulasEstudiante() {
         const db = window.firebaseDB;
 
         if (!currentUserEst || !currentUserEst.id) {
-            currentUserEst = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            currentUserEst = JSON.parse(localStorage.getItem('currentUser') || '{}');
         }
 
         if (!currentUserEst.id) {

@@ -1,4 +1,4 @@
-// Chat JavaScript
+﻿// Chat JavaScript
 document.addEventListener('DOMContentLoaded', async function () {
     // Check authentication
     await checkAuthentication();
@@ -62,7 +62,7 @@ let selectedImageFile = null;
 
 // Check authentication
 async function checkAuthentication() {
-    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (!currentUser.id) {
         window.location.href = '../index.html';
@@ -81,8 +81,8 @@ async function checkAuthentication() {
             currentUser.nombre = userData.nombre || currentUser.nombre;
             currentUser.tipoUsuario = userData.tipoUsuario || currentUser.tipoUsuario;
 
-            // Actualizar sessionStorage con los datos actualizados
-            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+            // Actualizar localStorage con los datos actualizados
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
     } catch (error) {
         console.error('Error loading user data:', error);
@@ -831,7 +831,7 @@ function hideConfirmLogoutModal() {
 
 // Confirm logout
 function confirmLogout() {
-    sessionStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUser');
     window.location.href = '../index.html';
 }
 

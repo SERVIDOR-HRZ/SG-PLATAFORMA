@@ -1,0 +1,132 @@
+/* ═══════════════════════════════════════════════════════════
+   VISUAL EDITOR — Iframe Overlay Styles
+   Injected into the landing page when in edit mode
+   Neón hover effects, selection glow, edit indicators
+   ═══════════════════════════════════════════════════════════ */
+
+/* Every editable element gets these styles */
+[data-sg-editable] {
+    position: relative;
+    cursor: pointer !important;
+    transition: outline 0.2s ease, box-shadow 0.2s ease !important;
+    outline: 2px solid transparent;
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* Hover state — neon glow */
+[data-sg-editable]:hover {
+    outline: 2px solid rgba(167, 139, 250, 0.5) !important;
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.12), inset 0 0 20px rgba(167, 139, 250, 0.03) !important;
+    z-index: 100 !important;
+}
+
+/* Selected state — bright neon */
+[data-sg-editable].sg-selected {
+    outline: 2px solid #a78bfa !important;
+    box-shadow: 0 0 30px rgba(167, 139, 250, 0.2), inset 0 0 30px rgba(167, 139, 250, 0.04) !important;
+    z-index: 101 !important;
+}
+
+/* Actively editing (contenteditable active) */
+[data-sg-editable].sg-editing {
+    outline: 2px solid #06b6d4 !important;
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.2), inset 0 0 20px rgba(6, 182, 212, 0.03) !important;
+    min-height: 1.2em;
+}
+
+/* Modified indicator — small green dot */
+[data-sg-editable].sg-modified::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid #0a0a12;
+    z-index: 102;
+    animation: sg-mod-pulse 2s ease infinite;
+}
+@keyframes sg-mod-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+}
+
+/* ─── FLOATING LABEL (shows field name on hover) ─── */
+.sg-edit-label {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 3px 10px;
+    background: rgba(167, 139, 250, 0.9);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Inter', system-ui, sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    box-shadow: 0 4px 12px rgba(167,139,250,0.3);
+}
+.sg-edit-label::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: rgba(167, 139, 250, 0.9);
+}
+[data-sg-editable]:hover > .sg-edit-label,
+[data-sg-editable].sg-selected > .sg-edit-label {
+    opacity: 1;
+}
+
+/* ─── SECTION HIGHLIGHT (when navigating) ─── */
+.sg-section-highlight {
+    outline: 2px dashed rgba(6, 182, 212, 0.3) !important;
+    outline-offset: 8px;
+    animation: sg-section-flash 1.5s ease;
+}
+@keyframes sg-section-flash {
+    0% { outline-color: rgba(6,182,212,0.6); }
+    100% { outline-color: rgba(6,182,212,0.3); }
+}
+
+/* ─── EDIT MODE CURSOR ─── */
+body.sg-edit-mode {
+    cursor: default;
+}
+body.sg-edit-mode [data-sg-editable] {
+    cursor: pointer !important;
+}
+body.sg-edit-mode [data-sg-editable].sg-editing {
+    cursor: text !important;
+}
+
+/* ─── PREVENT LINK NAVIGATION IN EDIT MODE ─── */
+body.sg-edit-mode a[data-sg-editable],
+body.sg-edit-mode a *[data-sg-editable] {
+    pointer-events: auto !important;
+}
+
+/* ─── DIMMING NON-EDITABLE ON HOVER ─── */
+body.sg-edit-mode.sg-focus-mode > *:not([data-sg-editable]):not(:has([data-sg-editable])) {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+/* ─── PLACEHOLDER FOR EMPTY ELEMENTS ─── */
+[data-sg-editable]:empty::before {
+    content: attr(data-sg-placeholder);
+    color: rgba(167, 139, 250, 0.3);
+    font-style: italic;
+}

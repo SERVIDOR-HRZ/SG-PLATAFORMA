@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Tutor | Seamos Genios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/styles.css">
+    <style>
+        body { background: var(--bg-main); color: var(--text-primary); font-family: 'Manrope', sans-serif; }
+        
+        .profile-wrapper { max-width: 1300px; margin: 100px auto 4rem; padding: 0 2rem; display: grid; grid-template-columns: 1fr 350px; gap: 3rem; }
+        @media(max-width: 900px) { .profile-wrapper { grid-template-columns: 1fr; } }
+        
+        /* Left Column: Hero & Info */
+        .profile-hero {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 3rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-glow { position: absolute; top:-50%; left:-50%; width: 200%; height: 200%; background: radial-gradient(circle at center, rgba(249,115,22,0.1) 0%, transparent 60%); pointer-events: none; }
+        .hero-img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-color); z-index: 1; }
+        .hero-details { z-index: 1; }
+        .tutor-name { font-family: 'Montserrat', sans-serif; font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .tutor-role { color: var(--primary-light); font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem; }
+        
+        /* Stats row inside hero */
+        .hero-stats { display: flex; gap: 2rem; margin-top: 1rem; }
+        .h-stat { display: flex; flex-direction: column; }
+        .h-stat-num { font-size: 1.5rem; font-weight: 800; color: #fff; }
+        .h-stat-label { font-size: 0.85rem; color: #aaabaf; text-transform: uppercase; letter-spacing: 1px;}
+        
+        /* Reviews Section */
+        .reviews-section { margin-top: 4rem; }
+        .section-heading { font-family: 'Montserrat', sans-serif; font-size: 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;}
+        
+        /* Comment form */
+        .comment-form-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        .rating-stars { display: flex; gap: 0.5rem; margin-bottom: 1rem; cursor: pointer; color: #555; }
+        .rating-stars svg.active { fill: #facc15; color: #facc15; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 1rem; border-radius: 8px; font-family: inherit; resize: vertical; min-height: 100px;}
+        .form-group textarea:focus { border-color: var(--primary-color); outline: none; }
+        .btn-submit { padding: 0.8rem 2rem; background: var(--primary-gradient); border: none; color: white; border-radius: 999px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
+        
+        /* Review List */
+        .review-card {
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 2rem 0;
+            display: flex;
+            gap: 1.5rem;
+        }
+        .reviewer-avatar { width: 50px; height: 50px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .review-content { flex: 1; }
+        .reviewer-name { font-weight: 700; font-size: 1.1rem; color: #fff; }
+        .review-date { font-size: 0.85rem; color: #888; margin-left: 1rem; }
+        .review-stars { color: #facc15; margin: 0.5rem 0; display: flex; gap: 2px;}
+        .review-text { font-size: 1rem; line-height: 1.6; color: #d1d5db;}
+        
+        /* Right Column: Sidebar sidebar */
+        .sidebar-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            position: sticky;
+            top: 100px;
+        }
+        .sb-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff; }
+        .sb-feature { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .sb-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(249,115,22,0.1); color: var(--primary-color); display: flex; align-items: center; justify-content: center; }
+        
+        .cta-big { display: block; width: 100%; text-align: center; padding: 1rem; background: var(--primary-gradient); color: white; border-radius: 12px; font-weight: 700; text-decoration: none; margin-top: 2rem; box-shadow: 0 4px 15px rgba(249,115,22,0.3); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">SEAMOS <span class="logo-highlight">GENIOS</span></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="tutors.html" class="nav-link">VOLVER A TUTORES</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="profile-wrapper">
+        <!-- Main Content -->
+        <div class="profile-main">
+            <!-- Hero -->
+            <div class="profile-hero">
+                <div class="hero-glow"></div>
+                <!-- ID genérico, podría inyectarse -->
+                <img src="https://i.ibb.co/3s6KkKSF/Daniel-De-La-Cruz-SEAMOSGENIOS.jpg" alt="Daniel De La Cruz" class="hero-img">
+                <div class="hero-details">
+                    <h1 class="tutor-name">Daniel De La Cruz</h1>
+                    <div class="tutor-role">PUNTAJE NACIONAL: 486</div>
+                    <div class="hero-stats">
+                        <div class="h-stat">
+                            <span class="h-stat-num">4.9/5</span>
+                            <span class="h-stat-label">Valoración</span>
+                        </div>
+                        <div class="h-stat">
+                            <span class="h-stat-num">+120</span>
+                            <span class="h-stat-label">Alumnos</span>
+                        </div>
+                        <div class="h-stat">
+                            <span class="h-stat-num">Matemáticas</span>
+                            <span class="h-stat-label">Especialidad</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About / Content -->
+            <div style="margin-top: 3rem; line-height: 1.8; color: #ccc;">
+                <h2 style="color: #fff; margin-bottom: 1rem;">Sobre Daniel</h2>
+                <p>Estudiante becado en Los Andes de Economía. Descubrí que el ICFES no se trata de medir cuánto sabes de forma cruda, sino de cómo hackear el formato de la prueba y usar herramientas de descarte lógico. Mi clase de matemáticas no te enseñará álgebra abstracta, te enseñará a llegar a la respuesta correcta en 45 segundos usando lógica de opciones.</p>
+            </div>
+
+            <!-- Reviews Section UI -->
+            <div class="reviews-section">
+                <h2 class="section-heading">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Comentarios y Calificaciones
+                </h2>
+
+                <!-- Leave a comment UI Simulator -->
+                <div class="comment-form-card">
+                    <h3 style="color:#fff; margin-bottom:1rem;">Comparte tu Experiencia</h3>
+                    <div class="rating-stars">
+                        <!-- Mock stars active -->
+                        <svg class="active" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <svg class="active" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <svg class="active" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <svg class="active" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <span style="margin-left:10px; color:#aaa; font-weight:600; line-height:24px;">Selecciona tu nota</span>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="¿Lograste entender mejor las matemáticas analíticas gracias a Daniel? ¡Cuéntanos tu experiencia!"></textarea>
+                    </div>
+                    <button class="btn-submit">
+                        Requerir Login para Publicar
+                    </button>
+                    <p style="margin-top: 1rem; font-size:0.8rem; color:#888;">* Solo los estudiantes matriculados en la generación pueden calificar a los tutores. Esto asegura la veracidad de nuestra plataforma.</p>
+                </div>
+
+                <!-- Feed of reviews -->
+                <div class="review-feed">
+                    <div class="review-card">
+                        <div class="reviewer-avatar">M</div>
+                        <div class="review-content">
+                            <h4 class="reviewer-name">María Rodríguez <span class="review-date">Hace 2 días</span></h4>
+                            <div class="review-stars">
+                                <svg class="active" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg class="active" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg class="active" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg class="active" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg class="active" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </div>
+                            <p class="review-text">¡Súper recomendado! Pensé que matemáticas iba a ser mi punto débil pero las estrategias de descarte que maneja Daniel me hicieron ganar más de 20 puntos en el simulacro nacional.</p>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="reviewer-avatar" style="background:#0f766e">J</div>
+                        <div class="review-content">
+                            <h4 class="reviewer-name">Juan Camilo <span class="review-date">Hace 1 semana</span></h4>
+                            <div class="review-stars">
+                                <svg class="active" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg class="active" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg class="active" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg class="active" width="16" height="16" viewBox="0 0 24 24" fill="#facc15" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </div>
+                            <p class="review-text">Las clases en vivo son otra cosa. Se sale del molde del colegio tradicional.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / Action panel -->
+        <div class="sidebar-wrapper">
+            <div class="sidebar-card">
+                <h3 class="sb-title">Aprende con Daniel</h3>
+                
+                <div class="sb-feature">
+                    <div class="sb-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                    <div>
+                        <div style="font-weight:700;">Tutorías Top</div>
+                        <div style="font-size:0.85rem; color:#aaa;">Puntaje Nacional</div>
+                    </div>
+                </div>
+
+                <div class="sb-feature">
+                    <div class="sb-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+                    <div>
+                        <div style="font-weight:700;">Clases en Vivo</div>
+                        <div style="font-size:0.85rem; color:#aaa;">Parte del Plan General</div>
+                    </div>
+                </div>
+
+                <div class="sb-feature">
+                    <div class="sb-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                    <div>
+                        <div style="font-weight:700;">Dudas 24/7</div>
+                        <div style="font-size:0.85rem; color:#aaa;">Acceso Vía WhatsApp</div>
+                    </div>
+                </div>
+
+                <a href="../index.html#planes" class="cta-big">Inscripción al Programa</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

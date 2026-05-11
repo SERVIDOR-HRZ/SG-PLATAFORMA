@@ -1,4 +1,4 @@
-// Mis Estudiantes - Coordinador JavaScript
+﻿// Mis Estudiantes - Coordinador JavaScript
 
 let todosLosEstudiantes = [];
 let estudiantesFiltrados = [];
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Check authentication
 function checkAuthentication() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!currentUser.id || currentUser.rol !== 'coordinador') {
         window.location.href = 'login.html';
@@ -37,7 +37,7 @@ function checkAuthentication() {
 
 // Load user info
 async function loadUserInfo() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (currentUser.nombre) {
         document.getElementById('coordinadorName').textContent = currentUser.nombre.toUpperCase();
@@ -242,7 +242,7 @@ async function loadEstudiantes() {
         
         if (!coordinadorInstitucion) {
             console.log('⚠️ Institución no cargada, cargando datos del coordinador...');
-            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
             await loadCoordinadorData(currentUser.id);
         }
         
@@ -614,7 +614,7 @@ async function handleLogout() {
     );
     
     if (confirmed) {
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
     }
 }

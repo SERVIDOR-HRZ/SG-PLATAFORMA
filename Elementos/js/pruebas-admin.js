@@ -1,4 +1,4 @@
-// Pruebas Management JavaScript
+﻿// Pruebas Management JavaScript
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize
     checkAuthentication();
@@ -19,7 +19,7 @@ let allTests = [];
 
 // Check authentication and determine view
 function checkAuthentication() {
-    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (!currentUser.id) {
         window.location.href = '../index.html';
@@ -439,7 +439,7 @@ async function handleLogout() {
     const confirmed = await showLogoutModal();
     
     if (confirmed) {
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         window.location.href = '../index.html';
     }
 }
@@ -1941,9 +1941,9 @@ function editBlocks(testId) {
         return;
     }
     
-    // Store test ID in sessionStorage for the blocks editor
-    sessionStorage.setItem('editingTestId', testId);
-    console.log('✅ Stored testId in sessionStorage:', sessionStorage.getItem('editingTestId'));
+    // Store test ID in localStorage for the blocks editor
+    localStorage.setItem('editingTestId', testId);
+    console.log('✅ Stored testId in localStorage:', localStorage.getItem('editingTestId'));
     
     // Show loading notification
     showNotification('Cargando editor de bloques...', 'info');

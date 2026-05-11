@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Completo | Seamos Genios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/styles.css">
+    <link rel="stylesheet" href="../Elementos/css/planes.css">
+    <style>
+        :root {
+            --primary: #f43f5e;
+            --primary-light: #fb7185;
+            --primary-dark: #be123c;
+            --primary-gradient: linear-gradient(135deg, #f43f5e 0%, #f97316 100%);
+            --glass-bg: rgba(20, 20, 25, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-blur: blur(24px);
+        }
+
+        .catalog-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem 2rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 4rem;
+        }
+        @media(max-width: 1024px) {
+            .catalog-container { grid-template-columns: 260px 1fr; gap: 2rem; }
+        }
+        @media(max-width: 900px) {
+            .catalog-container { grid-template-columns: 1fr; }
+        }
+
+        .catalog-header { grid-column: 1 / -1; margin-bottom: 2rem; text-align: center; }
+        .catalog-title { 
+            font-size: 3.5rem; 
+            color: #fff; 
+            font-family: 'Montserrat', sans-serif; 
+            font-weight: 900;
+            letter-spacing: -1px; 
+            margin-bottom: 1rem; 
+        }
+        .title-highlight {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .catalog-subtitle { 
+            color: #9ca3af; 
+            font-size: 1.15rem; 
+            max-width: 700px; 
+            margin: 0 auto; 
+            line-height: 1.6;
+        }
+        
+        /* Sidebar Filters */
+        .filters-sidebar {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        .filter-group { margin-bottom: 2.5rem; }
+        .filter-group:last-child { margin-bottom: 0; }
+        
+        .filter-title { 
+            font-weight: 800; 
+            margin-bottom: 1.2rem; 
+            color: #fff; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .filter-title svg { stroke: var(--primary-light); }
+        
+        .filter-options { display: flex; flex-direction: column; gap: 0.8rem; }
+        
+        /* Custom Checkbox */
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: #9ca3af;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .custom-checkbox:hover { color: #fff; }
+        .custom-checkbox input { display: none; }
+        .checkmark {
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .custom-checkbox:hover .checkmark { border-color: rgba(255,255,255,0.4); }
+        .custom-checkbox input:checked ~ .checkmark {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+        }
+        .checkmark::after {
+            content: '';
+            width: 6px;
+            height: 11px;
+            border: solid white;
+            border-width: 0 2.5px 2.5px 0;
+            transform: rotate(45deg) scale(0);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .custom-checkbox input:checked ~ .checkmark::after { transform: rotate(45deg) scale(1); }
+
+        /* Search Bar */
+        .catalog-search-wrapper {
+            margin-bottom: 2.5rem;
+            position: relative;
+            max-width: 600px;
+        }
+        .catalog-search-wrapper svg {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            transition: color 0.3s;
+        }
+        .catalog-search {
+            width: 100%;
+            background: rgba(15, 15, 20, 0.5);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: var(--glass-blur);
+            padding: 1.2rem 1.2rem 1.2rem 3.5rem;
+            border-radius: 50px;
+            color: #fff;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .catalog-search:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            background: rgba(20, 20, 25, 0.8);
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.2);
+        }
+        .catalog-search:focus + svg { color: var(--primary-light); }
+
+        /* Catalog Grid */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 2.5rem;
+        }
+        
+        /* Course/Project Card */
+        .project-card {
+            background: linear-gradient(180deg, rgba(25,25,30,0.6) 0%, rgba(15,15,20,0.9) 100%);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 24px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .project-card:hover { 
+            transform: translateY(-10px); 
+            border-color: rgba(255,255,255,0.15);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 40px rgba(244, 63, 94, 0.15);
+        }
+        
+        .project-img { 
+            width: 100%; 
+            height: 220px; 
+            background: #111; 
+            position: relative; 
+            overflow: hidden;
+        }
+        .project-img::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15,15,20,1) 0%, transparent 100%);
+        }
+        
+        .project-img img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            opacity: 0.8;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.7s;
+        }
+        .project-card:hover .project-img img { transform: scale(1.08); opacity: 1; }
+
+        .project-badge { 
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            background: var(--primary-gradient); 
+            color: #fff; 
+            padding: 6px 16px; 
+            border-radius: 999px; 
+            font-size: 0.75rem; 
+            font-weight: 800;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+        
+        .project-content { 
+            padding: 2rem; 
+            display: flex; 
+            flex-direction: column; 
+            flex: 1; 
+            position: relative;
+            z-index: 2;
+        }
+        
+        .project-title { 
+            font-family: 'Montserrat', sans-serif; 
+            font-size: 1.4rem; 
+            font-weight: 800;
+            color: #fff; 
+            margin-bottom: 0.8rem;
+            line-height: 1.3;
+        }
+        
+        .project-desc { 
+            color: #9ca3af; 
+            font-size: 1rem; 
+            line-height: 1.6; 
+            margin-bottom: 2rem; 
+            flex: 1;
+        }
+        
+        .project-meta { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 2rem; 
+            font-size: 0.9rem; 
+            color: #d1d5db;
+            font-weight: 600;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; }
+        .meta-item svg { color: var(--primary-light); }
+        
+        .project-cta { 
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            color: #fff; 
+            padding: 1rem; 
+            border-radius: 14px; 
+            text-align: center; 
+            text-decoration: none; 
+            font-weight: 700; 
+            transition: all 0.3s ease; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .project-cta::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: var(--primary-gradient);
+            transition: left 0.4s ease;
+            z-index: -1;
+        }
+        .project-cta:hover { 
+            border-color: transparent;
+            color: white; 
+            box-shadow: 0 10px 20px rgba(244, 63, 94, 0.3);
+            transform: translateY(-3px);
+        }
+        .project-cta:hover::before { left: 0; }
+        
+    </style>
+</head>
+<body style="background: #0f0f11; color: #fff; font-family: 'Manrope', sans-serif;">
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">SEAMOS <span class="logo-highlight" style="background:var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GENIOS</span></div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link" style="color: #fff; display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <span>VOLVER AL INICIO</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="catalog-container">
+        <div class="catalog-header">
+            <h1 class="catalog-title">Explora <span class="title-highlight">Nuestro Universo</span></h1>
+            <p class="catalog-subtitle">Descubre todos los programas, simulacros y laboratorios de aprendizaje que preparan a los estudiantes para los desafíos del futuro.</p>
+        </div>
+
+        <!-- Filters Sidebar -->
+        <div class="filters-sidebar">
+            <div class="filter-group">
+                <div class="filter-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+                    Categoría
+                </div>
+                <div class="filter-options">
+                    <label class="custom-checkbox"><input type="checkbox" checked><span class="checkmark"></span> Todos</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Simulacros ICFES</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Cursos Intensivos</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Preuniversitarios</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Talleres Libres</label>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <div class="filter-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    Materias
+                </div>
+                <div class="filter-options">
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Matemáticas</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Lectura Crítica</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Ciencias Naturales</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Ciencias Sociales</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Inglés</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <div class="filter-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Dificultad
+                </div>
+                <div class="filter-options">
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Básico</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Intermedio</label>
+                    <label class="custom-checkbox"><input type="checkbox"><span class="checkmark"></span> Avanzado</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catalog Content Area -->
+        <div class="catalog-content">
+            
+            <div class="catalog-search-wrapper">
+                <input type="text" class="catalog-search" placeholder="Busca cursos, códigos, o herramientas...">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+
+            <!-- Grid of Projects -->
+            <div class="catalog-grid">
+                
+                <!-- Project 1 -->
+                <div class="project-card">
+                    <div class="project-img">
+                        <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Curso">
+                        <div class="project-badge">SIMULACRO</div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Simulacro Diagnóstico Nacional</h3>
+                        <p class="project-desc">Mídete con miles de estudiantes del país bajo los estándares del Icfes. Resultados con IA que potencian tus puntos débiles al instante.</p>
+                        <div class="project-meta">
+                            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 4H 30M</div>
+                            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> +1500 Estudiantes</div>
+                        </div>
+                        <a href="#" class="project-cta">
+                            <span>Ver Detalles y Reservar</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="project-card">
+                    <div class="project-img">
+                        <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Curso">
+                        <div class="project-badge" style="background: linear-gradient(135deg, #8b5cf6, #c084fc);">COMPLETO</div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Plan Calendario A Extendido</h3>
+                        <p class="project-desc">El programa maestro. Cobertura total garantizando mejorar un promedio de más de 60 puntos con mentores calificados a nivel nacional.</p>
+                        <div class="project-meta">
+                            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 7 Meses</div>
+                            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg> Mentores Top</div>
+                        </div>
+                        <a href="../index.html#planes" class="project-cta">
+                            <span>Conocer Plan de Estudios</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="project-card">
+                    <div class="project-img">
+                        <img src="https://images.unsplash.com/photo-1596495578065-6e0763fa1178?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Curso">
+                        <div class="project-badge" style="background: linear-gradient(135deg, #10b981, #34d399);">INTENSIVO</div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Bootcamp Lectura Crítica</h3>
+                        <p class="project-desc">Transforma la forma en que analizas textos filosóficos y literarios con métodos comprobados por puntajes perfectos nacionales en meses recientes.</p>
+                        <div class="project-meta">
+                            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 2 Semanas</div>
+                            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> 100% Virtual</div>
+                        </div>
+                        <a href="#" class="project-cta">
+                            <span>Ver Detalles</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="project-card">
+                    <div class="project-img">
+                        <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Curso">
+                        <div class="project-badge" style="background: linear-gradient(135deg, #e11d48, #fb7185);">TALLER</div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Matemáticas desde Cero</h3>
+                        <p class="project-desc">Un taller especial para perderle el miedo a los números. Empieza sin bases y sal resolviendo ecuaciones complejas sin despeinarte.</p>
+                        <div class="project-meta">
+                            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 40 Horas</div>
+                            <div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Presencial/Virtual</div>
+                        </div>
+                        <a href="#" class="project-cta">
+                            <span>Ver Temario</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</body>
+</html>

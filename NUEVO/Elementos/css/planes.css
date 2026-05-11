@@ -1,0 +1,472 @@
+/* ============================================
+   PLAN BENTO GRID - Dashboard Style
+   ============================================ */
+
+.plan-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Generic Card */
+.plan-bento-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.plan-bento-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(249, 115, 22, 0.2);
+    box-shadow: 0 8px 30px rgba(249, 115, 22, 0.08);
+}
+
+/* Card: Descripción */
+.plan-bento-desc {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+}
+.plan-bento-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(249, 115, 22, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f97316;
+    margin-bottom: 12px;
+}
+.plan-bento-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+}
+.plan-bento-subtitle {
+    font-size: 0.85rem;
+    color: #f97316;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+.plan-bento-text {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.5;
+}
+
+/* Card: Fecha Inicio */
+.plan-bento-date-start {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+}
+/* Card: Fecha Fin */
+.plan-bento-date-end {
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
+}
+
+.plan-bento-date-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 8px;
+}
+.plan-bento-date-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+/* Mini Countdown */
+.plan-bento-mini-countdown {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.mini-cd-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.mini-cd-val {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #f97316;
+    font-variant-numeric: tabular-nums;
+    min-width: 32px;
+    text-align: center;
+    background: rgba(249, 115, 22, 0.08);
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+.mini-cd-lbl {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+.mini-cd-sep {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.15);
+    margin-bottom: 12px;
+}
+
+/* Status Badge */
+.plan-bento-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 10px;
+}
+.plan-bento-status-active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+.plan-bento-status-active .status-dot {
+    background: #22c55e;
+}
+.plan-bento-status-pending {
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.2);
+}
+.plan-bento-status-pending .status-dot {
+    background: #f97316;
+}
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: dotPulse 2s ease infinite;
+}
+@keyframes dotPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Card: Simulacros Stats */
+.plan-bento-sims {
+    grid-column: 4 / 5;
+    grid-row: 1 / 2;
+}
+.plan-bento-sim-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 16px;
+}
+.plan-bento-sim-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.sim-stat {
+    text-align: center;
+}
+.sim-stat-num {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #22c55e;
+    display: block;
+    font-variant-numeric: tabular-nums;
+}
+.sim-stat-label {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+}
+.sim-stat-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.sim-stat-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border-radius: 2px;
+    animation: barGrow 1.5s ease forwards;
+}
+.sim-stat-fill-pending {
+    background: linear-gradient(90deg, #f97316, #ea580c);
+}
+@keyframes barGrow {
+    from { width: 0; }
+}
+.sim-total {
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 10px;
+}
+.sim-total strong {
+    color: #f97316;
+    font-size: 1.1rem;
+}
+
+/* Card: PRECIO (center full width) */
+.plan-bento-price {
+    grid-column: 1 / -1;
+    grid-row: 2 / 3;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.08), rgba(220, 38, 38, 0.05));
+    border-color: rgba(249, 115, 22, 0.15);
+    text-align: center;
+    padding: 32px;
+}
+.plan-bento-price-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #f97316, #dc2626);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 6px 20px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+    animation: pulseBadge 2s ease-in-out infinite;
+}
+@keyframes pulseBadge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.plan-bento-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+.plan-bento-price-old {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.price-old-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+.price-old-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.3);
+    text-decoration: line-through;
+    text-decoration-color: #dc2626;
+    text-decoration-thickness: 3px;
+}
+.plan-bento-price-arrow {
+    color: rgba(255, 255, 255, 0.2);
+    animation: arrowBounce 1.5s ease infinite;
+}
+@keyframes arrowBounce {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(6px); }
+}
+
+.plan-bento-price-new {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.price-new-label {
+    font-size: 0.75rem;
+    color: #f97316;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.price-new-value {
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #f97316, #ff6b00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+.price-new-currency {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* CTA Button */
+.plan-bento-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 40px;
+    background: linear-gradient(135deg, #f97316, #dc2626);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.plan-bento-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(249, 115, 22, 0.3);
+}
+
+/* Cards: Features Bottom Row */
+.plan-bento-feature {
+    display: flex;
+    flex-direction: column;
+}
+.plan-bento-feature:nth-of-type(6) {
+    grid-column: 1 / 2;
+    grid-row: 3 / 4;
+}
+.plan-bento-feature:nth-of-type(7) {
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
+}
+.plan-bento-feat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+.plan-bento-feature h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+}
+.plan-bento-feat-stats {
+    display: flex;
+    gap: 16px;
+}
+.feat-stat {
+    text-align: center;
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    padding: 12px 8px;
+}
+.feat-stat span {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #f97316;
+    display: block;
+    font-variant-numeric: tabular-nums;
+}
+.feat-stat small {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Card: Benefits */
+.plan-bento-benefits {
+    grid-column: 3 / 5;
+    grid-row: 3 / 4;
+}
+.plan-bento-benefits-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+}
+.plan-bento-benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.plan-bento-benefits-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 6px 0;
+}
+.plan-bento-benefits-list li svg {
+    flex-shrink: 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+    .plan-bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .plan-bento-desc { grid-column: 1 / 2; grid-row: 1; }
+    .plan-bento-date-start { grid-column: 2 / 3; grid-row: 1; }
+    .plan-bento-date-end { grid-column: 1 / 2; grid-row: 2; }
+    .plan-bento-sims { grid-column: 2 / 3; grid-row: 2; }
+    .plan-bento-price { grid-column: 1 / -1; grid-row: 3; }
+    .plan-bento-feature:nth-of-type(6) { grid-column: 1 / 2; grid-row: 4; }
+    .plan-bento-feature:nth-of-type(7) { grid-column: 2 / 3; grid-row: 4; }
+    .plan-bento-benefits { grid-column: 1 / -1; grid-row: 5; }
+}
+
+@media (max-width: 640px) {
+    .plan-bento-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .plan-bento-desc,
+    .plan-bento-date-start,
+    .plan-bento-date-end,
+    .plan-bento-sims,
+    .plan-bento-price,
+    .plan-bento-feature:nth-of-type(6),
+    .plan-bento-feature:nth-of-type(7),
+    .plan-bento-benefits {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+    .plan-bento-price-row { gap: 16px; }
+    .price-new-value { font-size: 2.2rem; }
+    .plan-bento-benefits-list { grid-template-columns: 1fr; }
+    .plan-bento-card { padding: 20px; }
+}

@@ -1,4 +1,4 @@
-// Pruebas Menu Type Selector JavaScript
+﻿// Pruebas Menu Type Selector JavaScript
 // Maneja la selección entre Prueba, Minisimulacro y Reto
 
 let currentTestType = 'prueba'; // Por defecto
@@ -12,7 +12,7 @@ function initializeTypeTabs() {
     const typeTabs = document.querySelectorAll('.type-tab');
     
     // Solo para administradores
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (currentUser.tipoUsuario !== 'admin') {
         const tabsContainer = document.getElementById('typeTabs');
         if (tabsContainer) tabsContainer.style.display = 'none';

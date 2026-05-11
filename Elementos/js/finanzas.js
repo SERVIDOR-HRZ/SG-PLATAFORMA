@@ -1,4 +1,4 @@
-// ImgBB API configuration
+﻿// ImgBB API configuration
 const IMGBB_API_KEY = '0d447185d3dc7cba69ee1c6df144f146';
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
 
@@ -174,7 +174,7 @@ window.volverASelectorAulasFinanzas = volverASelectorAulasFinanzas;
 
 // Check authentication and permissions
 async function checkAuth() {
-    const sessionUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const sessionUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!sessionUser.id || sessionUser.tipoUsuario !== 'admin') {
         window.location.href = '../index.html';
@@ -2895,7 +2895,7 @@ async function handleLogout() {
     
     if (confirmed) {
         // Clear session storage
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         
         // Redirect to login
         window.location.href = '../index.html';

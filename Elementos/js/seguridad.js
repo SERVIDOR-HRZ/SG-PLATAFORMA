@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SISTEMA DE PROTECCIÓN WEB PROFESIONAL
  * =====================================
  * Sistema avanzado de seguridad con detección inteligente de amenazas,
@@ -169,7 +169,7 @@ class ProteccionWeb {
         try {
             if (!window.firebaseDB) return;
             
-            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
             
             await window.firebaseDB.collection('registroSeguridad').add({
                 ...evento,
@@ -215,7 +215,7 @@ class ProteccionWeb {
         try {
             if (!window.firebaseDB) return;
             
-            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
             
             await window.firebaseDB.collection('registroDescargas').add({
                 usuarioId: currentUser.id || 'anonimo',

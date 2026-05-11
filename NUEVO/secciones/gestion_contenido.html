@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeamosGenios — Admin CMS</title>
+    <link rel="icon" type="image/svg+xml" href="../Elementos/img/Logo.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Quill WYSIWYG CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../Elementos/css/admin.css">
+    <link rel="stylesheet" href="../Elementos/css/admin-rich-ui.css">
+    <link rel="stylesheet" href="../Elementos/css/admin-preview.css">
+    <link rel="stylesheet" href="../Elementos/css/tutor-profiles.css">
+    <link rel="stylesheet" href="../Elementos/css/visual-editor.css">
+</head>
+<body>
+    <!-- Main App -->
+    <div id="admin-app" class="admin-app">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#sideGrad)" stroke-width="1.5">
+                        <defs><linearGradient id="sideGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    <div>
+                        <span class="brand-name">SG Admin</span>
+                        <span class="brand-version">v2.0</span>
+                    </div>
+                </div>
+                <button class="sidebar-collapse-btn" onclick="toggleSidebar()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Principal</div>
+                <button class="nav-item active" data-section="dashboard" onclick="switchSection('dashboard')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-section="visual-editor" onclick="switchSection('visual-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 8l3 3-3 3"/><line x1="13" y1="14" x2="17" y2="14"/></svg>
+                    <span>Editor Visual</span>
+                    <span class="nav-badge" style="background:linear-gradient(135deg,#a78bfa,#06b6d4);color:#fff;font-size:0.55rem;">NEW</span>
+                </button>
+                <button class="nav-item" data-section="hero-editor" onclick="switchSection('hero-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span>Hero Section</span>
+                </button>
+                <button class="nav-item" data-section="about-editor" onclick="switchSection('about-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <span>Quiénes Somos</span>
+                </button>
+                <button class="nav-item" data-section="nav-editor" onclick="switchSection('nav-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    <span>Navegación</span>
+                </button>
+
+                <div class="nav-section-label">Contenido</div>
+                <button class="nav-item" data-section="tutors-editor" onclick="switchSection('tutors-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Tutores</span>
+                    <span class="nav-badge" id="tutor-count-badge">8</span>
+                </button>
+                <button class="nav-item" data-section="stats-editor" onclick="switchSection('stats-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                    <span>Estadísticas</span>
+                </button>
+                <button class="nav-item" data-section="plans-editor" onclick="switchSection('plans-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    <span>Planes & Precios</span>
+                </button>
+                <button class="nav-item" data-section="media-manager" onclick="switchSection('media-manager')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span>Multimedia</span>
+                </button>
+                <button class="nav-item" data-section="simulacros-editor" onclick="switchSection('simulacros-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    <span>Simulacros</span>
+                </button>
+                <button class="nav-item" data-section="comparativa-editor" onclick="switchSection('comparativa-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span>Comparativa</span>
+                </button>
+                <button class="nav-item" data-section="testimonios-editor" onclick="switchSection('testimonios-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Testimonios</span>
+                </button>
+                <button class="nav-item" data-section="faq-editor" onclick="switchSection('faq-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span>Preguntas Frec.</span>
+                </button>
+
+                <div class="nav-section-label">Marketing & Analítica</div>
+                <button class="nav-item" data-section="analytics-editor" onclick="switchSection('analytics-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+                    <span>Analíticas</span>
+                </button>
+                <button class="nav-item" data-section="seo-editor" onclick="switchSection('seo-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span>SEO & Meta</span>
+                </button>
+                <button class="nav-item" data-section="cta-editor" onclick="switchSection('cta-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
+                    <span>Call to Actions</span>
+                </button>
+                <button class="nav-item" data-section="contacto-manager" onclick="switchSection('contacto-manager')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span>Mensajes / Leads</span>
+                </button>
+
+                <div class="nav-section-label">Sistema</div>
+                <button class="nav-item" data-section="footer-editor" onclick="switchSection('footer-editor')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                    <span>Footer & Social</span>
+                </button>
+                <button class="nav-item" data-section="settings" onclick="switchSection('settings')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>Configuración</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="../index.html" target="_blank" class="sidebar-preview-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Ver Sitio
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <div class="topbar-breadcrumb">
+                        <span id="breadcrumb-section">Dashboard</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" placeholder="Buscar sección..." id="global-search" oninput="handleSearch(this.value)">
+                    </div>
+
+                    <!-- Component Library Toggle -->
+                    <button class="topbar-action topbar-action-accent" id="library-toggle-btn" title="Biblioteca de Componentes">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                        <span class="topbar-btn-label">Biblioteca</span>
+                    </button>
+
+                    <!-- Live Preview Toggle -->
+                    <button class="topbar-action topbar-action-preview" id="preview-toggle-btn" title="Vista Previa en Tiempo Real">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span class="topbar-btn-label">Preview</span>
+                    </button>
+
+                    <div class="topbar-divider"></div>
+
+                    <button class="topbar-action" onclick="saveAllData()" title="Guardar todo">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    </button>
+                    <button class="topbar-action" onclick="exportData()" title="Exportar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </button>
+                    <div class="topbar-user">
+                        <div class="topbar-avatar">A</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Sections Container -->
+            <div class="sections-container" id="sections-container">
+
+                <!-- ========== VISUAL EDITOR ========== -->
+                <section class="content-section" id="sec-visual-editor">
+                    <!-- Toolbar -->
+                    <div class="ve-toolbar">
+                        <div class="ve-toolbar-group">
+                            <span class="ve-toolbar-label">Modo</span>
+                            <button class="ve-btn" id="ve-btn-edit">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Editar
+                            </button>
+                            <button class="ve-btn" id="ve-btn-refresh">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                Recargar
+                            </button>
+                            <div class="ve-toolbar-divider"></div>
+                            <button class="ve-btn ve-btn-save" id="ve-btn-save">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                Guardar
+                                <span class="ve-changes-count zero">0</span>
+                            </button>
+                        </div>
+
+                        <div class="ve-toolbar-group ve-section-nav">
+                            <span class="ve-toolbar-label">Ir a</span>
+                            <button class="ve-section-pill active" data-scroll-to="#about">Hero</button>
+                            <button class="ve-section-pill" data-scroll-to="#nosotros">Nosotros</button>
+                            <button class="ve-section-pill" data-scroll-to="#planes">Planes</button>
+                            <button class="ve-section-pill" data-scroll-to="#faq">FAQ</button>
+                            <button class="ve-section-pill" data-scroll-to="footer">Footer</button>
+                        </div>
+
+                        <div class="ve-toolbar-group">
+                            <span class="ve-toolbar-label">Vista</span>
+                            <button class="ve-device-btn active" data-device="desktop" title="Desktop">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                            </button>
+                            <button class="ve-device-btn" data-device="tablet" title="Tablet">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                            </button>
+                            <button class="ve-device-btn" data-device="mobile" title="Mobile">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Iframe Container -->
+                    <div class="ve-iframe-container">
+                        <div class="ve-iframe-wrapper">
+                            <iframe id="ve-iframe" class="ve-iframe" title="Landing Page Preview"></iframe>
+                        </div>
+
+                        <!-- Loading Overlay -->
+                        <div class="ve-loading-overlay">
+                            <div class="ve-loading-spinner"></div>
+                            <div class="ve-loading-text">Cargando Landing Page...</div>
+                        </div>
+
+                        <!-- Edit Mode Indicator -->
+                        <div class="ve-edit-indicator">
+                            <span class="indicator-dot"></span>
+                            Modo Edición — Click para seleccionar, doble click para editar
+                        </div>
+
+                        <!-- Properties Panel (floating right) -->
+                        <div class="ve-props-panel">
+                            <div class="ve-props-header">
+                                <div class="ve-props-title">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                    Propiedades
+                                </div>
+                                <button class="ve-props-close">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <div class="ve-props-body">
+                                <div class="ve-props-info">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                                    <span class="ve-prop-element-name">Selecciona un elemento</span>
+                                </div>
+                                <div class="ve-props-section-label">Ubicación</div>
+                                <div class="ve-props-field">
+                                    <label>Firestore Path</label>
+                                    <code class="ve-prop-path" style="font-size:0.72rem;color:#a78bfa;background:rgba(0,0,0,0.3);padding:6px 10px;border-radius:6px;">—</code>
+                                </div>
+                                <div class="ve-props-field">
+                                    <label>Tipo <span class="ve-prop-type" style="color:#06b6d4;font-weight:600;">—</span></label>
+                                </div>
+                                <div class="ve-props-section-label">Valor</div>
+                                <div class="ve-props-field">
+                                    <label>Contenido</label>
+                                    <textarea id="ve-prop-value" rows="3" placeholder="Edita el contenido..."></textarea>
+                                </div>
+                            </div>
+                            <div class="ve-props-footer">
+                                <button class="ve-btn" id="ve-prop-apply">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Aplicar
+                                </button>
+                                <button class="ve-btn ve-btn-save" id="ve-prop-save">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                    Guardar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Autosave Toast -->
+                        <div class="ve-autosave-toast">✓ Guardado</div>
+                    </div>
+
+                    <!-- Status Bar -->
+                    <div class="ve-status-bar">
+                        <div class="ve-status-left">
+                            <span class="ve-status-badge editing">
+                                <span class="ve-status-dot"></span> Listo
+                            </span>
+                            <span class="ve-status-item">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                Desktop
+                            </span>
+                        </div>
+                        <div class="ve-status-right">
+                            <span class="ve-status-item">Haz clic en "Editar" para comenzar</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== DASHBOARD ========== -->
+                <section class="content-section active" id="sec-dashboard">
+                    <div class="section-heading">
+                        <h2>Dashboard</h2>
+                        <p>Vista general del contenido de tu sitio web</p>
+                    </div>
+
+                    <div class="dashboard-stats-grid">
+                        <div class="dash-stat-card">
+                            <div class="dash-stat-icon" style="background: linear-gradient(135deg, #a78bfa33, #a78bfa11);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                            <div class="dash-stat-info">
+                                <span class="dash-stat-number" id="dash-tutors">8</span>
+                                <span class="dash-stat-label">Tutores</span>
+                            </div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <div class="dash-stat-icon" style="background: linear-gradient(135deg, #06b6d433, #06b6d411);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                            <div class="dash-stat-info">
+                                <span class="dash-stat-number" id="dash-images">12</span>
+                                <span class="dash-stat-label">Imágenes</span>
+                            </div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <div class="dash-stat-icon" style="background: linear-gradient(135deg, #f59e0b33, #f59e0b11);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </div>
+                            <div class="dash-stat-info">
+                                <span class="dash-stat-number" id="dash-sections">7</span>
+                                <span class="dash-stat-label">Secciones</span>
+                            </div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <div class="dash-stat-icon" style="background: linear-gradient(135deg, #10b98133, #10b98111);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            </div>
+                            <div class="dash-stat-info">
+                                <span class="dash-stat-number" id="dash-changes">0</span>
+                                <span class="dash-stat-label">Cambios hoy</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card dash-card-wide">
+                            <div class="dash-card-header">
+                                <h3>Acciones Rápidas</h3>
+                            </div>
+                            <div class="quick-actions-grid">
+                                <button class="quick-action" onclick="switchSection('hero-editor')">
+                                    <div class="qa-icon" style="background:linear-gradient(135deg,#a78bfa,#7c3aed);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    </div>
+                                    <span>Editar Hero</span>
+                                </button>
+                                <button class="quick-action" onclick="switchSection('tutors-editor')">
+                                    <div class="qa-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                    </div>
+                                    <span>Gestionar Tutores</span>
+                                </button>
+                                <button class="quick-action" onclick="switchSection('media-manager')">
+                                    <div class="qa-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    </div>
+                                    <span>Subir Imágenes</span>
+                                </button>
+                                <button class="quick-action" onclick="switchSection('stats-editor')">
+                                    <div class="qa-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                                    </div>
+                                    <span>Editar Stats</span>
+                                </button>
+                                <button class="quick-action" onclick="switchSection('plans-editor')">
+                                    <div class="qa-icon" style="background:linear-gradient(135deg,#ec4899,#db2777);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                    </div>
+                                    <span>Precios</span>
+                                </button>
+                                <button class="quick-action" onclick="exportData()">
+                                    <div class="qa-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </div>
+                                    <span>Exportar Data</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="dash-card">
+                            <div class="dash-card-header">
+                                <h3>Cambios Recientes</h3>
+                            </div>
+                            <div class="recent-changes-list" id="recent-changes">
+                                <div class="empty-state-mini">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    <p>Sin cambios recientes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== HERO EDITOR ========== -->
+                <section class="content-section" id="sec-hero-editor">
+                    <div class="section-heading">
+                        <h2>Hero Section</h2>
+                        <p>Edita el contenido principal que los visitantes ven al llegar al sitio</p>
+                    </div>
+                    <div class="editor-grid">
+                        <div class="editor-card">
+                            <div class="editor-card-header">
+                                <h3>Títulos Principales</h3>
+                                <span class="editor-badge">Texto</span>
+                            </div>
+                            <div class="editor-card-body">
+                                <div class="field-group">
+                                    <label>Badge superior</label>
+                                    <input type="text" id="hero-badge" value="SISTEMA DE ALTO RENDIMIENTO" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Línea 1 del título</label>
+                                    <input type="text" id="hero-title-line1" value="ALCANZA TU" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Línea 2 (destacada)</label>
+                                    <input type="text" id="hero-title-line2" value="MÁXIMO NIVEL" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Subtítulo</label>
+                                    <div class="quill-container" data-target="hero-subtitle">La fusión definitiva entre Tecnología y Neurociencia.</div>
+                                    <textarea id="hero-subtitle" class="field-textarea" style="display:none;">La fusión definitiva entre Tecnología y Neurociencia.</textarea>
+                                </div>
+                                <div class="field-group">
+                                    <label>Descripción</label>
+                                    <div class="quill-container" data-target="hero-description">Prepárate para el ICFES con el sistema que está redefiniendo la educación.</div>
+                                    <textarea id="hero-description" class="field-textarea" style="display:none;">Prepárate para el ICFES con el sistema que está redefiniendo la educación.</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="editor-card">
+                            <div class="editor-card-header">
+                                <h3>Botones CTA</h3>
+                                <span class="editor-badge">Acción</span>
+                            </div>
+                            <div class="editor-card-body">
+                                <div class="field-group">
+                                    <label>Texto botón principal</label>
+                                    <input type="text" id="hero-cta-primary-text" value="Ver Simulacros" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Precio en CTA</label>
+                                    <input type="text" id="hero-cta-price" value="Desde $15.000" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Enlace CTA principal</label>
+                                    <input type="text" id="hero-cta-primary-link" value="#simulacros" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Texto botón secundario</label>
+                                    <input type="text" id="hero-cta-secondary-text" value="Conoce el Dashboard" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Enlace CTA secundario</label>
+                                    <input type="text" id="hero-cta-secondary-link" value="#dashboard-showcase" class="field-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="editor-card">
+                            <div class="editor-card-header">
+                                <h3>Countdown</h3>
+                                <span class="editor-badge">Fecha</span>
+                            </div>
+                            <div class="editor-card-body">
+                                <div class="field-group">
+                                    <label>Título del countdown</label>
+                                    <input type="text" id="hero-countdown-title" value="Examen Calendario A — 26 Jul 2026" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Fecha objetivo (ISO)</label>
+                                    <input type="date" id="hero-countdown-date" value="2026-07-26" class="field-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="editor-card">
+                            <div class="editor-card-header">
+                                <h3>Live Counter</h3>
+                                <span class="editor-badge">Número</span>
+                            </div>
+                            <div class="editor-card-body">
+                                <div class="field-group">
+                                    <label>Número de estudiantes</label>
+                                    <div class="range-slider-wrapper">
+                                        <input type="range" class="range-slider" min="0" max="5000" step="50" value="1400" oninput="document.getElementById('hero-live-count').value = this.value; this.nextElementSibling.innerText = this.value">
+                                        <span class="range-value">1400</span>
+                                        <input type="number" id="hero-live-count" value="1400" class="field-input" style="display:none;">
+                                    </div>
+                                </div>
+                                <div class="field-group">
+                                    <label>Texto complementario</label>
+                                    <input type="text" id="hero-live-text" value="estudiantes inscritos esta temporada" class="field-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn-save" onclick="saveSection('hero')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Guardar Cambios
+                        </button>
+                        <button class="btn-reset" onclick="resetSection('hero')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                            Restaurar Original
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ========== ABOUT EDITOR ========== -->
+                <section class="content-section" id="sec-about-editor">
+                    <div class="section-heading">
+                        <h2>Quiénes Somos</h2>
+                        <p>Administra la sección "About" y las tarjetas Bento</p>
+                    </div>
+                    <div class="editor-grid">
+                        <div class="editor-card editor-card-full">
+                            <div class="editor-card-header">
+                                <h3>Encabezado de Sección</h3>
+                                <span class="editor-badge">Texto</span>
+                            </div>
+                            <div class="editor-card-body">
+                                <div class="field-row">
+                                    <div class="field-group">
+                                        <label>Badge</label>
+                                        <input type="text" id="about-badge" value="QUIÉNES SOMOS" class="field-input">
+                                    </div>
+                                    <div class="field-group">
+                                        <label>Título de sección</label>
+                                        <input type="text" id="about-title" value="¿Qué es Seamos Genios?" class="field-input">
+                                    </div>
+                                </div>
+                                <div class="field-group">
+                                    <label>Descripción</label>
+                                    <textarea id="about-description" class="field-textarea" rows="3">Plataforma educativa innovadora que combina tecnología de vanguardia con neurociencia aplicada para revolucionar la preparación del examen ICFES en Colombia.</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="editor-card">
+                            <div class="editor-card-header">
+                                <h3>Tagline del Logo</h3>
+                            </div>
+                            <div class="editor-card-body">
+                                <div class="field-group">
+                                    <label>Texto bajo el logo</label>
+                                    <input type="text" id="about-tagline" value="La fusión entre Tecnología y Neurociencia" class="field-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="editor-card">
+                            <div class="editor-card-header">
+                                <h3>Barra de Confianza</h3>
+                            </div>
+                            <div class="editor-card-body">
+                                <div class="field-group">
+                                    <label>Item 1</label>
+                                    <input type="text" id="trust-1" value="Datos protegidos" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Item 2</label>
+                                    <input type="text" id="trust-2" value="Resultados garantizados" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Item 3</label>
+                                    <input type="text" id="trust-3" value="Soporte 24/7" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label>Item 4</label>
+                                    <input type="text" id="trust-4" value="Líderes en PreICFES" class="field-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bento Cards Editor -->
+                    <div class="section-heading" style="margin-top:2rem;">
+                        <h3>Tarjetas de Características</h3>
+                        <p>Edita las 6 tarjetas de la cuadrícula Bento</p>
+                    </div>
+                    <div class="bento-editor-grid" id="bento-cards-container">
+                        <!-- Generated by JS -->
+                    </div>
+
+                    <div class="editor-actions">
+                        <button class="btn-save" onclick="saveSection('about')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ========== TUTORS EDITOR ========== -->
+                <section class="content-section" id="sec-tutors-editor">
+                    <div class="section-heading">
+                        <h2>Gestión de Tutores</h2>
+                        <p>Agrega, edita o elimina perfiles de tutores del equipo</p>
+                        <button class="btn-add-new" onclick="openFullProfile()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Añadir Tutor
+                        </button>
+                    </div>
+                    <div class="tutors-grid" id="tutors-grid">
+                        <!-- Generated by JS -->
+                    </div>
+                </section>
+
+                <!-- ========== STATS EDITOR ========== -->
+                <section class="content-section" id="sec-stats-editor">
+                    <div class="section-heading">
+                        <h2>Estadísticas</h2>
+                        <p>Modifica los números y etiquetas que aparecen en el sitio</p>
+                    </div>
+                    <div class="editor-grid">
+                        <div class="editor-card">
+                            <div class="editor-card-header">
+                                <h3>Hero Stats</h3>
+                                <span class="editor-badge">Desktop</span>
+                            </div>
+                            <div class="editor-card-body">
+                                <div class="field-row">
+                                    <div class="field-group"><label>Stat 1 Número</label><input type="text" id="stat-hero-1-num" value="1400+" class="field-input"></div>
+                                    <div class="field-group"><label>Stat 1 Label</label><input type="text" id="stat-hero-1-label" value="Estudiantes Activos" class="field-input"></div>
+                                </div>
+                                <div class="field-row">
+                                    <div class="field-group"><label>Stat 2 Número</label><input type="text" id="stat-hero-2-num" value="450+" class="field-input"></div>
+                                    <div class="field-group"><label>Stat 2 Label</label><input type="text" id="stat-hero-2-label" value="Puntajes +450" class="field-input"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="editor-card">
+                            <div class="editor-card-header">
+                                <h3>Bento Stats Grid</h3>
+                                <span class="editor-badge">About</span>
+                            </div>
+                            <div class="editor-card-body">
+                                <div class="field-row">
+                                    <div class="field-group"><label>Número</label><input type="text" id="stat-bento-1-num" value="2000+" class="field-input"></div>
+                                    <div class="field-group"><label>Label</label><input type="text" id="stat-bento-1-label" value="Estudiantes" class="field-input"></div>
+                                </div>
+                                <div class="field-row">
+                                    <div class="field-group"><label>Número</label><input type="text" id="stat-bento-2-num" value="450+" class="field-input"></div>
+                                    <div class="field-group"><label>Label</label><input type="text" id="stat-bento-2-label" value="Puntajes Altos" class="field-input"></div>
+                                </div>
+                                <div class="field-row">
+                                    <div class="field-group"><label>Número</label><input type="text" id="stat-bento-3-num" value="15+" class="field-input"></div>
+                                    <div class="field-group"><label>Label</label><input type="text" id="stat-bento-3-label" value="Simulacros" class="field-input"></div>
+                                </div>
+                                <div class="field-row">
+                                    <div class="field-group"><label>Número</label><input type="text" id="stat-bento-4-num" value="98%" class="field-input"></div>
+                                    <div class="field-group"><label>Label</label><input type="text" id="stat-bento-4-label" value="Satisfacción" class="field-input"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn-save" onclick="saveSection('stats')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ========== PLANS EDITOR ========== -->
+                <section class="content-section" id="sec-plans-editor">
+                    <div class="section-heading">
+                        <h2>Planes & Precios</h2>
+                        <p>Administra los planes, precios y contenido de la sección de ventas</p>
+                    </div>
+                    <div class="editor-grid">
+                        <div class="editor-card">
+                            <div class="editor-card-header"><h3>Encabezado</h3></div>
+                            <div class="editor-card-body">
+                                <div class="field-group"><label>Badge</label><input type="text" id="plans-badge" value="PLANES Y PRECIOS" class="field-input"></div>
+                                <div class="field-group"><label>Título</label><input type="text" id="plans-title" value="Elige tu Plan" class="field-input"></div>
+                                <div class="field-group"><label>Descripción</label><textarea id="plans-desc" class="field-textarea" rows="2">Selecciona el simulacro que mejor se ajuste a tu preparación. Todos incluyen acceso completo al dashboard.</textarea></div>
+                            </div>
+                        </div>
+                        <div class="editor-card">
+                            <div class="editor-card-header"><h3>CTA Principal</h3></div>
+                            <div class="editor-card-body">
+                                <div class="field-group"><label>Precio desde</label><input type="text" id="plans-price-from" value="$15.000" class="field-input"></div>
+                                <div class="field-group"><label>Texto WhatsApp</label><input type="text" id="plans-whatsapp-text" value="Hola! Quiero información sobre los simulacros PreICFES" class="field-input"></div>
+                                <div class="field-group"><label>Número WhatsApp</label><input type="text" id="plans-whatsapp-num" value="573001234567" class="field-input"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn-save" onclick="saveSection('plans')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ========== MEDIA MANAGER ========== -->
+                <section class="content-section" id="sec-media-manager">
+                    <div class="section-heading">
+                        <h2>Gestor de Multimedia</h2>
+                        <p>Administra las imágenes del sitio. Arrastra o pega URLs</p>
+                    </div>
+                    <div class="media-grid" id="media-grid">
+                        <!-- Generated by JS -->
+                    </div>
+                </section>
+
+                <!-- ========== FOOTER EDITOR ========== -->
+                <section class="content-section" id="sec-footer-editor">
+                    <div class="section-heading">
+                        <h2>Footer & Redes Sociales</h2>
+                        <p>Edita los enlaces del footer y redes sociales</p>
+                    </div>
+                    <div class="editor-grid">
+                        <div class="editor-card">
+                            <div class="editor-card-header"><h3>Marca</h3></div>
+                            <div class="editor-card-body">
+                                <div class="field-group"><label>Tagline</label><input type="text" id="footer-tagline" value="Transformando estudiantes en genios desde 2021" class="field-input"></div>
+                                <div class="field-group"><label>Copyright</label><input type="text" id="footer-copyright" value="© 2026 Seamos Genios. Todos los derechos reservados." class="field-input"></div>
+                            </div>
+                        </div>
+                        <div class="editor-card">
+                            <div class="editor-card-header"><h3>Redes Sociales</h3></div>
+                            <div class="editor-card-body">
+                                <div class="field-group"><label>Instagram URL</label><input type="url" id="social-instagram" value="https://instagram.com/seamosgenios" class="field-input"></div>
+                                <div class="field-group"><label>TikTok URL</label><input type="url" id="social-tiktok" value="https://tiktok.com/@seamosgenios" class="field-input"></div>
+                                <div class="field-group"><label>WhatsApp Número</label><input type="text" id="social-whatsapp" value="573001234567" class="field-input"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn-save" onclick="saveSection('footer')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ========== SETTINGS ========== -->
+                <section class="content-section" id="sec-settings">
+                    <div class="section-heading">
+                        <h2>Configuración</h2>
+                        <p>Ajustes del panel de administración</p>
+                    </div>
+                    <div class="editor-grid">
+                        <div class="editor-card">
+                            <div class="editor-card-header"><h3>Datos</h3></div>
+                            <div class="editor-card-body">
+                                <div class="settings-actions">
+                                    <button class="btn-save btn-sm" onclick="exportData()">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                        Exportar JSON
+                                    </button>
+                                    <label class="btn-save btn-sm btn-import">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        Importar JSON
+                                        <input type="file" accept=".json" onchange="importData(event)" hidden>
+                                    </label>
+                                    <button class="btn-reset btn-sm" onclick="resetAllData()">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                        Resetear Todo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== NAVEGACION ========== -->
+                <section class="content-section" id="sec-nav-editor">
+                    <div class="section-heading">
+                        <h2>Navegación & Header</h2>
+                        <p>Edita los enlaces y la estructura del menú principal</p>
+                    </div>
+                </section>
+
+                <!-- ========== SIMULACROS ========== -->
+                <section class="content-section" id="sec-simulacros-editor">
+                    <div class="section-heading">
+                        <h2>Gestión de Simulacros</h2>
+                        <p>Configura las pruebas, paquetes y métricas</p>
+                    </div>
+                </section>
+
+                <!-- ========== COMPARATIVA ========== -->
+                <section class="content-section" id="sec-comparativa-editor">
+                    <div class="section-heading">
+                        <h2>Tabla Comparativa</h2>
+                        <p>Edita la comparativa de características entre planes</p>
+                    </div>
+                </section>
+
+                <!-- ========== TESTIMONIOS ========== -->
+                <section class="content-section" id="sec-testimonios-editor">
+                    <div class="section-heading">
+                        <h2>Testimonios</h2>
+                        <p>Añade y modera los testimonios de ex-alumnos</p>
+                    </div>
+                </section>
+
+                <!-- ========== FAQ ========== -->
+                <section class="content-section" id="sec-faq-editor">
+                    <div class="section-heading">
+                        <h2>Preguntas Frecuentes</h2>
+                        <p>Gestiona las dudas resueltas y categorías de ayuda</p>
+                    </div>
+                </section>
+
+                <!-- ========== ANALYTICS ========== -->
+                <section class="content-section" id="sec-analytics-editor">
+                    <div class="section-heading">
+                        <h2>Métricas & Analytics</h2>
+                        <p>Visualiza el tráfico y conversión (Integración con GA4 y Meta Pixel)</p>
+                    </div>
+                </section>
+
+                <!-- ========== SEO ========== -->
+                <section class="content-section" id="sec-seo-editor">
+                    <div class="section-heading">
+                        <h2>SEO y Metadatos</h2>
+                        <p>Configura título, descripciones y Open Graph tags para compartir</p>
+                    </div>
+                </section>
+
+                <!-- ========== CTA ========== -->
+                <section class="content-section" id="sec-cta-editor">
+                    <div class="section-heading">
+                        <h2>Call to Actions (Llamados a la Acción)</h2>
+                        <p>Edita los banners promocionales y botones de conversión a lo largo del sitio</p>
+                    </div>
+                </section>
+
+                <!-- ========== FORMULARIOS & LEADS ========== -->
+                <section class="content-section" id="sec-contacto-manager">
+                    <div class="section-heading">
+                        <h2>Bandeja de Mensajes y Contactos</h2>
+                        <p>Revisa los correos y las solicitudes que dejaron los usuarios</p>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Tutor Edit Modal -->
+    <div class="modal-overlay" id="tutor-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="tutor-modal-title">Añadir Tutor</h3>
+                <button class="modal-close" onclick="closeTutorModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="tutor-edit-id">
+                <div class="modal-preview-row">
+                    <div class="modal-avatar-preview" id="tutor-avatar-preview">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div class="modal-preview-info">
+                        <span class="preview-name" id="preview-tutor-name">Nombre del Tutor</span>
+                        <span class="preview-role" id="preview-tutor-role">Rol</span>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field-group"><label>Nombre completo</label><input type="text" id="tutor-name" class="field-input" placeholder="Ej: Daniel De La Cruz" oninput="document.getElementById('preview-tutor-name').textContent=this.value||'Nombre'"></div>
+                    <div class="field-group"><label>Rol / Cargo</label><input type="text" id="tutor-role" class="field-input" placeholder="Ej: PRESIDENTE Y FUNDADOR" oninput="document.getElementById('preview-tutor-role').textContent=this.value||'Rol'"></div>
+                </div>
+                <div class="field-row">
+                    <div class="field-group"><label>Badge</label><input type="text" id="tutor-badge-text" class="field-input" placeholder="Ej: 475 PUNTOS"></div>
+                    <div class="field-group">
+                        <label>Color Badge</label>
+                        <select id="tutor-badge-color" class="field-input">
+                            <option value="">Default (morado)</option>
+                            <option value="badge-blue">Azul</option>
+                            <option value="badge-cyan">Cyan</option>
+                            <option value="badge-pink">Rosa</option>
+                            <option value="badge-green">Verde</option>
+                            <option value="badge-orange">Naranja</option>
+                            <option value="badge-yellow">Amarillo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>URL de Imagen</label>
+                    <input type="url" id="tutor-image" class="field-input" placeholder="https://i.ibb.co/..." oninput="updateTutorPreview(this.value)">
+                </div>
+                <div class="field-row">
+                    <div class="field-group"><label>Especialidad</label><input type="text" id="tutor-specialty" class="field-input" placeholder="Ej: Matemáticas & Física"></div>
+                    <div class="field-group"><label>Universidad</label><input type="text" id="tutor-university" class="field-input" placeholder="Ej: UNAL - Medicina"></div>
+                </div>
+                <div class="field-group">
+                    <label>Logros (uno por línea)</label>
+                    <textarea id="tutor-achievements" class="field-textarea" rows="4" placeholder="Puntaje: 477 ICFES&#10;Estudiante de Medicina UIS&#10;Apasionado por la Física"></textarea>
+                </div>
+                <div class="field-group">
+                    <label>Enlace perfil (opcional)</label>
+                    <input type="text" id="tutor-profile-link" class="field-input" placeholder="tutor-nombre.html">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-reset" onclick="closeTutorModal()">Cancelar</button>
+                <button class="btn-save" onclick="saveTutor()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Guardar Tutor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ LIVE PREVIEW PANEL ═══ -->
+    <aside class="preview-panel" id="preview-panel">
+        <div class="preview-panel-header">
+            <div class="preview-panel-title">
+                <div class="preview-live-dot"></div>
+                <span>Vista Previa</span>
+            </div>
+            <div class="preview-panel-controls">
+                <div class="preview-device-switcher">
+                    <button class="preview-device-btn active" data-device="desktop" title="Desktop">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </button>
+                    <button class="preview-device-btn" data-device="tablet" title="Tablet">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    </button>
+                    <button class="preview-device-btn" data-device="mobile" title="Mobile">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    </button>
+                </div>
+                <button class="preview-action-btn" id="preview-refresh-btn" title="Recargar">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                </button>
+                <button class="preview-action-btn" id="preview-close-btn" title="Cerrar">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="preview-frame-wrapper" id="preview-frame-wrapper">
+            <iframe id="live-preview-frame" class="preview-iframe" title="Vista previa del sitio"></iframe>
+        </div>
+    </aside>
+
+    <!-- ═══ COMPONENT LIBRARY DRAWER ═══ -->
+    <aside class="component-library-drawer" id="component-library-drawer">
+        <div class="library-header">
+            <div class="library-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#libGrad)" stroke-width="2">
+                    <defs><linearGradient id="libGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+                </svg>
+                <span>Biblioteca</span>
+            </div>
+            <button class="preview-action-btn" id="library-close-btn" title="Cerrar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="library-search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="library-search" placeholder="Buscar componente..." class="library-search-input">
+        </div>
+        <div class="library-categories" id="library-categories">
+            <!-- Rendered by component-library.js -->
+        </div>
+    </aside>
+
+    <!-- ═══ COMPONENT INSERT MODAL ═══ -->
+    <div class="modal-overlay" id="component-insert-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Insertar Componente</h3>
+                <button class="modal-close" onclick="_closeInsertModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Populated by JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-reset" onclick="_closeInsertModal()">Cancelar</button>
+                <button class="btn-save" onclick="_confirmInsert()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Insertar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal / Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- External Libs -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <script src="../Elementos/js/admin-rich-ui.js"></script>
+    <script type="module" src="../Elementos/js/admin.js"></script>
+    <script type="module">
+        import { initVisualEditor } from '../Elementos/js/visual-editor.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize when visual editor section becomes active
+            const observer = new MutationObserver(() => {
+                const section = document.getElementById('sec-visual-editor');
+                if (section && section.classList.contains('active')) {
+                    initVisualEditor();
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.getElementById('sections-container'), { childList: true, subtree: true, attributes: true });
+
+            // Also trigger on first click
+            document.querySelector('[data-section="visual-editor"]')?.addEventListener('click', () => {
+                setTimeout(() => initVisualEditor(), 100);
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>

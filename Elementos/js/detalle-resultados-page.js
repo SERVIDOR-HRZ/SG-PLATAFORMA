@@ -1,4 +1,4 @@
-// Detalle de Resultados - Página Separada
+﻿// Detalle de Resultados - Página Separada
 // Este archivo maneja la carga y visualización de resultados en una página dedicada
 
 // Variables globales
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Verificar autenticación
 function verificarAutenticacion() {
-    const usuarioActual = sessionStorage.getItem('currentUser');
+    const usuarioActual = localStorage.getItem('currentUser');
     if (!usuarioActual) {
         window.location.href = '../index.html';
         return;
@@ -94,7 +94,7 @@ function verificarAutenticacion() {
 
 // Cargar datos del usuario
 async function cargarDatosUsuario() {
-    const usuarioActual = sessionStorage.getItem('currentUser');
+    const usuarioActual = localStorage.getItem('currentUser');
     if (usuarioActual) {
         try {
             const usuario = JSON.parse(usuarioActual);
@@ -224,13 +224,13 @@ function inicializarSidebar() {
                     color: '#fff'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        sessionStorage.removeItem('currentUser');
+                        localStorage.removeItem('currentUser');
                         window.location.href = '../index.html';
                     }
                 });
             } else {
                 if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                    sessionStorage.removeItem('currentUser');
+                    localStorage.removeItem('currentUser');
                     window.location.href = '../index.html';
                 }
             }
@@ -368,7 +368,7 @@ async function cargarResultadosDesdeURL() {
         let estudianteId = estudianteIdParam;
         
         if (!estudianteId) {
-            const usuarioActual = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            const usuarioActual = JSON.parse(localStorage.getItem('currentUser') || '{}');
             estudianteId = usuarioActual.numeroDocumento || usuarioActual.numeroIdentidad || usuarioActual.id;
         }
         

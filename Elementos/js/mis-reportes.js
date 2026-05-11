@@ -1,4 +1,4 @@
-// Mis Reportes - Vista de Estudiante (Solo Lectura)
+﻿// Mis Reportes - Vista de Estudiante (Solo Lectura)
 let graficoBarras;
 let reporteActual = null;
 let todosLosReportes = [];
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function checkAuthentication() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (!currentUser.id || currentUser.tipoUsuario !== 'estudiante') {
         window.location.href = '../index.html';
         return;
@@ -60,7 +60,7 @@ function checkAuthentication() {
 }
 
 function loadUserInfo() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (currentUser.nombre) {
         document.getElementById('studentName')?.textContent = currentUser.nombre.toUpperCase();
     }
@@ -136,7 +136,7 @@ function inicializarGrafico() {
 
 async function cargarReportesEstudiante() {
     try {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         const estudianteId = currentUser.numeroDocumento || currentUser.numeroIdentidad;
 
         if (!estudianteId) {
@@ -576,7 +576,7 @@ function handleLogout() {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            sessionStorage.clear();
+            localStorage.clear();
             localStorage.clear();
             window.location.href = '../index.html';
         }

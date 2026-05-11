@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ángel David Pacheco Casadiego | Tutor ICFES — Seamos Genios</title>
+    <meta name="description" content="Conoce la historia de Ángel David Pacheco Casadiego, tutor ICFES con 475 puntos. De luchar con las tablas de multiplicar a transformar vidas a través de las matemáticas.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           RESET & BASE
+           ============================================ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-card: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.06);
+            --border-hover: rgba(255,255,255,0.12);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.7);
+            --text-muted: rgba(255,255,255,0.45);
+            --accent: #ef4444;
+            --accent-soft: rgba(220,38,38,0.15);
+            --accent-glow: rgba(220,38,38,0.3);
+            --green: #25d366;
+            --green-soft: rgba(37,211,102,0.1);
+            --gold: #fbbf24;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; display: block; }
+
+        /* ============================================
+           BACK BUTTON (FIXED)
+           ============================================ */
+        .back-btn {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .back-btn svg { width: 16px; height: 16px; }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: url('https://i.ibb.co/KcnYhKMt/Angel-Pacheco-SEAMOSGENIOS.jpg') center top/cover no-repeat;
+            transform: scale(1.05);
+            animation: heroZoom 12s ease-out forwards;
+        }
+
+        @keyframes heroZoom {
+            to { transform: scale(1); }
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 50% 60% at 55% 35%, transparent 0%, rgba(10,10,10,0.6) 60%, rgba(10,10,10,0.95) 100%),
+                linear-gradient(
+                    to top,
+                    var(--bg-primary) 0%,
+                    rgba(10,10,10,0.9) 20%,
+                    rgba(10,10,10,0.3) 50%,
+                    rgba(10,10,10,0.15) 70%,
+                    rgba(10,10,10,0.4) 100%
+                );
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            padding: 4rem 2rem 5rem;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-soft);
+            border: 1px solid rgba(220,38,38,0.25);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp 0.8s 0.3s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+
+        .hero-name {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeUp 0.8s 0.45s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+
+        .hero-name span {
+            display: block;
+            background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-tagline {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            max-width: 550px;
+            opacity: 0;
+            animation: fadeUp 0.8s 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+
+        .hero-scroll-cue {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeUp 0.8s 1s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+
+        .hero-scroll-cue .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
+            50% { opacity: 1; transform: scaleY(1); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================
+           STATS BAR
+           ============================================ */
+        .stats-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 1rem;
+        }
+
+        .stats-grid {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            position: relative;
+        }
+
+        .stat-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 1px;
+            background: var(--border);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.3rem;
+        }
+
+        /* ============================================
+           SECTIONS — GENERAL
+           ============================================ */
+        .section {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .section-label .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-text {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .section-divider .icon {
+            font-size: 1.2rem;
+            opacity: 0.3;
+        }
+
+        /* ============================================
+           QUOTE BLOCK
+           ============================================ */
+        .quote-block {
+            position: relative;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 16px 16px 0;
+            padding: 2rem 2rem 2rem 2.5rem;
+            margin: 2rem 0;
+        }
+
+        .quote-block::before {
+            content: '"';
+            position: absolute;
+            top: -0.5rem;
+            left: 1rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            color: var(--accent);
+            opacity: 0.3;
+            line-height: 1;
+        }
+
+        .quote-block p {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .quote-block cite {
+            display: block;
+            margin-top: 0.8rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-style: normal;
+        }
+
+        /* ============================================
+           TIMELINE
+           ============================================ */
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+            margin: 2.5rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.65rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), var(--border), transparent);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            transform: translateX(-15px);
+            animation: slideRight 0.6s ease forwards;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
+        .timeline-item:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes slideRight {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -2.6rem;
+            top: 0.4rem;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        .timeline-year {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .timeline-text {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ============================================
+           EDUCATION CARDS
+           ============================================ */
+        .edu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .edu-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .edu-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .edu-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .edu-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .edu-icon.unal { background: linear-gradient(135deg, #16a34a15, #16a34a30); }
+        .edu-icon.andes { background: linear-gradient(135deg, #eab30815, #eab30830); }
+
+        .edu-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .edu-card p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .edu-card .edu-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           VALUES GRID
+           ============================================ */
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .value-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .value-card:hover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .value-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .value-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .value-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           TESTIMONIALS
+           ============================================ */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            border-color: rgba(251,191,36,0.3);
+        }
+
+        .testimonial-stars {
+            color: var(--gold);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            margin-bottom: 0.8rem;
+        }
+
+        .testimonial-text {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .testimonial-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #dc2626);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .testimonial-author strong {
+            display: block;
+            font-size: 0.85rem;
+        }
+
+        .testimonial-author span {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           FULL-WIDTH IMAGE BREAK
+           ============================================ */
+        .image-break {
+            position: relative;
+            height: 45vh;
+            min-height: 300px;
+            overflow: hidden;
+        }
+
+        .image-break-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .image-break-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to bottom,
+                var(--bg-primary) 0%,
+                rgba(10,10,10,0.4) 30%,
+                rgba(10,10,10,0.4) 70%,
+                var(--bg-primary) 100%
+            );
+        }
+
+        .image-break-text {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 2rem;
+        }
+
+        .image-break-text blockquote {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            font-weight: 700;
+            font-style: italic;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.4;
+            color: white;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+        }
+
+        /* ============================================
+           HOBBIES / PERSONAL
+           ============================================ */
+        .hobbies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .hobby-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .hobby-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+        }
+
+        .hobby-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .hobby-card h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .hobby-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           CTA SECTION
+           ============================================ */
+        .cta-section {
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .cta-inner {
+            max-width: 600px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--green-soft), rgba(18,140,126,0.05));
+            border: 1px solid rgba(37,211,102,0.15);
+            border-radius: 24px;
+            padding: 3.5rem 2rem;
+        }
+
+        .cta-inner h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+        }
+
+        .cta-inner p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, var(--green), #128c7e);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            box-shadow: 0 6px 25px rgba(37,211,102,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            animation: shine 3s ease-in-out infinite;
+        }
+
+        @keyframes shine {
+            0%, 100% { left: -100%; }
+            50% { left: 100%; }
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 14px 40px rgba(37,211,102,0.45);
+        }
+
+        .cta-btn svg { width: 24px; height: 24px; }
+
+        .cta-contact-info {
+            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .cta-contact-info a {
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .cta-contact-info a:hover { color: var(--accent); }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .bio-footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .bio-footer a { color: var(--accent); }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .stat-item:not(:last-child)::after { display: none; }
+
+            .hero-content { padding: 3rem 1.5rem 4rem; }
+
+            .section { padding: 3.5rem 1.5rem; }
+
+            .timeline { padding-left: 2.5rem; }
+
+            .image-break { background-attachment: scroll; }
+
+            .edu-grid,
+            .values-grid,
+            .testimonials-grid,
+            .hobbies-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================
+           SCROLL REVEAL
+           ============================================ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.7s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BACK BUTTON -->
+    <a href="../index.html#mentores" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Volver
+    </a>
+
+    <!-- ============================
+         HERO
+         ============================ -->
+    <section class="hero" id="inicio">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot" style="width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
+                Vicepresidente & Tutor ICFES
+            </div>
+            <h1 class="hero-name">
+                <span>Ángel David</span>
+                <span>Pacheco Casadiego</span>
+            </h1>
+            <p class="hero-tagline">"Entre ideas, café y futuros posibles — Una travesía académica desde la Tierra del conocimiento hacia las galaxias del pensamiento."</p>
+        </div>
+        <div class="hero-scroll-cue">
+            <span>Descubre mi historia</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- ============================
+         STATS BAR
+         ============================ -->
+    <div class="stats-bar">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">475</div>
+                <div class="stat-label">Puntos ICFES</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">+3</div>
+                <div class="stat-label">Años Enseñando</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">200+</div>
+                <div class="stat-label">Estudiantes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">98%</div>
+                <div class="stat-label">Satisfacción</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================
+         SECTION: LA ECUACIÓN DEL CAMBIO
+         ============================ -->
+    <section class="section reveal" id="historia">
+        <div class="section-label"><span class="dot"></span> Mi Historia</div>
+        <h2 class="section-title">La Ecuación del Cambio</h2>
+
+        <p class="section-text">
+            ¿Cuántos de ustedes no recibieron regaños, burlas o hasta castigos por no memorizar las tablas de multiplicar? Yo fui uno de esos, al que le costaba, al que le llovían regaños por no entender algo tan sencillo como lo eran aquellas tablas.
+        </p>
+        <p class="section-text">
+            No obstante, con el tiempo las cosas cambiaron. Los regaños fueron disminuyendo: ya no eran cinco, sino cuatro, después tres, luego uno, y al final ninguno. Los golpes se apagaron, pero algo se encendió: <strong style="color:var(--accent);">los números comenzaron a gustarme.</strong> De esa lucha inicial nació una conexión que jamás imaginé.
+        </p>
+
+        <div class="quote-block">
+            <p>Todo comenzó con un gesto sencillo pero inigualable: mi padre me regaló "El Diablo de los Números". Con cada capítulo, las matemáticas dejaron de ser un castigo y empezaron a hablarme en un idioma que entendía.</p>
+            <cite>— Ángel sobre el libro que cambió su vida</cite>
+        </div>
+
+        <p class="section-text">
+            Para fortalecer mi hábito, mi padre me pidió algo más: debía escribir un ensayo cada semana sobre cada capítulo. Al principio lo hacía por la recompensa, o para evitar el regaño. Pero con el tiempo, el ejercicio dejó de ser una tarea, y se volvió una puerta. <strong style="color:white;">Una noche, en la inquietud de mi cuarto, el libro aprendió a decir mi nombre.</strong>
+        </p>
+    </section>
+
+    <div class="section-divider"><span class="icon">📐</span></div>
+
+    <!-- ============================
+         SECTION: LA SEMILLA DE ENSEÑAR
+         ============================ -->
+    <section class="section reveal" id="vocacion">
+        <div class="section-label"><span class="dot"></span> Mi Vocación</div>
+        <h2 class="section-title">La Semilla de Enseñar</h2>
+
+        <p class="section-text">
+            El camino no fue lineal. Una piedra se atravesó justo cuando más seguro me sentía: un proyecto de vida. No sabía por dónde empezar, qué decir, ni qué dirección tomar. Me sentía perdido. En lugar de enfrentar esa incertidumbre, decidí no entregarlo. <strong style="color:white;">Lo que parecía una derrota terminó siendo una bendición disfrazada.</strong>
+        </p>
+        <p class="section-text">
+            Para recuperar la nota, la profesora eligió a los diez estudiantes con mejores resultados en matemáticas y nos pidió que formáramos grupos para enseñar a otros. Al principio fue incómodo, tosco. No entendía por qué debía explicar lo que apenas estaba aprendiendo.
+        </p>
+        <p class="section-text">
+            Pero, sin saberlo, esa experiencia me sembró una semilla. Aunque no veía reflejado algún propósito con enseñarle a alguien más, así fue como nació de una manera oculta <strong style="color:var(--accent);">un amor que me persigue hasta el día de hoy</strong>, donde me he dado cuenta que una buena enseñanza puede cambiar y transformar vidas a través del conocimiento.
+        </p>
+    </section>
+
+    <!-- ============================
+         IMAGE BREAK — PARALLAX QUOTE
+         ============================ -->
+    <div class="image-break">
+        <div class="image-break-bg" style="background-image:url('https://images.unsplash.com/photo-1509228468518-180dd4864904?w=1920&q=80');"></div>
+        <div class="image-break-overlay"></div>
+        <div class="image-break-text">
+            <blockquote>"Si fuera fácil, tal vez, no valdría la pena."</blockquote>
+        </div>
+    </div>
+
+    <!-- ============================
+         SECTION: EL CAMINO AL 475
+         ============================ -->
+    <section class="section reveal" id="icfes">
+        <div class="section-label"><span class="dot"></span> Mi Transformación</div>
+        <h2 class="section-title">De 308 a 475: El Salto</h2>
+
+        <p class="section-text">
+            Mi mentalidad cambió. Seguía siendo el mismo cuerpo — bueno, un poco más viejo — pero lo que importaba era cómo pensaba. Mi sueño era simple: pasar a las mejores universidades de Colombia. La Universidad Nacional de Colombia y la Universidad de los Andes.
+        </p>
+        <p class="section-text">
+            Pero déjenme decirles que <strong style="color:white;">saqué 308 en el examen del ICFES</strong> — el cuál me podría ayudar a pasar a los Andes con beca — y un resultado que no alcanzó en el examen de la Nacional. Tenía el corazón vacío. No lloro, pero el día de los resultados <strong style="color:var(--accent);">mis ojos simplemente se hicieron agua.</strong>
+        </p>
+
+        <div class="quote-block">
+            <p>Quería tirar la toalla, aunque ¿Valía la pena? Mi respuesta fue un rotundo NO. No valía dejar tirado el hecho de sobresalir, de cambiar, de pensar diferente.</p>
+            <cite>— Ángel, sobre su momento más difícil</cite>
+        </div>
+
+        <p class="section-text">
+            Sin rumbo, pero con muchas ganas, les dije a mis padres que iba a estudiar algo relacionado con las matemáticas. Aunque no supiera exactamente el qué, sí sabía que ese era mi camino a seguir. Para ganar un segundo intento, tuve que tomar la decisión de irme de mi casa a mis <strong style="color:white;">16 años.</strong>
+        </p>
+        <p class="section-text">
+            No era una nueva vida, pero sí un nuevo comienzo. A los días de llegar a la nueva casa comencé a trabajar y estudiar para el ICFES, entusiasmado di todo, todo lo que tenía, llevando mi cuerpo al límite.
+        </p>
+        <p class="section-text">
+            Hasta que un día alguien del curso me escribió, me dijo que le gustaba cómo participaba en clase y que me daría la oportunidad de dar una. Sin dudarlo le dije que sí. Al día siguiente me envió un enlace... y comenzaron a entrar los estudiantes: <strong style="color:var(--accent);">10, 20, 40, 50, 70.</strong> Mientras veía cómo el número subía, pasaba saliva. Él simplemente me presentó ante el nuevo público y se marchó.
+        </p>
+        <p class="section-text">
+            En esa larga noche, después de horas de dar clase, caí en cuenta que <strong style="color:white;">una buena enseñanza convierte al estudiante en un actor activo del conocimiento.</strong> Pasar de un 308 a un 475 en el ICFES no fue solo un salto numérico: fue recuperar la confianza, reconstruirme y entender que el conocimiento, cuando se gana con esfuerzo, también puede sanar.
+        </p>
+    </section>
+
+    <div class="section-divider"><span class="icon">🎓</span></div>
+
+    <!-- ============================
+         SECTION: TIMELINE
+         ============================ -->
+    <section class="section reveal" id="trayectoria">
+        <div class="section-label"><span class="dot"></span> Mi Trayectoria</div>
+        <h2 class="section-title">Un Camino de Transformación</h2>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">Inicio</div>
+                <div class="timeline-title">Luchando con las tablas de multiplicar</div>
+                <div class="timeline-text">De recibir regaños y castigos por no entender las tablas, a encontrar la chispa que encendería todo gracias a "El Diablo de los Números".</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">El despertar</div>
+                <div class="timeline-title">Ensayo semanal, capítulo a capítulo</div>
+                <div class="timeline-text">Escribir ensayos sobre cada capítulo del libro dejó de ser una tarea y se convirtió en una puerta al mundo de las matemáticas.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">La semilla</div>
+                <div class="timeline-title">Enseñar por primera vez</div>
+                <div class="timeline-text">Una tarea de recuperación lo llevó a explicar matemáticas a sus compañeros. Sin saberlo, nació su vocación.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">El golpe</div>
+                <div class="timeline-title">308 puntos en el ICFES</div>
+                <div class="timeline-text">El primer resultado no fue el esperado. Pero la derrota se convirtió en combustible para reinventarse.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">La reinvención</div>
+                <div class="timeline-title">Independencia a los 16 años</div>
+                <div class="timeline-text">Salió de casa para perseguir su sueño. Trabajó, estudió, y dio todo de sí llevando su cuerpo al límite.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">El logro</div>
+                <div class="timeline-title">475 puntos — Ingreso a las mejores universidades</div>
+                <div class="timeline-text">De 308 a 475. Ingresó a la Universidad Nacional (Ing. Agrícola) y la Universidad de los Andes (Matemáticas Puras). La ecuación del cambio se resolvió.</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"><span class="icon">🏛️</span></div>
+
+    <!-- ============================
+         SECTION: FORMACIÓN ACADÉMICA
+         ============================ -->
+    <section class="section reveal" id="formacion">
+        <div class="section-label"><span class="dot"></span> Formación Académica</div>
+        <h2 class="section-title">Dos Universidades Top de Colombia</h2>
+
+        <div class="edu-grid">
+            <div class="edu-card">
+                <div class="edu-card-header">
+                    <div class="edu-icon unal">🟢</div>
+                    <div>
+                        <h4>Universidad Nacional de Colombia</h4>
+                        <p>Ingeniería Agrícola</p>
+                    </div>
+                </div>
+                <p class="edu-desc">La universidad pública más prestigiosa de Colombia, donde Ángel aplica el pensamiento matemático a la ingeniería.</p>
+            </div>
+            <div class="edu-card">
+                <div class="edu-card-header">
+                    <div class="edu-icon andes">🟡</div>
+                    <div>
+                        <h4>Universidad de los Andes</h4>
+                        <p>Matemáticas Puras</p>
+                    </div>
+                </div>
+                <p class="edu-desc">Una de las mejores universidades de Latinoamérica, donde profundiza en su pasión original: las matemáticas.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================
+         IMAGE BREAK — PARALLAX QUOTE 2
+         ============================ -->
+    <div class="image-break">
+        <div class="image-break-bg" style="background-image:url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&q=80');"></div>
+        <div class="image-break-overlay"></div>
+        <div class="image-break-text">
+            <blockquote>"Una buena enseñanza no solo transmite saberes, configura identidades y proyecta futuros."</blockquote>
+        </div>
+    </div>
+
+    <!-- ============================
+         SECTION: FILOSOFÍA DE ENSEÑANZA
+         ============================ -->
+    <section class="section reveal" id="filosofia">
+        <div class="section-label"><span class="dot"></span> Mi Filosofía</div>
+        <h2 class="section-title">Lo Que Creo Sobre Enseñar</h2>
+
+        <p class="section-text">
+            Descubrí que enseñar desde la experiencia, y no solo desde el conocimiento, genera un poder único. Cada clase se convirtió en un acto de alegría. No se trata de tener todas las respuestas, sino de acompañar con honestidad y presencia.
+        </p>
+
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">🧠</div>
+                <h4>Aprender Enseñando</h4>
+                <p>Los estudiantes aprenden más profundamente cuando se convierten en responsables del conocimiento que comparten.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">❤️</div>
+                <h4>Empatía Primero</h4>
+                <p>Cuando la enseñanza nace desde la empatía y el deseo genuino de ayudar, el impacto es real y duradero.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🌟</div>
+                <h4>Transformar Vidas</h4>
+                <p>Una clase bien dada puede cambiar la percepción que un estudiante tiene de sí mismo y de su futuro.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">🔥</div>
+                <h4>Superar Límites</h4>
+                <p>Cuando el logro académico es fruto del esfuerzo autónomo, el impacto emocional y motivacional es profundo.</p>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            <p>Cuando el conocimiento se convierte en vínculo, y cuando enseñar nace del deseo genuino de acompañar, entonces la educación deja de ser un deber… y se vuelve un destino.</p>
+            <cite>— Del ensayo autobiográfico de Ángel</cite>
+        </div>
+    </section>
+
+    <div class="section-divider"><span class="icon">⚽</span></div>
+
+    <!-- ============================
+         SECTION: ÁNGEL EN PERSONA
+         ============================ -->
+    <section class="section reveal" id="personal">
+        <div class="section-label"><span class="dot"></span> Más Allá de los Números</div>
+        <h2 class="section-title">Conóceme en Persona</h2>
+
+        <p class="section-text">
+            Vivo actualmente en Soacha. Desde años atrás, me di cuenta que me gustaba aprender algo nuevo — no importa el tema que fuera, lo complejo o en algunos casos lo extraño. Diariamente disfruto ver diferentes contenidos audiovisuales que me dejen alguna enseñanza extra. Dato curioso: no soy de tomarme muchas fotos. 📸
+        </p>
+
+        <div class="hobbies-grid">
+            <div class="hobby-card">
+                <div class="hobby-emoji">⚽</div>
+                <h4>Fútbol</h4>
+                <p>+8 años practicando. Mi deporte estrella que me enseñó disciplina y constancia.</p>
+            </div>
+            <div class="hobby-card">
+                <div class="hobby-emoji">🎧</div>
+                <h4>Aprendizaje Continuo</h4>
+                <p>Contenidos audiovisuales diarios. Siempre aprendiendo sin importar qué tan extraño sea el tema.</p>
+            </div>
+            <div class="hobby-card">
+                <div class="hobby-emoji">👥</div>
+                <h4>Amistades</h4>
+                <p>Grupos de estudio de +10h diarias. Amigos que pese a la distancia, son de verdad.</p>
+            </div>
+            <div class="hobby-card">
+                <div class="hobby-emoji">☕</div>
+                <h4>Café & Ideas</h4>
+                <p>Entre ideas, café y futuros posibles, como dice su lema personal.</p>
+            </div>
+        </div>
+
+        <p class="section-text" style="margin-top:1rem;">
+            He estado en muchos grupos sociales, en muchos grupos de estudio, y de cada uno me llevo una experiencia muy agradable. Con mi último grupo estudiábamos más de 10 horas diarias. Aprendí mucho de ellos, como ellos aprendieron de mí, y son de esas amistades que a pesar de la distancia, son <strong style="color:white;">amigos de verdad.</strong>
+        </p>
+    </section>
+
+    <div class="section-divider"><span class="icon">💬</span></div>
+
+    <!-- ============================
+         SECTION: TESTIMONIOS
+         ============================ -->
+    <section class="section reveal" id="testimonios">
+        <div class="section-label"><span class="dot"></span> Testimonios</div>
+        <h2 class="section-title">Lo Que Dicen Mis Estudiantes</h2>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"Ángel explica de una forma que todo se vuelve fácil. Pasé de tenerle miedo a las matemáticas a que fuera mi materia más fuerte en el ICFES."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">S</div>
+                    <div>
+                        <strong>Santiago R.</strong>
+                        <span>Estudiante PreICFES 2025</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"La mejor inversión que hice. Con Ángel subí más de 80 puntos en total. Sus trucos para razonamiento cuantitativo son de otro nivel."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">V</div>
+                    <div>
+                        <strong>Valentina M.</strong>
+                        <span>Estudiante PreICFES 2025</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"Las clases son super dinámicas y siempre tiene la paciencia de explicar hasta que todos entiendan. 100% recomendado."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">D</div>
+                    <div>
+                        <strong>Daniel P.</strong>
+                        <span>Estudiante PreICFES 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================
+         CTA — CONTACTO
+         ============================ -->
+    <section class="cta-section reveal" id="contacto">
+        <div class="cta-inner">
+            <h2>¿Listo para romperla en el ICFES?</h2>
+            <p>Aprende matemáticas desde cero, sin miedo y con los mejores trucos. Contáctame y empecemos a trabajar juntos.</p>
+            <a href="https://api.whatsapp.com/send/?phone=573124177360&text=Hola+Angel%21+Vi+tu+perfil+en+Seamos+Genios+y+quiero+saber+más+sobre+las+clases" class="cta-btn" target="_blank">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Parcha un rato conmigo
+            </a>
+            <div class="cta-contact-info">
+                <a href="mailto:davidpacheco1099@gmail.com">📧 davidpacheco1099@gmail.com</a>
+                <a href="tel:+573124177360">📱 312 417 7360</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bio-footer">
+        <p>© 2026 <a href="../index.html">Seamos Genios</a> — Todas las historias merecen ser contadas.</p>
+    </footer>
+
+    <!-- ============================================
+         SCROLL REVEAL SCRIPT
+         ============================================ -->
+    <script>
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.12,
+            rootMargin: '0px 0px -60px 0px'
+        });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+    </script>
+</body>
+</html>

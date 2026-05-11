@@ -1,4 +1,4 @@
-// Coordinador Panel JavaScript
+﻿// Coordinador Panel JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize panel modal styles
     initializePanelModal();
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Check if user is authenticated and is coordinador
 function checkAuthentication() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!currentUser.id || currentUser.rol !== 'coordinador') {
         // Redirect to login if not authenticated or not coordinador
@@ -31,7 +31,7 @@ function checkAuthentication() {
 
 // Load user information
 async function loadUserInfo() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (currentUser.nombre) {
         document.getElementById('coordinadorName').textContent = currentUser.nombre.toUpperCase();
@@ -428,7 +428,7 @@ async function handleLogout() {
     
     if (confirmed) {
         // Clear session storage
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         
         // Redirect to login
         window.location.href = 'login.html';

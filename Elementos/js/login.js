@@ -1,5 +1,19 @@
-// Login functionality with Firebase Firestore
+﻿// Login functionality with Firebase Firestore
 document.addEventListener('DOMContentLoaded', function() {
+    // Si ya hay sesión activa, redirigir al panel correspondiente
+    const existingUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (existingUser.id) {
+        const isInSecciones = window.location.pathname.includes('/Secciones/');
+        if (existingUser.rol === 'coordinador') {
+            window.location.href = isInSecciones ? 'Panel_Coordinador.html' : 'Secciones/Panel_Coordinador.html';
+        } else if (existingUser.tipoUsuario === 'admin' || existingUser.rol === 'superusuario' || existingUser.rol === 'admin') {
+            window.location.href = isInSecciones ? 'Panel_Admin.html' : 'Secciones/Panel_Admin.html';
+        } else {
+            window.location.href = isInSecciones ? 'Panel_Estudiantes.html' : 'Secciones/Panel_Estudiantes.html';
+        }
+        return;
+    }
+
     const loginForm = document.getElementById('loginForm');
     const loginBtn = document.querySelector('.login-btn');
     const registerLink = document.getElementById('registerLink');
@@ -65,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Store user session
-            sessionStorage.setItem('currentUser', JSON.stringify({
+            localStorage.setItem('currentUser', JSON.stringify({
                 id: userQuery.docs[0].id,
                 nombre: userData.nombre,
                 email: userData.email,
@@ -76,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }));
             
             // Log para debug
-            console.log('Usuario guardado en sessionStorage:', {
+            console.log('Usuario guardado en localStorage:', {
                 tipoUsuario: userData.tipoUsuario,
                 rol: userData.rol || userData.tipoUsuario
             });

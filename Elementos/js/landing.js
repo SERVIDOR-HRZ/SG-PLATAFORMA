@@ -1,4 +1,4 @@
-// Carousel functionality
+﻿// Carousel functionality
 let currentSlide = 0;
 let slides = [];
 let totalSlides = 0;
@@ -263,7 +263,7 @@ let currentUser = null;
 
 // Helper function to get current user data
 function getCurrentUserData() {
-    const userData = sessionStorage.getItem('currentUser');
+    const userData = localStorage.getItem('currentUser');
     if (!userData) return null;
     
     try {
@@ -289,7 +289,7 @@ auth.onAuthStateChanged((user) => {
 
 // Check session storage for logged in user
 function checkUserSession() {
-    const userData = sessionStorage.getItem('currentUser');
+    const userData = localStorage.getItem('currentUser');
     if (userData) {
         try {
             const user = JSON.parse(userData);
@@ -306,7 +306,7 @@ function updateLoginButton() {
     const btnLogin = document.getElementById('btnLogin');
     const btnLoginMobile = document.getElementById('btnLoginMobile');
 
-    const userData = sessionStorage.getItem('currentUser');
+    const userData = localStorage.getItem('currentUser');
     if (userData) {
         try {
             const user = JSON.parse(userData);

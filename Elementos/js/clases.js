@@ -1,4 +1,4 @@
-// Clases JavaScript
+﻿// Clases JavaScript
 document.addEventListener('DOMContentLoaded', function () {
     checkAuthentication();
     loadUserInfo();
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Check authentication
 function checkAuthentication() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (!currentUser.id) {
         window.location.href = '../index.html';
@@ -18,7 +18,7 @@ function checkAuthentication() {
 
 // Load user info
 async function loadUserInfo() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (currentUser.nombre) {
         document.getElementById('userName').textContent = currentUser.nombre.toUpperCase();
@@ -115,7 +115,7 @@ async function loadAulasAndClases() {
     try {
         await esperarFirebase();
         const db = window.firebaseDB;
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
         const clasesGrid = document.getElementById('clasesGrid');
         clasesGrid.innerHTML = '<div class="loading-spinner"><i class="bi bi-arrow-clockwise"></i><p>Cargando aulas...</p></div>';
@@ -315,7 +315,7 @@ function createAulaCard(aula, userData, currentUser, materiasProfesorPorAula = {
     
     card.addEventListener('click', () => {
         // Guardar el aula seleccionada y redirigir
-        sessionStorage.setItem('selectedAula', JSON.stringify({
+        localStorage.setItem('selectedAula', JSON.stringify({
             id: aula.id,
             nombre: aula.nombre,
             materias: materiasVisibles,
@@ -480,7 +480,7 @@ function setupEventListeners() {
     const backBtn = document.getElementById('backBtn');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
-            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
             if (currentUser.tipoUsuario === 'admin') {
                 window.location.href = 'Panel_Admin.html';
             } else {
@@ -511,7 +511,7 @@ function setupEventListeners() {
     const logoutBtnDropdown = document.getElementById('logoutBtnDropdown');
     if (logoutBtnDropdown) {
         logoutBtnDropdown.addEventListener('click', () => {
-            sessionStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUser');
             window.location.href = '../index.html';
         });
     }

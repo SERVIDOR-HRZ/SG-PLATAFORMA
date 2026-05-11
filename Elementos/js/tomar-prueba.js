@@ -1,4 +1,4 @@
-// Tomar Prueba JavaScript
+﻿// Tomar Prueba JavaScript
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize
     checkAuthentication();
@@ -52,7 +52,7 @@ const subjectConfig = {
 
 // Check authentication
 function checkAuthentication() {
-    currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (!currentUser.id || currentUser.tipoUsuario !== 'estudiante') {
         window.location.href = '../index.html';
@@ -534,8 +534,8 @@ function hideDevToolsWarning() {
 // Load test data
 async function loadTestData() {
     try {
-        const testId = sessionStorage.getItem('takingTestId');
-        const blockNumber = sessionStorage.getItem('takingBlockNumber');
+        const testId = localStorage.getItem('takingTestId');
+        const blockNumber = localStorage.getItem('takingBlockNumber');
 
         if (!testId) {
             throw new Error('No se encontró el ID de la prueba');
@@ -1496,8 +1496,8 @@ function showTimeUpModal() {
     // Handle accept button
     document.getElementById('acceptTimeUp').addEventListener('click', () => {
         // Clear session data
-        sessionStorage.removeItem('takingTestId');
-        sessionStorage.removeItem('takingBlockNumber');
+        localStorage.removeItem('takingTestId');
+        localStorage.removeItem('takingBlockNumber');
 
         // Redirect to student tests selection
         window.location.href = 'Pruebas-Estudiante.html';
@@ -1750,8 +1750,8 @@ async function submitTest() {
         clearSavedAnswers();
 
         // Clear session data
-        sessionStorage.removeItem('takingTestId');
-        sessionStorage.removeItem('takingBlockNumber');
+        localStorage.removeItem('takingTestId');
+        localStorage.removeItem('takingBlockNumber');
 
         // Disable navigation protection since test is completed
         if (window.disableNavigationProtection) {
@@ -2169,7 +2169,7 @@ function initializeAutoSave() {
 // Load saved answers from localStorage
 function loadSavedAnswersFromStorage() {
     try {
-        const testId = sessionStorage.getItem('takingTestId');
+        const testId = localStorage.getItem('takingTestId');
         const studentId = currentUser.numeroDocumento || currentUser.numeroIdentidad || currentUser.id;
         const storageKey = `test_answers_${testId}_${studentId}_block${currentBlock}`;
 
@@ -2210,7 +2210,7 @@ function loadSavedAnswersFromStorage() {
 // Save answers to localStorage only (frequent saves)
 function saveAnswersToLocalStorage() {
     try {
-        const testId = sessionStorage.getItem('takingTestId');
+        const testId = localStorage.getItem('takingTestId');
         const studentId = currentUser.numeroDocumento || currentUser.numeroIdentidad || currentUser.id;
         const storageKey = `test_answers_${testId}_${studentId}_block${currentBlock}`;
 
@@ -2299,7 +2299,7 @@ async function syncAnswersWithFirebase() {
     try {
         if (!window.firebaseDB) return;
 
-        const testId = sessionStorage.getItem('takingTestId');
+        const testId = localStorage.getItem('takingTestId');
         const studentId = currentUser.numeroDocumento || currentUser.numeroIdentidad || currentUser.id;
 
         // Create a draft submission
@@ -2331,7 +2331,7 @@ async function syncAnswersWithFirebase() {
 // Clear saved answers (called when test is submitted successfully)
 function clearSavedAnswers() {
     try {
-        const testId = sessionStorage.getItem('takingTestId');
+        const testId = localStorage.getItem('takingTestId');
         const studentId = currentUser.numeroDocumento || currentUser.numeroIdentidad || currentUser.id;
         const storageKey = `test_answers_${testId}_${studentId}_block${currentBlock}`;
 
@@ -2359,7 +2359,7 @@ async function clearDraftFromFirebase() {
     try {
         if (!window.firebaseDB) return;
 
-        const testId = sessionStorage.getItem('takingTestId');
+        const testId = localStorage.getItem('takingTestId');
         const studentId = currentUser.numeroDocumento || currentUser.numeroIdentidad || currentUser.id;
         const draftId = `draft_${testId}_${studentId}_block${currentBlock}`;
 
@@ -2393,7 +2393,7 @@ window.recoverAnswers = recoverAnswersFromStorage;
 // Debug function to check auto-save status
 function debugAutoSave() {
     try {
-        const testId = sessionStorage.getItem('takingTestId');
+        const testId = localStorage.getItem('takingTestId');
         const studentId = currentUser.numeroDocumento || currentUser.numeroIdentidad || currentUser.id;
         const storageKey = `test_answers_${testId}_${studentId}_block${currentBlock}`;
 

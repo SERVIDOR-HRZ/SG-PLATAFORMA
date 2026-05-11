@@ -1,4 +1,4 @@
-// Configuración inicial del gráfico
+﻿// Configuración inicial del gráfico
 let graficoBarras;
 
 // Colores para cada materia
@@ -1483,8 +1483,8 @@ async function descargarPDF() {
 // Función para cargar el nombre del administrador actual
 function cargarNombreAdministrador() {
     try {
-        // Obtener el usuario actual del sessionStorage (como se usa en panel-admin.js)
-        const usuarioActual = sessionStorage.getItem('currentUser');
+        // Obtener el usuario actual del localStorage (como se usa en panel-admin.js)
+        const usuarioActual = localStorage.getItem('currentUser');
         if (usuarioActual) {
             const datosUsuario = JSON.parse(usuarioActual);
             if (datosUsuario.nombre) {
@@ -1550,7 +1550,7 @@ function handleLogout() {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            sessionStorage.clear();
+            localStorage.clear();
             localStorage.clear();
             window.location.href = '../index.html';
         }

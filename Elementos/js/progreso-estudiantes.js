@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 // PROGRESO DE ESTUDIANTES - COORDINADOR
 // ============================================
 
@@ -50,8 +50,8 @@ function esperarFirebase() {
 // ============================================
 
 async function verificarAutenticacion() {
-    // Intentar obtener usuario de sessionStorage primero
-    const sessionUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    // Intentar obtener usuario de localStorage primero
+    const sessionUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!sessionUser.id) {
         window.location.href = 'login.html';
@@ -279,10 +279,10 @@ function mostrarSeccion(section) {
     
     // Si es evaluaciones, redirigir a Resultados.html con parámetro de coordinador
     if (section === 'evaluaciones') {
-        sessionStorage.setItem('modoCoordinador', 'true');
-        sessionStorage.setItem('volverAProgresoEstudiantes', 'true');
+        localStorage.setItem('modoCoordinador', 'true');
+        localStorage.setItem('volverAProgresoEstudiantes', 'true');
         if (currentUser && currentUser.institucion) {
-            sessionStorage.setItem('institucionCoordinador', currentUser.institucion);
+            localStorage.setItem('institucionCoordinador', currentUser.institucion);
         }
         window.location.href = 'Resultados.html';
         return;
@@ -323,7 +323,7 @@ async function handleLogout() {
     const confirmed = await showLogoutModal();
     
     if (confirmed) {
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
     }
 }

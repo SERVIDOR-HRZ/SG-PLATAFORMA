@@ -1,4 +1,4 @@
-// Detalle de Resultados - Funcionalidad para mostrar detalles de pruebas
+﻿// Detalle de Resultados - Funcionalidad para mostrar detalles de pruebas
 
 let modalDetalleActivo = false;
 let datosDetalleActual = null;
@@ -194,8 +194,8 @@ async function mostrarDetalleResultados(respuestaId, pruebaId, tipo) {
         console.log('=== DATOS DE PRUEBA ===', pruebaData);
 
         // Obtener TODAS las respuestas del estudiante (ambos bloques si existen)
-        const estudianteId = JSON.parse(sessionStorage.getItem('currentUser') || '{}').numeroDocumento ||
-            JSON.parse(sessionStorage.getItem('currentUser') || '{}').numeroIdentidad;
+        const estudianteId = JSON.parse(localStorage.getItem('currentUser') || '{}').numeroDocumento ||
+            JSON.parse(localStorage.getItem('currentUser') || '{}').numeroIdentidad;
 
         const respuestasEstudianteSnapshot = await db.collection('respuestas')
             .where('pruebaId', '==', pruebaId)

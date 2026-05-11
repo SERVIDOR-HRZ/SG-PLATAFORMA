@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulacros PreICFES | Catálogo Completo — Seamos Genios</title>
+    <meta name="description" content="Explora todas las ediciones de simulacros PreICFES de Seamos Genios. Dashboard profesional, ranking nacional y plan de estudio con IA.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           RESET & DESIGN TOKENS (matching tutor-angel)
+           ============================================ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-card: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.06);
+            --border-hover: rgba(255,255,255,0.12);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.7);
+            --text-muted: rgba(255,255,255,0.45);
+            --accent: #ef4444;
+            --accent-soft: rgba(220,38,38,0.15);
+            --accent-glow: rgba(220,38,38,0.3);
+            --green: #25d366;
+            --green-soft: rgba(37,211,102,0.1);
+            --gold: #fbbf24;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+        a { color: inherit; text-decoration: none; }
+
+        /* ============================================
+           BACK BUTTON (same as tutor-angel)
+           ============================================ */
+        .back-btn {
+            position: fixed; top: 1.5rem; left: 1.5rem; z-index: 100;
+            display: flex; align-items: center; gap: 0.5rem;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border); padding: 0.6rem 1.2rem;
+            border-radius: 50px; color: var(--text-secondary);
+            font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent); color: var(--accent);
+        }
+        .back-btn svg { width: 16px; height: 16px; }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero {
+            position: relative; min-height: 60vh;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; text-align: center;
+        }
+        .hero-bg {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(220,38,38,0.12), transparent 70%),
+                        radial-gradient(ellipse 60% 50% at 80% 70%, rgba(139,92,246,0.06), transparent 60%);
+        }
+        .hero-particles {
+            position: absolute; inset: 0;
+            background-image:
+                radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.15), transparent),
+                radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.1), transparent),
+                radial-gradient(1px 1px at 50% 40%, rgba(255,255,255,0.12), transparent),
+                radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.08), transparent),
+                radial-gradient(1px 1px at 90% 30%, rgba(255,255,255,0.1), transparent);
+        }
+        .hero-content { position: relative; z-index: 2; max-width: 700px; padding: 6rem 2rem 4rem; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 3px;
+            text-transform: uppercase; color: var(--accent);
+            background: var(--accent-soft);
+            border: 1px solid rgba(220,38,38,0.25);
+            padding: 0.5rem 1.2rem; border-radius: 50px;
+            margin-bottom: 1.5rem;
+            opacity: 0; animation: fadeUp 0.8s 0.2s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        .hero-badge .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            font-weight: 800; line-height: 1.1; margin-bottom: 1.25rem;
+            opacity: 0; animation: fadeUp 0.8s 0.35s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        .hero-title span {
+            display: block;
+            background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-subtitle {
+            font-size: 1.1rem; color: var(--text-secondary); max-width: 550px;
+            margin: 0 auto; line-height: 1.8;
+            opacity: 0; animation: fadeUp 0.8s 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================
+           STATS BAR (same as tutor-angel)
+           ============================================ */
+        .stats-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 1rem;
+        }
+        .stats-grid {
+            max-width: 900px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+        }
+        .stat-item { text-align: center; position: relative; }
+        .stat-item:not(:last-child)::after {
+            content: ''; position: absolute; right: 0; top: 15%; height: 70%;
+            width: 1px; background: var(--border);
+        }
+        .stat-number { font-size: 2rem; font-weight: 900; color: var(--accent); line-height: 1; }
+        .stat-label { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.3rem; }
+
+        /* ============================================
+           SECTIONS
+           ============================================ */
+        .section { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
+        .section-label {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 3px;
+            text-transform: uppercase; color: var(--accent); margin-bottom: 1rem;
+        }
+        .section-label .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+            font-weight: 800; line-height: 1.15; margin-bottom: 1.5rem;
+        }
+        .section-text { font-size: 1rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.5rem; }
+        .section-divider {
+            display: flex; align-items: center; gap: 1rem;
+            max-width: 1100px; margin: 0 auto; padding: 0 2rem;
+        }
+        .section-divider::before, .section-divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+        .section-divider .icon { font-size: 1.2rem; opacity: 0.3; display:flex; }
+
+        /* ============================================
+           HOW IT WORKS — TIMELINE STYLE
+           ============================================ */
+        .how-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 0; position: relative; margin: 2.5rem 0;
+        }
+        .how-grid::before {
+            content: ''; position: absolute; top: 28px; left: 16.5%; right: 16.5%;
+            height: 2px; background: linear-gradient(90deg, var(--accent), var(--border), var(--accent));
+        }
+        .how-item { text-align: center; position: relative; padding: 0 1rem; }
+        .how-number {
+            width: 56px; height: 56px; margin: 0 auto 1.25rem;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            background: var(--bg-primary); border: 2px solid var(--accent);
+            box-shadow: 0 0 0 6px var(--accent-soft), 0 0 20px var(--accent-glow);
+            font-weight: 900; font-size: 1.1rem; color: var(--accent);
+            position: relative; z-index: 2;
+        }
+        .how-item h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .how-item p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+
+        /* ============================================
+           SIMULACRO CARDS — PREMIUM
+           ============================================ */
+        .cards-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem; margin: 2rem 0;
+        }
+        .sim-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; overflow: hidden; position: relative;
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        .sim-card:hover {
+            border-color: var(--border-hover); transform: translateY(-6px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(220,38,38,0.05);
+        }
+        .sim-card.popular { border-color: rgba(239,68,68,0.2); }
+        .sim-card.popular:hover { border-color: rgba(239,68,68,0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 60px rgba(220,38,38,0.1); }
+        .sim-card.free { border-color: rgba(34,197,94,0.2); }
+        .sim-card.free:hover { border-color: rgba(34,197,94,0.4); }
+
+        /* Card badge */
+        .sim-badge {
+            position: absolute; top: 0; right: 1.25rem;
+            padding: 0.35rem 0.9rem; border-radius: 0 0 10px 10px;
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 1.5px;
+            text-transform: uppercase; color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .sim-badge.hot { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .sim-badge.free-badge { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .sim-badge.new { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+
+        /* Card header */
+        .sim-card-header {
+            padding: 1.75rem 1.75rem 0; position: relative;
+        }
+        .sim-edition {
+            font-size: 0.6rem; font-weight: 700; letter-spacing: 2.5px;
+            color: var(--text-muted); text-transform: uppercase;
+        }
+        .sim-number {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.5rem; font-weight: 900; margin: 0.2rem 0 0.15rem;
+            line-height: 1; letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 60%, var(--accent) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .sim-card.free .sim-number {
+            background: linear-gradient(135deg, #fff 60%, #22c55e 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .sim-type { font-size: 0.78rem; color: var(--text-secondary); }
+
+        /* Card body */
+        .sim-card-body { padding: 1rem 1.75rem 1.75rem; }
+
+        /* Features toggle */
+        .sim-toggle {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border); border-radius: 10px;
+            padding: 0.65rem 1rem; color: var(--text-secondary);
+            font-size: 0.8rem; font-weight: 500; cursor: pointer;
+            margin-bottom: 0.75rem; transition: all 0.3s ease;
+        }
+        .sim-toggle:hover { background: rgba(255,255,255,0.05); border-color: var(--border-hover); }
+        .sim-toggle svg { transition: transform 0.3s ease; }
+        .sim-toggle.open { border-color: rgba(220,38,38,0.2); background: rgba(220,38,38,0.03); }
+        .sim-toggle.open svg { transform: rotate(180deg); }
+
+        .sim-features { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .sim-features.open { max-height: 250px; }
+        .sim-feat {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.35rem 0; color: var(--text-secondary); font-size: 0.82rem;
+        }
+        .sim-feat svg { color: #22c55e; flex-shrink: 0; }
+
+        /* Price */
+        .sim-price {
+            display: flex; align-items: baseline; gap: 0.5rem;
+            margin: 1rem 0; padding: 0.85rem 1rem;
+            background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04));
+            border: 1px solid var(--border); border-radius: 12px;
+        }
+        .sim-price-amount {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.5rem; font-weight: 800;
+            background: linear-gradient(135deg, #f97316, #dc2626);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .sim-price-currency { color: var(--text-muted); font-size: 0.8rem; font-weight: 500; }
+        .sim-price-free { font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 800; color: #22c55e; }
+
+        /* CTA button */
+        .sim-cta {
+            display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+            width: 100%; padding: 0.9rem; border-radius: 12px;
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: white; font-weight: 700; font-size: 0.9rem;
+            border: none; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            position: relative; overflow: hidden;
+        }
+        .sim-cta::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+            animation: shine 3s ease-in-out infinite;
+        }
+        @keyframes shine { 0%, 100% { left: -100%; } 50% { left: 100%; } }
+        .sim-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,211,102,0.3); }
+        .sim-cta.free-cta { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+        /* ============================================
+           GUARANTEE
+           ============================================ */
+        .guarantee {
+            display: flex; align-items: center; gap: 1.25rem;
+            background: var(--green-soft); border: 1px solid rgba(37,211,102,0.15);
+            border-radius: 20px; padding: 1.75rem 2rem;
+        }
+        .guarantee-icon {
+            flex-shrink: 0; width: 52px; height: 52px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(37,211,102,0.12); border-radius: 50%;
+        }
+        .guarantee strong { font-size: 1rem; display: block; margin-bottom: 0.25rem; }
+        .guarantee span { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* ============================================
+           TRUST BADGES
+           ============================================ */
+        .trust-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem; margin: 2rem 0;
+        }
+        .trust-card {
+            display: flex; align-items: center; gap: 1rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+        .trust-card:hover { border-color: var(--border-hover); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .trust-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .trust-card strong { display: block; font-size: 0.88rem; margin-bottom: 0.15rem; }
+        .trust-card span.sub { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* ============================================
+           CTA FINAL
+           ============================================ */
+        .cta-section { padding: 4rem 2rem; text-align: center; }
+        .cta-inner {
+            max-width: 650px; margin: 0 auto;
+            background: linear-gradient(135deg, var(--green-soft), rgba(18,140,126,0.05));
+            border: 1px solid rgba(37,211,102,0.15);
+            border-radius: 24px; padding: 3.5rem 2rem;
+        }
+        .cta-inner h2 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 800; margin-bottom: 0.8rem; }
+        .cta-inner p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 2rem; max-width: 420px; margin-left: auto; margin-right: auto; }
+        .cta-btn {
+            display: inline-flex; align-items: center; gap: 0.8rem;
+            background: linear-gradient(135deg, var(--green), #128c7e);
+            color: white; padding: 1rem 2.5rem; border-radius: 50px;
+            font-size: 1.1rem; font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            box-shadow: 0 6px 25px rgba(37,211,102,0.3);
+            position: relative; overflow: hidden;
+        }
+        .cta-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            animation: shine 3s ease-in-out infinite;
+        }
+        .cta-btn:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 14px 40px rgba(37,211,102,0.45); }
+        .cta-btn svg { width: 24px; height: 24px; }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .bio-footer {
+            text-align: center; padding: 2rem; border-top: 1px solid var(--border);
+            font-size: 0.78rem; color: var(--text-muted);
+        }
+        .bio-footer a { color: var(--accent); }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+            .stat-item:not(:last-child)::after { display: none; }
+            .how-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .how-grid::before { display: none; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .guarantee { flex-direction: column; text-align: center; }
+        }
+
+        /* ============================================
+           SCROLL REVEAL
+           ============================================ */
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.7s cubic-bezier(0.16,1,0.3,1);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- BACK BUTTON -->
+    <a href="../index.html#simulacros" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Volver
+    </a>
+
+    <!-- ============================
+         HERO
+         ============================ -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-particles"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Simulacros PreICFES Saber 11
+            </div>
+            <h1 class="hero-title">
+                <span>Catálogo de Simulacros</span>
+            </h1>
+            <p class="hero-subtitle">Cada edición es <strong style="color:white">única e irrepetible</strong> — preguntas nuevas, dificultad calibrada y ranking exclusivo. Elige tu simulacro e inscríbete.</p>
+        </div>
+    </section>
+
+    <!-- ============================
+         STATS BAR
+         ============================ -->
+    <div class="stats-bar">
+        <div class="stats-grid">
+            <div class="stat-item"><div class="stat-number">1400+</div><div class="stat-label">Estudiantes</div></div>
+            <div class="stat-item"><div class="stat-number">7</div><div class="stat-label">Ediciones</div></div>
+            <div class="stat-item"><div class="stat-number">254</div><div class="stat-label">Preguntas/Examen</div></div>
+            <div class="stat-item"><div class="stat-number">24h</div><div class="stat-label">Resultados</div></div>
+        </div>
+    </div>
+
+    <!-- ============================
+         ¿CÓMO FUNCIONA?
+         ============================ -->
+    <div class="section reveal">
+        <div class="section-label"><span class="dot"></span> Proceso</div>
+        <h2 class="section-title">¿Cómo funciona?</h2>
+        <p class="section-text">Tres pasos simples para presentar tu simulacro y recibir resultados profesionales.</p>
+
+        <div class="how-grid">
+            <div class="how-item">
+                <div class="how-number">1</div>
+                <h4>Inscríbete por WhatsApp</h4>
+                <p>Escríbenos y agenda tu simulacro en menos de 2 minutos</p>
+            </div>
+            <div class="how-item">
+                <div class="how-number">2</div>
+                <h4>Presenta 254 preguntas</h4>
+                <p>Examen tipo ICFES con las 5 áreas en condiciones reales</p>
+            </div>
+            <div class="how-item">
+                <div class="how-number">3</div>
+                <h4>Recibe tu dashboard</h4>
+                <p>Resultados con ranking, evolución y plan de estudio con IA</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-divider"><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></span></div>
+
+    <!-- ============================
+         CATÁLOGO DE SIMULACROS
+         ============================ -->
+    <div class="section">
+        <div class="reveal">
+            <div class="section-label"><span class="dot"></span> Ediciones Disponibles</div>
+            <h2 class="section-title">Elige tu Simulacro</h2>
+            <p class="section-text">Cada edición tiene preguntas completamente diferentes. Puedes presentar más de uno para medir tu evolución.</p>
+        </div>
+
+        <div class="cards-grid">
+            <!-- SG11-08 -->
+            <div class="sim-card reveal">
+                <div class="sim-card-header">
+                    <div class="sim-edition">Edición</div>
+                    <div class="sim-number">SG11 – 08</div>
+                    <div class="sim-type">Simulacro PreICFES Saber 11</div>
+                </div>
+                <div class="sim-card-body">
+                    <button class="sim-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+                        <span>Ver características</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="sim-features">
+                        <div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>254 preguntas formato ICFES</span></div>
+                        <div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Dashboard personalizado</span></div>
+                        <div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Ranking nacional + análisis</span></div>
+                        <div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Plan de estudio con IA</span></div>
+                    </div>
+                    <div class="sim-price"><span class="sim-price-amount">$ 15.000</span><span class="sim-price-currency">COP</span></div>
+                    <a href="https://wa.me/573001234567?text=Hola!%20Quiero%20inscribirme%20al%20simulacro%20SG11-08" target="_blank" class="sim-cta">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                        <span>Inscribirme</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SG11-09 MÁS VENDIDO -->
+            <div class="sim-card popular reveal">
+                <div class="sim-badge hot">★ Más Vendido</div>
+                <div class="sim-card-header">
+                    <div class="sim-edition">Edición</div>
+                    <div class="sim-number">SG11 – 09</div>
+                    <div class="sim-type">Simulacro PreICFES Saber 11</div>
+                </div>
+                <div class="sim-card-body">
+                    <button class="sim-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span>Ver características</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+                    <div class="sim-features">
+                        <div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>254 preguntas formato ICFES</span></div>
+                        <div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Dashboard personalizado</span></div>
+                        <div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Ranking nacional + análisis</span></div>
+                        <div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Plan de estudio con IA</span></div>
+                    </div>
+                    <div class="sim-price"><span class="sim-price-amount">$ 15.000</span><span class="sim-price-currency">COP</span></div>
+                    <a href="https://wa.me/573001234567?text=Hola!%20Quiero%20inscribirme%20al%20simulacro%20SG11-09" target="_blank" class="sim-cta"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg><span>Inscribirme</span></a>
+                </div>
+            </div>
+
+            <!-- SG11-10 -->
+            <div class="sim-card reveal">
+                <div class="sim-card-header"><div class="sim-edition">Edición</div><div class="sim-number">SG11 – 10</div><div class="sim-type">Simulacro PreICFES Saber 11</div></div>
+                <div class="sim-card-body">
+                    <button class="sim-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span>Ver características</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+                    <div class="sim-features"><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>254 preguntas formato ICFES</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Dashboard personalizado</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Ranking nacional + análisis</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Plan de estudio con IA</span></div></div>
+                    <div class="sim-price"><span class="sim-price-amount">$ 15.000</span><span class="sim-price-currency">COP</span></div>
+                    <a href="https://wa.me/573001234567?text=Hola!%20Quiero%20inscribirme%20al%20simulacro%20SG11-10" target="_blank" class="sim-cta"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg><span>Inscribirme</span></a>
+                </div>
+            </div>
+
+            <!-- SG11-11 -->
+            <div class="sim-card reveal">
+                <div class="sim-card-header"><div class="sim-edition">Edición</div><div class="sim-number">SG11 – 11</div><div class="sim-type">Simulacro PreICFES Saber 11</div></div>
+                <div class="sim-card-body">
+                    <button class="sim-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span>Ver características</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+                    <div class="sim-features"><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>254 preguntas formato ICFES</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Dashboard personalizado</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Ranking nacional + análisis</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Plan de estudio con IA</span></div></div>
+                    <div class="sim-price"><span class="sim-price-amount">$ 15.000</span><span class="sim-price-currency">COP</span></div>
+                    <a href="https://wa.me/573001234567?text=Hola!%20Quiero%20inscribirme%20al%20simulacro%20SG11-11" target="_blank" class="sim-cta"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg><span>Inscribirme</span></a>
+                </div>
+            </div>
+
+            <!-- SG11-12x GRATIS -->
+            <div class="sim-card free reveal">
+                <div class="sim-badge free-badge">Prueba Gratis</div>
+                <div class="sim-card-header"><div class="sim-edition">Edición de Prueba</div><div class="sim-number">SG11 – 12x</div><div class="sim-type">Simulacro PreICFES Saber 11</div></div>
+                <div class="sim-card-body">
+                    <button class="sim-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span>Ver características</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+                    <div class="sim-features"><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>254 preguntas formato ICFES</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Dashboard básico</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Ranking nacional</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Acceso gratuito completo</span></div></div>
+                    <div class="sim-price"><span class="sim-price-free">GRATIS</span></div>
+                    <a href="https://wa.me/573001234567?text=Hola!%20Quiero%20probar%20el%20simulacro%20gratuito%20SG11-12x" target="_blank" class="sim-cta free-cta">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        <span>Probar Gratis</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SG11-13 -->
+            <div class="sim-card reveal">
+                <div class="sim-card-header"><div class="sim-edition">Edición</div><div class="sim-number">SG11 – 13</div><div class="sim-type">Simulacro PreICFES Saber 11</div></div>
+                <div class="sim-card-body">
+                    <button class="sim-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span>Ver características</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+                    <div class="sim-features"><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>254 preguntas formato ICFES</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Dashboard personalizado</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Ranking nacional + análisis</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Plan de estudio con IA</span></div></div>
+                    <div class="sim-price"><span class="sim-price-amount">$ 15.000</span><span class="sim-price-currency">COP</span></div>
+                    <a href="https://wa.me/573001234567?text=Hola!%20Quiero%20inscribirme%20al%20simulacro%20SG11-13" target="_blank" class="sim-cta"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg><span>Inscribirme</span></a>
+                </div>
+            </div>
+
+            <!-- SG11-14 NUEVO -->
+            <div class="sim-card reveal">
+                <div class="sim-badge new">✦ Nuevo</div>
+                <div class="sim-card-header"><div class="sim-edition">Edición</div><div class="sim-number">SG11 – 14</div><div class="sim-type">Simulacro PreICFES Saber 11</div></div>
+                <div class="sim-card-body">
+                    <button class="sim-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span>Ver características</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+                    <div class="sim-features"><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>254 preguntas formato ICFES</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Dashboard personalizado</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Ranking nacional + análisis</span></div><div class="sim-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Plan de estudio con IA</span></div></div>
+                    <div class="sim-price"><span class="sim-price-amount">$ 15.000</span><span class="sim-price-currency">COP</span></div>
+                    <a href="https://wa.me/573001234567?text=Hola!%20Quiero%20inscribirme%20al%20simulacro%20SG11-14" target="_blank" class="sim-cta"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg><span>Inscribirme</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-divider"><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span></div>
+
+    <!-- ============================
+         GARANTÍA + TRUST
+         ============================ -->
+    <div class="section">
+        <div class="guarantee reveal">
+            <div class="guarantee-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+                <strong>Garantía de Resultados en 24 Horas</strong>
+                <span>Si no recibes tu dashboard con resultados completos al día siguiente del simulacro, te devolvemos tu dinero — sin preguntas.</span>
+            </div>
+        </div>
+
+        <div class="trust-grid" style="margin-top:2.5rem">
+            <div class="trust-card reveal">
+                <div class="trust-icon" style="background:rgba(34,197,94,0.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <div><strong>Seguro y confiable</strong><span class="sub">Plataforma verificada con datos protegidos</span></div>
+            </div>
+            <div class="trust-card reveal">
+                <div class="trust-icon" style="background:rgba(99,102,241,0.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div><strong>Resultados en 24 horas</strong><span class="sub">Dashboard disponible al día siguiente</span></div>
+            </div>
+            <div class="trust-card reveal">
+                <div class="trust-icon" style="background:rgba(245,158,11,0.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                <div><strong>Calificación profesional</strong><span class="sub">Algoritmo idéntico al ICFES oficial</span></div>
+            </div>
+            <div class="trust-card reveal">
+                <div class="trust-icon" style="background:rgba(236,72,153,0.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                <div><strong>+1400 estudiantes confían</strong><span class="sub">La comunidad PreICFES más grande</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================
+         CTA FINAL
+         ============================ -->
+    <div class="cta-section">
+        <div class="cta-inner reveal">
+            <h2>¿Listo para mejorar tu puntaje?</h2>
+            <p>Escríbenos por WhatsApp y te ayudamos a elegir el simulacro ideal para ti</p>
+            <a href="https://wa.me/573001234567?text=Hola!%20Quiero%20información%20sobre%20los%20simulacros" target="_blank" class="cta-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                <span>Escribir por WhatsApp</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bio-footer">
+        <p>© 2025 <a href="../index.html">Seamos Genios</a> — Todos los derechos reservados</p>
+    </footer>
+
+    <script>
+        // Scroll reveal
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    </script>
+</body>
+</html>

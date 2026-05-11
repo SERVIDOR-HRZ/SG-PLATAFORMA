@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipo de Tutores | Seamos Genios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../Elementos/css/styles.css">
+    <link rel="stylesheet" href="../Elementos/css/about.css">
+    <style>
+        .tutors-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem 2rem;
+        }
+        .catalog-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .catalog-title {
+            font-size: 2.5rem;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .tutors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        /* Reuse tutor-card but disable slider behavior */
+        .tutor-card {
+            width: 100%;
+            height: auto;
+            flex-shrink: unset;
+        }
+    </style>
+</head>
+<body style="background: var(--bg-main); color: var(--text-primary); font-family: 'Manrope', sans-serif;">
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                SEAMOS <span class="logo-highlight">GENIOS</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">
+                        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <span>VOLVER AL INICIO</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="tutors-container">
+        <div class="catalog-header">
+            <h1 class="catalog-title">Conoce a <span class="title-highlight" style="color:var(--primary-color);">Nuestro Equipo</span></h1>
+            <p>Los mejores puntajes y el talento jóven al servicio de tu futuro universitario.</p>
+        </div>
+
+        <div class="tutors-grid" id="all-tutors-grid">
+            <div class="tutor-card">
+                <div style="padding:2rem;text-align:center;">Cargando tutores...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script to load all tutors into grid -->
+    <script type="module">
+        import { db } from "../Elementos/js/firebase.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        async function loadAllTutors() {
+            const grid = document.getElementById('all-tutors-grid');
+            if (!grid) return;
+
+            try {
+                const snapshot = await getDocs(collection(db, "tutors"));
+                grid.innerHTML = ''; // Clear loading
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const id = doc.id; // To pass to profile page
+                    const badgeClassStr = data.badgeClass ? ` ${data.badgeClass}` : '';
+                    
+                    let achHtml = '';
+                    if (data.achievements?.length > 0) {
+                        achHtml = data.achievements.map((ach) => `
+                            <div class="achievement-item">
+                                <span style="font-size:0.85rem">${ach}</span>
+                            </div>
+                        `).join('');
+                    }
+
+                    // Card tailored for the grid
+                    const html = `
+                        <div class="tutor-card">
+                            <div class="tutor-badge${badgeClassStr}">${data.badge || ''}</div>
+                            <div class="tutor-image">
+                                <img src="${data.imgUrl || ''}" alt="${data.name}">
+                                <div class="tutor-overlay"></div>
+                            </div>
+                            <div class="tutor-content">
+                                <h3 class="tutor-name">${data.name}</h3>
+                                <div class="tutor-role">${data.role || ''}</div>
+                                <div class="tutor-info-grid" style="margin-bottom:1rem;">
+                                    <div class="info-item">
+                                        <div>
+                                            <div class="info-label">Universidad</div>
+                                            <div class="info-value">${data.university || ''}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="tutor-profile.html?id=${id}" class="tutor-profile-btn" style="text-decoration:none;display:flex;justify-content:center;align-items:center;padding:12px;width:100%;">
+                                    Ver Perfil y Calificar
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    grid.insertAdjacentHTML('beforeend', html);
+                });
+            } catch (e) {
+                console.error("Error loading tutors", e);
+            }
+        }
+        
+        loadAllTutors();
+    </script>
+</body>
+</html>

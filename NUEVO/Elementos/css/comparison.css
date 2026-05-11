@@ -1,0 +1,536 @@
+/* ============================================
+   COMPARISON SECTION — Premium Redesign
+   Card-based row layout with SG elevated column
+   ============================================ */
+
+.comparison-section {
+    padding: 5rem 2rem !important;
+    background: linear-gradient(180deg, #0f0505 0%, #120707 50%, #0f0505 100%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.comparison-container {
+    max-width: 1200px !important;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* ====== COLUMN HEADERS ====== */
+.cmp-grid {
+    display: grid !important;
+    grid-template-columns: 1.5fr 1fr 1fr !important;
+    gap: 14px;
+    margin-top: 3rem;
+    margin-bottom: 6px;
+}
+
+.cmp-col-header {
+    padding: 1rem;
+    border-radius: 20px 20px 0 0;
+}
+
+.cmp-col-feature {
+    /* spacer column — intentionally minimal */
+    display: block;
+}
+
+/* SG Column Header — Hero Treatment */
+.cmp-col-sg {
+    position: relative;
+    padding: 0;
+}
+
+.cmp-col-sg-inner {
+    background: linear-gradient(160deg, rgba(220, 38, 38, 0.12) 0%, rgba(249, 115, 22, 0.06) 100%);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.cmp-col-sg-inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #dc2626, #f97316, transparent);
+    border-radius: 2px;
+}
+
+.cmp-col-sg-badge {
+    display: inline-flex;
+    padding: 0.25rem 0.7rem;
+    background: linear-gradient(135deg, #dc2626, #f97316);
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: white;
+    text-transform: uppercase;
+}
+
+.cmp-sg-logo {
+    width: 48px;
+    max-width: 48px;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    filter: drop-shadow(0 0 12px rgba(255, 107, 0, 0.2));
+}
+
+.cmp-col-sg-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 40%, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Trad Column Header */
+.cmp-col-trad {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 1rem;
+}
+
+.cmp-col-trad-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+/* ====== COMPARISON ROWS ====== */
+.cmp-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cmp-row {
+    display: grid !important;
+    grid-template-columns: 1.5fr 1fr 1fr !important;
+    gap: 14px;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.cmp-row:hover .cmp-cell {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.cmp-row:hover .cmp-cell-sg {
+    background: rgba(220, 38, 38, 0.06);
+    border-color: rgba(220, 38, 38, 0.2);
+}
+
+/* Individual Cells */
+.cmp-cell {
+    padding: 1.1rem 1.4rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: all 0.3s ease;
+    min-height: 78px;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+/* Feature Cell (left column) */
+.cmp-cell-feature {
+    background: transparent;
+    border: none;
+    gap: 1rem;
+}
+
+.cmp-feature-icon {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(220, 38, 38, 0.08));
+    border: 1px solid rgba(249, 115, 22, 0.12);
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.cmp-feature-icon svg {
+    stroke: #f97316;
+}
+
+.cmp-row:hover .cmp-feature-icon {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(220, 38, 38, 0.15));
+    border-color: rgba(249, 115, 22, 0.25);
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.1);
+}
+
+.cmp-feature-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.cmp-feature-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.cmp-feature-sub {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.35);
+    line-height: 1.4;
+}
+
+/* SG Cell (middle column — hero) */
+.cmp-cell-sg {
+    background: rgba(220, 38, 38, 0.03);
+    border-color: rgba(220, 38, 38, 0.1);
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.cmp-check-badge {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cmp-check-badge svg {
+    stroke: #22c55e;
+}
+
+.cmp-sg-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #22c55e;
+}
+
+/* Trad Cell (right column — muted) */
+.cmp-cell-trad {
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.cmp-cross-badge {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.12);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cmp-cross-badge svg {
+    stroke: #ef4444;
+    opacity: 0.6;
+}
+
+.cmp-cross-neutral {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.cmp-cross-neutral svg {
+    stroke: rgba(255, 255, 255, 0.3);
+    opacity: 1;
+}
+
+.cmp-trad-value {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* ====== PRICE ROW — HERO TREATMENT ====== */
+.cmp-row-price {
+    margin-top: 8px;
+}
+
+.cmp-row-price .cmp-cell {
+    border-radius: 16px;
+}
+
+.cmp-row-price .cmp-cell-feature {
+    border: none;
+}
+
+.cmp-icon-price {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(249, 115, 22, 0.1)) !important;
+    border-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.cmp-icon-price svg {
+    stroke: #22c55e !important;
+}
+
+.cmp-cell-sg-price {
+    flex-direction: column;
+    gap: 0.15rem !important;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(249, 115, 22, 0.04));
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    padding: 1.2rem;
+}
+
+.cmp-price-sg {
+    font-size: 1.8rem;
+    font-weight: 900;
+    background: linear-gradient(180deg, #FFFFFF 30%, #ff9e4f 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+
+.cmp-price-currency {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.cmp-cell-trad-price {
+    justify-content: center;
+}
+
+.cmp-price-trad {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.3);
+    text-decoration: line-through;
+    text-decoration-color: rgba(239, 68, 68, 0.4);
+}
+
+/* ====== BOTTOM CTA ====== */
+.cmp-bottom-cta {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.cmp-cta-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.5rem;
+    background: rgba(34, 197, 94, 0.06);
+    border: 1px solid rgba(34, 197, 94, 0.12);
+    border-radius: 100px;
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.cmp-cta-text svg {
+    stroke: #22c55e;
+    flex-shrink: 0;
+}
+
+.cmp-cta-text strong {
+    color: #22c55e;
+    font-weight: 800;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 968px) {
+    .comparison-section {
+        padding: 4rem 1.5rem;
+    }
+
+    .cmp-grid {
+        margin-top: 2.5rem;
+    }
+
+    .cmp-feature-sub {
+        display: none;
+    }
+
+    .cmp-feature-icon {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 10px;
+    }
+
+    .cmp-feature-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .cmp-cell {
+        padding: 0.8rem;
+        min-height: 60px;
+        border-radius: 12px;
+    }
+
+    .cmp-sg-value, .cmp-trad-value {
+        font-size: 0.72rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .comparison-section {
+        padding: 3rem 1rem;
+    }
+
+    .cmp-grid,
+    .cmp-row {
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 6px;
+    }
+
+    .cmp-col-sg-inner {
+        padding: 1rem 0.5rem 0.8rem;
+    }
+
+    .cmp-sg-logo {
+        width: 36px;
+    }
+
+    .cmp-col-sg-name {
+        font-size: 0.75rem;
+    }
+
+    .cmp-col-trad-name {
+        font-size: 0.65rem;
+    }
+
+    .cmp-col-sg-badge {
+        font-size: 0.5rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .cmp-feature-icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 8px;
+    }
+
+    .cmp-feature-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .cmp-feature-name {
+        font-size: 0.75rem;
+    }
+
+    .cmp-cell {
+        padding: 0.6rem 0.5rem;
+        min-height: 50px;
+        border-radius: 10px;
+        gap: 0.4rem;
+    }
+
+    .cmp-check-badge {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+    }
+
+    .cmp-check-badge svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .cmp-cross-badge {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+    }
+
+    .cmp-cross-badge svg {
+        width: 10px;
+        height: 10px;
+    }
+
+    .cmp-sg-value {
+        font-size: 0.68rem;
+    }
+
+    .cmp-trad-value {
+        font-size: 0.65rem;
+    }
+
+    .cmp-price-sg {
+        font-size: 1.2rem;
+    }
+
+    .cmp-price-trad {
+        font-size: 0.72rem;
+    }
+
+    .cmp-cta-text {
+        font-size: 0.72rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .cmp-cta-text svg {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+@media (max-width: 420px) {
+    .cmp-grid,
+    .cmp-row {
+        grid-template-columns: 1fr 0.8fr 0.8fr;
+        gap: 4px;
+    }
+
+    .cmp-feature-icon {
+        display: none;
+    }
+
+    .cmp-feature-name {
+        font-size: 0.7rem;
+    }
+
+    .cmp-cell {
+        padding: 0.5rem 0.4rem;
+        min-height: 44px;
+    }
+
+    .cmp-sg-value, .cmp-trad-value {
+        font-size: 0.6rem;
+    }
+
+    .cmp-check-badge, .cmp-cross-badge {
+        display: none;
+    }
+
+    .cmp-sg-value {
+        color: #22c55e;
+    }
+
+    .cmp-price-sg {
+        font-size: 1rem;
+    }
+}

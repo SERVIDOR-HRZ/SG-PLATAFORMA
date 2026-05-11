@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Reproductor de Música para Tomar Prueba
  * Reproduce playlist de YouTube para concentración durante exámenes
  */
@@ -267,7 +267,7 @@ class MusicPlayer {
             await this.esperarFirebase();
             
             const db = window.firebaseDB;
-            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
             
             if (!currentUser.id) {
                 console.log('No hay usuario logueado, usando playlist por defecto');

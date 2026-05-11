@@ -1,0 +1,861 @@
+/* ============================================
+   SPLASH SCREEN — ARMOURY CRATE CINEMATIC BOOT
+   Premium Motion Design v2.0
+   ============================================ */
+
+/* Lock body during splash */
+body.splash-active {
+    overflow: hidden;
+}
+
+.splash-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: #030303;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0, 1), visibility 0.6s ease;
+    overflow: hidden;
+}
+.splash-screen.splash-done {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* === Background: Subtle Hex Grid === */
+.splash-screen::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background:
+        linear-gradient(rgba(220, 38, 38, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(220, 38, 38, 0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    background-position: center;
+    animation: gridPulse 6s ease-in-out infinite;
+    z-index: 1;
+}
+@keyframes gridPulse {
+    0%, 100% { opacity: 0; transform: perspective(500px) rotateX(2deg) scale(1.05); }
+    50% { opacity: 0.6; transform: perspective(500px) rotateX(0deg) scale(1); }
+}
+
+/* === Ambient Radial Glow === */
+.splash-screen::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 600px;
+    height: 600px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(220, 38, 38, 0.08) 0%, transparent 70%);
+    animation: ambientPulse 3s ease-in-out infinite;
+    z-index: 1;
+}
+@keyframes ambientPulse {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* === Data Stream Particles === */
+.splash-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 1;
+}
+.splash-particle {
+    position: absolute;
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, rgba(249, 115, 22, 0.5), transparent);
+    animation: dataStream 2s linear infinite;
+    opacity: 0.4;
+}
+@keyframes dataStream {
+    0% { transform: translateY(-100vh); opacity: 0; }
+    10% { opacity: 0.4; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* === Hexagonal Frame === */
+.splash-hex-frame {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    z-index: 2;
+    opacity: 0;
+    animation: hexReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+}
+.splash-hex-frame svg {
+    width: 100%;
+    height: 100%;
+}
+.hex-path {
+    fill: none;
+    stroke: rgba(220, 38, 38, 0.15);
+    stroke-width: 1;
+    stroke-dasharray: 1200;
+    stroke-dashoffset: 1200;
+    animation: hexTrace 2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+.hex-path-2 {
+    fill: none;
+    stroke: rgba(249, 115, 22, 0.1);
+    stroke-width: 1;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: hexTrace 2.5s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+}
+@keyframes hexReveal {
+    0% { opacity: 0; transform: scale(0.5) rotate(30deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes hexTrace {
+    0% { stroke-dashoffset: 1200; }
+    100% { stroke-dashoffset: 0; }
+}
+
+/* ============================================
+   LOGO CONTAINER — ROG STYLE
+   ============================================ */
+.splash-logo-container.rog-container {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    overflow: visible;
+    transform: scale(0);
+    animation: containerBoot 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1) 0.1s forwards;
+}
+@keyframes containerBoot {
+    0%   { transform: scale(0) rotate(10deg); opacity: 0; }
+    60%  { transform: scale(1.05) rotate(-1deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* === HUD Crosshair — Refined === */
+.rog-hud-crosshair {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 320px; height: 320px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0;
+    animation: crosshairSnap 3.5s cubic-bezier(0.8, 0, 0.2, 1) 0.2s forwards;
+}
+.rog-hud-crosshair::before,
+.rog-hud-crosshair::after {
+    content: '';
+    position: absolute;
+}
+.rog-hud-crosshair::before {
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.4), transparent);
+}
+.rog-hud-crosshair::after {
+    left: 50%;
+    top: 10%;
+    bottom: 10%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(220, 38, 38, 0.4), transparent);
+}
+@keyframes crosshairSnap {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(2); }
+    8%   { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+    10%  { opacity: 0.3; }
+    12%  { opacity: 0.8; }
+    80%  { opacity: 0.4; }
+    100% { opacity: 0; }
+}
+
+/* === HUD Target Lock === */
+.rog-hud-target {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 200px; height: 200px;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(249, 115, 22, 0.6);
+    clip-path: polygon(
+        0 0, 25% 0, 25% 3%, 3% 3%, 3% 25%, 0 25%,
+        0 75%, 3% 75%, 3% 97%, 25% 97%, 25% 100%, 0 100%,
+        100% 100%, 75% 100%, 75% 97%, 97% 97%, 97% 75%, 100% 75%,
+        100% 25%, 97% 25%, 97% 3%, 75% 3%, 75% 0, 100% 0
+    );
+    opacity: 0;
+    animation: targetSnap 2.5s steps(1) 0.3s forwards;
+}
+@keyframes targetSnap {
+    0%   { opacity: 0; width: 350px; height: 350px; }
+    5%   { opacity: 1; width: 200px; height: 200px; }
+    8%   { opacity: 0.3; }
+    10%  { opacity: 1; }
+    70%  { opacity: 0.5; }
+    100% { opacity: 0; }
+}
+
+/* === HUD Spinning Rings === */
+.rog-hud-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.border-dash {
+    width: 240px; height: 240px;
+    border: 1.5px dashed rgba(220, 38, 38, 0.3);
+    animation: ringSpinCW 8s linear infinite;
+    opacity: 0;
+    animation: ringSpinCW 8s linear infinite, ringFadeIn 0.5s ease 0.4s forwards;
+}
+.solid-pulse {
+    width: 260px; height: 260px;
+    border-top: 2px solid rgba(249, 115, 22, 0.7);
+    border-right: 2px solid transparent;
+    border-bottom: 2px solid rgba(249, 115, 22, 0.7);
+    border-left: 2px solid transparent;
+    filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.6));
+    opacity: 0;
+    animation: ringSpinCCW 5s linear infinite, ringFadeIn 0.5s ease 0.5s forwards;
+}
+@keyframes ringSpinCW {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes ringSpinCCW {
+    from { transform: translate(-50%, -50%) rotate(360deg); }
+    to   { transform: translate(-50%, -50%) rotate(0deg); }
+}
+@keyframes ringFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* === MOTION GRAPHICS SVG LOGO SYSTEM === */
+
+/* SVG Container — breathing & entry */
+.splash-logo-vector {
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    position: absolute;
+    z-index: 5;
+    filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.5));
+    transform: scale(0);
+    opacity: 0;
+}
+
+.splash-logo-vector.phase-enter {
+    animation: logoEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.splash-logo-vector.phase-breathe {
+    opacity: 1;
+    transform: scale(1);
+    animation: logoBreathe 2s ease-in-out infinite;
+}
+
+.splash-logo-vector.phase-glitch {
+    opacity: 1;
+    transform: scale(1);
+    animation: logoGlitchShake 0.4s steps(4) 1;
+}
+
+.splash-logo-vector.phase-settle {
+    opacity: 1;
+    transform: scale(1);
+    animation: logoSettle 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes logoEnter {
+    0%   { transform: scale(0.3) rotate(-5deg); opacity: 0; filter: drop-shadow(0 0 30px #fff) brightness(3); }
+    40%  { transform: scale(1.08) rotate(1deg); opacity: 1; filter: drop-shadow(0 0 20px #ff6600) brightness(1.5); }
+    70%  { transform: scale(0.97) rotate(-0.5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.5)); }
+}
+
+@keyframes logoBreathe {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.4)); }
+    50%      { transform: scale(1.015); filter: drop-shadow(0 0 12px rgba(220, 38, 38, 0.7)); }
+}
+
+@keyframes logoGlitchShake {
+    0%  { transform: translate(0, 0) scale(1); filter: drop-shadow(0 0 20px #0ff); }
+    12% { transform: translate(-6px, 3px) scale(1.02) skewX(-2deg); filter: drop-shadow(-4px 0 10px #f00) drop-shadow(4px 0 10px #0ff); }
+    25% { transform: translate(5px, -4px) scale(0.98) skewX(3deg); filter: drop-shadow(3px 0 12px #f00) drop-shadow(-3px 0 12px #0ff); }
+    37% { transform: translate(-3px, 2px) scale(1.01); filter: drop-shadow(0 0 15px #ff6600); }
+    50% { transform: translate(4px, -2px) scale(0.99) skewX(-1deg); filter: drop-shadow(-2px 0 8px #0ff) drop-shadow(2px 0 8px #f00); }
+    62% { transform: translate(-2px, 3px) scale(1.02); }
+    75% { transform: translate(3px, -1px) scale(0.98) skewX(1deg); filter: drop-shadow(0 0 10px #dc2626); }
+    87% { transform: translate(-1px, 1px) scale(1.01); }
+    100%{ transform: translate(0, 0) scale(1); filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.5)); }
+}
+
+@keyframes logoSettle {
+    0%   { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(255, 60, 0, 0.8)); }
+    40%  { transform: scale(0.98); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.5)); }
+}
+
+/* === Path Base Styles === */
+#logoSVG path {
+    fill: none;
+    stroke: #dc2626;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: var(--path-length);
+    stroke-dashoffset: var(--path-length);
+    opacity: 0;
+    will-change: stroke-dashoffset, opacity, stroke, filter;
+}
+
+/* Phase 1: Construction — each path traces with hot-tip glow */
+#logoSVG path.tracing {
+    opacity: 1;
+    animation: pathConstruct var(--trace-duration) cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+@keyframes pathConstruct {
+    0% {
+        stroke-dashoffset: var(--path-length);
+        stroke: #ffffff;
+        stroke-width: 12;
+        filter: drop-shadow(0 0 25px #ffffff) drop-shadow(0 0 15px #ffaa00);
+    }
+    15% {
+        stroke: #ffffff;
+        stroke-width: 10;
+        filter: drop-shadow(0 0 20px #ffffff) drop-shadow(0 0 10px #ff6600);
+    }
+    50% {
+        stroke: #ffaa00;
+        stroke-width: 8;
+        filter: drop-shadow(0 0 15px #ff6600) drop-shadow(0 0 8px #ff4400);
+    }
+    85% {
+        stroke: #ff4400;
+        stroke-width: 6;
+        filter: drop-shadow(0 0 10px #ff0000) drop-shadow(0 0 5px #ff4400);
+    }
+    100% {
+        stroke-dashoffset: 0;
+        stroke: #ff3300;
+        stroke-width: 5;
+        filter: drop-shadow(0 0 8px #ff3300) drop-shadow(0 0 4px #ff0000);
+    }
+}
+
+/* Phase 2: Traced — stable state */
+#logoSVG path.traced {
+    opacity: 1;
+    stroke-dashoffset: 0;
+    stroke: #ff3300;
+    stroke-width: 5;
+    filter: drop-shadow(0 0 8px #ff3300) drop-shadow(0 0 4px #ff0000);
+    transition: all 0.3s ease;
+}
+
+/* Phase 3: Deconstruct — paths scatter outward */
+#logoSVG path.deconstructing {
+    opacity: 1;
+    stroke-dashoffset: 0;
+    animation: pathDeconstruct 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes pathDeconstruct {
+    0% {
+        stroke-dashoffset: 0;
+        stroke: #dc2626;
+        stroke-width: 4;
+        filter: drop-shadow(0 0 4px rgba(220, 38, 38, 0.5));
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+    30% {
+        stroke: #ff6600;
+        stroke-width: 6;
+        filter: drop-shadow(0 0 12px #ff6600);
+        opacity: 1;
+    }
+    100% {
+        stroke-dashoffset: calc(var(--path-length) * 0.6);
+        stroke: #0ff;
+        stroke-width: 2;
+        filter: drop-shadow(0 0 8px #0ff);
+        transform: translate(var(--scatter-x), var(--scatter-y));
+        opacity: 0.3;
+    }
+}
+
+/* Phase 4: Reconstruct — paths snap back */
+#logoSVG path.reconstructing {
+    animation: pathReconstruct 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pathReconstruct {
+    0% {
+        stroke-dashoffset: calc(var(--path-length) * 0.6);
+        stroke: #0ff;
+        stroke-width: 2;
+        filter: drop-shadow(0 0 8px #0ff);
+        transform: translate(var(--scatter-x), var(--scatter-y));
+        opacity: 0.3;
+    }
+    30% {
+        stroke: #ffffff;
+        stroke-width: 8;
+        filter: drop-shadow(0 0 20px #fff);
+        opacity: 1;
+    }
+    60% {
+        stroke: #ff6600;
+        stroke-width: 6;
+        transform: translate(0, 0);
+    }
+    100% {
+        stroke-dashoffset: 0;
+        stroke: #ff3300;
+        stroke-width: 5;
+        filter: drop-shadow(0 0 8px #ff3300);
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+}
+
+/* Phase 5: Final neon pulse breathing */
+#logoSVG path.alive {
+    opacity: 1;
+    stroke-dashoffset: 0;
+    stroke: #ef4444;
+    stroke-width: 5;
+    animation: pathAlive 2.5s ease-in-out infinite;
+    animation-delay: var(--alive-delay, 0s);
+}
+
+@keyframes pathAlive {
+    0%, 100% {
+        filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
+        stroke-width: 5;
+    }
+    50% {
+        filter: drop-shadow(0 0 14px rgba(255, 80, 0, 0.9)) drop-shadow(0 0 5px #ef4444);
+        stroke-width: 5.5;
+    }
+}
+
+/* === Spark Canvas Overlay === */
+.spark-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 6;
+    pointer-events: none;
+}
+
+/* Hide old img-based layers */
+.splash-logo-img { display: none; }
+
+/* === SCANLINE REVELATION — sweeps down during trace === */
+.rog-glitch-slicer {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 3px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.05) 15%,
+        rgba(255, 255, 255, 0.9) 45%,
+        rgba(249, 115, 22, 0.9) 55%,
+        rgba(255, 255, 255, 0.05) 85%,
+        transparent 100%
+    );
+    box-shadow:
+        0 0 30px rgba(249, 115, 22, 0.9),
+        0 0 60px rgba(220, 38, 38, 0.5),
+        0 0 100px rgba(249, 115, 22, 0.2);
+    z-index: 15;
+    opacity: 0;
+    mix-blend-mode: screen;
+    animation: scanSlice 2.5s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+    pointer-events: none;
+}
+.rog-glitch-slicer.scan-repeat {
+    animation: scanSlice2 3.5s ease-in-out infinite;
+}
+@keyframes scanSlice {
+    0%   { top: -10%; opacity: 0; }
+    3%   { opacity: 1; }
+    50%  { top: 110%; opacity: 0.7; }
+    51%  { opacity: 0; top: -10%; }
+    100% { opacity: 0; }
+}
+@keyframes scanSlice2 {
+    0%   { top: -10%; opacity: 0; }
+    5%   { opacity: 0.5; }
+    45%  { top: 110%; opacity: 0.3; }
+    46%  { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* === GHOST TRAIL — afterimage during deconstruction === */
+.logo-ghost-trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+}
+.logo-ghost-trail.active {
+    animation: ghostFade 1.2s ease-out forwards;
+}
+.logo-ghost-trail svg {
+    width: 100%;
+    height: 100%;
+}
+.logo-ghost-trail .ghost-path {
+    fill: none;
+    stroke: rgba(0, 255, 255, 0.15);
+    stroke-width: 2;
+    filter: blur(2px);
+}
+@keyframes ghostFade {
+    0%   { opacity: 0.6; filter: blur(0px); }
+    30%  { opacity: 0.3; filter: blur(1px); }
+    100% { opacity: 0; filter: blur(4px); }
+}
+
+/* === CAMERA SHAKE — impact during deconstruction === */
+.splash-screen.camera-shake {
+    animation: cameraShake 0.4s ease-out;
+}
+@keyframes cameraShake {
+    0%  { transform: translate(0, 0); }
+    10% { transform: translate(-4px, 2px); }
+    20% { transform: translate(3px, -3px); }
+    30% { transform: translate(-2px, 4px); }
+    40% { transform: translate(4px, -1px); }
+    50% { transform: translate(-3px, 3px); }
+    60% { transform: translate(2px, -2px); }
+    70% { transform: translate(-1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+    90% { transform: translate(0, 1px); }
+    100%{ transform: translate(0, 0); }
+}
+
+/* === MICRO-GLITCH — brief flickers during trace === */
+.splash-logo-vector.micro-glitch {
+    animation: microGlitch 0.12s steps(2) 1 !important;
+}
+@keyframes microGlitch {
+    0%   { filter: drop-shadow(0 0 8px #0ff) brightness(2); transform: scale(1) translate(2px, -1px); }
+    25%  { filter: drop-shadow(0 0 12px #f00) brightness(0.5); transform: scale(1.01) translate(-3px, 1px); }
+    50%  { filter: drop-shadow(0 0 6px #ff6600) brightness(1.8); transform: scale(0.99) translate(1px, 2px); }
+    75%  { filter: drop-shadow(0 0 10px #0ff) brightness(0.7); transform: scale(1.01) translate(-1px, -1px); }
+    100% { filter: drop-shadow(0 0 8px rgba(220,38,38,0.5)); transform: scale(1) translate(0, 0); }
+}
+
+/* === HUD SYNC — crosshair contracts on trace complete === */
+.rog-hud-crosshair.hud-lock {
+    animation: crosshairLock 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+@keyframes crosshairLock {
+    0%   { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+    30%  { opacity: 1; transform: translate(-50%, -50%) scale(0.85); }
+    60%  { opacity: 0.9; transform: translate(-50%, -50%) scale(0.92); }
+    100% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.9); }
+}
+
+/* HUD ring speed burst during glitch */
+.border-dash.hud-burst {
+    animation: ringSpinCW 1.5s linear infinite, ringFadeIn 0.5s ease 0.4s forwards !important;
+    border-color: rgba(0, 255, 255, 0.4) !important;
+}
+.solid-pulse.hud-burst {
+    animation: ringSpinCCW 1s linear infinite, ringFadeIn 0.5s ease 0.5s forwards !important;
+    border-top-color: rgba(0, 255, 255, 0.7) !important;
+    border-bottom-color: rgba(0, 255, 255, 0.7) !important;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6)) !important;
+}
+
+/* HUD calm after reconstruct */
+.border-dash.hud-calm {
+    animation: ringSpinCW 12s linear infinite !important;
+    border-color: rgba(220, 38, 38, 0.2) !important;
+}
+.solid-pulse.hud-calm {
+    animation: ringSpinCCW 8s linear infinite !important;
+    filter: drop-shadow(0 0 3px rgba(249, 115, 22, 0.3)) !important;
+}
+
+/* === Impact Flare — Subtle Lens Flash === */
+.rog-impact-flare {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.6), transparent 70%);
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    opacity: 0;
+    mix-blend-mode: screen;
+    animation: lensFlare 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+    pointer-events: none;
+}
+@keyframes lensFlare {
+    0%   { opacity: 0; width: 0; height: 0; }
+    20%  { opacity: 1; width: 100px; height: 100px; }
+    50%  { opacity: 0.8; width: 400px; height: 400px; }
+    100% { opacity: 0; width: 600px; height: 600px; }
+}
+
+/* ============================================
+   TYPOGRAPHY — REFINED GLITCH TEXT
+   ============================================ */
+.splash-text {
+    margin-top: 24px;
+    text-align: center;
+    z-index: 10;
+}
+.splash-text-main {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 12px;
+    color: #fff;
+    opacity: 0;
+    position: relative;
+    text-transform: uppercase;
+    overflow: hidden;
+}
+/* Typewriter cursor */
+.splash-text-main.typewriting {
+    opacity: 1;
+}
+.splash-text-main .char {
+    opacity: 0;
+    display: inline-block;
+    transition: none;
+}
+.splash-text-main .char.visible {
+    opacity: 1;
+    animation: charAppear 0.05s ease-out;
+}
+.splash-text-main .char.glitch-char {
+    animation: charGlitch 0.15s steps(3) 1;
+}
+.splash-text-main .char-space {
+    display: inline-block;
+    width: 0.5em;
+}
+.splash-text-main span.gradient-text {
+    background: linear-gradient(135deg, #dc2626, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+@keyframes charAppear {
+    0%   { opacity: 0; transform: translateY(-8px) scaleY(1.3); filter: blur(2px); }
+    50%  { opacity: 0.7; }
+    100% { opacity: 1; transform: translateY(0) scaleY(1); filter: blur(0); }
+}
+@keyframes charGlitch {
+    0%   { opacity: 1; transform: translateX(-3px) skewX(10deg); color: #0ff; }
+    33%  { opacity: 0.5; transform: translateX(4px) skewX(-5deg); color: #f00; }
+    66%  { opacity: 0.8; transform: translateX(-2px) skewX(3deg); color: #ff6600; }
+    100% { opacity: 1; transform: translateX(0) skewX(0); }
+}
+/* Typewriter cursor blink */
+.splash-text-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background: #f97316;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: cursorBlink 0.6s step-end infinite;
+    opacity: 0;
+}
+.splash-text-cursor.active {
+    opacity: 1;
+}
+@keyframes cursorBlink {
+    0%, 50% { opacity: 1; }
+    50.1%, 100% { opacity: 0; }
+}
+
+.splash-text-sub {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(249, 115, 22, 0.7);
+    margin-top: 8px;
+    opacity: 0;
+}
+.splash-text-sub.revealed {
+    animation: subTextFade 0.6s ease forwards;
+}
+@keyframes subTextFade {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 0.7; transform: translateY(0); }
+}
+
+/* ============================================
+   LOADING BAR — CLEAN MINIMAL
+   ============================================ */
+.splash-loading-bar {
+    width: 220px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.06);
+    position: relative;
+    overflow: hidden;
+    margin-top: 0;
+    z-index: 10;
+    border-radius: 1px;
+}
+.splash-loading-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #dc2626, #f97316);
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+    transition: width 0.1s linear;
+    border-radius: 1px;
+}
+.splash-loading-pct {
+    font-family: 'Manrope', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: 12px;
+    z-index: 10;
+    opacity: 0;
+    animation: pctFade 0.3s ease 1.5s forwards;
+}
+@keyframes pctFade {
+    to { opacity: 1; }
+}
+
+/* === Version Tag === */
+.splash-version {
+    position: absolute;
+    bottom: 30px;
+    right: 40px;
+    font-family: 'Manrope', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.15);
+    z-index: 10;
+    opacity: 0;
+    animation: versionFade 0.5s ease 2s forwards;
+}
+@keyframes versionFade {
+    to { opacity: 1; }
+}
+
+/* === Corner HUD Brackets === */
+.splash-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    z-index: 2;
+    opacity: 0;
+    animation: cornerLock 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+}
+.splash-corner::before,
+.splash-corner::after {
+    content: '';
+    position: absolute;
+    background: rgba(220, 38, 38, 0.5);
+    transition: all 0.3s ease;
+}
+.splash-corner::before { width: 100%; height: 1px; }
+.splash-corner::after  { width: 1px; height: 100%; }
+
+.splash-corner-tl { top: 25px; left: 25px; }
+.splash-corner-tl::before { top: 0; left: 0; }
+.splash-corner-tl::after  { top: 0; left: 0; }
+
+.splash-corner-tr { top: 25px; right: 25px; }
+.splash-corner-tr::before { top: 0; right: 0; }
+.splash-corner-tr::after  { top: 0; right: 0; }
+
+.splash-corner-bl { bottom: 25px; left: 25px; }
+.splash-corner-bl::before { bottom: 0; left: 0; }
+.splash-corner-bl::after  { bottom: 0; left: 0; }
+
+.splash-corner-br { bottom: 25px; right: 25px; }
+.splash-corner-br::before { bottom: 0; right: 0; }
+.splash-corner-br::after  { bottom: 0; right: 0; }
+
+@keyframes cornerLock {
+    0%   { opacity: 0; transform: scale(3); }
+    50%  { opacity: 0.6; }
+    100% { opacity: 0.35; transform: scale(1); }
+}
+
+/* ============================================
+   EXIT ANIMATION — CINEMATIC WIPE
+   ============================================ */
+.splash-screen.splash-done .splash-logo-container,
+.splash-screen.splash-done .splash-text {
+    animation: exitZoom 0.5s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes exitZoom {
+    0%   { opacity: 1; transform: scale(1); filter: blur(0); }
+    100% { opacity: 0; transform: scale(1.15); filter: blur(8px); }
+}
+.splash-screen.splash-done .splash-corner,
+.splash-screen.splash-done .splash-hex-frame {
+    animation: exitFade 0.3s ease forwards;
+}
+@keyframes exitFade {
+    to { opacity: 0; }
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .splash-logo-container.rog-container {
+        width: 200px;
+        height: 200px;
+    }
+    .splash-logo-img {
+        max-width: 160px;
+    }
+    .rog-hud-crosshair { width: 220px; height: 220px; }
+    .border-dash { width: 170px; height: 170px; }
+    .solid-pulse { width: 185px; height: 185px; }
+    .rog-hud-target { width: 140px; height: 140px; }
+    .splash-hex-frame { width: 200px; height: 200px; }
+    .splash-text-main { font-size: 1.5rem; letter-spacing: 8px; }
+    .splash-text-sub { font-size: 0.6rem; letter-spacing: 3px; }
+    .splash-loading-bar { width: 160px; }
+    .splash-corner { width: 20px; height: 20px; }
+}

@@ -1,4 +1,4 @@
-// Users Management JavaScript
+﻿// Users Management JavaScript
 document.addEventListener('DOMContentLoaded', function () {
     // Check authentication
     checkAuthentication();
@@ -188,7 +188,7 @@ const elements = {
 
 // Check authentication
 function checkAuthentication() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     // Permitir acceso a admin, superusuario o tipoUsuario admin
     const isAdmin = currentUser.tipoUsuario === 'admin' ||
@@ -206,7 +206,7 @@ function checkAuthentication() {
 
 // Load user info
 function loadUserInfo() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     if (currentUser.nombre) {
         document.getElementById('adminName').textContent = currentUser.nombre.toUpperCase();
@@ -1116,7 +1116,7 @@ function renderUsers() {
     tbody.innerHTML = '';
 
     const isSuperuser = window.currentUserRole === 'superusuario';
-    const currentUserId = JSON.parse(sessionStorage.getItem('currentUser') || '{}').id;
+    const currentUserId = JSON.parse(localStorage.getItem('currentUser') || '{}').id;
 
     filteredUsers.forEach(user => {
         const row = document.createElement('tr');
@@ -1500,7 +1500,7 @@ function openEditUserModal(userId) {
     if (!user) return;
 
     const isSuperuser = window.currentUserRole === 'superusuario';
-    const currentUserId = JSON.parse(sessionStorage.getItem('currentUser') || '{}').id;
+    const currentUserId = JSON.parse(localStorage.getItem('currentUser') || '{}').id;
 
     // Verificar permisos: superusuario puede editar todo, admin solo estudiantes y su propio perfil
     if (!isSuperuser && user.tipoUsuario === 'admin' && user.id !== currentUserId) {
@@ -2460,7 +2460,7 @@ async function handleLogout() {
     const confirmed = await showLogoutModal();
     
     if (confirmed) {
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         window.location.href = '../index.html';
     }
 }

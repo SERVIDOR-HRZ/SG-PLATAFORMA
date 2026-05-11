@@ -1,4 +1,4 @@
-// Resumen General - Dashboard del Coordinador
+﻿// Resumen General - Dashboard del Coordinador
 // Dashboard profesional con análisis completo de estudiantes
 
 // Variables globales
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 // Verificar autenticación
 function verificarAutenticacion() {
-    const usuarioActual = sessionStorage.getItem('currentUser');
+    const usuarioActual = localStorage.getItem('currentUser');
     if (!usuarioActual) {
         window.location.href = '../index.html';
         return;
@@ -438,7 +438,7 @@ function verificarAutenticacion() {
 
 // Cargar datos del usuario
 async function cargarDatosUsuario() {
-    const usuarioActual = sessionStorage.getItem('currentUser');
+    const usuarioActual = localStorage.getItem('currentUser');
     if (!usuarioActual) {
         throw new Error('No se encontró información del usuario');
     }
@@ -447,7 +447,7 @@ async function cargarDatosUsuario() {
         const usuario = JSON.parse(usuarioActual);
 
         console.log('=== CARGANDO DATOS DE USUARIO ===');
-        console.log('Usuario desde sessionStorage:', usuario);
+        console.log('Usuario desde localStorage:', usuario);
 
         const userNameElement = document.getElementById('coordinadorName');
         if (userNameElement && usuario.nombre) {
@@ -461,11 +461,11 @@ async function cargarDatosUsuario() {
             usuario.institution ||
             null;
 
-        console.log('Institución desde sessionStorage:', institucionCoordinador);
+        console.log('Institución desde localStorage:', institucionCoordinador);
 
-        // Si no tiene institución en sessionStorage, buscar en Firebase
+        // Si no tiene institución en localStorage, buscar en Firebase
         if (!institucionCoordinador) {
-            console.log('⚠️ No se encontró institución en sessionStorage, buscando en Firebase...');
+            console.log('⚠️ No se encontró institución en localStorage, buscando en Firebase...');
 
             const db = window.firebaseDB;
             const usuarioDoc = await db.collection('usuarios').doc(usuario.id).get();
@@ -489,10 +489,10 @@ async function cargarDatosUsuario() {
                     console.log('📋 Campos disponibles en Firebase:', Object.keys(datosUsuario));
                     throw new Error('No se encontró institución asignada en tu perfil. Por favor, contacta al administrador para que asigne una institución a tu cuenta.');
                 } else {
-                    // Actualizar sessionStorage con la institución encontrada
+                    // Actualizar localStorage con la institución encontrada
                     usuario.institucion = institucionCoordinador;
-                    sessionStorage.setItem('currentUser', JSON.stringify(usuario));
-                    console.log('✓ Institución actualizada en sessionStorage');
+                    localStorage.setItem('currentUser', JSON.stringify(usuario));
+                    console.log('✓ Institución actualizada en localStorage');
                 }
             } else {
                 throw new Error('No se encontró el perfil del usuario en la base de datos');
@@ -633,7 +633,7 @@ function inicializarSidebar() {
     });
 
     document.getElementById('btnLogout')?.addEventListener('click', () => {
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         window.location.href = '../index.html';
     });
 }
@@ -2399,8 +2399,8 @@ function renderizarEstadisticasAvanzadas() {
 // Ver detalle de estudiante
 window.verDetalleEstudiante = function (estudianteId) {
     // Guardar flag para volver a resumen general
-    sessionStorage.setItem('volverAResumenGeneral', 'true');
-    sessionStorage.setItem('estudianteIdSeleccionado', estudianteId);
+    localStorage.setItem('volverAResumenGeneral', 'true');
+    localStorage.setItem('estudianteIdSeleccionado', estudianteId);
 
     // Redirigir a resultados con el estudiante seleccionado
     window.location.href = `Resultados.html?estudianteId=${encodeURIComponent(estudianteId)}`;

@@ -1,4 +1,4 @@
-// Funciones compartidas para gestión de perfil de usuario
+﻿// Funciones compartidas para gestión de perfil de usuario
 // Este archivo se puede incluir en cualquier página que necesite mostrar foto de perfil
 
 // Cargar foto de perfil del usuario
@@ -108,7 +108,7 @@ function configurarMenuUsuarioCompartido() {
 
 // Inicializar foto de perfil automáticamente
 function inicializarPerfilCompartido() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (currentUser.id) {
         cargarFotoPerfilCompartida(currentUser.id);

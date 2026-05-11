@@ -1,4 +1,4 @@
-// Resultados.js - Funcionalidad para la sección de resultados
+﻿// Resultados.js - Funcionalidad para la sección de resultados
 
 // Variables globales para filtros
 let todasLasPruebas = [];
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Verificar si el usuario está autenticado
 function verificarAutenticacion() {
-    const usuarioActual = sessionStorage.getItem('currentUser');
+    const usuarioActual = localStorage.getItem('currentUser');
 
     if (!usuarioActual) {
         window.location.href = '../index.html';
@@ -36,7 +36,7 @@ function verificarAutenticacion() {
 
 // Cargar datos del usuario
 async function cargarDatosUsuario() {
-    const usuarioActual = sessionStorage.getItem('currentUser');
+    const usuarioActual = localStorage.getItem('currentUser');
 
     if (usuarioActual) {
         try {
@@ -52,7 +52,7 @@ async function cargarDatosUsuario() {
             const userRoleElement = document.getElementById('userRole');
             if (userRoleElement) {
                 // Verificar si viene desde modo coordinador
-                const modoCoordinadorFlag = sessionStorage.getItem('modoCoordinador');
+                const modoCoordinadorFlag = localStorage.getItem('modoCoordinador');
                 const tipoUsuario = usuario.tipoUsuario || usuario.rol;
                 
                 const roles = {
@@ -299,17 +299,17 @@ const btnBack = document.getElementById('btnBack');
 if (btnBack) {
     btnBack.addEventListener('click', function () {
         // Verificar si viene desde progreso-estudiantes
-        const volverAProgresoEstudiantes = sessionStorage.getItem('volverAProgresoEstudiantes');
+        const volverAProgresoEstudiantes = localStorage.getItem('volverAProgresoEstudiantes');
         
         if (volverAProgresoEstudiantes === 'true') {
             // Limpiar el flag
-            sessionStorage.removeItem('volverAProgresoEstudiantes');
+            localStorage.removeItem('volverAProgresoEstudiantes');
             // Volver a progreso-estudiantes
             window.location.href = 'Progreso-Estudiantes.html';
             return;
         }
         
-        const usuarioActual = sessionStorage.getItem('currentUser');
+        const usuarioActual = localStorage.getItem('currentUser');
 
         if (usuarioActual) {
             try {
@@ -346,7 +346,7 @@ if (btnLogout) {
     btnLogout.addEventListener('click', async function () {
         const confirmed = await showLogoutModal();
         if (confirmed) {
-            sessionStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUser');
             window.location.href = '../index.html';
         }
     });
@@ -478,7 +478,7 @@ function closeModal(overlay) {
 
 // Cargar resultados del usuario
 async function cargarResultados() {
-    const usuarioActual = sessionStorage.getItem('currentUser');
+    const usuarioActual = localStorage.getItem('currentUser');
 
     if (!usuarioActual) return;
 
@@ -497,24 +497,24 @@ async function cargarResultados() {
         esCoordinador = usuario.tipoUsuario === 'coordinador' || usuario.rol === 'coordinador';
         
         // Verificar si viene desde modo coordinador (desde progreso-estudiantes.js)
-        const modoCoordinadorFlag = sessionStorage.getItem('modoCoordinador');
+        const modoCoordinadorFlag = localStorage.getItem('modoCoordinador');
         if (modoCoordinadorFlag === 'true') {
             esCoordinador = true;
             // Limpiar el flag después de usarlo
-            sessionStorage.removeItem('modoCoordinador');
+            localStorage.removeItem('modoCoordinador');
         }
 
         if (esAdmin || esCoordinador) {
             // Si es coordinador, obtener su institución
             if (esCoordinador) {
-                // Primero intentar desde sessionStorage (viene de progreso-estudiantes)
-                institucionCoordinador = sessionStorage.getItem('institucionCoordinador');
+                // Primero intentar desde localStorage (viene de progreso-estudiantes)
+                institucionCoordinador = localStorage.getItem('institucionCoordinador');
                 // Si no está, obtener del usuario
                 if (!institucionCoordinador) {
                     institucionCoordinador = usuario.institucion || null;
                 } else {
                     // Limpiar después de usar
-                    sessionStorage.removeItem('institucionCoordinador');
+                    localStorage.removeItem('institucionCoordinador');
                 }
                 console.log('Institución del coordinador:', institucionCoordinador);
             }
@@ -548,7 +548,7 @@ function configurarInterfazAdmin() {
         if (subtitulo) subtitulo.textContent = 'Consulta los resultados de los estudiantes de tu institución';
         
         // Actualizar el texto del botón "Volver al Panel" si viene desde progreso-estudiantes
-        const volverAProgresoEstudiantes = sessionStorage.getItem('volverAProgresoEstudiantes');
+        const volverAProgresoEstudiantes = localStorage.getItem('volverAProgresoEstudiantes');
         if (volverAProgresoEstudiantes === 'true') {
             const btnBack = document.getElementById('btnBack');
             if (btnBack) {
@@ -1661,7 +1661,7 @@ async function cargarPruebasParaPlanEstudio() {
     `;
     
     try {
-        const usuarioActual = sessionStorage.getItem('currentUser');
+        const usuarioActual = localStorage.getItem('currentUser');
         if (!usuarioActual) return;
         
         const usuario = JSON.parse(usuarioActual);

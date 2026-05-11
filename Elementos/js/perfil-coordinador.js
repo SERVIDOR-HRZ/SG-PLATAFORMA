@@ -1,4 +1,4 @@
-// Perfil Coordinador JavaScript
+﻿// Perfil Coordinador JavaScript
 // ImgBB API Configuration
 const IMGBB_API_KEY = '0d447185d3dc7cba69ee1c6df144f146';
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload';
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Check if user is authenticated and is coordinador
 function checkAuthentication() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!currentUser.id || currentUser.rol !== 'coordinador') {
         // Redirect to login if not authenticated or not coordinador
@@ -34,7 +34,7 @@ function checkAuthentication() {
 
 // Load user information
 async function loadUserInfo() {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     console.log('=== INICIO CARGA DE PERFIL ===');
     console.log('Current user from session:', currentUser);
@@ -43,13 +43,13 @@ async function loadUserInfo() {
         document.getElementById('coordinadorName').textContent = currentUser.nombre.toUpperCase();
     }
     
-    // Si hay email en sessionStorage, mostrarlo inmediatamente
+    // Si hay email en localStorage, mostrarlo inmediatamente
     if (currentUser.email) {
         const emailInput = document.getElementById('email');
         if (emailInput) {
             emailInput.value = currentUser.email;
             emailInput.placeholder = '';
-            console.log('✓ Email cargado desde sessionStorage:', currentUser.email);
+            console.log('✓ Email cargado desde localStorage:', currentUser.email);
         }
     }
 
@@ -304,7 +304,7 @@ function setupEventListeners() {
     const cancelarBtn = document.getElementById('cancelarBtn');
     if (cancelarBtn) {
         cancelarBtn.addEventListener('click', () => {
-            const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
             cargarDatosUsuario(currentUser.id);
         });
     }
@@ -386,7 +386,7 @@ async function handleFotoChange(event) {
             await esperarFirebase();
         }
         
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         const db = window.firebaseDB;
         
         // Subir imagen a ImgBB
@@ -404,7 +404,7 @@ async function handleFotoChange(event) {
         
         // Actualizar sesión
         currentUser.fotoPerfil = datosImagen.url;
-        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
         // Mostrar foto
         mostrarFotoPerfil(datosImagen.url);
@@ -471,7 +471,7 @@ async function handleEliminarFoto() {
             await esperarFirebase();
         }
         
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         const db = window.firebaseDB;
         
         // Eliminar de Firestore
@@ -482,7 +482,7 @@ async function handleEliminarFoto() {
         
         // Actualizar sesión
         delete currentUser.fotoPerfil;
-        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
         // Ocultar imagen y mostrar avatar por defecto
         const avatarDefault = document.getElementById('userAvatarDefault');
@@ -526,7 +526,7 @@ async function handleGuardarCambios(event) {
             await esperarFirebase();
         }
         
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         const db = window.firebaseDB;
         
         // Mostrar loading en botón
@@ -548,9 +548,9 @@ async function handleGuardarCambios(event) {
         // Actualizar en Firestore
         await db.collection('usuarios').doc(currentUser.id).update(datosActualizados);
         
-        // Actualizar sessionStorage
+        // Actualizar localStorage
         currentUser.nombre = datosActualizados.nombre;
-        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
         // Actualizar nombre en sidebar
         document.getElementById('coordinadorName').textContent = datosActualizados.nombre.toUpperCase();
@@ -866,7 +866,7 @@ async function handleLogout() {
     const confirmed = await showLogoutModal();
     
     if (confirmed) {
-        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
     }
 }

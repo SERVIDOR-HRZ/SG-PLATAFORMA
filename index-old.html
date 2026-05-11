@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seamos Genios - Landing en Desarrollo</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Plataforma educativa Seamos Genios - Landing page en desarrollo">
+    <meta name="keywords" content="educación, plataforma educativa, aprendizaje, Seamos Genios">
+    <meta name="author" content="Seamos Genios">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Seamos Genios - Landing en Desarrollo">
+    <meta property="og:description" content="Nuestra landing page está en desarrollo. Accede directamente a la plataforma.">
+    <meta property="og:image" content="https://seamosgenios.org/Elementos/img/logo1.png">
+    <meta property="og:url" content="https://seamosgenios.org/">
+    <meta property="og:type" content="website">
+
+    <link rel="shortcut icon" href="Elementos/img/logo1.png" type="image/x-icon">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(255, 0, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 70%);
+        }
+
+        .maintenance-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .maintenance-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .maintenance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff0000, #cc0000, #ff0000);
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .logo-container h1 {
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-container p {
+            color: #ff0000;
+            font-size: 16px;
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+        }
+
+        .maintenance-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .maintenance-title {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .maintenance-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: #ffffff;
+            padding: 15px 40px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
+            background: linear-gradient(135deg, #cc0000, #ff0000);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .info-message {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .info-message strong {
+            color: #ff0000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .maintenance-container {
+                padding: 15px;
+            }
+
+            .maintenance-card {
+                padding: 40px 25px;
+            }
+
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+
+            .logo-container h1 {
+                font-size: 24px;
+            }
+
+            .maintenance-title {
+                font-size: 22px;
+            }
+
+            .countdown {
+                gap: 10px;
+            }
+
+            .countdown-item {
+                min-width: 70px;
+                padding: 12px 15px;
+            }
+
+            .countdown-value {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="maintenance-container">
+        <div class="maintenance-card">
+            <div class="logo-container">
+                <img src="Elementos/img/logo1.png" alt="Seamos Genios Logo" class="logo">
+                <h1>Seamos Genios</h1>
+                <p>Plataforma Educativa</p>
+            </div>
+
+            <h2 class="maintenance-title">Página Principal en Desarrollo</h2>
+            <p class="maintenance-description">
+                Estamos trabajando en nuestra nueva landing page para ofrecerte una mejor experiencia.
+                Mientras tanto, puedes acceder directamente a la plataforma.
+            </p>
+
+            <a href="Secciones/login.html" class="login-button">
+                Iniciar Sesión
+            </a>
+
+            <div class="info-message">
+                <strong>Nota:</strong> Si necesitas asistencia, por favor contacta a nuestro equipo de soporte.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atajo de teclado opcional (Alt + Shift + L para ir al login)
+        let keysPressed = {};
+        document.addEventListener('keydown', function(event) {
+            keysPressed[event.key.toLowerCase()] = true;
+            
+            if (event.altKey && event.shiftKey && keysPressed['l']) {
+                event.preventDefault();
+                window.location.href = 'Secciones/login.html';
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            delete keysPressed[event.key.toLowerCase()];
+        });
+    </script>
+</body>
+
+</html>
